@@ -8,6 +8,7 @@ import psycopg2
 
 from src.standard_paths import standard_config_file_path as config_file_path
 from src.standard_paths import standard_log_dir
+from src.table_data import TableConfig
 
 
 current_dir = os.path.dirname(__file__)
@@ -73,9 +74,9 @@ class GetConfig:
             self.SLEEP_INTERVAL  = config['SLEEP_INTERVAL']
 
             self.HOT_DISK_LOG_FILE_PATH = config['HOT_DISK_LOG_FILE_PATH']
-            self.TP_DATA_TABLE_NAME = config['TP_DATA_TABLE_NAME'] #todo: possible to use tableconfig without circular import?
-            self.META_DATA_TABLE_NAME = config["META_DATA_TABLE_NAME"]
-            self.CYCLE_DATA_TABLE_NAME = config["CYCLE_DATA_TABLE_NAME"]
+            self.TP_DATA_TABLE_NAME = TableConfig().TPDataTable.table_name
+            self.META_DATA_TABLE_NAME = TableConfig().MetaDataTable.table_name
+            self.CYCLE_DATA_TABLE_NAME = TableConfig().CycleDataTable.table_name
 
             self.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME = config['THERMAL_CONDUCTIVITY_DATA_TABLE_NAME']
             self.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME = config['THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME']
@@ -91,7 +92,8 @@ class GetConfig:
                                         'password': self.DB_PASSWORD,
                                         'port': self.DB_PORT
                                       }
-        except Exception as e:
+
+        except Exception:
 
             config_prompter = ConfigPrompter()
             temp_file_name = "config_logging_modbus_database_temp.json"
@@ -110,9 +112,6 @@ class GetConfig:
             self.META_DATA_COLUMN_NAMES = self.get_column_names(self.META_DATA_TABLE_NAME)
             self.CYCLE_DATA_COLUMN_NAMES = self.get_column_names(self.CYCLE_DATA_TABLE_NAME)
 
-            self.TP_DATA_INSERT_QUERY = self.create_insert_query(self.TP_DATA_TABLE_NAME, self.TP_DATA_COLUMN_NAMES)
-            self.THERMAL_CONDUCTIVITY_DATA_INSERT_QUERY = self.create_insert_query(self.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME, self.THERMAL_CONDUCTIVITY_COLUMN_NAMES)
-            self.THERMAL_CONDUCTIVITY_XY_DATA_INSERT_QUERY = self.create_insert_query(self.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME, self.THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES)
         except Exception as e:
             print("No tables yet. Will be created")
 

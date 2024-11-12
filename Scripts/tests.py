@@ -34,23 +34,15 @@ def bla():
 
 
 if __name__ == '__main__':
-    column_attribute_mapping = {
-        'sample_id': '1',
-        'sample_material': 'material',
-        'sample_mass': 'sample_mass',
-        'measurement_cell': 'measurement_cell',
-        'start_time': 'start_time',
-        'end_time': 'end_time',
-        'first_hydrogenation': 'first_hydrogenation',
-        'max_pressure_cycling': 'max_pressure_cycling',
-        'min_temperature_cycling': 'min_temperature_cycling',
-        'enthalpy': 'enthalpy',
-        'entropy': 'entropy',
-        'average_cycle_duration': 'average_cycle_duration',
-        'reservoir_volume': 'reservoir_volume',
-        'total_number_cycles': 'total_number_cycles',
-        'last_de_hyd_state': 'last_de_hyd_state'
-    }
+    import os
 
-    for column_name, attribute_name in column_attribute_mapping.items():
-            print(column_name, attribute_name)
+
+
+
+    # Example usage:
+    folder_path = r'C:/Daten/Kiki'
+    latest_file = find_latest_file(folder_path)
+    if latest_file:
+        print(f"The latest file is: {latest_file}")
+    else:
+        print("No files found in the folder.")

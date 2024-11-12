@@ -2,22 +2,21 @@ import threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import time
+import glob
+import os
 
 from PySide6.QtCore import Signal, QObject
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger, GetConfig
+from src.config_connection_reading_management.connections_and_logger import AppLogger
 from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor
 from src.standard_paths import standard_hot_disk_file_path
 
-class LogFileTracker(QObject):
 
+class LogFileTracker(QObject):
     time_range_etc_import = Signal(tuple)
 
     def __init__(self, meta_data):
         super().__init__()
-        config = GetConfig()
-
-        #print(config.HOT_DISK_LOG_FILE_PATH)
         self.meta_data = meta_data
         self.hot_disk_log_dir_path = standard_hot_disk_file_path
         self.observer = None
@@ -75,9 +74,35 @@ class LogFileHandler(FileSystemEventHandler, QObject):
     def __init__(self, meta_data):
         super().__init__()
         self.meta_data = meta_data
-        self.latest_export_path = None
+        latest_file = self.get_latest_file(folder_path=standard_hot_disk_file_path)
+        self.latest_export_path = latest_file
         self.logger = AppLogger().get_logger(__name__)
         self._test_mode = False
+
+    @staticmethod
+    def get_export_file_path(log_file_path):
+        last_result_path = None
+        with open(log_file_path, 'r') as file:
+            for line in file:
+                if "Progress\tFinish" in line and "<a>file:" in line:
+                    start_index = line.find("<a>file:") + len("<a>file:")
+                    end_index = line.find("</a>", start_index)
+                    if start_index != -1 and end_index != -1:
+                        # Update the last_result_path for each matching line
+                        last_result_path = line[start_index:end_index]
+        return last_result_path
+
+    @staticmethod
+    def get_latest_file(folder_path):
+        # Get a list of all files in the folder
+        files = glob.glob(os.path.join(folder_path, '*.log'))
+        # Filter out directories, only keep files
+        files = [f for f in files if os.path.isfile(f)]
+        if not files:
+            return None  # No files found
+        # Find the file with the latest modification time
+        latest_file = max(files, key=os.path.getmtime)
+        return latest_file
 
     def on_created(self, event):
         if not event.is_directory and event.src_path.endswith('.log'):
@@ -91,16 +116,9 @@ class LogFileHandler(FileSystemEventHandler, QObject):
         #print(f"Processing log file: {file_path}")
         self.logger.info(f"Processing log file: {file_path}")
 
-        last_result_path = None  # Variable to keep track of the last result path found
+        # Variable to keep track of the last result path found
         time.sleep(15)
-        with open(file_path, 'r') as file:
-            for line in file:
-                if "Progress\tFinish" in line and "<a>file:" in line:
-                    start_index = line.find("<a>file:") + len("<a>file:")
-                    end_index = line.find("</a>", start_index)
-                    if start_index != -1 and end_index != -1:
-                        # Update the last_result_path for each matching line
-                        last_result_path = line[start_index:end_index]
+        last_result_path = self.get_export_file_path(log_file_path=file_path)
 
         # Print the last result path found after reading the entire file
         if last_result_path != self.latest_export_path:
@@ -120,7 +138,6 @@ class LogFileHandler(FileSystemEventHandler, QObject):
 
 
 def create_temp_log_file(temp_log_file_path):
-
     # Create a temporary log file for testing
     with open(temp_log_file_path, 'w') as file:
         file.write("Initial log content\n")

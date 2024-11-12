@@ -142,5 +142,22 @@ class TableConfig:
         time_min = 'time_min'
         time_max = 'time_max'
 
+    @staticmethod
+    def get_table_column_names(table_class):
+        """
+        Returns a list of all column names in the table class.
+        """
+        column_names = []
+        for attr_name in dir(table_class):
+            # Skip special attributes and methods
+            if not attr_name.startswith('__') and attr_name != 'table_name':
+                attr_value = getattr(table_class, attr_name)
+                if not callable(attr_value):
+                    column_names.append(attr_value)
+        return column_names
 
-
+if __name__ == '__main__':
+    tablemaster = TableConfig()
+    table = TableConfig().TPDataTable
+    names = tablemaster.get_table_column_names(table)
+    print(names)

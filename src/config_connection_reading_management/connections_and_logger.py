@@ -36,7 +36,6 @@ THERMAL_CONDUCTIVITY_DATA_TABLE_NAME = config.THERMAL_CONDUCTIVITY_DATA_TABLE_NA
 THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME = config.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME
 
 
-
 class AppLogger:
     """
     A class for setting up and providing access to a logger.
@@ -295,6 +294,7 @@ def test_connection_simulated_modbus():
         except Exception as e:
             print("An error occurred:", e)
 
+
 def test_mb_connection():
 
     logger = AppLogger().get_logger("TestApp")
@@ -316,6 +316,7 @@ def test_mb_connection():
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
     logger.info("Functionality test completed.")
+
 
 # Run the test function
 if __name__ == "__main__":
