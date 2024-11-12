@@ -1,0 +1,31 @@
+{
+    "DB_SERVER": "localhost",
+    "DB_DATABASE": "postgres",
+    "DB_USERNAME": "postgres",
+    "DB_PASSWORD": "Bananensalat1!",
+    "DB_PORT": "5432",
+    "MODBUS_HOST": "192.168.178.1",
+    "MODBUS_PORT": 502,
+    "REGS_OF_INTEREST": [
+        4605,
+        4653,
+        4655,
+        4669,
+        4671
+    ],
+    "START_REG": 4585,
+    "END_REG": 4672,
+    "SLEEP_INTERVAL": 0.5,
+    "LOG_DIRECTORY": "Log",
+    "LOG_FILE": "Application_Log.log",
+    "HOT_DISK_LOG_FILE_PATH": "C:\\HotDiskTPS_7\\data\\Log",
+    "TP_DATA_TABLE_NAME": "t_p_data",
+    "THERMAL_CONDUCTIVITY_DATA_TABLE_NAME": "thermal_conductivity_data",
+    "THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME": "thermal_conductivity_xy_data",
+    "META_DATA_TABLE_NAME": "meta_data",
+    "CYCLE_DATA_TABLE_NAME": "cycle_data",
+    "MINIMUM_TEMPERATURE_INCREASE": 2,
+    "MAXIMUM_TEMPERATURE_INCREASE": 5,
+    "MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME": 0.33,
+    "MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME": 1
+}

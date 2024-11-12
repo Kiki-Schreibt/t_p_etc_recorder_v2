@@ -1,0 +1,62 @@
+[
+    {
+        "Hydride": "Fe1H1",
+        "Enthalpy": "42300",
+        "Entropy": "52",
+        "Density": {"Hydrogenated": "1.45",
+                    "Dehydrogenated": "1.738"
+                    },
+        "Conductivity_Bulk": {
+            "Hydrogenated": "",
+            "Dehydrogenated": ""
+        }
+    },
+    {
+        "Hydride": "Mg1H2",
+        "Enthalpy": "74701",
+        "Entropy": "134.7",
+        "Density": {"Hydrogenated": "1.45",
+                    "Dehydrogenated": "1.738"
+                    },
+        "Conductivity_Bulk": {
+            "Hydrogenated": 31,
+            "Dehydrogenated": 156
+        }
+    },
+    {
+        "Hydride": "Mg2Al3H4",
+        "Enthalpy": "62700",
+        "Entropy": "123",
+        "Density": {"Hydrogenated": "1.45",
+                    "Dehydrogenated": "1.738"
+                    },
+        "Conductivity_Bulk": {
+            "Hydrogenated": "",
+            "Dehydrogenated": ""
+        }
+    },
+    {
+        "Hydride": "Mg2Fe1H6",
+        "Enthalpy": "79211.124243",
+        "Entropy": "137.188755",
+        "Density": {"Hydrogenated": "1.45",
+                    "Dehydrogenated": "1.738"
+                    },
+        "Conductivity_Bulk": {
+            "Hydrogenated": "",
+            "Dehydrogenated": ""
+        }
+    },
+    {
+        "Hydride": "Mg2Ni1H4",
+        "Enthalpy": "61858",
+        "Entropy": "118.9",
+        "Density": {"Hydrogenated": "1.45",
+                    "Dehydrogenated": "1.738"
+                    },
+        "Conductivity_Bulk": {
+            "Hydrogenated": "",
+            "Dehydrogenated": ""
+        }
+    }
+]

@@ -1,0 +1,4 @@
+Symbol	AtomicMass	Density
+H	1.008	0.00008988
+Mg	24.305	1.738
+MgH2	26.32	1.45

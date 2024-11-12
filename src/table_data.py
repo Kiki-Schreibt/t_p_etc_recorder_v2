@@ -1,0 +1,146 @@
+
+class TableConfig:
+
+    class TPDataTable:
+        table_name = 't_p_data'
+        time = 'time'
+        pressure = 'pressure'
+        temperature_sample = 'temperature_sample'
+        setpoint_sample = 'setpoint_sample'
+        temperature_heater = 'temperature_heater'
+        setpoint_heater = 'setpoint_heater'
+        eq_pressure = 'eq_pressure'
+        de_hyd_state = 'de_hyd_state'
+        cycle_number = 'cycle_number'
+        reservoir_volume = 'reservoir_volume'
+        sample_id = 'sample_id'
+        h2_uptake = 'h2_uptake'
+        cycle_number_flag = 'cycle_number_flag'
+        h2_uptake_flag = 'h2_uptake_flag'
+        cycle_length_flag = 'cycle_length_flag'
+        eq_pressure_real = 'eq_pressure_real'
+
+    class ETCDataTable:
+        table_name = 'thermal_conductivity_data'
+        time = "\"Time\""
+        file =  "\"File\""
+        description = "\"Description\""
+        sample_id = "\"Sample_ID\""
+        points =  "\"Points\""
+        temperature = "\"Temperature\""
+        th_conductivity = "\"ThConductivity\""
+        th_diffusivity = "\"ThDiffusivity\""
+        specific_heat = "\"SpecHeat\""
+        th_effusivity = "\"ThEffusivity\""
+        probing_depth = "\"PrDepth\""
+        temperature_increase = "\"TempIncr\""
+        temperature_drift = "\"TempDrift\""
+        total_temperature_increase = "\"TotalTempIncr\""
+        total_to_characteristic_time = "\"TotalCharTime\""
+        time_correction = "\"Time_Corr\""
+        mean_deviation = "\"Mean_Dev\""
+        disk_resistance = "\"Disk_Res\""
+        calculation_settings = "\"Calc_settings\""
+        temperature_average = "\"Temperature_avg\""
+        thermal_conductivity_average = "\"ThConductivity_avg\""
+        thermal_diffusivity_average = "\"ThDiffusivity_avg\""
+        specific_heat_average = "\"SpecHeat_avg\""
+        thermal_effusivity_average = "\"ThEffusivity_avg\""
+        probing_depth_average = "\"PrDepth_avg\""
+        temperature_increase_average = "\"TempIncr_avg\""
+        temperature_drift_average = "\"TempDrift_avg\""
+        total_temperature_increase_average = "\"TotalTempIncr_avg\""
+        total_to_characteristic_time_average = "\"TotalCharTime_avg\""
+        time_correction_average = "\"Time_Corr_avg\""
+        mean_deviation_average = "\"Mean_Dev_avg\""
+        disk_resistance_average = "\"Disk_Res_avg\""
+        calculation_settings_average = "\"Calc_settings_avg\""
+        temperature_deviation = "\"Temperature_dvt\""
+        thermal_conductivity_deviation = "\"ThConductivity_dvt\""
+        thermal_diffusivity_deviation = "\"ThDiffusivity_dvt\""
+        specific_heat_deviation = "\"SpecHeat_dvt\""
+        thermal_effusivity_deviation = "\"ThEffusivity_dvt\""
+        probing_depth_deviation = "\"PrDepth_dvt\""
+        temperature_increase_deviation = "\"TempIncr_dvt\""
+        temperature_drift_deviation = "\"TempDrift_dvt\""
+        total_temperature_increase_deviation = "\"TotalTempIncr_dvt\""
+        total_to_characteristic_time_deviation = "\"TotalCharTime_dvt\""
+        time_correction_deviation = "\"Time_Corr_dvt\""
+        mean_deviation_deviation = "\"Mean_Dev_dvt\""
+        disk_resistance_deviation = "\"Disk_Res_dvt\""
+        calculation_settings_deviation = "\"Calc_settings_dvt\""
+        output_power = "\"Outppower\""
+        measurement_time = "\"Meastime\""
+        disk_radius = "\"Radius\""
+        tcr = "\"TCR\""
+        disk_type = "\"Disk_Type\""
+        temperature_drift_rec = "\"Tempdrift_rec\""
+        notes = "\"Notes\""
+        resistance = "\"Rs\""
+        sample_id_small = "sample_id"
+        pressure = "pressure"
+        temperature_sample = "temperature_sample"
+        cycle_number = "cycle_number"
+        cycle_number_flag = "cycle_number_flag"
+        de_hyd_state = 'de_hyd_state'
+
+        @classmethod
+        def get_clean(cls, attribute_name):
+            """Return the value of a class attribute without escaped quotes."""
+            value = getattr(cls, attribute_name, None)
+            if value is not None and isinstance(value, str):
+                return value.replace('\"', '')
+            return value
+
+    class ThermalConductivityXyDataTable:
+        table_name = 'thermal_conductivity_xy_data'
+        point_number =  'point_nr'
+        time = 'time'
+        t_f_tau =  't_f_tau'
+        temperature =  'temperature'
+        _time_temperature_increase = 'time_temperature_increase'
+        temperature_increase =  'temperature_increase'
+        sqrt_time =  'sqrt_time'
+        temp_diff = 'diff_temperature'
+        drift_time =  'time_drift'
+        temperature_drift = 'temperature_drift'
+        sample_id = "sample_id"
+
+    class MetaDataTable:
+        table_name = "meta_data"
+        sample_id = "sample_id"
+        material = "material"
+        mass = "mass"
+        measurement_cell = "measurement_cell"
+        time_start = "time_start"
+        time_end = "time_end"
+        time_first_hydrogenation = "first_hydrogenation"
+        max_pressure_cycling = "max_pressure_cycling"
+        min_temperature_cycling = "min_temperature_cycling"
+        reservoir_volume = "reservoir_volume"
+        average_cycle_duration = "average_cycle_duration"
+        enthalpy = "enthalpy"
+        entropy = "entropy"
+        total_number_cycles = "total_number_cycles"
+        last_de_hyd_state = "last_de_hyd_state"
+
+    class CycleDataTable:
+        table_name = 'cycle_data'
+        sample_id = 'sample_id'
+        time_start = 'time_start'
+        time_end = 'time_end'
+        cycle_number = 'cycle_number'
+        cycle_duration = 'cycle_duration'
+        de_hyd_state = 'de_hyd_state'
+        pressure_min = 'pressure_min'
+        pressure_max = 'pressure_max'
+        temperature_min = 'temperature_min'
+        temperature_max = 'temperature_max'
+        volume_reservoir = 'volume_reservoior'
+        volume_cell = 'volume_cell'
+        h2_uptake = 'h2_uptake'
+        time_min = 'time_min'
+        time_max = 'time_max'
+
+
+

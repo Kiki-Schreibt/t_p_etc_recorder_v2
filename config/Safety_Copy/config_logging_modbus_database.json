@@ -1,0 +1,46 @@
+{
+    "LOG_DIRECTORY": "C:\\Daten\\Kiki\\ProgrammingStuff\\kikis_hot_v1\\Log",
+    "LOG_FILE": "Application_Log.log",
+    "DB_SERVER": "localhost",
+    "DB_DATABASE": "postgres",
+    "DB_USERNAME": "postgres",
+    "DB_PASSWORD": "Bananensalat1!",
+    "DB_PORT": "5432",
+    "MODBUS_HOST": "192.168.178.1",
+    "MODBUS_PORT": 502,
+    "REGS_OF_INTEREST": [4605, 4653, 4655, 4669, 4671],
+    "START_REG": 4585,
+    "END_REG": 4672,
+    "SLEEP_INTERVAL": 0.5,
+    "HOT_DISK_LOG_FILE_PATH": "C:\\HotDiskTPS_7\\data\\Log",
+    "TP_DATA_COLUMN_NAMES": [
+	"time", "pressure", "temperature_sample", "setpoint_sample", "temperature_heater", 
+	"setpoint_heater", "eq_pressure", "de_hyd_state", "cycle_number", "reservoir_volume", "sample_id"
+	],
+    "TP_DATA_TABLE_NAME": "t_p_data",
+    "THERMAL_CONDUCTIVITY_DATA_TABLE_NAME": "thermal_conductivity_data",
+    "THERMAL_CONDUCTIVITY_COLUMN_NAMES": [
+        "\"Time\"", "\"File\"", "\"Description\"", "\"Sample_ID\"", "\"Points\"", "\"Temperature\"", 
+        "\"ThConductivity\"", "\"ThDiffusivity\"", "\"SpecHeat\"", "\"ThEffusivity\"", "\"PrDepth\"", 
+        "\"TempIncr\"", "\"TempDrift\"", "\"TotalTempIncr\"", "\"TotalCharTime\"", "\"Time_Corr\"", 
+        "\"Mean_Dev\"", "\"Disk_Res\"", "\"Calc_settings\"", "\"Temperature_avg\"", "\"ThConductivity_avg\"", 
+        "\"ThDiffusivity_avg\"", "\"SpecHeat_avg\"", "\"ThEffusivity_avg\"", "\"PrDepth_avg\"", 
+        "\"TempIncr_avg\"", "\"TempDrift_avg\"", "\"TotalTempIncr_avg\"", "\"TotalCharTime_avg\"", 
+        "\"Time_Corr_avg\"", "\"Mean_Dev_avg\"", "\"Disk_Res_avg\"", "\"Calc_settings_avg\"", 
+        "\"Temperature_dvt\"", "\"ThConductivity_dvt\"", "\"ThDiffusivity_dvt\"", "\"SpecHeat_dvt\"", 
+        "\"ThEffusivity_dvt\"", "\"PrDepth_dvt\"", "\"TempIncr_dvt\"", "\"TempDrift_dvt\"", 
+        "\"TotalTempIncr_dvt\"", "\"TotalCharTime_dvt\"", "\"Time_Corr_dvt\"", "\"Mean_Dev_dvt\"", 
+        "\"Disk_Res_dvt\"", "\"Calc_settings_dvt\"", "\"Outppower\"", "\"Meastime\"", "\"Radius\"", "\"TCR\"", 
+        "\"Disk_Type\"", "\"Tempdrift_rec\"", "\"Notes\"", "\"Rs\""
+    	],
+    "THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME": "thermal_conductivity_xy_data",
+    "THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES": [
+    	"point_nr", "time", "t_f_tau","temperature", "time_temperature_increase", "temperature_increase", 
+        "sqrt_time", "diff_temperature", "time_drift", "temperature_drift"
+	],
+    "MINIMUM_TEMPERATURE_INCREASE" : 2,
+    "MAXIMUM_TEMPERATURE_INCREASE" : 5,
+    "MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME" : 0.33,
+    "MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME" : 1
+}
+
