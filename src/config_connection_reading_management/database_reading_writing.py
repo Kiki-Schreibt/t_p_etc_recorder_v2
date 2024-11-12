@@ -20,7 +20,7 @@ from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
 from src.table_data import TableConfig
-
+from src.standard_paths import standard_log_dir
 
 qb = QueryBuilder()
 # Load the configuration
@@ -152,8 +152,8 @@ class DataRetriever:
             "\"Tempdrift_rec\"", "\"Notes\"", "\"Rs\""]
         """
 
-        table_name_etc = TableConfig().ETCDataTable().table_name
-        table_name_tp = TableConfig().TPDataTable().table_name
+        table_name_etc = TableConfig().ETCDataTable.table_name
+        table_name_tp = TableConfig().TPDataTable.table_name
         if time_range and not sample_id:
             tp_data = self.fetch_data_by_time_2(time_range=time_range,
                                                 column_names=column_names_t_p,
@@ -576,7 +576,7 @@ class DataBaseManipulator:
                     return False
 
     def _update_cycle_count_flag(self, sample_id=None, min_cycling_temperature=None):
-        table_name = TableConfig().TPDataTable().table_name
+        table_name = TableConfig().TPDataTable.table_name
         for col_name in self.config.TP_DATA_COLUMN_NAMES:
             if "cycle" in col_name.lower() and "flag" in col_name.lower():
                 column_to_update = col_name
@@ -1278,7 +1278,7 @@ def test_data_retriever():
    data_retriever = DataRetriever()
 
    sample_id = 'WAE-WA-040'
-   table_name = TableConfig().ETCDataTable().table_name
+   table_name = TableConfig().ETCDataTable.table_name
    #table_name = TableConfig().TPDataTable.table_name
    df = data_retriever.fetch_data_by_sample_id_2(column_names=None, table_name=table_name, sample_id=sample_id)
    print(df)
