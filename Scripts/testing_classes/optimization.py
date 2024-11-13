@@ -1,5 +1,4 @@
-
-from connections_and_logger import AppLogger, DatabaseConnection, GetConfig, ModbusConnection
+import threading
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
@@ -9,15 +8,14 @@ import os
 import struct
 import time
 from zoneinfo import ZoneInfo
+
+from src.config_connection_reading_management.connections_and_logger import AppLogger, DatabaseConnection, GetConfig, ModbusConnection
 from pymodbus.exceptions import ModbusException, ConnectionException
 from pymodbus.pdu import ExceptionResponse
-from eq_p_calculation import VantHoffCalcEq as EqCalculator
-from query_builder import QueryBuilder
-from meta_data_handler import MetaData
-from table_data import TableConfig
-import threading
-
-
+from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
+from src.config_connection_reading_management.query_builder import QueryBuilder
+from src.meta_data.meta_data_handler import MetaData
+from src.table_data import TableConfig
 
 qb = QueryBuilder()
 # Load the configuration
@@ -37,8 +35,6 @@ START_REG       = config.START_REG
 END_REG         = config.END_REG
 SLEEP_INTERVAL  = config.SLEEP_INTERVAL
 
-THERMAL_CONDUCTIVITY_DATA_TABLE_NAME = config.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME
-THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME = config.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME
 local_tz = ZoneInfo("Europe/Berlin")
 table_rp = TableConfig().TPDataTable
 

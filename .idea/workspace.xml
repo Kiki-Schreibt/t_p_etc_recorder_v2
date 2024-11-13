@@ -49,7 +49,7 @@
     "Python.eq_p_calculation.executor": "Run",
     "Python.export_methods.executor": "Run",
     "Python.hydride_worker.executor": "Run",
-    "Python.main.executor": "Debug",
+    "Python.main.executor": "Run",
     "Python.manual_csv_xlsx_inserter.executor": "Run",
     "Python.meta_data_handler.executor": "Run",
     "Python.modbus_handler.executor": "Run",
@@ -97,7 +97,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.recording_business_v2">
+  <component name="RunManager" selected="Python.main">
     <configuration name="config_reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -232,8 +232,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.recording_business_v2" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.recording_business_v2" />
         <item itemvalue="Python.database_reading_writing" />
         <item itemvalue="Python.table_data" />
         <item itemvalue="Python.config_reader" />
@@ -308,7 +308,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>460</line>
+          <line>461</line>
           <option name="timeStamp" value="375" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

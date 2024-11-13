@@ -445,6 +445,7 @@ class DataBaseManipulator:
     """
     Handles batch updates and manipulations of the database.
     """
+    tp_table = TableConfig().TPDataTable
     def __init__(self):
         """
         Initializes the DataBaseManipulator with a logger.
@@ -583,8 +584,9 @@ class DataBaseManipulator:
             self.logger.error("Error updating cycle count flag %s", e)
 
     def _update_uptake_flag(self, sample_id=None, max_cycling_pressure=None):
-        table_name = self.config.TP_DATA_TABLE_NAME
-        for col_name in self.config.TP_DATA_COLUMN_NAMES:
+        table_name = self.tp_table.table_name
+        column_names = TableConfig().get_table_column_names(self.tp_table)
+        for col_name in column_names:
             if "uptake" in col_name.lower() and "flag" in col_name.lower():
                 column_to_update = col_name
             if "sample" in col_name.lower() and "id" in col_name.lower():
@@ -592,12 +594,11 @@ class DataBaseManipulator:
             if "pressure" in col_name.lower() and "eq" not in col_name.lower():
                 sample_pressure_column = col_name
 
-        query = f"UPDATE {table_name} SET {column_to_update} = CASE WHEN " \
+        try:
+            query = f"UPDATE {table_name} SET {column_to_update} = CASE WHEN " \
                 f"{sample_pressure_column} < {max_cycling_pressure}  THEN True " \
                 f"ELSE False END "\
                 f"WHERE {sample_id_column} = '{sample_id}'"
-
-        try:
             with DatabaseConnection() as db_conn:
                 db_conn.cursor.execute(query)
                 db_conn.cursor.connection.commit()
@@ -607,8 +608,10 @@ class DataBaseManipulator:
             self.logger.error("Error updating cycle count flag %s", e)
 
     def _update_first_hyd_flag(self, sample_id=None, date_first_hydrogenation=None):
-        table_name = self.config.TP_DATA_TABLE_NAME
-        for col_name in self.config.TP_DATA_COLUMN_NAMES:
+        table_name = self.tp_table.table_name
+        column_names = TableConfig().get_table_column_names(self.tp_table)
+
+        for col_name in column_names:
             if "uptake" in col_name.lower() and "flag" in col_name.lower():
                 column_to_update_1 = col_name
             if "cycle" in col_name.lower() and "flag" in col_name.lower():
@@ -618,10 +621,10 @@ class DataBaseManipulator:
             if "time" in col_name.lower():
                 time_column = col_name
 
-        query = f"UPDATE {table_name} SET {column_to_update_1} = False, " \
+        try:
+            query = f"UPDATE {table_name} SET {column_to_update_1} = False, " \
                 f"{column_to_update_2} = False " \
                 f"WHERE {sample_id_column} = '{sample_id}' AND {time_column} < '{date_first_hydrogenation}'"
-        try:
             with DatabaseConnection() as db_conn:
                 db_conn.cursor.execute(query)
                 db_conn.cursor.connection.commit()
@@ -659,17 +662,6 @@ class DataBaseManipulator:
         passed_time = time.time()-start_time_all
         print(f"Updating all flags takes {passed_time} s in total")
 
-    def get_column_names(self, table_name):
-
-        if "t_p" in table_name.lower():
-            column_names = self.config.TP_DATA_COLUMN_NAMES
-        elif "conductivity" in table_name.lower() and "xy" in table_name.lower():
-            column_names = self.config.THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES
-        elif "conductivity" in table_name.lower():
-            column_names = self.config.THERMAL_CONDUCTIVITY_COLUMN_NAMES
-        elif "meta" in table_name.lower():
-            column_names = self.config.META_DATA_COLUMN_NAMES
-        return column_names
 
 
 class ExcelDataProcessor:

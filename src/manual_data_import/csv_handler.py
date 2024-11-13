@@ -24,7 +24,7 @@ from src.config_connection_reading_management.database_reading_writing import Da
 from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor, DataRetriever, write_ETC_in_parallel
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.config_connection_reading_management.connections_and_logger import AppLogger, DatabaseConnection, GetConfig, ModbusConnection
-
+from src.table_data import TableConfig
 local_tz = ZoneInfo("Europe/Berlin")
 
 REALISTIC_MAX_TEMP = 1000
@@ -880,17 +880,19 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
     config = GetConfig()
     data_retriever = DataRetriever()
     data_retriever.limit_datapoints = data_points_max
-    table_name = config.TP_DATA_TABLE_NAME
+    table_name = TableConfig().TPDataTable.table_name
     if not sample_id:
         time_one = "2023-10-29 00:21:30"
         time_two = "2023-10-29 04:00:20"
         time_range = (time_one, time_two)
+        column_names = TableConfig().get_table_column_names(table_name=table_name)
         df = data_retriever.fetch_data_by_time_2(time_range=time_range,
-                                                 column_names=config.TP_DATA_COLUMN_NAMES,
+                                                 column_names=column_names,
                                                  table_name=table_name)
     else:
+        column_names = TableConfig().get_table_column_names(table_name=table_name)
         df = data_retriever.fetch_data_by_sample_id_2(sample_id=sample_id, table_name=table_name,
-                                                      column_names=config.TP_DATA_COLUMN_NAMES)
+                                                      column_names=column_names)
 
     df['eq_pressure_real'] = inserter_wizard.eq_calculator.calc_eq(df['temperature_sample'])
     _plot_temperatures_and_pressures(df=df)

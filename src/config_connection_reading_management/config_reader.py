@@ -10,7 +10,6 @@ from src.standard_paths import standard_config_file_path as config_file_path
 from src.standard_paths import standard_log_dir
 from src.table_data import TableConfig
 
-
 current_dir = os.path.dirname(__file__)
 
 
@@ -74,12 +73,7 @@ class GetConfig:
             self.SLEEP_INTERVAL  = config['SLEEP_INTERVAL']
 
             self.HOT_DISK_LOG_FILE_PATH = config['HOT_DISK_LOG_FILE_PATH']
-            self.TP_DATA_TABLE_NAME = TableConfig().TPDataTable.table_name
-            self.META_DATA_TABLE_NAME = TableConfig().MetaDataTable.table_name
-            self.CYCLE_DATA_TABLE_NAME = TableConfig().CycleDataTable.table_name
 
-            self.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME = config['THERMAL_CONDUCTIVITY_DATA_TABLE_NAME']
-            self.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME = config['THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME']
             self.MINIMUM_TEMPERATURE_INCREASE = config["MINIMUM_TEMPERATURE_INCREASE"]
             self.MAXIMUM_TEMPERATURE_INCREASE = config["MAXIMUM_TEMPERATURE_INCREASE"]
             self.MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME = config["MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME"]
@@ -94,7 +88,6 @@ class GetConfig:
                                       }
 
         except Exception:
-
             config_prompter = ConfigPrompter()
             temp_file_name = "config_logging_modbus_database_temp.json"
 
@@ -104,47 +97,6 @@ class GetConfig:
                 config_prompter.config = config_prompter.config_template
                 config_prompter.save_to_file(temp_file_name)
             self.__init__(config_file_path=temp_file_path)
-
-        try:
-            self.TP_DATA_COLUMN_NAMES = self.get_column_names(self.TP_DATA_TABLE_NAME)
-            self.THERMAL_CONDUCTIVITY_COLUMN_NAMES = self.get_column_names(self.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME)
-            self.THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES = self.get_column_names(self.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME)
-            self.META_DATA_COLUMN_NAMES = self.get_column_names(self.META_DATA_TABLE_NAME)
-            self.CYCLE_DATA_COLUMN_NAMES = self.get_column_names(self.CYCLE_DATA_TABLE_NAME)
-
-        except Exception as e:
-            print("No tables yet. Will be created")
-
-    def get_column_names(self, table_name):
-        column_names = []
-        try:
-            # Open a new connection using psycopg2
-            connection = psycopg2.connect(**self.connection_string)
-            cursor = connection.cursor()
-
-            # Execute the query to fetch column names
-            cursor.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = %s ORDER BY ordinal_position", (table_name,))
-
-            # Fetch all rows
-            rows = cursor.fetchall()
-
-            # Iterate over rows and extract column names
-            for row in rows:
-                column_name = row[0]
-                if self._has_uppercase(column_name):
-                    column_name = f"\"{column_name}\""
-                column_names.append(column_name)
-
-        except Exception as e:
-            print("Error while fetching column names:", e)
-        finally:
-            # Close the cursor and connection
-            if cursor:
-                cursor.close()
-            if connection:
-                connection.close()
-
-        return column_names
 
     @staticmethod
     def _has_uppercase(string):
@@ -161,6 +113,7 @@ class GetConfig:
         placeholders = ", ".join(["%s"] * len(column_names))
         # Create the full insert query
         return f"INSERT INTO {table_name} ({column_names_str}) VALUES ({placeholders})"
+
 
 """
 ConfigPrompter: A class to prompt user input for configuration settings and save them to a JSON file.
@@ -184,6 +137,7 @@ Usage Example:
     prompter.prompt()
     prompter.save_to_file("config.json")
 """
+
 
 class ConfigPrompter:
 
@@ -260,7 +214,8 @@ class ConfigPrompter:
             else:
                 return default_value
 
-    def _convert_value(self, value):
+    @staticmethod
+    def _convert_value(value):
         """
         Attempts to convert a value to an integer or float, otherwise returns it as a string.
 
@@ -281,7 +236,8 @@ class ConfigPrompter:
                 # Return as string if neither int nor float
                 return value
 
-    def get_base_dir(self):
+    @staticmethod
+    def get_base_dir():
         """
         Returns the base directory of the script or the PyInstaller bundle.
 
@@ -345,22 +301,11 @@ class ConfigPrompter:
 
 
 
-def test_get_column_names_from_postgres():
-    """
-    Test the get_column_names_from_postgres method.
-    """
-    # Replace 'your_table_name' with the actual name of your table
-    get_config = GetConfig()
-    table_name = get_config.META_DATA_COLUMN_NAMES
-    print("Column names retrieved successfully:", get_config.CYCLE_DATA_COLUMN_NAMES)
- #   print("Old Column names =:", get_config.THERMAL_CONDUCTIVITY_COLUMN_NAMES_OLD)
-
-
 if __name__ == "__main__":
 
     config = GetConfig()
     print(config.LOG_FILE)
-    print(config.TP_DATA_COLUMN_NAMES)
+
 
 
 

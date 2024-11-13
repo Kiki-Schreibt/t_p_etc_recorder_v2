@@ -43,7 +43,7 @@ class MetaData:
         self.config = GetConfig()
         self.qb = QueryBuilder()
         self.logger = AppLogger().get_logger(__name__)
-        self.table_name = self.config.META_DATA_TABLE_NAME
+        self.table_name = TableConfig().MetaDataTable.table_name
         self.sample_id = sample_id
         self.start_time = None
         self.volume_measurement_cell = None
@@ -68,7 +68,7 @@ class MetaData:
     def reading_thread(self, column_names=None, mode="create"):
         if self.sample_id:
             if not column_names:
-                column_names = self.config.META_DATA_COLUMN_NAMES
+                column_names = TableConfig().get_table_column_names(table_name=self.table_name)
 
             if self._sample_id_exists():
                 query, values = self.qb.create_reading_query(table_name=self.table_name,
@@ -212,8 +212,8 @@ class MetaData:
 
     def _create_new_line_meta_data(self):
         # Create a new row with the given sample_id
-        table_name = self.config.META_DATA_TABLE_NAME
-        column_name = self.config.META_DATA_COLUMN_NAMES[0]
+        table_name = TableConfig().MetaDataTable.table_name
+        column_name = TableConfig().MetaDataTable.sample_id
         value = (self.sample_id,)
         query = f"INSERT INTO {table_name} ({column_name}) VALUES (%s)"
         print(query)
@@ -225,8 +225,8 @@ class MetaData:
 
     def _sample_id_exists(self):
         # Check if the sample_id exists in the table
-        table_name = self.config.META_DATA_TABLE_NAME
-        column_name = self.config.META_DATA_COLUMN_NAMES[0]
+        table_name = self.table_name
+        column_name = TableConfig().MetaDataTable.sample_id
         query = f"SELECT 1 FROM {table_name} WHERE {column_name} = '{self.sample_id}'"
         with self.db as conn:
 

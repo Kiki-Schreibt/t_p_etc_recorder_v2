@@ -3,7 +3,6 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import time
 
-from src.config_connection_reading_management.config_reader import GetConfig
 from src.config_connection_reading_management.connections_and_logger import DatabaseConnection, AppLogger
 from src.table_data import TableConfig
 local_tz = ZoneInfo("Europe/Berlin")
@@ -12,7 +11,6 @@ local_tz = ZoneInfo("Europe/Berlin")
 class QueryBuilder:
 
     def __init__(self):
-        self.config = GetConfig()
         self.db = DatabaseConnection()
         self.logger = AppLogger().get_logger(__name__)
         self.tp_table = TableConfig().TPDataTable
@@ -233,7 +231,7 @@ class QueryBuilder:
     def create_update_by_sample_id_query(self, table_name, column_to_update, value_to_update, sample_id):
 
         table_name, column_names_str = self._normalize_table_names(table_name=table_name, column_names="do_nothing")
-        sample_id_column = next((meta_key for meta_key in self.config.META_DATA_COLUMN_NAMES if "sample_id" in meta_key), None)
+        sample_id_column = next((meta_key for meta_key in TableConfig().get_table_column_names(table_class=self.meta_data_table) if "sample_id" in meta_key), None)
         if isinstance(value_to_update, datetime) or isinstance(value_to_update, str):
             query = f"UPDATE {table_name} SET {column_to_update} = '{value_to_update}' WHERE {sample_id_column} = '{sample_id}'"
             return query
@@ -247,7 +245,7 @@ class QueryBuilder:
         # Create the column part of the query
 
         if not column_names and "t_p" in table_name.lower():
-            column_names = self.config.TP_DATA_COLUMN_NAMES
+            column_names = TableConfig().get_table_column_names(table_class=self.tp_table)
             column_names_str = ", ".join(column_names)
         # Create the placeholders for values
         amount_values_to_insert = ", ".join(["%s"] * len(column_names))
@@ -268,12 +266,12 @@ class QueryBuilder:
         """
         if constraints is None:
             return "", ()
-        if self.config.TP_DATA_TABLE_NAME in base_query:
-            column_names = self.config.TP_DATA_COLUMN_NAMES
-        elif self.config.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME in base_query:
-            column_names = self.config.THERMAL_CONDUCTIVITY_COLUMN_NAMES
-        elif self.config.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME in base_query:
-            column_names = self.config.THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES
+        if self.tp_table.table_name in base_query:
+            column_names = TableConfig().get_table_column_names(table_class=self.tp_table)
+        elif self.etc_table.table_name in base_query:
+            column_names = TableConfig().get_table_column_names(table_class=self.etc_table)
+        elif self.etc_xy_table.table_name in base_query:
+            column_names = TableConfig().get_table_column_names(table_class=self.etc_xy_table)
 
         constraint_clauses = []
         values = []
@@ -412,14 +410,14 @@ class QueryBuilder:
             return meta_data.start_time, meta_data.end_time
 
     def _get_time_column(self, base_query):
-        if self.config.TP_DATA_TABLE_NAME in base_query:
-            return self.config.TP_DATA_COLUMN_NAMES[0]
-        if self.config.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME in base_query:
-            return self.config.THERMAL_CONDUCTIVITY_COLUMN_NAMES[0]
-        if self.config.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME in base_query:
-            return self.config.THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES[0]
-        if self.config.CYCLE_DATA_TABLE_NAME in base_query:
-            return self.config.CYCLE_DATA_COLUMN_NAMES[1]
+        if self.tp_table.table_name in base_query:
+            return self.tp_table.time
+        if self.etc_table.table_name in base_query:
+            return self.etc_table.time
+        if self.etc_xy_table.table_name in base_query:
+            return self.etc_xy_table.time
+        if self.cycle_data_table.table_name in base_query:
+            return self.cycle_data_table.time_start
 
     def _get_sample_id_column(self, table_name):
         """
@@ -529,27 +527,27 @@ class QueryBuilder:
     def _normalize_table_names(self, table_name=None, column_names=None):
 
         if "t_p" in table_name.lower():
-            table_name = self.config.TP_DATA_TABLE_NAME
+            table_name = self.tp_table.table_name
             if isinstance(column_names, list) or isinstance(column_names, tuple):
                 column_names_str = ", ".join(column_names)
             else:
                 column_names_str = column_names
         elif "x_y" in table_name.lower():
-            table_name = self.config.THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME
+            table_name = self.etc_xy_table.table_name
             if isinstance(column_names, list) or isinstance(column_names, tuple):
                 column_names_str = ", ".join(column_names)
         elif "etc" in table_name.lower() or "conductivity" in table_name.lower():
-            table_name = self.config.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME
+            table_name = self.etc_table.table_name
             if isinstance(column_names, list) or isinstance(column_names, tuple):
                 column_names_str = ", ".join(column_names)
             else:
                 column_names_str = column_names
         elif "meta" in table_name.lower():
-            table_name = self.config.META_DATA_TABLE_NAME
+            table_name = self.meta_data_table.table_name
             if isinstance(column_names, list) or isinstance(column_names, tuple):
                 column_names_str = ", ".join(column_names)
         elif "cycle" in table_name.lower():
-            table_name = self.config.CYCLE_DATA_TABLE_NAME
+            table_name = self.cycle_data_table.table_name
             if isinstance(column_names, list) or isinstance(column_names, tuple):
                 column_names_str = ", ".join(column_names)
             else:
@@ -564,12 +562,14 @@ class QueryBuilder:
 
     def _fetch_first_and_last_match_by_sample_id(self, sample_id=None):
         self.db.open_connection()
-        table_name = self.config.TP_DATA_TABLE_NAME
-        time_column = self.config.TP_DATA_COLUMN_NAMES[0]
-        for column_name in self.config.TP_DATA_COLUMN_NAMES:
+        table_name = self.tp_table.table_name
+        time_column = self.tp_table.time
+        column_names = TableConfig().get_table_column_names(self.tp_table)
+        for column_name in column_names:
             # Check if the column name contains the substring "sample_id"
             if "sample_id" in column_name.lower():
                 sample_id_column = column_name
+
         if sample_id is not None:
             query = f"SELECT MIN({time_column}) AS first_occurrence_datetime, " \
                     f"MAX({time_column}) As last_occurrence_datetime "\
@@ -592,7 +592,6 @@ class QueryBuilder:
 
 def test_query_builder():
     qb = QueryBuilder()
-    config = GetConfig()
     constraints = {
         'min_TotalTempIncr': 0,
         'max_TotalTempIncr': 20,
@@ -607,7 +606,7 @@ def test_query_builder():
     start_time = datetime(2022, 1, 1, 20, 21, 22)
     end_time = datetime(2023, 1, 5, 20, 22, 22)
     time_window = (start_time, end_time)
-    table_name_etc = qb.config.THERMAL_CONDUCTIVITY_DATA_TABLE_NAME
+    table_name_etc = TableConfig().ETCDataTable.table_name
     sample_id = "WAE-WA-040"
     #query, values = qb.create_reading_query(table_name=table_name_etc, constraints=constraints, time_window=time_window)
     query, values = qb.create_reading_query(table_name="t_p", column_names="eq_pressure", sample_id=sample_id)
