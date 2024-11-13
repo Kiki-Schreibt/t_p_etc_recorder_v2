@@ -98,7 +98,7 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.main">
-    <configuration name="config_reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="config_creator_ui_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -107,11 +107,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/config_connection_reading_management" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/config_creation" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/config_creation/config_creator_ui_main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -233,10 +233,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.config_creator_ui_main" />
         <item itemvalue="Python.recording_business_v2" />
         <item itemvalue="Python.database_reading_writing" />
         <item itemvalue="Python.table_data" />
-        <item itemvalue="Python.config_reader" />
       </list>
     </recent_temporary>
   </component>

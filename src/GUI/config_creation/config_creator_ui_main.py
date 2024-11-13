@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QFormLayout, QMessageBox, QGroupBox,
     QGridLayout, QHBoxLayout
 )
-from PySide6.QtCore import Qt, Signal, QObject
+from PySide6.QtCore import Signal
 
 from src.standard_paths import standard_config_file_path
 
@@ -33,15 +33,10 @@ class ConfigWindow(QWidget):
             "END_REG": 4672,
             "SLEEP_INTERVAL": 0.5,
             "HOT_DISK_LOG_FILE_PATH": r"C:\HotDiskTPS_7\data\Log",
-            "TP_DATA_TABLE_NAME": "t_p_data",
-            "THERMAL_CONDUCTIVITY_DATA_TABLE_NAME": "thermal_conductivity_data",
-            "THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME": "thermal_conductivity_xy_data",
             "MINIMUM_TEMPERATURE_INCREASE": 2,
             "MAXIMUM_TEMPERATURE_INCREASE": 5,
             "MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME": 0.33,
             "MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME": 1,
-            "META_DATA_TABLE_NAME": "meta_data",
-            "CYCLE_DATA_TABLE_NAME": "cycle_data"
         }
 
         self.non_editable_keys = [
@@ -75,10 +70,6 @@ class ConfigWindow(QWidget):
             "HOT_DISK_LOG_FILE_PATH"
         ])
 
-        data_tables_group = self.create_group_box("Data Tables", [
-            "TP_DATA_TABLE_NAME", "THERMAL_CONDUCTIVITY_DATA_TABLE_NAME", "THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME",
-            "META_DATA_TABLE_NAME", "CYCLE_DATA_TABLE_NAME"
-        ])
 
         other_settings_group = self.create_group_box("Other Settings", [
             "MINIMUM_TEMPERATURE_INCREASE", "MAXIMUM_TEMPERATURE_INCREASE", "MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME",
@@ -89,7 +80,6 @@ class ConfigWindow(QWidget):
         layout.addWidget(modbus_group)
         layout.addWidget(log_group)
         layout.addWidget(file_paths_group)
-        layout.addWidget(data_tables_group)
         layout.addWidget(other_settings_group)
 
         # Create a horizontal layout for the buttons
@@ -259,7 +249,8 @@ class ConfigWindow(QWidget):
             modbus_error_message = str(e)
             return modbus_connection_successful, modbus_error_message
 
-    def _convert_value(self, value):
+    @staticmethod
+    def _convert_value(value):
         try:
             return int(value)
         except ValueError:
@@ -268,7 +259,8 @@ class ConfigWindow(QWidget):
             except ValueError:
                 return value
 
-    def _create_tables(self):
+    @staticmethod
+    def _create_tables():
         from src.table_creator import TableCreator
         TableCreator().create_all_tables()
 

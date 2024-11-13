@@ -13,7 +13,6 @@ from src.simulation.simulator_gui import ModbusServerControlGUI
 from test_planner import TestPlannerMain
 
 
-
 #main_ui_file_path = r"..\src\GUI\recording_gui\recording_ui_design_works.ui"
 def load_ui_file(ui_file_path):
         try:

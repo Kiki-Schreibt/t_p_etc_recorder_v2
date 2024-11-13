@@ -1,4 +1,4 @@
-from table_data import TableConfig
+from src.table_data import TableConfig
 from src.config_connection_reading_management.connections_and_logger import DatabaseConnection, AppLogger
 
 

@@ -98,6 +98,7 @@ class GetConfig:
                 config_prompter.save_to_file(temp_file_name)
             self.__init__(config_file_path=temp_file_path)
 
+
     @staticmethod
     def _has_uppercase(string):
         for char in string:
@@ -297,7 +298,11 @@ class ConfigPrompter:
         """
         base_path = self.get_base_dir()
         return os.path.abspath(os.path.join(base_path, path))
-# Template JSON structure
+
+    def delete_file(self, filename):
+        config_dir = self.get_config_dir()
+        file_path = os.path.join(config_dir, filename)
+        os.remove(file_path)
 
 
 
