@@ -142,12 +142,16 @@ class MetaData:
         for col_name in column_names:
             if "sample_id" in col_name.lower():
                 self.sample_id = df[col_name].iloc[0]
+
             if "start" in col_name.lower() and "time" in col_name.lower():
                 self.start_time = df[col_name].iloc[0]
+
             if "end" in col_name.lower() and "time" in col_name.lower():
                 self.end_time = df[col_name].iloc[0]
+
             if "mass" in col_name.lower():
                 self.sample_mass = float(df[col_name].iloc[0])
+
             if "cell" in col_name.lower() and "volume" not in col_name.lower():
                 self.measurement_cell = df[col_name].iloc[0]
                 if self.measurement_cell:
@@ -155,15 +159,20 @@ class MetaData:
                         self.volume_measurement_cell = 30.24  #[ml]
                     if "3" in self.measurement_cell:
                         self.volume_measurement_cell = 44.37  #[ml]
+
             if "material" in col_name.lower():
                 self.sample_material = df[col_name].iloc[0]
+
             if "hydrogenation" in col_name.lower():
                 self.first_hydrogenation = df[col_name].iloc[0]
                 #self.first_hydrogenation = self._make_tz_aware(value=self.first_hydrogenation)
+
             if "max" in col_name.lower() and "pressure" in col_name.lower():
-                self.max_pressure_cycling = df[col_name].iloc[0]
+                self.max_pressure_cycling = float(df[col_name].iloc[0])
+
             if "min" in col_name.lower() and "temperature" in col_name.lower():
-                self.min_temperature_cycling = df[col_name].iloc[0]
+                self.min_temperature_cycling = float(df[col_name].iloc[0])
+
             if "duration" in col_name.lower():
                 if df[col_name].iloc[0]:
                     value = df[col_name].iloc[0]
@@ -184,16 +193,20 @@ class MetaData:
                     duration_in_hours = hours + (minutes / 60) + (seconds / 3600)
                     avg_dur = timedelta(hours=duration_in_hours)
                     self.average_cycle_duration = avg_dur
+
             if "reservoir" in col_name.lower():
                 self.reservoir_volume = float(df[col_name].iloc[0])  #[l]
+
             if "number_cycles" in col_name.lower():
                 self.total_number_cycles = float(df[col_name].iloc[0])  #
                 if not self.total_number_cycles and self.retry_counter > 0:
                     self.last_de_hyd_state, self.total_number_cycles = self.fetch_last_state_and_cycle()
                     self.write()
                     self.retry_counter -= 1
+
             if "de_hyd_state" in col_name.lower():
                 self.last_de_hyd_state = df[col_name].iloc[0]  #
+
             if self.sample_material:
                 (self.enthalpy, self.entropy, self.theoretical_uptake) = self._get_enthalpy_entropy_wt_theoretical()
 

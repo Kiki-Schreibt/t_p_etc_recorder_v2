@@ -142,19 +142,34 @@ class TableConfig:
         time_min = 'time_min'
         time_max = 'time_max'
 
-    @staticmethod
-    def get_table_column_names(table_class):
+    def get_table_column_names(self, table_class=None, table_name=None):
         """
         Returns a list of all column names in the table class.
         """
-        column_names = []
-        for attr_name in dir(table_class):
-            # Skip special attributes and methods
-            if not attr_name.startswith('__') and attr_name != 'table_name':
-                attr_value = getattr(table_class, attr_name)
-                if not callable(attr_value):
-                    column_names.append(attr_value)
-        return column_names
+        if not table_class  and table_name:
+            if "t_p" in table_name.lower():
+                table_class = self.TPDataTable
+            elif "conductivity" in table_name.lower() and "xy" in table_name.lower():
+                table_class = self.ThermalConductivityXyDataTable
+            elif "conductivity" in table_name.lower():
+                table_class = self.ETCDataTable
+            elif "meta" in table_name.lower():
+                table_class = self.MetaDataTable
+            elif "cycle" in table_name.lower():
+                table_class = self.CycleDataTable
+
+        if table_class:
+            column_names = []
+            for attr_name in dir(table_class):
+                # Skip special attributes and methods
+                if not attr_name.startswith('__') and attr_name != 'table_name':
+                    attr_value = getattr(table_class, attr_name)
+                    if not callable(attr_value):
+                        column_names.append(attr_value)
+            return column_names
+        else:
+            print(f'Could not find table class {table_class}')
+            return None
 
     def writing_query_from_df(self, df, table_name: str, map: dict):
         db_columns, df_columns = self._map_attr_col_to_list(df_cols_all=df.columns,

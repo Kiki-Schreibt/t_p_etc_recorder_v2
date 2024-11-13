@@ -341,10 +341,9 @@ class DataRetriever:
 
     def fetch_data_by_time_no_limit(self, table, time_range, col_names=None):
         if not col_names:
-            col_name_str = "*"
-        else:
-            col_name_str = ", ".join(col_names)
+            col_names = TableConfig().get_table_column_names(table_class=table)
 
+        col_name_str = ", ".join(col_names)
 
         query = f"SELECT {col_name_str} "\
                 f"FROM {table.table_name} "\
@@ -354,16 +353,7 @@ class DataRetriever:
 
     def execute_fetching(self, query, column_names=None, table_name=None, values=None):
         if column_names is None:
-            if "t_p" in table_name.lower():
-                column_names = qb.config.TP_DATA_COLUMN_NAMES
-            elif "conductivity" in table_name.lower() and "xy" in table_name.lower():
-                column_names = qb.config.THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES
-            elif "conductivity" in table_name.lower():
-                column_names = qb.config.THERMAL_CONDUCTIVITY_COLUMN_NAMES
-            elif "meta" in table_name.lower():
-                column_names = qb.config.META_DATA_COLUMN_NAMES
-            elif "cycle" in table_name.lower():
-                column_names = qb.config.CYCLE_DATA_COLUMN_NAMES
+            column_names = TableConfig().get_table_column_names(table_name=table_name)
 
         try:
             with DatabaseConnection() as db_conn:
@@ -388,16 +378,7 @@ class DataRetriever:
 
     def execute_continuous_fetching(self, query, cursor, column_names=None, table_name=None, values=None):
         if column_names is None:
-            if "t_p" in table_name.lower():
-                column_names = qb.config.TP_DATA_COLUMN_NAMES
-            elif "conductivity" in table_name.lower() and "xy" in table_name.lower():
-                column_names = qb.config.THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES
-            elif "conductivity" in table_name.lower():
-                column_names = qb.config.THERMAL_CONDUCTIVITY_COLUMN_NAMES
-            elif "meta" in table_name.lower():
-                column_names = qb.config.META_DATA_COLUMN_NAMES
-            elif "cycle" in table_name.lower():
-                column_names = qb.config.CYCLE_DATA_COLUMN_NAMES
+            column_names = TableConfig().get_table_column_names(table_name=table_name)
 
         try:
 
@@ -414,6 +395,7 @@ class DataRetriever:
                 df = pd.DataFrame()
 
             return df
+
         except Exception as e:
             self.logger.error(f"Error occurred while continuous fetching data: {e}")
         return None
@@ -576,8 +558,10 @@ class DataBaseManipulator:
                     return False
 
     def _update_cycle_count_flag(self, sample_id=None, min_cycling_temperature=None):
-        table_name = TableConfig().TPDataTable.table_name
-        for col_name in self.config.TP_DATA_COLUMN_NAMES:
+        tp_table = TableConfig().TPDataTable
+        table_name = tp_table.table_name
+        column_names = TableConfig().get_table_column_names()
+        for col_name in column_names:
             if "cycle" in col_name.lower() and "flag" in col_name.lower():
                 column_to_update = col_name
             if "sample" in col_name.lower() and "id" in col_name.lower():

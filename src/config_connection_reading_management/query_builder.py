@@ -555,7 +555,8 @@ class QueryBuilder:
             else:
                 column_names_str = column_names
         if not column_names:
-            column_names_str = " * "
+            column_names = TableConfig().get_table_column_names(table_name=table_name)
+            column_names_str = ", ".join(column_names)
         if column_names == "do_nothing":
             column_names_str = ""
 
