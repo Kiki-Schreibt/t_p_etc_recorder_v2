@@ -97,7 +97,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.table_data">
+  <component name="RunManager" selected="Python.database_reading_writing">
     <configuration name="config_reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -232,11 +232,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.database_reading_writing" />
         <item itemvalue="Python.table_data" />
         <item itemvalue="Python.config_reader" />
         <item itemvalue="Python.tests" />
         <item itemvalue="Python.csv_handler" />
-        <item itemvalue="Python.database_reading_writing" />
       </list>
     </recent_temporary>
   </component>

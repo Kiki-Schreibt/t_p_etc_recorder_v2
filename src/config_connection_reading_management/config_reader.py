@@ -115,7 +115,6 @@ class GetConfig:
         except Exception as e:
             print("No tables yet. Will be created")
 
-
     def get_column_names(self, table_name):
         column_names = []
         try:

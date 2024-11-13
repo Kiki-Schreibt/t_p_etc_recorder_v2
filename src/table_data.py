@@ -156,6 +156,57 @@ class TableConfig:
                     column_names.append(attr_value)
         return column_names
 
+    def writing_query_from_df(self, df, table_name: str, map: dict):
+        db_columns, df_columns = self._map_attr_col_to_list(df_cols_all=df.columns,
+                                                            column_attribute_mapping=map)
+        insert_query, data_values = self._writing_query(df=df,
+                                                        db_columns=db_columns,
+                                                        df_columns=df_columns,
+                                                        table_name=table_name)
+        return insert_query, data_values
+
+    @staticmethod
+    def _map_attr_col_to_list(df_cols_all,
+                              column_attribute_mapping: dict):
+        """
+        :param df:
+        :param column_attribute_mapping:
+        :param table_name:
+        :return: columns_str, placeholders
+        """
+        db_columns = []
+        df_columns = []
+
+        # Iterate over the mapping
+        for db_col, df_col in column_attribute_mapping.items():
+            if df_col in df_cols_all:
+                db_columns.append(db_col)
+                df_columns.append(df_col)
+
+
+        return db_columns, df_columns
+
+    @staticmethod
+    def _writing_query(df,
+                      db_columns: list,
+                      df_columns: list,
+                      table_name: str):
+        """
+        :param df:
+        :param column_attribute_mapping:
+        :param table_name:
+        :param placeholders
+        :return: insert_query, data_values
+        """
+
+        columns_str = ', '.join(db_columns)
+        placeholders = ', '.join(['%s'] * len(db_columns))
+        insert_query = (f"INSERT INTO {table_name} ({columns_str}) "
+                        f"VALUES ({placeholders})")
+        data_values = df[df_columns].values.tolist()
+        return insert_query, data_values
+
+
 if __name__ == '__main__':
     tablemaster = TableConfig()
     table = TableConfig().TPDataTable

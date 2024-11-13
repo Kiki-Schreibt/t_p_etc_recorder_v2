@@ -21,7 +21,7 @@ from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
 from src.table_data import TableConfig
 from src.standard_paths import standard_log_dir
-#test
+
 qb = QueryBuilder()
 # Load the configuration
 config = GetConfig()
@@ -1195,12 +1195,12 @@ class ExcelDataProcessor:
 
             pd.set_option('future.no_silent_downcasting', True)
             combined_df.replace('(no corr.)', 0, inplace=True)
-            ETC_insert_query, ETC_values = self._writing_query(df=combined_df,
-                                                               column_attribute_mapping=self.etc_column_attribute_mapping,
-                                                               table_name=self.etc_table.table_name)
-            xy_insert_query, xy_values = self._writing_query(df=thermal_conductivity_xy_data,
-                                                             column_attribute_mapping=self.etc_xy_column_attribute_mapping,
-                                                             table_name=self.xy_table.table_name)
+            ETC_insert_query, ETC_values = TableConfig().writing_query_from_df(df=combined_df,
+                                                                               map=self.etc_column_attribute_mapping,
+                                                                               table_name=self.etc_table.table_name)
+            xy_insert_query, xy_values = TableConfig().writing_query_from_df(df=thermal_conductivity_xy_data,
+                                                                             map=self.etc_xy_column_attribute_mapping,
+                                                                             table_name=self.xy_table.table_name)
 
             #output_file_path = file_path.replace('.xlsx', '_combined.csv')
             #processor.save_combined_data(combined_df, output_file_path)
@@ -1239,30 +1239,6 @@ class ExcelDataProcessor:
         #print(df['Time'])
         self.logger.info("Data times overwritten for testing purpose")
         return df
-
-    def _writing_query(self, df: pd.DataFrame, column_attribute_mapping: dict, table_name: str):
-        """
-
-        :param df:
-        :param column_attribute_mapping:
-        :param table_name:
-        :return: insert_query, data_values
-        """
-        db_columns = []
-        df_columns = []
-
-        # Iterate over the mapping
-        for db_col, df_col in column_attribute_mapping.items():
-            if df_col in df.columns:
-                db_columns.append(db_col)
-                df_columns.append(df_col)
-        columns_str = ', '.join(db_columns)
-        placeholders = ', '.join(['%s'] * len(db_columns))
-
-        insert_query = (f"INSERT INTO {table_name} ({columns_str}) "
-                        f"VALUES ({placeholders})")
-        data_values = df[df_columns].values.tolist()
-        return insert_query, data_values
 
 
 def test_update_first_hydr():
