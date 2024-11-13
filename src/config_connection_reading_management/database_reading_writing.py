@@ -21,7 +21,7 @@ from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
 from src.table_data import TableConfig
 from src.standard_paths import standard_log_dir
-
+#test
 qb = QueryBuilder()
 # Load the configuration
 config = GetConfig()
