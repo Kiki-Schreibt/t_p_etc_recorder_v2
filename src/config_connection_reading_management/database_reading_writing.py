@@ -66,6 +66,80 @@ class DataRetriever:
         close_connection(): Closes the database connection.
         fetch_last_state_and_cycle(): Fetches the last state and cycle number from a table.
     """
+    xy_table = TableConfig().ThermalConductivityXyDataTable
+    etc_table = TableConfig().ETCDataTable
+
+    etc_column_attribute_mapping = {etc_table.time: 'Time',
+                                    etc_table.file: 'File',
+                                    etc_table.description: 'Description',
+                                    etc_table.sample_id: 'Sample ID',
+                                    etc_table.points: 'Points',
+                                    etc_table.temperature: 'Temperature',
+                                    etc_table.th_conductivity: 'ThConductivity',
+                                    etc_table.th_diffusivity: 'ThDiffusivity',
+                                    etc_table.specific_heat: 'SpecHeat',
+                                    etc_table.th_effusivity: 'ThEffusivity',
+                                    etc_table.probing_depth: 'PrDepth',
+                                    etc_table.temperature_increase: 'TempIncr',
+                                    etc_table.temperature_drift: 'TempDrift',
+                                    etc_table.total_temperature_increase: 'TotalTempIncr',
+                                    etc_table.total_to_characteristic_time: 'TotalCharTime',
+                                    etc_table.time_correction: 'Time Corr',
+                                    etc_table.mean_deviation: 'Mean Dev',
+                                    etc_table.disk_resistance: 'Disk Res',
+                                    etc_table.calculation_settings: 'Calc settings',
+                                    etc_table.temperature_average: 'Temperature_avg',
+                                    etc_table.thermal_conductivity_average: 'ThConductivity_avg',
+                                    etc_table.thermal_diffusivity_average: 'ThDiffusivity_avg',
+                                    etc_table.specific_heat_average: 'SpecHeat_avg',
+                                    etc_table.thermal_effusivity_average: 'ThEffusivity_avg',
+                                    etc_table.probing_depth_average: 'PrDepth_avg',
+                                    etc_table.temperature_increase_average: 'TempIncr_avg',
+                                    etc_table.temperature_drift_average: 'TempDrift_avg',
+                                    etc_table.total_temperature_increase_average: 'TotalTempIncr_avg',
+                                    etc_table.total_to_characteristic_time_average: 'TotalCharTime_avg',
+                                    etc_table.time_correction_average: 'Time Corr_avg',
+                                    etc_table.mean_deviation_average: 'Mean Dev_avg',
+                                    etc_table.disk_resistance_average: 'Disk Res_avg',
+                                    etc_table.calculation_settings_average: 'Calc settings_avg',
+                                    etc_table.temperature_deviation: 'Temperature_dvt',
+                                    etc_table.thermal_conductivity_deviation: 'ThConductivity_dvt',
+                                    etc_table.thermal_diffusivity_deviation: 'ThDiffusivity_dvt',
+                                    etc_table.specific_heat_deviation: 'SpecHeat_dvt',
+                                    etc_table.thermal_effusivity_deviation: 'ThEffusivity_dvt',
+                                    etc_table.probing_depth_deviation: 'PrDepth_dvt',
+                                    etc_table.temperature_increase_deviation: 'TempIncr_dvt',
+                                    etc_table.temperature_drift_deviation: 'TempDrift_dvt',
+                                    etc_table.total_temperature_increase_deviation: 'TotalTempIncr_dvt',
+                                    etc_table.total_to_characteristic_time_deviation: 'TotalCharTime_dvt',
+                                    etc_table.time_correction_deviation: 'Time Corr_dvt',
+                                    etc_table.mean_deviation_deviation: 'Mean Dev_dvt',
+                                    etc_table.disk_resistance_deviation: 'Disk Res_dvt',
+                                    etc_table.calculation_settings_deviation: 'Calc settings_dvt',
+                                    etc_table.output_power: 'Outppower',
+                                    etc_table.measurement_time: 'Meastime',
+                                    etc_table.disk_radius: 'Radius',
+                                    etc_table.tcr: 'TCR',
+                                    etc_table.disk_type: 'Disk Type',
+                                    etc_table.temperature_drift_rec: 'Tempdrift rec',
+                                    etc_table.notes:'Notes',
+                                    etc_table.resistance:'Rs',
+                                    etc_table.sample_id_small:'"Sample_ID"',
+                                    etc_table.pressure: 'pressure',
+                                    etc_table.temperature_sample: 'temperature_sample',
+                                    etc_table.cycle_number: 'cycle_number',
+                                    etc_table.cycle_number_flag: 'cycle_number_flag',
+                                    etc_table.de_hyd_state: 'de_hyd_state'}
+    etc_xy_column_attribute_mapping ={  xy_table.point_number: 'point_nr',
+                                        xy_table.time: 'time',
+                                        xy_table.t_f_tau: 't_f_tau',
+                                        xy_table.temperature: 'temperature',
+                                        xy_table._time_temperature_increase: 'time_temperature_increase',
+                                        xy_table.temperature_increase: 'temperature_increase',
+                                        xy_table.sqrt_time: 'sqrt_time',
+                                        xy_table.temp_diff: 'diff_temperature',
+                                        xy_table.drift_time: 'time_drift',
+                                        xy_table.temperature_drift: 'temperature_drift'}
     def __init__(self):
         self.running = False
         self.qb = qb
@@ -219,9 +293,6 @@ class DataRetriever:
             if time_value.tzinfo is None:
                 time_value = time_value.replace(tzinfo=local_tz)
 
-        print(time_value)
-
-
         match row_package_name.lower():
             case 'transient':
                 column_names = (table._time_temperature_increase, table.temperature_increase, f"{time_column}")
@@ -307,24 +378,35 @@ class DataRetriever:
         table_name = table.table_name
         sample_id_col = table.sample_id
         cycle_col = table.cycle_number
+        column_name_str = None
+        if not column_names:
+            column_names = TableConfig().get_table_column_names(table_name=table_name,
+                                                                table_class=table)
+        if column_names:
+            column_name_str = ', '.join(column_names)
+
+        if not column_name_str:
+            self.logger.error("Couldn't find column names")
+            return pd.DataFrame()
 
         if isinstance(cycle_numbers, (list, tuple)):
             # Convert any NumPy types to native Python types
             cycle_numbers = [float(cn) for cn in cycle_numbers]
             query_symbol = "IN"
             placeholders = ', '.join(['%s'] * len(cycle_numbers))
-            query = f"SELECT * from {table_name} WHERE " \
+            query = f"SELECT {column_name_str} from {table_name} WHERE " \
                     f"{sample_id_col} = %s AND " \
                     f"{cycle_col} {query_symbol} ({placeholders}) ORDER by {table.time}"
             values = [sample_id] + cycle_numbers
         else:
             query_symbol = "="
-            query = f"SELECT * from {table_name} WHERE " \
+            query = f"SELECT {column_name_str} from {table_name} WHERE " \
                     f"{sample_id_col} = %s AND " \
                     f"{cycle_col} {query_symbol} %s"
             values = [sample_id, float(cycle_numbers)]
         # print(query, values)
-        return self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+        df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+        return df
 
     def fetch_pressures_for_h2_uptake_calc(self, sample_id, cycle_number):
         query = qb.create_pressure_query_for_uptake_calc(sample_id=sample_id, cycle_number=cycle_number)
@@ -352,12 +434,14 @@ class DataRetriever:
         return self.execute_fetching(query=query, values=time_range, column_names=col_names)
 
     def execute_fetching(self, query, column_names=None, table_name=None, values=None):
+        #todo cycle counter access from that
         if column_names is None:
             column_names = TableConfig().get_table_column_names(table_name=table_name)
 
         try:
             with DatabaseConnection() as db_conn:
                 db_conn.cursor.execute(query, values)
+
                 records = db_conn.cursor.fetchall()
 
             if isinstance(column_names, (tuple, list)):
@@ -367,8 +451,6 @@ class DataRetriever:
             if records:
                 df = pd.DataFrame.from_records(records, columns=column_names_for_df)
                 df = self._adjust_df_types_and_times(df)
-               # print("df returned")
-
             else:
                 df = pd.DataFrame()
             return df
@@ -413,7 +495,6 @@ class DataRetriever:
             #return dt
 
         for col in df.columns:
-
             if "_flag" in col.lower():
                 df_col = df[col].apply(lambda x: True if x in ('t', 1, "1", 'True', 'true') else False)
                 df[col] = df_col
@@ -421,10 +502,10 @@ class DataRetriever:
             #check if time column is str or object
             is_time_col_str = "time" in col.lower() and pd.api.types.is_string_dtype(df[col])
             is_time_col_obj = "time" in col.lower() and pd.api.types.is_object_dtype(df[col])
+
             if is_time_col_str or is_time_col_obj:
                 df[col] = pd.to_datetime(df[col], utc=True)
-            #converted = pd.to_datetime(df[col], errors='coerce')
-            #datetime_check = converted.notna().any()
+
             if pd.api.types.is_datetime64_any_dtype(df[col]):
                 if not df[col].dt.tz:
                     df[col] = df[col].dt.tz_localize('UTC')

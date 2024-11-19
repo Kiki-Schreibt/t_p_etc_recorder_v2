@@ -216,7 +216,6 @@ class MetaData:
         column_name = TableConfig().MetaDataTable.sample_id
         value = (self.sample_id,)
         query = f"INSERT INTO {table_name} ({column_name}) VALUES (%s)"
-        print(query)
         with self.db as conn:
             conn.cursor.execute(query, value)
             conn.cursor.connection.commit()

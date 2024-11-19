@@ -229,10 +229,12 @@ class ReadData(QThread):
     def _read_emit_uptake_last_cycle(self):
         table = TableConfig().CycleDataTable
         if self.current_cycle:
+
             df_one_cycle = self.db_retriever.fetch_data_by_cycle(
                 cycle_numbers=self.current_cycle - 0.5,
                 sample_id=self.meta_data.sample_id,
                 table=table)
+
             if not df_one_cycle.empty:
                 self.current_uptake = df_one_cycle[TableConfig().CycleDataTable.h2_uptake].iloc[-1]
                 self.current_uptake_sig.emit(self.current_uptake)
@@ -320,19 +322,18 @@ class ReadContinuous(ReadData):
             if t_p_df.empty:
                 self.logger.debug("No new T-p data available.")
                 return
-            self.logger.debug(f"Read T-p data: {t_p_df.head()}")
 
+            self.logger.debug(f"Read T-p data: {t_p_df.head()}")
             self._separate_and_append_t_p(t_p_df)
             last_row = t_p_df.iloc[-1]
+
             if (self.current_cycle != last_row[TableConfig().TPDataTable.cycle_number] or
                     self.current_state != last_row[TableConfig().TPDataTable.de_hyd_state]):
-
                 self.current_cycle = last_row[TableConfig().TPDataTable.cycle_number]
                 self.current_state = last_row[TableConfig().TPDataTable.de_hyd_state]
                 self.current_cycle_sig.emit(self.current_cycle)
                 self.current_state_sig.emit(self.current_state)
                 self._read_emit_uptake_last_cycle()
-
             if not self.T_data.empty:
                 self.T_data_sig.emit(self.T_data)
             if not self.p_data.empty:
@@ -662,7 +663,6 @@ class PlotBaseWindow(PlotBaseStyle):
     def update_plot_left(self, df):
 
         if df.empty:
-            print("empty df")
             return
         x = [t.timestamp() for t in df[self.t_p_table.time]]
         # If plot items already exist, update them
@@ -819,7 +819,7 @@ class PlotBaseWindow(PlotBaseStyle):
             # Take only the first point
             point = points[0]
             point_datetime = datetime.fromtimestamp(point.pos().x(), tz=local_tz_reg)
-            print('clicked a point', point_datetime)
+            #print('clicked a point', point_datetime)
             self._change_point_color(point.pos().x())
             self.point_clicked_time_received.emit(point_datetime,  self.current_color_scatter)
 

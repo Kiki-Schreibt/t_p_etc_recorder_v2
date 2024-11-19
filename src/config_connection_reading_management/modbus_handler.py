@@ -211,7 +211,6 @@ class ModbusReader:
                                                              config.END_REG,
                                                              config.REGS_OF_INTEREST)
 
-                print(converted_dicon_data)
                 time.sleep(config.SLEEP_INTERVAL)
 
             except Exception as e:
@@ -936,7 +935,7 @@ class CycleCounter:
                                       f"{self.tp_table.cycle_number} = {self.tp_table.cycle_number} - 1 "
                                       f"WHERE {self.tp_table.time} > %s")
         values = (end_time_cycle,)
-        print(f"{query_update_rest_of_table}, {end_time_cycle}")
+        #print(f"{query_update_rest_of_table}, {end_time_cycle}")
         DataBaseManipulator().execute_updating(query=query_update_rest_of_table,
                                                values=values,
                                                many_bool=False)
