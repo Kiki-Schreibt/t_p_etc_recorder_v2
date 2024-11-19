@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from threading import Thread
 
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit, differential_evolution, brute
@@ -8,6 +9,16 @@ from src.calculations.hydride_worker import MetalHydrideDatabase
 from src.config_connection_reading_management.connections_and_logger import AppLogger
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.table_data import TableConfig
+
+def remove_order_term(input_string):
+    keyword = "order"
+    index = input_string.lower().find(keyword)
+    if index != -1:
+        # Slice the string up to the index where "ORDER" starts
+        return input_string[:index]
+    else:
+        # "ORDER" not found; return the original string
+        return input_string
 
 
 class DataLoader:
@@ -57,12 +68,13 @@ class DataLoader:
         query, values = self.data_retriever.qb.create_reading_query(table_name=self.etc_table.table_name,
                                                             column_names=column_names,
                                                             constraints=self.standard_constraints_dict)
-
+        query = remove_order_term(query)
         query += f" AND {self.etc_table.sample_id_small} = %s "
         query += f" AND {self.etc_table.cycle_number} = %s "
         query += f" AND {self.etc_table.temperature} = %s "
         query += f" ORDER by {self.etc_table.pressure}"
         values += (sample_id, cycle_number, temperature)
+        print(query, values)
         results = self.data_retriever.execute_fetching(query=query, column_names=column_names, values=values)
         return results
 
@@ -184,7 +196,7 @@ class MaterialProperties:
             return 0
 
 
-class Model:
+class BaseModel:
     def __init__(self, material_properties=MaterialProperties(), Temperature=None, beta=None, beta_name=None):
         self.mp = material_properties
         self.lambda_bulk = self.mp.lambda_solid
@@ -205,7 +217,20 @@ class Model:
         return 1 - self.lambda_gas_fun(p, porosity, particle_diameter, lambda_null_gas, beta) / lambda_particle
 
     #model
-    def ETC_fun_kaganer(self, p, params):
+
+
+class KaganerModel(BaseModel):
+
+    def __init__(self, material_properties=MaterialProperties(),
+                         Temperature=None,
+                         beta=None,
+                         beta_name=None):
+        super().__init__(material_properties=material_properties,
+                         Temperature=Temperature,
+                         beta=beta,
+                         beta_name=beta_name)
+
+    def ETC_fun(self, p, params):
         particle_diameter, lambda_null_gas, porosity, lambda_base = params
         lambda_gas = self.lambda_gas_fun(p, porosity, particle_diameter, lambda_null_gas, self.beta)
         k_g = self.kapa_kaganer(p, porosity, particle_diameter, lambda_null_gas, self.beta, self.lambda_bulk)
@@ -213,8 +238,20 @@ class Model:
         return lambda_base + (lambda_gas * (5.81 * ((1 - porosity)**2) / k_g) *
                          (1 / k_g * np.log(self.lambda_bulk / lambda_gas) - 1 - (k_g / 2)) + 1)
 
+
+class ZehnerBauerSchluenderModel(BaseModel):
+
+    def __init__(self, material_properties=MaterialProperties(),
+                         Temperature=None,
+                         beta=None,
+                         beta_name=None):
+        super().__init__(material_properties=material_properties,
+                         Temperature=Temperature,
+                         beta=beta,
+                         beta_name=beta_name)
+
     #model
-    def ETC_fun_Zehner_Bauer_Schlunder(self, p, params):
+    def ETC_fun(self, p, params):
         def b(porosity):
             c = 1.25
             return c * ((1 - porosity) / porosity)**(10/9)
@@ -231,84 +268,61 @@ class Model:
         return lambda_base + l_g * (term1 + term2 * (term3 - term4 - term5))
 
 
-class ZSD_Model:
-    def __init__(self):
-        pass
-
-    def function(self, p, params):
-        porosity = params
-        term1 = self.lambda_gas_fun() * (1-(1-porosity)**0.5)
-        #term2 = self.
-
-
 class ModelFitter:
     def __init__(self, model):
         self.model = model
         self.x0 = self.create_starting_values()
-
-    def fit_ETC_kaganer(self, x, y, bounds):
-        def fit_function(x, params):
-            d, lambda_null_gas, porosity, lambda_base = params
-            return self.model.ETC_fun_kaganer(x, params)
-
-        if bounds:
-            popt, pcov = curve_fit(lambda x, d, lambda_null_gas, porosity, lambda_base:
-                                   fit_function(x, (d, lambda_null_gas, porosity, lambda_base)),
-                                   x, y,  p0=self.x0)
-        else:
-            popt, pcov = curve_fit(lambda x, d, lambda_null_gas, porosity, lambda_base:
-                                   fit_function(x, (d, lambda_null_gas, porosity, lambda_base)),
-                                   x, y,  p0=self.x0)
-
-        return popt, pcov
-
-
-    def fit_ETC_ZBS(self, x, y, bounds):
-        def fit_function_zbs(x, params):
-            d, lambda_null_gas, porosity, lambda_base = params
-            return self.model.ETC_fun_Zehner_Bauer_Schlunder(x, params)
-        #x = x *1e5
-
-        if bounds:
-
-            popt, pcov = curve_fit(lambda x, d, lambda_null_gas, porosity, lambda_base:
-                                   fit_function_zbs(x, (d, lambda_null_gas, porosity, lambda_base)),
-                                   x, y, p0=self.x0, bounds=bounds)
-        else:
-            popt, pcov = curve_fit(lambda x, d, lambda_null_gas, porosity, lambda_base:
-                               fit_function_zbs(x, (d, lambda_null_gas, porosity, lambda_base)),
-                               x, y, p0=self.x0)
-        return popt, pcov
-
+        self._fit_methods = {
+            'curve_fit': self._fit_curve_fit,
+            'differential_evolution': self._fit_differential_evolution,
+            'brute': self._fit_brute,
+            'curve_fit_log': self._fit_curve_fit_log
+        }
 
     def create_starting_values(self):
         return [self.model.mp.particle_diameter,
           self.model.mp.lambda_solid, self.model.mp.porosity, 1e-5]
 
+    def fit_ETC(self, x, y, method='curve_fit', **kwargs):
+        if method not in self._fit_methods:
+            raise ValueError(f"Unknown fitting method: {method}")
+        params, pcov = self._fit_methods[method](x, y, **kwargs)
+        if 'log' in method:
+            metrics = self.calculate_metrics(x, y, params, log_space=True)
+        else:
+            metrics = self.calculate_metrics(x, y, params)
 
-    def fit_ETC_ZBS_diff(self, x, y, bounds):
-        def fit_function_zbs(params, x, y):
+        return params, pcov, metrics
+
+    def _fit_curve_fit(self, x, y, bounds):
+        def fit_function(x, params):
+            d, lambda_null_gas, porosity, lambda_base = params
+            return self.model.ETC_fun(x, params)
+
+        if bounds:
+            popt, pcov = curve_fit(lambda x, d, lambda_null_gas, porosity, lambda_base:
+                                   fit_function(x, (d, lambda_null_gas, porosity, lambda_base)),
+                                   x, y,  p0=self.x0, bounds=bounds)
+        else:
+            popt, pcov = curve_fit(lambda x, d, lambda_null_gas, porosity, lambda_base:
+                                   fit_function(x, (d, lambda_null_gas, porosity, lambda_base)),
+                                   x, y,  p0=self.x0)
+
+        return popt, pcov
+
+    def _fit_differential_evolution(self, x, y, bounds):
+        def fit_function(params, x, y):
             #d, lambda_null_gas, porosity, lambda_base = params
-            predicted_y = self.model.ETC_fun_Zehner_Bauer_Schlunder(x, params)
+            predicted_y = self.model.ETC_fun(x, params)
             return np.sum((y - predicted_y) ** 2)
 
-        result = differential_evolution(fit_function_zbs, bounds, args=(x, y))
+        result = differential_evolution(fit_function, bounds, args=(x, y))
         return result.x, result.fun
 
-
-    def fit_ETC_kaganer_diff(self, x, y, bounds):
-        def fit_function_kaganer(params, x, y):
-            #d, lambda_null_gas, porosity, lambda_base = params
-            predicted_y = self.model.ETC_fun_kaganer(x, params)
-            return np.sum((y - predicted_y) ** 2)
-
-        result = differential_evolution(fit_function_kaganer, bounds, args=(x, y))
-        return result.x, result.fun
-
-    def fit_ETC_ZBS_brute(self, x, y, ranges):
+    def _fit_brute(self, x, y, ranges):
         def fit_function_zbs(params, x, y):
             # d, lambda_null_gas, porosity, lambda_base = params
-            predicted_y = self.model.ETC_fun_Zehner_Bauer_Schlunder(x, params)
+            predicted_y = self.model.ETC_fun(x, params)
             return np.sum((y - predicted_y) ** 2)
 
         result = brute(fit_function_zbs, ranges=ranges, args=(x, y), full_output=True, finish=None)
@@ -316,12 +330,57 @@ class ModelFitter:
         best_score = result[1]
         return best_params, best_score
 
+    def _fit_curve_fit_log(self, x, y, bounds=None):
+        # Log-transform the data
+        x_log = np.log10(x)
+        y_log = np.log10(y)
+
+        # Define the fitting function in log-log space
+        def fit_function(x_log, d, lambda_null_gas, porosity, lambda_base):
+            params = (d, lambda_null_gas, porosity, lambda_base)
+            # Return log10 of the model output
+            return np.log10(self.model.ETC_fun(10**x_log, params))
+
+        if bounds:
+            popt, pcov = curve_fit(
+                fit_function,
+                x_log,
+                y_log,
+                p0=self.x0,
+                bounds=bounds
+            )
+        else:
+            popt, pcov = curve_fit(
+                fit_function,
+                x_log,
+                y_log,
+                p0=self.x0
+            )
+        return popt, pcov
+
+    def calculate_metrics(self, x, y, params, log_space=False):
+        if log_space:
+            y_pred = self.model.ETC_fun(x, params)
+            residuals = np.log10(y) - np.log10(y_pred)
+        else:
+            y_pred = self.model.ETC_fun(x, params)
+            residuals = y - y_pred
+
+        ss_res = np.sum(residuals ** 2)
+        if log_space:
+            ss_tot = np.sum((np.log10(y) - np.mean(np.log10(y))) ** 2)
+        else:
+            ss_tot = np.sum((y - np.mean(y)) ** 2)
+        r_squared = 1 - (ss_res / ss_tot)
+        rmse = np.sqrt(np.mean(residuals ** 2))
+        mae = np.mean(np.abs(residuals))
+        return {'R_squared': r_squared, 'RMSE': rmse, 'MAE': mae}
 
 class Plotter:
     @staticmethod
     def plot_results(x, y, fitted_values_dict, x_plot):
         plt.figure()
-        plt.plot(x, y, 'x', label='Measured Data')
+        plt.plot(x, y, '-x', label='Measured Data')
 
         for beta_name, fitted_values in fitted_values_dict.items():
             plt.plot(x_plot, fitted_values, label=f'Fitted Data {beta_name}')
@@ -334,13 +393,13 @@ class Plotter:
         plt.show()
 
 
-def main():
+def main(mode='curve_fit'):
     #file_path = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\Results\Results-WAE-WA-028-044\WAE-WA-028-044-AllData.txt"
     # Load data
     data_loader = DataLoader(sample_id="WAE-WA-040", cycle_number=0.5, temperature=200)
     isotherm, mean_temperature, de_hyd_state = data_loader.get_isotherm()
-
-
+    #[Particle_Diameter,lambda_solid(1,mat_it),Porosity(mat_it), l_base]
+    material_properties = MaterialProperties(material="MgH2", de_hyd_state=de_hyd_state)
     lb = [1e-8, 1e-6, 1e-8, 1e-8]
     ub = [10, 156, 1, 10]
     bounds = None
@@ -351,14 +410,11 @@ def main():
                 (0, 1, 0.1),  # Example range for porosity with larger step
                 (0, 10, 1)
             ]
-    #Data350C=Measured_All[128:154]
-    #Data350C = Data350C.sort_values(by='Druck')
+
     T = mean_temperature
     x = isotherm["pressure"]
     y = isotherm["ThConductivity"]
     # Material properties
-    material_properties = MaterialProperties(material="MgH2", de_hyd_state=de_hyd_state)
-    #[Particle_Diameter,lambda_solid(1,mat_it),Porosity(mat_it), l_base]
 
     fitted_values_dict = {}
     popt_dict = {}
@@ -371,7 +427,7 @@ def main():
             beta_val = value
             beta_name = name
 
-            model = Model(material_properties, Temperature=T, beta=beta_val)
+            model = KaganerModel(material_properties, Temperature=T, beta=beta_val)
             model_fitter = ModelFitter(model)
 
             try:
@@ -381,8 +437,9 @@ def main():
                 #popt, pcov = model_fitter.fit_ETC_kaganer(x, y, bounds)
                 #fitted_values = model.ETC_fun_kaganer(x_plot, popt)
 
-                popt, pcov = model_fitter.fit_ETC_ZBS(x, y, bounds)
-                fitted_values = model.ETC_fun_Zehner_Bauer_Schlunder(x_plot, popt)
+
+                popt, pcov, metrics = model_fitter.fit_ETC(x=x, y=y, method=mode, bounds=bounds)
+                fitted_values = model.ETC_fun(x_plot, popt)
 
                 # Fit using differential evolution
                 #opt_params, opt_value = model_fitter.fit_ETC_kaganer_diff(x, y, bounds_differential)
@@ -399,6 +456,8 @@ def main():
             except Exception as e:
                 print(f"nope {e}")
                 continue
+            for key, value in metrics.items():
+                print(f"{key}: {value}")
 
 
     print("Optimized parameters for different beta values:")
@@ -409,9 +468,11 @@ def main():
                             sep="\n")
 
 
-    # Plot the results
+
+
     Plotter.plot_results(x, y, fitted_values_dict, x_plot)
 
 
 if __name__ == "__main__":
-   main()
+   main('curve_fit')
+   main('curve_fit_log')
