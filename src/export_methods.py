@@ -182,7 +182,7 @@ class QuickExport:
                 ) m ON true
                 ORDER BY ts.minute;
                 """
-        #print(query)
+
         values = (sample_id, sample_id)
         df = self.db_retriever.execute_fetching(query=query,
                                                 values=values,
@@ -222,42 +222,6 @@ class QuickExport:
             return df_to_export, "_t-p-data"
         else:
             return pd.DataFrame(), ""
-
-
-class FirstTryExport:
-
-    def write(self):
-        query_ETC = """SELECT 
-                        
-                        "Time", "pressure", "temperature_sample", "ThConductivity", "ThConductivity_avg", "ThConductivity_dvt", "TotalTempIncr", "TotalCharTime", "cycle_number", "cycle_number_flag", "Outppower", "Meastime", "Rs"
-                        
-                        FROM thermal_conductivity_data
-                        
-                        WHERE "TotalTempIncr" >= 1.9 and "TotalTempIncr" <= 5.2 and "TotalCharTime" >= 0.3 and "TotalCharTime"  <= 1.1 and sample_id ='WAE-WA-030'
-                    """
-        query_cap = """ SELECT "cycle_number", "h2_uptake" from cycle_data WHERE sample_id = 'WAE-WA-030'"""
-        query = query_cap
-        # Output file path
-        output_file = '../Scripts/WAE-WA-028-cap.txt'
-
-        try:
-            # Connect to the database
-            with DatabaseConnection() as db_conn:
-                # Execute the query
-                db_conn.cursor.execute(query)
-
-                # Fetch all results
-                results = db_conn.cursor.fetchall()
-
-                # Write results to the text file
-                with open(output_file, 'w') as f:
-                    for row in results:
-                        f.write('\t'.join(map(str, row)) + '\n')
-
-                print(f"Query results written to {output_file}")
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
 
 
 if __name__ == '__main__':

@@ -1,8 +1,10 @@
 # mb_server.py
+from datetime import datetime, timedelta
 import threading
 import json
 import os
 import time
+
 import struct
 from zoneinfo import ZoneInfo
 
@@ -320,18 +322,12 @@ class TpProgramSimulator:
         def simulate_program(self, program, repeat_start=None, repeat_end=None,
                                 repeat_count=0):
             current_time = 0
-            if repeat_start is not None and repeat_end is not None:
-                repeat_segments = program[repeat_start:repeat_end + 1]
-            else:
-                repeat_segments = []
 
-            total_program = (
-                program[:repeat_start] +
-                repeat_segments * repeat_count +
-                program[repeat_end + 1:]
-                if repeat_start is not None and repeat_end is not None
-                else program
-            )
+
+            total_program = self.total_program(program=program,
+                                               repeat_start=repeat_start,
+                                               repeat_count=repeat_count,
+                                               repeat_end=repeat_end)
 
             for i in range(len(total_program) - 1):
                 if len(total_program[i]) == 2:
@@ -369,6 +365,22 @@ class TpProgramSimulator:
             for second in range(duration_seconds):
                 yield current_time, last_temp, last_p
                 current_time += 1
+
+        @staticmethod
+        def total_program(program, repeat_start=None, repeat_count=None, repeat_end=None):
+            """returns total programm"""
+            repeat_segments = []
+            if repeat_start is not None and repeat_end is not None:
+                repeat_segments = program[repeat_start:repeat_end + 1]
+
+            t_program = (
+            program[:repeat_start] +
+            repeat_segments * repeat_count +
+            program[repeat_end + 1:]
+            if repeat_start is not None and repeat_end is not None
+            else program
+            )
+            return t_program
 
     class TemperatureController:
         def __init__(self, temperature_program=None, repeat_start=None,
@@ -441,6 +453,94 @@ class TpProgramSimulator:
             ax2.plot(times, pressures, label='Pressure')
             plt.show()
 
+        def get_program_times(self, start_time: datetime):
+            """returns temperatures pressures and times as a list.
+            can be used for scheduling measurement times in hotdisk software"""
+            total_program = self.program.total_program(program=self.temperature_program,
+                                                       repeat_start=self.repeat_start,
+                                                       repeat_end=self.repeat_end,
+                                                       repeat_count=self.repeat_count)
+            compressed_program = combine_consecutive_temperatures(data=total_program)
+
+            end_times = []
+
+            for index, row in compressed_program.iterrows():
+                end_time = start_time + row["duration"]
+                end_times.append(end_time)
+                start_time = end_time
+
+            compressed_program['end_time'] = end_times
+            return compressed_program
+
+
+
+
+
+
+def parse_duration(duration_str):
+    hours, minutes, seconds = map(int, duration_str.split(':'))
+    return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+
+
+def format_duration(duration_td):
+    total_seconds = int(duration_td.total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f'{hours:02}:{minutes:02}:{seconds:02}'
+
+
+def combine_consecutive_temperatures(data):
+    """combines program steps returns pd.DataFrame"""
+    if not data:
+        return []
+
+    result = []
+    df_program = pd.DataFrame()
+
+    if len(data[0]) == 3:
+        # Initialize with the first entry
+        current_temp, current_duration_str, current_param = data[0]
+        current_duration = parse_duration(current_duration_str)
+        for temp, duration_str, param in data[1:]:
+            if temp == current_temp:
+                # Sum the durations
+                current_duration += parse_duration(duration_str)
+            else:
+                # Append the accumulated result
+                result.append([current_temp, current_duration, current_param])
+                # Reset accumulators for the new temperature
+                current_temp = temp
+                current_duration = parse_duration(duration_str)
+                current_param = param
+        # Append the last accumulated result
+        result.append([current_temp, current_duration, current_param])
+        df_program = pd.DataFrame(result, columns=['temperature', 'duration', 'pressure'])
+
+        return df_program
+    else:
+        # Initialize with the first entry
+        current_temp, current_duration_str = data[0]
+        current_duration = parse_duration(current_duration_str)
+        for temp, duration_str in data[1:]:
+            if temp == current_temp:
+                # Sum the durations
+                current_duration += parse_duration(duration_str)
+            else:
+                # Append the accumulated result
+                result.append([current_temp, current_duration])
+                # Reset accumulators for the new temperature
+                current_temp = temp
+                current_duration = parse_duration(duration_str)
+
+        # Append the last accumulated result
+        result.append([current_temp, current_duration])
+        df_program = pd.DataFrame(result, columns=['temperature', 'duration'])
+
+        return df_program
+
+
+
+
 
 if __name__ == "__main__":
     # Example usage
@@ -458,5 +558,10 @@ if __name__ == "__main__":
     #        time.sleep(1)
     #except KeyboardInterrupt:
     #    mbs.stop_server()
-    program = TpProgramSimulator().TemperatureController()
-    program.plot_program()
+    start = datetime.now()
+    program = TpProgramSimulator().TemperatureController(repeat_start=3,
+                                                        repeat_end=6,
+                                                        repeat_count=2)
+    p =program.get_program_times(start)
+    print(p)
+

@@ -744,7 +744,6 @@ class DataBaseManipulator:
         print(f"Updating all flags takes {passed_time} s in total")
 
 
-
 class ExcelDataProcessor:
     etc_table = TableConfig().ETCDataTable
     xy_table = TableConfig().ThermalConductivityXyDataTable
