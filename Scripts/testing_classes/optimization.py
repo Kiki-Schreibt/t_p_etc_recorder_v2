@@ -9,7 +9,8 @@ import struct
 import time
 from zoneinfo import ZoneInfo
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger, DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.connections import DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.logger import AppLogger
 from pymodbus.exceptions import ModbusException, ConnectionException
 from pymodbus.pdu import ExceptionResponse
 from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator

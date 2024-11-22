@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import numpy as np
 
-from src.config_connection_reading_management.connections_and_logger import DatabaseConnection, AppLogger
+from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
 from src.table_data import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.standard_paths import standard_export_path

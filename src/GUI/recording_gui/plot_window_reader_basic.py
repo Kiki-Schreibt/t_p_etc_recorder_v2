@@ -11,7 +11,8 @@ from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, QObject,
                             Signal, Slot, QRunnable, QThreadPool)
 from PySide6.QtWidgets import QApplication
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger, DatabaseConnection
+from src.config_connection_reading_management.connections import  DatabaseConnection
+from src.config_connection_reading_management.logger import AppLogger
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
 from src.meta_data.meta_data_handler import MetaData

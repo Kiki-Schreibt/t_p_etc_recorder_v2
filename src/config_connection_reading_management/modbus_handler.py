@@ -14,7 +14,8 @@ from pymodbus.pdu import ExceptionResponse
 from psycopg2 import IntegrityError
 
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger, DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.connections import  DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.logger import AppLogger
 from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData

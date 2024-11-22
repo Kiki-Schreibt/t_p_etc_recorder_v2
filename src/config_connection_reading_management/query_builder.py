@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import time
 
-from src.config_connection_reading_management.connections_and_logger import DatabaseConnection, AppLogger
+from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
 from src.table_data import TableConfig
 local_tz = ZoneInfo("Europe/Berlin")
 

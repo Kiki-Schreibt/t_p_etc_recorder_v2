@@ -36,13 +36,8 @@ def bla():
 if __name__ == '__main__':
     import os
 
-
-
-
-    # Example usage:
-    folder_path = r'C:/Daten/Kiki'
-    latest_file = find_latest_file(folder_path)
-    if latest_file:
-        print(f"The latest file is: {latest_file}")
-    else:
-        print("No files found in the folder.")
+data = [(20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0), (20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0), (20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0), (20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0)]
+for a in data[1:]:
+    temp = a[0]
+    time = a[1]
+    print(temp, time)

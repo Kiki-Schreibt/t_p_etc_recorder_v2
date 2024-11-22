@@ -23,7 +23,8 @@ from src.config_connection_reading_management.modbus_handler import ModbusDataHa
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
 from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor, DataRetriever, write_ETC_in_parallel
 from src.config_connection_reading_management.query_builder import QueryBuilder
-from src.config_connection_reading_management.connections_and_logger import AppLogger, DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.connections import  DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.logger import AppLogger
 from src.table_data import TableConfig
 local_tz = ZoneInfo("Europe/Berlin")
 

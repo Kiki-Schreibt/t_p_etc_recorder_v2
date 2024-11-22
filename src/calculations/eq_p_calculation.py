@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.calculations.hydride_worker import MetalHydrideDatabase
-from src.config_connection_reading_management.connections_and_logger import AppLogger
+from src.config_connection_reading_management.logger import AppLogger
 from src.meta_data.meta_data_handler import MetaData
 
 # Constants

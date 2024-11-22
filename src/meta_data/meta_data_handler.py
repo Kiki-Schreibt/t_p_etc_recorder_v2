@@ -7,7 +7,7 @@ from datetime import datetime
 import pandas as pd
 
 from src.config_connection_reading_management.config_reader import GetConfig
-from src.config_connection_reading_management.connections_and_logger import DatabaseConnection, AppLogger
+from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.calculations.hydride_worker import MetalHydrideDatabase
 from src.table_data import TableConfig

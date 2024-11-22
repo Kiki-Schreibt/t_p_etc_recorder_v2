@@ -27,7 +27,7 @@ from src.standard_paths import (
     standard_simulation_config_file_path
 )
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger
+from src.config_connection_reading_management.logger import AppLogger
 from src.config_connection_reading_management.config_reader import GetConfig
 from src.GUI.qt_styles import aqua as style
 

@@ -1,5 +1,5 @@
-import os
-import logging
+
+
 import time
 import atexit
 import pyodbc
@@ -9,104 +9,10 @@ from pymodbus.client import ModbusTcpClient as ModbusClient
 from pymodbus.exceptions import ModbusException, ConnectionException
 from psycopg2.extras import RealDictCursor  # Optional: for dictionary-like cursor
 import psycopg2
+from src.config_connection_reading_management.logger import AppLogger
+
 
 from src.config_connection_reading_management.config_reader import GetConfig
-
-
-
-# Load the configuration
-config = GetConfig()
-# Accessing the variables
-LOG_DIRECTORY   = config.LOG_DIRECTORY
-LOG_FILE        = config.LOG_FILE
-DB_SERVER       = config.DB_SERVER
-DB_DATABASE     = config.DB_DATABASE
-DB_USERNAME     = config.DB_USERNAME
-DB_PASSWORD     = config.DB_PASSWORD
-DB_PORT         = config.DB_PORT
-MODBUS_HOST     = config.MODBUS_HOST
-MODBUS_PORT     = config.MODBUS_PORT
-REGS_OF_INTEREST = config.REGS_OF_INTEREST
-START_REG       = config.START_REG
-END_REG         = config.END_REG
-SLEEP_INTERVAL  = config.SLEEP_INTERVAL
-
-
-class AppLogger:
-    """
-    A class for setting up and providing access to a logger.
-
-    This class configures a logger using settings from a configuration file. It sets up
-    logging to a specified file and optionally to the standard error stream.
-
-    Attributes:
-        LOG_DIRECTORY (str): Directory where the log files are stored.
-        LOG_FILE_NAME (str): Name of the log file.
-        LOG_FILE (str): Full path of the log file.
-
-    Methods:
-        setup_logger(): Configures the logger with a FileHandler and optional StreamHandler.
-        get_logger(logger_name): Retrieves a logger with the specified name.
-        create_log_dir(): Creates the log directory if it does not exist.
-    """
-
-    _logger_initialized = False
-
-    def __init__(self):
-        if not AppLogger._logger_initialized:
-            self.LOG_DIRECTORY = config.LOG_DIRECTORY
-            self.LOG_FILE_NAME = config.LOG_FILE
-            self.create_log_dir()
-
-            # Set up logging with FileHandler
-            self.LOG_FILE = os.path.join(
-                                            self.LOG_DIRECTORY,
-                                            datetime.now().strftime('%Y-%m-%d_%H') + '_' + self.LOG_FILE_NAME
-                                        )
-
-            self.setup_logger()
-            atexit.register(self.close_logging_handlers, logging.getLogger())
-        AppLogger._logger_initialized = True
-
-    def setup_logger(self):
-        # Clear existing handlers if re-running this setup
-        logger = logging.getLogger()
-        if logger.handlers:
-            for handler in logger.handlers:
-                handler.close()
-                logger.removeHandler(handler)
-
-        # Configure new logging handlers
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(self.LOG_FILE, mode='a'),
-                logging.StreamHandler()  # Optional: also log to stderr
-            ]
-        )
-
-    def get_logger(self, logger_name):
-        return logging.getLogger(logger_name)
-
-    def create_log_dir(self):
-        try:
-            if not os.path.exists(self.LOG_DIRECTORY):
-                os.makedirs(self.LOG_DIRECTORY)
-        except Exception as e:
-            print(f"Failed to create log directory {self.LOG_DIRECTORY}: {e}")
-
-    def close_logging_handlers(self, logger):
-        """
-        Close all handlers of the specified logger to ensure all resources are properly released.
-
-        Parameters:
-            logger (logging.Logger): The logger whose handlers should be closed.
-        """
-        # Loop over a copy of the handlers list to avoid modifying the list during iteration
-        for handler in logger.handlers[:]:  # Copy the list to avoid modification issues
-            handler.close()                 # Close each handler to flush and release resources
-            logger.removeHandler(handler)   # Remove the handler from the logger
 
 
 class DatabaseConnection:
@@ -122,6 +28,14 @@ class DatabaseConnection:
         logger (Logger): Logger for logging messages.
         auto_close (bool): Flag to indicate automatic closing of the connection.
     """
+    # Load the configuration
+    config = GetConfig()
+    # Accessing the variables
+    DB_SERVER       = config.DB_SERVER
+    DB_DATABASE     = config.DB_DATABASE
+    DB_USERNAME     = config.DB_USERNAME
+    DB_PASSWORD     = config.DB_PASSWORD
+    DB_PORT         = config.DB_PORT
 
     def __init__(self):
         self.conn = None
@@ -148,7 +62,7 @@ class DatabaseConnection:
 
     def open_connection(self, auto_close=False):
         if self.conn is None:
-            conn_str = f"dbname={DB_DATABASE} user={DB_USERNAME} password={DB_PASSWORD} host={DB_SERVER} port={DB_PORT}"
+            conn_str = f"dbname={self.DB_DATABASE} user={self.DB_USERNAME} password={self.DB_PASSWORD} host={self.DB_SERVER} port={self.DB_PORT}"
             try:
                 self.conn = psycopg2.connect(conn_str)
                 self.cursor = self.conn.cursor()  # Optional
@@ -186,6 +100,15 @@ class ModbusConnection:
         is_connected(): Checks if the Modbus TCP connection is still active.
         reconnect(): Re-establishes the Modbus TCP connection.
     """
+    config = GetConfig()
+    MODBUS_HOST     = config.MODBUS_HOST
+    MODBUS_PORT     = config.MODBUS_PORT
+    REGS_OF_INTEREST = config.REGS_OF_INTEREST
+    START_REG       = config.START_REG
+    END_REG         = config.END_REG
+    SLEEP_INTERVAL  = config.SLEEP_INTERVAL
+
+
 
     def __init__(self, mb_host=MODBUS_HOST, mb_port=MODBUS_PORT):
         self.client = None
@@ -241,6 +164,10 @@ class ModbusConnection:
 
 
 def test_functionality():
+    config = GetConfig()
+    END_REG = config.END_REG
+    START_REG = config.START_REG
+
     # Test the AppLogger
     logger = AppLogger().get_logger("TestApp")
     logger.info("Testing AppLogger functionality.")
@@ -292,7 +219,9 @@ def test_connection_simulated_modbus():
 
 
 def test_mb_connection():
-
+    config = GetConfig()
+    END_REG = config.END_REG
+    START_REG = config.START_REG
     logger = AppLogger().get_logger("TestApp")
     with ModbusConnection() as connection:
         try:

@@ -7,7 +7,7 @@ import os
 
 from PySide6.QtCore import Signal, QObject
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger
+from src.config_connection_reading_management.logger import AppLogger
 from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor
 from src.standard_paths import standard_hot_disk_file_path
 

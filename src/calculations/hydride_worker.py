@@ -2,7 +2,7 @@ import csv
 import json
 import re
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger
+from src.config_connection_reading_management.logger import AppLogger
 from src.standard_paths import standard_hydride_data_base_path, standard_periodic_table_path
 
 

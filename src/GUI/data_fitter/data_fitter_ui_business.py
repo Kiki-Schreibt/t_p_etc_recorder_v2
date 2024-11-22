@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit, differential_evolution, brute
 
 from src.calculations.hydride_worker import MetalHydrideDatabase
-from src.config_connection_reading_management.connections_and_logger import AppLogger
+from src.config_connection_reading_management.logger import AppLogger
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.table_data import TableConfig
 
@@ -112,7 +112,9 @@ class MaterialProperties:
     #Sebastian Sonnick, Lars Erlbeck,  Manuel Meier,  Hermann Nirschl,  Matthias Rädle
 
     def __init__(self, sample_mass=18.0741e-3, cell_type='3rd', cell_volume=None,
-                 material="MgH2", de_hyd_state="Dehydrogenated", particle_diameter=45e-6):
+                 material=None, de_hyd_state="Dehydrogenated", particle_diameter=45e-6):
+        if not material:
+            return
         self.logger = AppLogger().get_logger(__name__)
         self.hydride_worker = MetalHydrideDatabase()
         self.material = material # material name MgH2

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from pyModbusTCP.server import ModbusServer
 from PySide6.QtCore import Signal, QObject
 
-from src.config_connection_reading_management.connections_and_logger import AppLogger
+from src.config_connection_reading_management.logger import AppLogger
 from src.table_data import TableConfig
 
 local_tz = ZoneInfo("Europe/Berlin")
@@ -316,8 +316,11 @@ class TpProgramSimulator:
 
         def parse_duration(self, duration_str):
             """Converts duration string 'HH:MM:SS' to total seconds."""
-            h, m, s = map(int, duration_str.split(':'))
-            return h * 3600 + m * 60 + s
+            if isinstance(duration_str, timedelta):
+                return duration_str.total_seconds()
+            else:
+                h, m, s = map(int, duration_str.split(':'))
+                return h * 3600 + m * 60 + s
 
         def simulate_program(self, program, repeat_start=None, repeat_end=None,
                                 repeat_count=0):
@@ -371,15 +374,15 @@ class TpProgramSimulator:
             """returns total programm"""
             repeat_segments = []
             if repeat_start is not None and repeat_end is not None:
-                repeat_segments = program[repeat_start:repeat_end + 1]
+                repeat_segments = program[repeat_start - 1 : repeat_end]
 
             t_program = (
-            program[:repeat_start] +
-            repeat_segments * repeat_count +
-            program[repeat_end + 1:]
-            if repeat_start is not None and repeat_end is not None
-            else program
-            )
+                        program[:repeat_start - 1] +
+                        repeat_segments * (repeat_count + 1) +
+                        program[repeat_end:]
+                        if repeat_start is not None and repeat_end is not None
+                        else program
+                        )
             return t_program
 
     class TemperatureController:
@@ -473,13 +476,12 @@ class TpProgramSimulator:
             return compressed_program
 
 
-
-
-
-
 def parse_duration(duration_str):
-    hours, minutes, seconds = map(int, duration_str.split(':'))
-    return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    if isinstance(duration_str, timedelta):
+        return duration_str
+    else:
+        hours, minutes, seconds = map(int, duration_str.split(':'))
+        return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
 
 def format_duration(duration_td):
@@ -490,7 +492,8 @@ def format_duration(duration_td):
 
 
 def combine_consecutive_temperatures(data):
-    """combines program steps returns pd.DataFrame"""
+    """combines program steps returns pd.DataFrame
+    :returns pd.DataFrame cols  = 'temperature', 'duration', optional : 'measurement_power_watt', optional : 'measurement_time'"""
     if not data:
         return []
 
@@ -501,7 +504,10 @@ def combine_consecutive_temperatures(data):
         # Initialize with the first entry
         current_temp, current_duration_str, current_param = data[0]
         current_duration = parse_duration(current_duration_str)
-        for temp, duration_str, param in data[1:]:
+        for values in data[1:]:
+            temp = values[0]
+            duration_str = values[1]
+            param = values[2]
             if temp == current_temp:
                 # Sum the durations
                 current_duration += parse_duration(duration_str)
@@ -517,11 +523,16 @@ def combine_consecutive_temperatures(data):
         df_program = pd.DataFrame(result, columns=['temperature', 'duration', 'pressure'])
 
         return df_program
-    else:
+    elif len(data[0]) == 2:
         # Initialize with the first entry
-        current_temp, current_duration_str = data[0]
+        current_temp = data[0][0]
+        current_duration_str = data[0][1]
         current_duration = parse_duration(current_duration_str)
-        for temp, duration_str in data[1:]:
+
+        for values in data[1:]:
+            temp = values[0]
+            duration_str = values[1]
+
             if temp == current_temp:
                 # Sum the durations
                 current_duration += parse_duration(duration_str)
@@ -537,9 +548,37 @@ def combine_consecutive_temperatures(data):
         df_program = pd.DataFrame(result, columns=['temperature', 'duration'])
 
         return df_program
+    elif len(data[0]) > 3:
+         # Initialize with the first entry
+        current_temp = data[0][0]
+        current_duration_str = data[0][1]
+        current_duration = parse_duration(current_duration_str)
+        current_meas_power = data[0][2]
+        current_meas_time = data[0][3]
 
 
+        for values in data[1:]:
+            temp = values[0]
+            duration_str = values[1]
+            meas_power = values[2]
+            meas_time = values[3]
 
+            if temp == current_temp:
+                # Sum the durations
+                current_duration += parse_duration(duration_str)
+            else:
+                # Append the accumulated result
+                result.append([current_temp, current_duration, current_meas_power, current_meas_time])
+                # Reset accumulators for the new temperature
+                current_temp = temp
+                current_duration = parse_duration(duration_str)
+                current_meas_power = meas_power
+                current_meas_time = meas_time
+
+        # Append the last accumulated result
+        result.append([current_temp, current_duration, current_meas_power, current_meas_time])
+        df_program = pd.DataFrame(result, columns=['temperature', 'duration', 'measurement_power_watt', 'measurement_time'])
+        return df_program
 
 
 if __name__ == "__main__":
