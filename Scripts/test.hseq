@@ -885,7 +885,7 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T15:34:49.8203980</targetTime>
+            <targetTime>2024-11-25T15:28:35.5528580</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>
@@ -954,7 +954,7 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T15:44:49.8203980</targetTime>
+            <targetTime>2024-11-25T15:38:35.5528580</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>
@@ -1023,7 +1023,7 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T16:04:49.8203980</targetTime>
+            <targetTime>2024-11-25T15:58:35.5528580</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>
@@ -1092,7 +1092,7 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T16:24:49.8203980</targetTime>
+            <targetTime>2024-11-25T16:18:35.5528580</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>

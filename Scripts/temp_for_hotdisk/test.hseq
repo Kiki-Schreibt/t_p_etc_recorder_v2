@@ -885,7 +885,7 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T15:34:49.8203980</targetTime>
+            <targetTime>2024-11-25T15:35:05.1627620</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>
@@ -954,7 +954,7 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T15:44:49.8203980</targetTime>
+            <targetTime>2024-11-25T15:45:05.1627620</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>
@@ -1023,7 +1023,7 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T16:04:49.8203980</targetTime>
+            <targetTime>2024-11-25T16:05:05.1627620</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>
@@ -1092,7 +1092,559 @@
             </CalculationSettingsBySwitchPort>
         </ScheduleActivity>
         <ScheduleActivity type="ScheduledTime">
-            <targetTime>2024-11-25T16:24:49.8203980</targetTime>
+            <targetTime>2024-11-25T16:15:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>200.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>200.0</Manual>
+                                    <TCR>0.003811288161742225</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T16:35:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>100.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>100.0</Manual>
+                                    <TCR>0.004485619999999999</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T16:45:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>200.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>200.0</Manual>
+                                    <TCR>0.003811288161742225</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T17:05:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>100.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>100.0</Manual>
+                                    <TCR>0.004485619999999999</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T17:15:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>200.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>200.0</Manual>
+                                    <TCR>0.003811288161742225</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T17:35:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>100.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>100.0</Manual>
+                                    <TCR>0.004485619999999999</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T17:45:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>200.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>200.0</Manual>
+                                    <TCR>0.003811288161742225</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T18:05:05.1627620</targetTime>
+        </ScheduleActivity>
+        <ScheduleActivity type="MeasurementTriggerEvent">
+            <NoOfMeasurements>3</NoOfMeasurements>
+            <MeasurementInterval>3</MeasurementInterval>
+            <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+            <ExperimentSettingsBySwitchPort>
+                <ExecutedStep type="ExecutedExperiment">
+                    <RowNumber>0</RowNumber>
+                    <LastStatus>NotRun</LastStatus>
+                    <Data>
+                        <RunConfiguration>
+                            <MethodType>Standard</MethodType>
+                            <SampleIdentity>
+                                <Identity>WAE-WA-040-023</Identity>
+                                <AvailableProbingDepth>10</AvailableProbingDepth>
+                                <Notes>Mg/MgH2 + 5 wt-% Fe -350-420C</Notes>
+                            </SampleIdentity>
+                            <InstrumentRunConfigurations type="StandardRunConfigurations">
+                                <SampleTemperatureData>
+                                    <Sample>100.0</Sample>
+                                    <Source>ManualTemp</Source>
+                                    <Manual>100.0</Manual>
+                                    <TCR>0.004485619999999999</TCR>
+                                    <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-Old_F2.txt</TcrFile>
+                                </SampleTemperatureData>
+                                <DiskType>Mica</DiskType>
+                                <SensorType>DISK</SensorType>
+                                <SensorDesign>5465</SensorDesign>
+                                <SensorDimension>3.189</SensorDimension>
+                                <SensorBatchID>F2</SensorBatchID>
+                                <CableOrHolder>RedCable</CableOrHolder>
+                                <HeatingPower>0.01</HeatingPower>
+                                <HeatingTime>3.0</HeatingTime>
+                                <NPLC>0.0</NPLC>
+                                <DriftEnable>true</DriftEnable>
+                                <DriftTime>40</DriftTime>
+                                <ScanningVoltage>0.05</ScanningVoltage>
+                            </InstrumentRunConfigurations>
+                            <ExperimentHardware>
+                                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                                <PowerLineFrequency>50</PowerLineFrequency>
+                                <ReferenceResistance>6.912091</ReferenceResistance>
+                            </ExperimentHardware>
+                            <OriginalFile>C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-023-350-420C-6Cyc\WAE-WA-040-023.hotb</OriginalFile>
+                            <SoftwareVersion>7.5.14.0</SoftwareVersion>
+                        </RunConfiguration>
+                    </Data>
+                    <FileName />
+                </ExecutedStep>
+            </ExperimentSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledCalculation">
+            <CalculationSettingsBySwitchPort>
+                <CalcSettings>
+                    <selectionStartIndex>20</selectionStartIndex>
+                    <selectionEndIndex>200</selectionEndIndex>
+                    <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+                    <specificHeatOfSample>1E-06</specificHeatOfSample>
+                    <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+                    <specHeatCapSensorCal>true</specHeatCapSensorCal>
+                    <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+                    <timeCorrection>true</timeCorrection>
+                    <analysisType>Standard</analysisType>
+                    <SwitchPort>-1</SwitchPort>
+                </CalcSettings>
+            </CalculationSettingsBySwitchPort>
+        </ScheduleActivity>
+        <ScheduleActivity type="ScheduledTime">
+            <targetTime>2024-11-25T18:25:05.1627620</targetTime>
         </ScheduleActivity>
         <ScheduleActivity type="MeasurementTriggerEvent">
             <NoOfMeasurements>3</NoOfMeasurements>
