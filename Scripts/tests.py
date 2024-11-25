@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import differential_evolution
 import matplotlib.pyplot as plt
-
+import xml.etree.ElementTree as ET
 from src.table_data import TableConfig
 
 
@@ -34,10 +34,11 @@ def bla():
 
 
 if __name__ == '__main__':
-    import os
 
-data = [(20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0), (20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0), (20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0), (20.0, '00:10:00', 1.0, 5.0), (30.0, '00:10:00', 2.0, 4.0), (40.0, '00:10:00', 3.0, 6.0)]
-for a in data[1:]:
-    temp = a[0]
-    time = a[1]
-    print(temp, time)
+    path_file = r'C:\Daten\Kiki\Masterarbeit\WAE-WA-021-Hexahydrid\WAE-WA-021-001b014-Hydriert\WAE-WA-021-007-60C-1-90bar_Hyd\WAE-WA-021-007-Hyd.hseq'
+    tree = ET.parse(path_file)
+    root = tree.getroot()
+    print(tree)
+    for child in root:
+
+        print(child.tag, child.attrib)
