@@ -1,17 +1,11 @@
-
-
 import time
-import atexit
-import pyodbc
-from datetime import datetime
+
 
 from pymodbus.client import ModbusTcpClient as ModbusClient
 from pymodbus.exceptions import ModbusException, ConnectionException
-from psycopg2.extras import RealDictCursor  # Optional: for dictionary-like cursor
 import psycopg2
+
 from src.config_connection_reading_management.logger import AppLogger
-
-
 from src.config_connection_reading_management.config_reader import GetConfig
 
 

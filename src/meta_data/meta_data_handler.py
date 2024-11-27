@@ -1,15 +1,12 @@
 import time
 from datetime import timedelta
 from zoneinfo import ZoneInfo
-import threading
-from datetime import datetime
 
 import pandas as pd
 
 from src.config_connection_reading_management.config_reader import GetConfig
 from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
 from src.config_connection_reading_management.query_builder import QueryBuilder
-from src.calculations.hydride_worker import MetalHydrideDatabase
 from src.table_data import TableConfig
 meta_table = TableConfig().MetaDataTable
 
@@ -255,7 +252,7 @@ class MetaData:
         print("Last de_hyd state:", self.last_de_hyd_state) if self.last_de_hyd_state else print("No defined de_hyd state")
 
     def _get_enthalpy_entropy_wt_theoretical(self):
-
+        from src.calculations.hydride_worker import MetalHydrideDatabase
         if self.enthalpy is not None and self.entropy is not None and self.theoretical_uptake is not None:
             return self.enthalpy, self.entropy, self.theoretical_uptake
 

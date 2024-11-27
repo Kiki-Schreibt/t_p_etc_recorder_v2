@@ -150,8 +150,6 @@ def modify_temp_log_file(temp_log_file_path, content):
 
 
 def test_log_file_tracker():
-    import os
-    import threading
     temp_log_file_path = r'C:\Daten\Kiki\ProgrammingStuff\kikis_hot_v3\For_testing\HotDiskLogFiles\HotDisk 2023 08 13 10.27.22.log'
     log_file_tracker = LogFileTracker()
 
@@ -175,6 +173,7 @@ def test_log_file_tracker():
         # Clean up: remove the temporary log file
         if os.path.exists(temp_log_file_path):
             os.remove(temp_log_file_path)
+
 
 # Run the test function
 if __name__ == "__main__":

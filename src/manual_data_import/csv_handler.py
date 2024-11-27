@@ -1,33 +1,24 @@
 import numpy as np
-import win32com.client as win32
-import re
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from multiprocessing import Pool
 from threading import Lock
-import struct
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from typing import Optional, List
 
 import pandas as pd
 from psycopg2 import IntegrityError
-from pymodbus.exceptions import ModbusException, ConnectionException
-from pymodbus.pdu import ExceptionResponse
 
-from src.table_data import TableConfig
 from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.meta_data.meta_data_handler import MetaData
-from src.config_connection_reading_management.modbus_handler import ModbusDataHandler, ModbusDBWriter, CycleCounter, ModbusReader
+from src.config_connection_reading_management.modbus_handler import ModbusDBWriter, CycleCounter
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
-from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor, DataRetriever, write_ETC_in_parallel
-from src.config_connection_reading_management.query_builder import QueryBuilder
-from src.config_connection_reading_management.connections import  DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.database_reading_writing import DataRetriever, write_ETC_in_parallel
+from src.config_connection_reading_management.connections import DatabaseConnection, GetConfig
 from src.config_connection_reading_management.logger import AppLogger
 from src.table_data import TableConfig
-local_tz = ZoneInfo("Europe/Berlin")
 
+local_tz = ZoneInfo("Europe/Berlin")
 REALISTIC_MAX_TEMP = 1000
 REALISTIC_MIN_PRESSURE = 1.0
 SUPPORTED_FILE_EXTENSIONS = ['.csv', '.txt']
@@ -900,11 +891,10 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
     return df
 
 
-
 #Methods for usage
 if __name__ == '__main__':
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    sample_ids = ('WAE-WA-030',)
+    #sample_ids = ('WAE-WA-030',)
     logger = AppLogger().get_logger(__name__)
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)

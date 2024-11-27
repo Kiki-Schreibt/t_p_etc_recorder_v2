@@ -1,8 +1,5 @@
 from datetime import datetime, timedelta
 import numpy as np
-import win32com.client as win32
-import re
-import os
 import struct
 import time
 from zoneinfo import ZoneInfo
@@ -14,7 +11,7 @@ from pymodbus.pdu import ExceptionResponse
 from psycopg2 import IntegrityError
 
 
-from src.config_connection_reading_management.connections import  DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.connections import DatabaseConnection, GetConfig, ModbusConnection
 from src.config_connection_reading_management.logger import AppLogger
 from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.config_connection_reading_management.query_builder import QueryBuilder

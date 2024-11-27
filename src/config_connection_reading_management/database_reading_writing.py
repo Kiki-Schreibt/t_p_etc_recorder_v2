@@ -3,44 +3,21 @@ import numpy as np
 import win32com.client as win32
 import re
 import os
-import struct
 import time
 from zoneinfo import ZoneInfo
-import threading
 from multiprocessing import Pool
+from datetime import datetime, timedelta
 
 import pandas as pd
-from pymodbus.exceptions import ModbusException, ConnectionException
-from pymodbus.pdu import ExceptionResponse
 from psycopg2 import IntegrityError
 
-from src.config_connection_reading_management.connections import  DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.connections import DatabaseConnection
 from src.config_connection_reading_management.logger import AppLogger
-from datetime import datetime, timedelta
-from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
 from src.table_data import TableConfig
-from src.standard_paths import standard_log_dir
 
 qb = QueryBuilder()
-# Load the configuration
-config = GetConfig()
-# Accessing the variables
-LOG_DIRECTORY   = config.LOG_DIRECTORY
-LOG_FILE        = config.LOG_FILE
-DB_SERVER       = config.DB_SERVER
-DB_DATABASE     = config.DB_DATABASE
-DB_USERNAME     = config.DB_USERNAME
-DB_PASSWORD     = config.DB_PASSWORD
-DB_PORT         = config.DB_PORT
-MODBUS_HOST     = config.MODBUS_HOST
-MODBUS_PORT     = config.MODBUS_PORT
-REGS_OF_INTEREST = config.REGS_OF_INTEREST
-START_REG       = config.START_REG
-END_REG         = config.END_REG
-SLEEP_INTERVAL  = config.SLEEP_INTERVAL
-
 local_tz = ZoneInfo("Europe/Berlin")
 table_rp = TableConfig().TPDataTable
 
@@ -144,7 +121,6 @@ class DataRetriever:
     def __init__(self):
         self.running = False
         self.qb = qb
-        self.config = config
         self.logger = AppLogger().get_logger(__name__)
         self.database_connection = DatabaseConnection()
         self.limit_datapoints = 10000
@@ -535,7 +511,7 @@ class DataBaseManipulator:
         self.running = False
         self.logger = AppLogger().get_logger(__name__)
         self.database_connection = DatabaseConnection()
-        self.config = GetConfig()
+
 
     def execute_updating(self, query, values, many_bool=True):
         with DatabaseConnection() as db_conn:
@@ -820,14 +796,14 @@ class ExcelDataProcessor:
                                         xy_table.drift_time: 'time_drift',
                                         xy_table.temperature_drift: 'temperature_drift'}
 
-    def __init__(self, file_path='dummy', results_sheet_name='Results',
-                 parameters_sheet_name='Parameters', log_directory='logs',
-                 log_file='process.log', sample_id=None, meta_data=MetaData()):
+    def __init__(self, file_path='dummy',
+                 results_sheet_name='Results',
+                 parameters_sheet_name='Parameters',
+                 sample_id=None,
+                 meta_data=MetaData()):
         self.file_path = file_path
         self.results_sheet_name = results_sheet_name
         self.parameters_sheet_name = parameters_sheet_name
-        self.log_directory = log_directory
-        self.log_file = log_file
         self.logger = AppLogger().get_logger(__name__)
 
 

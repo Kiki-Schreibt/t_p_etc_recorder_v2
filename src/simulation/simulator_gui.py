@@ -1,6 +1,4 @@
-# gui.py
 import sys
-import os
 
 import pandas as pd
 from PySide6.QtWidgets import (

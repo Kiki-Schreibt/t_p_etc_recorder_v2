@@ -1,14 +1,10 @@
 import json
-from datetime import datetime, timedelta
 import sys
 import os
-import logging
-
-import psycopg2
 
 from src.standard_paths import standard_config_file_path as config_file_path
 from src.standard_paths import standard_log_dir
-from src.table_data import TableConfig
+
 
 current_dir = os.path.dirname(__file__)
 
@@ -35,15 +31,6 @@ class GetConfig:
         END_REG (int): Ending register for Modbus reads.
         SLEEP_INTERVAL (int): Sleep interval for loops in seconds.
         HOT_DISK_LOG_FILE_PATH (str): Path for hot disk log files.
-        TP_DATA_COLUMN_NAMES (list): Column names for temperature and pressure data.
-        TP_DATA_TABLE_NAME (str): Table name for temperature and pressure data.
-        THERMAL_CONDUCTIVITY_DATA_TABLE_NAME (str): Table name for thermal conductivity data.
-        THERMAL_CONDUCTIVITY_COLUMN_NAMES (list): Column names for thermal conductivity data.
-        THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME (str): Table name for thermal conductivity XY data.
-        THERMAL_CONDUCTIVITY_XY_COLUMN_NAMES (list): Column names for thermal conductivity XY data.
-        TP_DATA_INSERT_QUERY (str): SQL insert query for temperature and pressure data.
-        THERMAL_CONDUCTIVITY_DATA_INSERT_QUERY (str): SQL insert query for thermal conductivity data.
-        THERMAL_CONDUCTIVITY_XY_DATA_INSERT_QUERY (str): SQL insert query for thermal conductivity XY data.
 
     Methods:
         create_insert_query(table_name, column_names): Creates an SQL insert query for the given table and column names.
@@ -74,11 +61,6 @@ class GetConfig:
 
             self.HOT_DISK_LOG_FILE_PATH = config['HOT_DISK_LOG_FILE_PATH']
 
-            self.MINIMUM_TEMPERATURE_INCREASE = config["MINIMUM_TEMPERATURE_INCREASE"]
-            self.MAXIMUM_TEMPERATURE_INCREASE = config["MAXIMUM_TEMPERATURE_INCREASE"]
-            self.MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME = config["MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME"]
-            self.MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME = config["MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME"]
-
             self.connection_string = {
                                         'host': self.DB_SERVER,
                                         'dbname': self.DB_DATABASE,
@@ -97,7 +79,6 @@ class GetConfig:
                 config_prompter.config = config_prompter.config_template
                 config_prompter.save_to_file(temp_file_name)
             self.__init__(config_file_path=temp_file_path)
-
 
     @staticmethod
     def _has_uppercase(string):
@@ -154,7 +135,6 @@ class ConfigPrompter:
             self.config_template = config_template
         else:
             self.config_template = {
-                                    "LOG_DIRECTORY": "C:\\Daten\\Kiki\\ProgrammingStuff\\kikis_hot_v5\\Log",
                                     "LOG_FILE": "Application_Log.log",
                                     "DB_SERVER": "localhost",
                                     "DB_DATABASE": "postgres",
@@ -167,16 +147,7 @@ class ConfigPrompter:
                                     "START_REG": 4585,
                                     "END_REG": 4672,
                                     "SLEEP_INTERVAL": 0.5,
-                                    "HOT_DISK_LOG_FILE_PATH": "C:\\HotDiskTPS_7\\data\\Log",
-                                    "TP_DATA_TABLE_NAME": "t_p_data",
-                                    "THERMAL_CONDUCTIVITY_DATA_TABLE_NAME": "thermal_conductivity_data",
-                                    "THERMAL_CONDUCTIVITY_XY_DATA_TABLE_NAME": "thermal_conductivity_xy_data",
-                                    "MINIMUM_TEMPERATURE_INCREASE": 2,
-                                    "MAXIMUM_TEMPERATURE_INCREASE": 5,
-                                    "MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME": 0.33,
-                                    "MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME": 1,
-                                    "META_DATA_TABLE_NAME": "meta_data",
-                                    "CYCLE_DATA_TABLE_NAME": "cycle_data"
+                                    "HOT_DISK_LOG_FILE_PATH": "C:\\HotDiskTPS_7\\data\\Log"
                                    }
 
         self.config = {}

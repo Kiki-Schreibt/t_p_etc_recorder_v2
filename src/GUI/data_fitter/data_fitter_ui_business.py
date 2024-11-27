@@ -10,6 +10,13 @@ from src.config_connection_reading_management.logger import AppLogger
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.table_data import TableConfig
 
+standard_constraints_dict = {
+            "min_TotalCharTime": 0.33,
+            "max_TotalCharTime": 1,
+            "min_TotalTempIncr": 2,
+            "max_TotalTempIncr": 5
+                            }
+
 def remove_order_term(input_string):
     keyword = "order"
     index = input_string.lower().find(keyword)
@@ -26,12 +33,7 @@ class DataLoader:
         self.logger = AppLogger().get_logger(__name__)
         self.file_path = file_path
         self.data_retriever = DataRetriever()
-        self.standard_constraints_dict = {
-            "min_TotalCharTime": self.data_retriever.config.MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME,
-            "max_TotalCharTime": self.data_retriever.config.MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME,
-            "min_TotalTempIncr": self.data_retriever.config.MINIMUM_TEMPERATURE_INCREASE,
-            "max_TotalTempIncr": self.data_retriever.config.MAXIMUM_TEMPERATURE_INCREASE
-        }
+        self.standard_constraints_dict = standard_constraints_dict
         self.etc_table = TableConfig().ETCDataTable
         self.sample_id = sample_id
         self.temperature = temperature

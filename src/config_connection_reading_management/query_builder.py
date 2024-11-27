@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import pandas as pd
-import time
 
-from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
+from src.config_connection_reading_management.connections import DatabaseConnection
+from src.config_connection_reading_management.logger import AppLogger
 from src.table_data import TableConfig
 local_tz = ZoneInfo("Europe/Berlin")
 
@@ -11,7 +10,6 @@ local_tz = ZoneInfo("Europe/Berlin")
 class QueryBuilder:
 
     def __init__(self):
-        self.db = DatabaseConnection()
         self.logger = AppLogger().get_logger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.etc_table = TableConfig().ETCDataTable
@@ -561,7 +559,7 @@ class QueryBuilder:
         return table_name, column_names_str
 
     def _fetch_first_and_last_match_by_sample_id(self, sample_id=None):
-        self.db.open_connection()
+
         table_name = self.tp_table.table_name
         time_column = self.tp_table.time
         column_names = TableConfig().get_table_column_names(self.tp_table)
@@ -575,19 +573,20 @@ class QueryBuilder:
                     f"MAX({time_column}) As last_occurrence_datetime "\
                     f"FROM {table_name} "\
                     f"WHERE {sample_id_column} = '{sample_id}'"
-        try:
-            self.db.cursor.execute(query)
-            occurence_sample_id = self.db.cursor.fetchone()
-            self.db.close_connection()
-
-
-            first_occ = occurence_sample_id[0]
-            last_occ = occurence_sample_id[1]
-          #  first_occ = min(item[0] for item in occurence_sample_id)
-           # last_occ = max(item[0] for item in occurence_sample_id)
-            return first_occ, last_occ
-        except Exception as e:
-            self.logger.error(f"Error occurred while fetching data: {e}")
+        else:
+            return None, None
+        with DatabaseConnection() as db_conn:
+            try:
+                db_conn.cursor.execute(query)
+                occurence_sample_id = db_conn.cursor.fetchone()
+                db_conn.close_connection()
+                first_occ = occurence_sample_id[0]
+                last_occ = occurence_sample_id[1]
+              #  first_occ = min(item[0] for item in occurence_sample_id)
+               # last_occ = max(item[0] for item in occurence_sample_id)
+                return first_occ, last_occ
+            except Exception as e:
+                self.logger.error(f"Error occurred while fetching data: {e}")
 
 
 def test_query_builder():
@@ -620,8 +619,7 @@ def test_query_builder():
 
 
 if __name__ == "__main__":
-    import time
-    from src.meta_data.meta_data_handler import MetaData
+
 
     qb = QueryBuilder()
     qb.create_reading_query(table_name=TableConfig().TPDataTable.table_name,

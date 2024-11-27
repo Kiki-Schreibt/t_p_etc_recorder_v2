@@ -1,16 +1,10 @@
-# Standard library imports
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-# Third-party imports
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 from PySide6 import QtGui
-
-# Local application imports
-#from utils.path_utils import add_source_folders
-#add_source_folders()
 
 from src.GUI.recording_gui.recording_business_v2 import (
     PlotContinuousWindow,
@@ -28,7 +22,6 @@ from src.standard_paths import (
 )
 
 from src.config_connection_reading_management.logger import AppLogger
-from src.config_connection_reading_management.config_reader import GetConfig
 from src.GUI.qt_styles import aqua as style
 
 # Constants
@@ -36,6 +29,12 @@ STANDARD_T_P_TEST_DATA_FOLDER_PATH = standard_t_p_test_data_folder_path
 STANDARD_SIM_CONFIG = standard_simulation_config_file_path
 FONT = QtGui.QFont("Arial", 8)
 local_tz_reg = ZoneInfo("Europe/Berlin")
+standard_constraints_dict = {
+            "min_TotalCharTime": 0.33,
+            "max_TotalCharTime": 1,
+            "min_TotalTempIncr": 2,
+            "max_TotalTempIncr": 5
+                            }
 READING_MODE_FULL_TEST = 'full_test'
 READING_MODE_BY_TIME = 'by_time'
 
@@ -54,7 +53,6 @@ class RecordingMainWindow(QMainWindow):
         self.setStyleSheet(style)
         self.setFont(FONT)
         self.logger = AppLogger().get_logger(__name__)
-        self.config = GetConfig()
         self.load_ui_file(recording_ui_file_path)
 
         self.meta_data = MetaData()
@@ -104,12 +102,7 @@ class RecordingMainWindow(QMainWindow):
         """
         Initialize constants and default values.
         """
-        self.constraints_dict = {
-            "min_TotalCharTime": self.config.MINIMUM_TOTAL_TO_CHARACTERISTIC_TIME,
-            "max_TotalCharTime": self.config.MAXIMUM_TOTAL_TO_CHARACTERISTIC_TIME,
-            "min_TotalTempIncr": self.config.MINIMUM_TEMPERATURE_INCREASE,
-            "max_TotalTempIncr": self.config.MAXIMUM_TEMPERATURE_INCREASE
-        }
+        self.constraints_dict = standard_constraints_dict
         self.ui.MinCharTimeEditField.setText(str(self.constraints_dict["min_TotalCharTime"]))
         self.ui.MaxCharTimeEditField.setText(str(self.constraints_dict["max_TotalCharTime"]))
         self.ui.MinTempIncEditField.setText(str(self.constraints_dict["min_TotalTempIncr"]))
