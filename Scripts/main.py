@@ -11,6 +11,7 @@ from src.standard_paths import standard_config_file_path
 from src.GUI.recording_gui.recording_main import RecordingMainWindow
 from src.simulation.simulator_gui import ModbusServerControlGUI
 from test_planner import TestPlannerMain
+from src.GUI.hot_disk_sequenzer.suquenzer_gui import ScheduleGeneratorMain
 
 
 #main_ui_file_path = r"..\src\GUI\recording_gui\recording_ui_design_works.ui"
@@ -38,6 +39,7 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionConfig_Settings.triggered.connect(self.open_config_settings)
         self.ui.actionQuick_Export.triggered.connect(self._quick_export)
         self.ui.actionDicon_Simulator.triggered.connect(self._open_dicon_simulator)
+        self.ui.actionSchedule_Creator.triggered.connect(self._open_schedule_creator)
 
     def open_test_planner(self):
         self.planner = TestPlannerMain()
@@ -59,6 +61,10 @@ class MainProgram(RecordingMainWindow):
         self.dicon_simulator.show()
         self.dicon_simulator.server_started.connect(self.change_modbus_host_ip)
         self.dicon_simulator.server_stopped.connect(self.change_modbus_host_ip)
+
+    def _open_schedule_creator(self):
+        self.schedule_creator = ScheduleGeneratorMain()
+        self.schedule_creator.show()
 
     def change_modbus_host_ip(self, host_ip=None, port=None):
         if host_ip and port:

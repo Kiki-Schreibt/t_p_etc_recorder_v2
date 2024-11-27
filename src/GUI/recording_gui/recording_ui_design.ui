@@ -654,6 +654,7 @@
     <addaction name="actionConfig_Settings"/>
     <addaction name="actionQuick_Export"/>
     <addaction name="actionDicon_Simulator"/>
+    <addaction name="actionSchedule_Creator"/>
    </widget>
    <addaction name="menuView"/>
   </widget>
@@ -676,6 +677,11 @@
   <action name="actionDicon_Simulator">
    <property name="text">
     <string>Dicon Simulator</string>
+   </property>
+  </action>
+  <action name="actionSchedule_Creator">
+   <property name="text">
+    <string>Schedule Creator</string>
    </property>
   </action>
  </widget>

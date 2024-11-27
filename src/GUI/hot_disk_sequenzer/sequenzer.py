@@ -57,7 +57,7 @@ class ScheduleCreator:
         instr_config = self._get_instr_config(root)
         hardware_data = self._get_hardware_data(root)
 
-        tcr_file_path = sample_temp_data.find('TcrFile').text
+        tcr_file_path = sample_temp_data.find('TcrFile').text if sample_temp_data is not None else "asdfasdfasdf" #todo standard tcr file path here
         disk_type = instr_config.find("DiskType").text
         sensor_type = instr_config.find("SensorType").text
         sensor_desing = instr_config.find("SensorDesign").text

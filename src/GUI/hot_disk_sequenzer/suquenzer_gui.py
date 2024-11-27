@@ -48,7 +48,7 @@ class ScheduleGeneratorBase(QWidget):
         # start time program
         self.start_measurements_label = QLabel("Start time temperature program:")
         self.start_measurements_input = QLineEdit(str(datetime.datetime.now()))
-        self.start_measurements_input.setFixedWidth(100)
+        self.start_measurements_input.setFixedWidth(300)
         measurement_layout.addRow(self.start_measurements_label, self.start_measurements_input)
 
 
@@ -70,6 +70,7 @@ class ScheduleGeneratorBase(QWidget):
         self.template_file_label = QLabel("Template File:")
         self.template_file_path = QLineEdit()
         self.template_file_path.setText(r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\hot_disk_sequenzer\template.hseq")
+        self.template_file_path.setFixedWidth(600)
         self.template_file_browse_button = QPushButton("Browse")
         self.template_file_browse_button.clicked.connect(self.browse_template_file)
         template_file_layout = QHBoxLayout()
@@ -93,7 +94,9 @@ class ScheduleGeneratorBase(QWidget):
         # Measurement table
         self.program_table = QTableWidget()
         self.program_table.setColumnCount(4)  # Adjust column count
-        self.program_table.setHorizontalHeaderLabels(['Temperature', 'Time', 'Measurement Power [W]', 'Measurement Time [s]'])
+        self.program_table.setHorizontalHeaderLabels(['Temperature [°C]', 'Time [hh:mm:ss]', 'Measurement Power [W]', 'Measurement Time [s]'])
+        header = self.program_table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
         self.layout.addWidget(self.program_table)
         self.program_table.insertRow(0)
         self.program_table.insertRow(1)
