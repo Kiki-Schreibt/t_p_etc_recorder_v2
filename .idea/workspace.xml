@@ -5,20 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_log_file_tracker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_log_file_tracker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/export_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/export_methods.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/meta_data/meta_data_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/meta_data/meta_data_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulation/simulator_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/simulator_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/testing_classes/optimization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/testing_classes/optimization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -265,7 +252,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>415</line>
+          <line>396</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -290,7 +277,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>538</line>
+          <line>519</line>
           <option name="timeStamp" value="375" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -310,42 +297,42 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>233</line>
+          <line>214</line>
           <option name="timeStamp" value="413" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>238</line>
+          <line>219</line>
           <option name="timeStamp" value="414" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>236</line>
+          <line>217</line>
           <option name="timeStamp" value="415" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>448</line>
+          <line>429</line>
           <option name="timeStamp" value="416" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>447</line>
+          <line>428</line>
           <option name="timeStamp" value="417" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>452</line>
+          <line>433</line>
           <option name="timeStamp" value="418" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>501</line>
+          <line>482</line>
           <option name="timeStamp" value="419" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>404</line>
+          <line>385</line>
           <option name="timeStamp" value="423" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
