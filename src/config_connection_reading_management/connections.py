@@ -218,19 +218,6 @@ class HotDiskConnection:
                 self.logger.error(f"Couldn't disconnect from server: {e}")
 
 
-if __name__ == "__main__":
-    file = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\waittenminutes.hseq"
-    try:
-        with HotDiskConnection() as client:
-            #client.send_command(f"SCHED:INIT {file}")
-            client.send_command(f"STAT?")
-            client.receive_response()
-    except KeyboardInterrupt:
-        print("Program interrupted by user.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
 
 def test_functionality():
     config = GetConfig()
@@ -311,10 +298,22 @@ def test_mb_connection():
             logger.error(f"Unexpected error: {e}")
     logger.info("Functionality test completed.")
 
+def test_hot_disk_connection():
+    try:
+        with HotDiskConnection() as client:
+            #client.send_command(f"SCHED:INIT {file}")
+            client.send_command(f"*IDN?")
+            client.receive_response()
+    except KeyboardInterrupt:
+        print("Program interrupted by user.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 # Run the test function
+
 if __name__ == "__main__":
-    pass
-    #test_functionality()
-    #test_mb_connection()
-    #test_connection_simulated_modbus()
+    file = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\waittenminutes.hseq"
+
+    test_functionality()
+    test_mb_connection()
+    test_hot_disk_connection()
