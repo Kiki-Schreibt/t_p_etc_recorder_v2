@@ -18,7 +18,7 @@ from src.meta_data.meta_data_handler import MetaData
 from src.standard_paths import (
     recording_ui_file_path,
     standard_t_p_test_data_folder_path,
-    standard_simulation_config_file_path
+
 )
 
 from src.config_connection_reading_management.logger import AppLogger
@@ -26,7 +26,6 @@ from src.GUI.qt_styles import aqua as style
 
 # Constants
 STANDARD_T_P_TEST_DATA_FOLDER_PATH = standard_t_p_test_data_folder_path
-STANDARD_SIM_CONFIG = standard_simulation_config_file_path
 FONT = QtGui.QFont("Arial", 8)
 local_tz_reg = ZoneInfo("Europe/Berlin")
 standard_constraints_dict = {

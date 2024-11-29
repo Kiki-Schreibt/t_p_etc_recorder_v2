@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import differential_evolution
 import matplotlib.pyplot as plt
+import socket
 import xml.etree.ElementTree as ET
 from src.table_data import TableConfig
 
@@ -30,15 +31,3 @@ def bla():
     plt.ylabel('y')
     plt.title('Differential Evolution Fit')
     plt.show()
-
-
-
-if __name__ == '__main__':
-
-    path_file = r'C:\Daten\Kiki\Masterarbeit\WAE-WA-021-Hexahydrid\WAE-WA-021-001b014-Hydriert\WAE-WA-021-007-60C-1-90bar_Hyd\WAE-WA-021-007-Hyd.hseq'
-    tree = ET.parse(path_file)
-    root = tree.getroot()
-    print(tree)
-    for child in root:
-
-        print(child.tag, child.attrib)

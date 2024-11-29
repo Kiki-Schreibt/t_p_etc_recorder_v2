@@ -1,5 +1,5 @@
 import time
-
+import socket
 
 from pymodbus.client import ModbusTcpClient as ModbusClient
 from pymodbus.exceptions import ModbusException, ConnectionException
@@ -157,6 +157,81 @@ class ModbusConnection:
         return False
 
 
+class HotDiskConnection:
+    HOT_DISK_HOST = 'localhost'
+    HOT_DISK_PORT = 50009
+
+    def __init__(self, host=HOT_DISK_HOST, port=HOT_DISK_PORT):
+        self.logger = AppLogger().get_logger(__name__)
+        self.host = host
+        self.port = port
+        self.sock = None
+
+    def __enter__(self):
+        self.connect()
+        #self.send_command("CONFIRM ON")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.disconnect()
+        # Return False to propagate exceptions
+        return False
+
+    def connect(self):
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(10)  # Set timeout [s]
+            self.logger.info(f"Connecting to {self.host}:{self.port}...")
+            self.sock.connect((self.host, self.port))
+            self.logger.info("Connected.")
+            return self
+        except Exception as e:
+            self.logger.error(f"An error occurred during connection: {e}")
+
+    def send_command(self, command):
+        if not self.sock:
+            self.logger.error("Not connected to the server.")
+            return
+        try:
+            self.sock.sendall(command.encode('ascii') + b'\r\n')
+            self.logger.info(f"Sent command: {command}")
+        except Exception as e:
+            self.logger.error(f"An error occurred while sending command: {e}")
+
+    def receive_response(self):
+        try:
+            response = self.sock.recv(4096)
+            self.logger.info(f"Received response: {response.decode('ascii')}")
+            return response.decode('ascii')
+        except socket.timeout:
+            self.logger.warning("No response received within timeout period.")
+        except Exception as e:
+            self.logger.error(f"An error occurred while receiving response: {e}")
+
+    def disconnect(self):
+        if self.sock:
+            try:
+                self.sock.close()
+                self.sock = None
+                self.logger.info("Disconnected from the server.")
+            except Exception as e:
+                self.logger.error(f"Couldn't disconnect from server: {e}")
+
+
+if __name__ == "__main__":
+    file = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\waittenminutes.hseq"
+    try:
+        with HotDiskConnection() as client:
+            #client.send_command(f"SCHED:INIT {file}")
+            client.send_command(f"STAT?")
+            client.receive_response()
+    except KeyboardInterrupt:
+        print("Program interrupted by user.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
 def test_functionality():
     config = GetConfig()
     END_REG = config.END_REG
@@ -239,6 +314,7 @@ def test_mb_connection():
 
 # Run the test function
 if __name__ == "__main__":
-    test_functionality()
+    pass
+    #test_functionality()
     #test_mb_connection()
     #test_connection_simulated_modbus()

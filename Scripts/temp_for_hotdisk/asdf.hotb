@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ExperimentBatch xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Schedule>
+    <BasicPreMeasurmentDelay>0</BasicPreMeasurmentDelay>
+    <BasicMeasurementInterval>10</BasicMeasurementInterval>
+    <BasicNoOfMeasurements>5</BasicNoOfMeasurements>
+    <StandbyTemperature>22</StandbyTemperature>
+    <StandbyVariation>2</StandbyVariation>
+    <ControllerStandbyMode>Undefined</ControllerStandbyMode>
+    <ActivityList>
+      <ScheduleActivity type="ScheduledDelay">
+        <waitPeriod>10</waitPeriod>
+      </ScheduleActivity>
+    </ActivityList>
+  </Schedule>
+  <ExecutedSteps>
+    <ExecutedStep type="ExecutedStep">
+      <RowNumber>0</RowNumber>
+      <LastStatus>Aborted</LastStatus>
+      <Description>9 minutes and 42 seconds left of 10 minutes</Description>
+      <DefaultDescription>9 minutes and 42 seconds left of 10 minutes</DefaultDescription>
+      <Time>2024-11-29T15:55:34.1091633+01:00</Time>
+    </ExecutedStep>
+    <ExecutedStep type="ExecutedStep">
+      <RowNumber>0</RowNumber>
+      <LastStatus>Aborted</LastStatus>
+      <Description>9 minutes and 56 seconds left of 10 minutes</Description>
+      <DefaultDescription>9 minutes and 56 seconds left of 10 minutes</DefaultDescription>
+      <Time>2024-11-29T16:00:25.4650651+01:00</Time>
+    </ExecutedStep>
+  </ExecutedSteps>
+  <ResultSteps>
+    <ExecutedStep type="ExecutedExperiment">
+      <RowNumber>0</RowNumber>
+      <LastStatus>NotRun</LastStatus>
+      <Data>
+        <RunConfiguration>
+          <MethodType>Standard</MethodType>
+          <SampleIdentity>
+            <Identity>asdf</Identity>
+            <AvailableProbingDepth>10</AvailableProbingDepth>
+            <Notes>350 C-400 C </Notes>
+          </SampleIdentity>
+          <InstrumentRunConfigurations type="StandardRunConfigurations">
+            <SampleTemperatureData>
+              <Sample>350</Sample>
+              <Source>ManualTemp</Source>
+              <Manual>350</Manual>
+              <TCR>0.00258621815450644</TCR>
+            </SampleTemperatureData>
+            <DiskType>Mica</DiskType>
+            <SensorType>DISK</SensorType>
+            <SensorDesign>5465</SensorDesign>
+            <SensorDimension>3.189</SensorDimension>
+            <SensorBatchID>F2</SensorBatchID>
+            <CableOrHolder>GreyCable</CableOrHolder>
+            <HeatingPower>0.05</HeatingPower>
+            <HeatingTime>20</HeatingTime>
+            <NPLC>4</NPLC>
+            <DriftEnable>true</DriftEnable>
+            <DriftTime>40</DriftTime>
+            <ScanningVoltage>0.05</ScanningVoltage>
+          </InstrumentRunConfigurations>
+          <ExperimentHardware>
+            <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+            <PowerLineFrequency>50</PowerLineFrequency>
+            <ReferenceResistance>6.912091</ReferenceResistance>
+          </ExperimentHardware>
+          <OriginalFile>C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\asdf.hotb</OriginalFile>
+          <SoftwareVersion>7.6.28</SoftwareVersion>
+        </RunConfiguration>
+      </Data>
+      <FileName>asdf_1</FileName>
+    </ExecutedStep>
+  </ResultSteps>
+  <ExportFiles />
+  <LogFiles>
+    <string>C:\HotDiskTPS_7\data\Log\StartHotDisk 2024 11 29 16.00.07.log</string>
+    <string>C:\HotDiskTPS_7\data\Log\StartHotDisk 2024 11 29 15.53.27.log</string>
+    <string>C:\HotDiskTPS_7\data\Log\StartHotDisk 2024 11 29 15.50.58.log</string>
+    <string>C:\HotDiskTPS_7\data\Log\StartHotDisk 2024 11 29 15.48.36.log</string>
+  </LogFiles>
+  <StatisticsByRow>false</StatisticsByRow>
+</ExperimentBatch>
