@@ -172,7 +172,9 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         self.generate_schedule_button.clicked.connect(self.generate_schedule)
 
     def generate_schedule(self):
-        # Collect all measurements from the table
+
+        #todo: change to schedule executor (run) from hot_disk_controller
+        #
         scheduled_program = self.parse_program()
         scheduled_program_unique_temperatures = scheduled_program.drop_duplicates(subset=['temperature'], keep='last')
         temperatures = scheduled_program_unique_temperatures['temperature'].tolist()

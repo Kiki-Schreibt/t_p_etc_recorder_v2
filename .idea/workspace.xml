@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
