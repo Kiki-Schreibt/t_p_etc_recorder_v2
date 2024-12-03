@@ -3,16 +3,20 @@ import threading
 from datetime import datetime
 import time
 import re
+from zoneinfo import ZoneInfo
 
 from src.config_connection_reading_management.connections import HotDiskConnection
 from src.config_connection_reading_management.logger import AppLogger
 
 temp_folder_path = r'C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk'
+local_tz = ZoneInfo("Europe/Berlin")
 
 
 class HotDiskScheduleGrabber:
-    def __init__(self, template_folder_path=temp_folder_path):
+    def __init__(self, template_folder_path=temp_folder_path, sensor_insulation="Mica", sensor_type="5465"):
         self.template_folder_path = template_folder_path
+        self.sensor_type = sensor_type
+        self.sensor_insulation = sensor_insulation
 
     def add_file_names_to_dict(self, temp_schedule_dict_list: list):
         """
@@ -22,12 +26,13 @@ class HotDiskScheduleGrabber:
         :return:
         """
         for measurement in temp_schedule_dict_list:
-            if not isinstance(measurement['time'], datetime):
-                measurement['time'] = datetime.strptime(measurement['time'], '%Y-%m-%d %H:%M:%S')
-        temp_schedule_dict_list.sort(key=lambda x: x['time'])
+            if not isinstance(measurement['meas_time'], datetime):
+                measurement['meas_time'] = datetime.strptime(measurement['meas_time'], '%Y-%m-%d %H:%M:%S')
+                measurement['meas_time'].replace(tzinfo=local_tz)
+        temp_schedule_dict_list.sort(key=lambda x: x['meas_time'])
 
         for measurement in temp_schedule_dict_list:
-            datetime_of_measurement = measurement['time']
+            datetime_of_measurement = measurement['meas_time']
             temperature = measurement['temperature']
             heating_time = measurement['heating_time']
             heating_power = measurement['heating_power']
@@ -46,7 +51,7 @@ class HotDiskScheduleGrabber:
         :return: List of matching file paths
         """
         # Build regex pattern to match filenames containing the parameters in any order
-        pattern = rf"^(?=.*{temperature}_C)(?=.*{heating_time}_s)(?=.*{heating_power}_mW).*\.hseq$"
+        pattern = rf"^(?=.*{int(temperature)}_C)(?=.*{int(heating_time)}_s)(?=.*{int(heating_power)}_mW)(?=.*{self.sensor_insulation}_ins)(?=.*{self.sensor_type}_type).*\.hseq$"
         regex = re.compile(pattern)
 
         # List all files in the directory
@@ -56,7 +61,9 @@ class HotDiskScheduleGrabber:
         for filename in all_files:
             if regex.match(filename):
                 full_path = os.path.join(self.template_folder_path, filename)
-                matching_files.append(full_path)
+                full_path = os.path.normpath(full_path)
+                return full_path
+
 
         if not matching_files:
             print(f"No files found for measurement at {temperature} °C, {heating_time} s, {heating_power} mW")
@@ -67,55 +74,63 @@ class HotDiskScheduleGrabber:
 
 
 class HotDiskController:
-    def __init__(self, template_folder_path=temp_folder_path):
+    def __init__(self, template_folder_path=temp_folder_path, sensor_insulation="Mica", sensor_type="5465"):
         self.logger = AppLogger().get_logger(__name__)
-        self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path)
+        self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type)
         self.running_event = threading.Event()
+        self.stop_event = threading.Event()
 
     def run(self, temp_schedule_dict_list):
         self.running_event.set()  # Indicate that the thread is running
         temp_schedule_dict_list = self.schedule_grabber.add_file_names_to_dict(temp_schedule_dict_list)
         for measurement in temp_schedule_dict_list:
             if not measurement['file_path']:
-                print(f"No scheduler file for measurement at {measurement['time']}")
+                self.logger.error(f"No scheduler file for measurement at {measurement['meas_time']}")
                 self.running_event.clear()
-        while self.running_event.is_set():
+        while self.running_event.is_set() and not self.stop_event.is_set():
             for measurement in temp_schedule_dict_list:
-                datetime_of_measurement = measurement['time']
+                datetime_of_measurement = measurement['meas_time']
                 full_file_path = measurement['file_path']
                 self.wait_until(datetime_of_measurement)
-                if not self.running_event.is_set():
-                    break  # Exit if the event has been cleared
+                if self.stop_event.is_set():
+                    break  # Exit if the stop event has been set
                 self.start_schedule_file(full_file_path=full_file_path)
             self.running_event.clear()  # Stop after one iteration
 
+
     def start_schedule_file(self, full_file_path):
         if full_file_path:
-            print("I'm starting a file")
-            # Uncomment and adjust the following code when ready
-            # try:
-            #     with HotDiskConnection() as client:
-            #         client.send_command(f"SCHED:INIT {full_file_path}")
-            # except Exception as e:
-            #     self.logger.error(f"Could not start schedule file: {e}")
+            try:
+                with HotDiskConnection() as client:
+                    client.send_command(f"SCHED:INIT {full_file_path}")
+                    self.logger.info(f"Measurement started with schedule {full_file_path}")
+            except Exception as e:
+                self.logger.error(f"Could not start schedule file: {e}")
 
     def wait_until(self, target_time):
-        """Pause execution until a specified target_time or until the running event is cleared.
+        """Pause execution until a specified target_time or until the stop_event is set.
 
         Args:
             target_time (datetime.datetime): The time to wait until.
         """
         now = datetime.now()
         delay = (target_time - now).total_seconds()
+        passed_time = 0
         if delay > 0:
             end_time = time.time() + delay
-            while time.time() < end_time and self.running_event.is_set():
+            while time.time() < end_time and not self.stop_event.is_set():
                 time_left = end_time - time.time()
-                wait_time = min(1, time_left)  # Wait in 1-second increments
-                self.running_event.wait(timeout=wait_time)
-
+                wait_time = min(1, time_left)
+                passed_time += wait_time
+                if passed_time >= 10:
+                    passed_time = 0
+                    print(f"{time_left} s left till measurement")
+                self.stop_event.wait(timeout=wait_time)  # Wait for wait_time seconds or until stop_event is set
+                if self.stop_event.is_set():
+                    break
     def end(self):
         self.running_event.clear()
+        self.stop_event.set()
 
 
 def test_hd_controller():
@@ -149,7 +164,10 @@ def test_hd_controller():
 
 
 if __name__ == '__main__':
-    test_hd_controller()
+   # test_hd_controller()
+    command = r"BATCH:REPORT C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\t"
     with HotDiskConnection() as client:
-        client.send_command("*IDN?")
-        response = client.receive_response()
+
+        client.send_command(command)
+        #client.send_command("*IDN?")
+        #response = client.receive_response()

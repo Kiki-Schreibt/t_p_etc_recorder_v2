@@ -8,8 +8,8 @@
   <ControllerStandbyMode>Undefined</ControllerStandbyMode>
   <BasicPreMeasurmentDelay>0</BasicPreMeasurmentDelay>
   <ActivityList>
-    <ScheduleActivity type="ScheduledTime">
-      <targetTime>2024-11-27T14:34:54.3012779+01:00</targetTime>
+    <ScheduleActivity type="ScheduledDelay">
+      <waitPeriod>1</waitPeriod>
     </ScheduleActivity>
     <ScheduleActivity type="MeasurementTriggerEvent">
       <NoOfMeasurements>3</NoOfMeasurements>
@@ -23,17 +23,16 @@
             <RunConfiguration>
               <MethodType>Standard</MethodType>
               <SampleIdentity>
-                <Identity>Test_Schedule_Creator</Identity>
+                <Identity>
+                </Identity>
                 <AvailableProbingDepth>10</AvailableProbingDepth>
-                <Notes>350 C-400 C </Notes>
               </SampleIdentity>
               <InstrumentRunConfigurations type="StandardRunConfigurations">
                 <SampleTemperatureData>
                   <Sample>350</Sample>
                   <Source>ManualTemp</Source>
                   <Manual>350</Manual>
-                  <TCR>0.00390518127278611</TCR>
-                  <TcrFile>C:\HotDiskTPS_7\data\Config\Tcr\Estimtated-TCR-Man-Deleted2-New_F2.txt</TcrFile>
+                  <TCR>0.00258621815450644</TCR>
                 </SampleTemperatureData>
                 <DiskType>Mica</DiskType>
                 <SensorType>DISK</SensorType>
@@ -42,8 +41,8 @@
                 <SensorBatchID>F2</SensorBatchID>
                 <CableOrHolder>GreyCable</CableOrHolder>
                 <HeatingPower>0.1</HeatingPower>
-                <HeatingTime>5</HeatingTime>
-                <NPLC>1</NPLC>
+                <HeatingTime>2</HeatingTime>
+                <NPLC>0.5</NPLC>
                 <DriftEnable>true</DriftEnable>
                 <DriftTime>40</DriftTime>
                 <ScanningVoltage>0.05</ScanningVoltage>
@@ -53,12 +52,11 @@
                 <PowerLineFrequency>50</PowerLineFrequency>
                 <ReferenceResistance>6.912091</ReferenceResistance>
               </ExperimentHardware>
-              <OriginalFile>C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\template.hotb</OriginalFile>
+              <OriginalFile>C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\asdf.hotb</OriginalFile>
               <SoftwareVersion>7.6.28</SoftwareVersion>
             </RunConfiguration>
           </Data>
-          <FileName>
-          </FileName>
+          <FileName>_2</FileName>
         </ExecutedStep>
       </ExperimentSettingsBySwitchPort>
     </ScheduleActivity>
@@ -69,14 +67,11 @@
           <selectionEndIndex>200</selectionEndIndex>
           <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
           <specificHeatOfSample>1E-06</specificHeatOfSample>
-          <specificHeatOfSampleOtherValue>0</specificHeatOfSampleOtherValue>
           <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
           <specHeatCapSensorCal>true</specHeatCapSensorCal>
           <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
           <timeCorrection>true</timeCorrection>
           <analysisType>Standard</analysisType>
-          <MinIntervalSize>20</MinIntervalSize>
-          <FullIntervalSize>60</FullIntervalSize>
           <SwitchPort>-1</SwitchPort>
         </CalcSettings>
       </CalculationSettingsBySwitchPort>

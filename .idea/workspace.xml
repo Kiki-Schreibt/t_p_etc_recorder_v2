@@ -6,8 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/25_C_3_s_100_mW.hseq" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/WAE-WA-030-037-Cyc290C-390C_Copy.hotb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/asdf.hotb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/final_schedule.hseq" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/hjhgkjhgjhg.hotb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/sequenzer_temp.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/template.hotb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/template.hseq" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/waittenminutes.hseq" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/test.hseq" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/test.hseq" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,27 +104,27 @@
     "Python.visualize_color_maps.executor": "Run",
     "Python.write_sql_results_to_txt.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "C:/Daten/Kiki/ProgrammingStuff/t_p_etc_recorder_v2/Scripts/temp_for_hotdisk",
+    "last_opened_file_path": "C:/Daten/Kiki/ProgrammingStuff/t_p_etc_recorder_v2/temp_folder_hot",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\temp_folder_hot" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\config_creation" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\data_fitter" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\recording_gui" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\recording_gui" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\Trash" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.hot_disk_controller">
+  <component name="RunManager" selected="Python.suquenzer_gui">
     <configuration name="connections" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -226,10 +237,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.suquenzer_gui" />
         <item itemvalue="Python.hot_disk_controller" />
         <item itemvalue="Python.connections" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.suquenzer_gui" />
         <item itemvalue="Python.tests" />
       </list>
     </recent_temporary>
@@ -345,6 +356,21 @@
           <line>23</line>
           <option name="timeStamp" value="432" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="445" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py</url>
+          <line>57</line>
+          <option name="timeStamp" value="446" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py</url>
+          <line>481</line>
+          <option name="timeStamp" value="449" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -354,6 +380,9 @@
         <watch expression="query" />
         <watch expression="column_names[0]" />
         <watch expression="update_between_min_list" />
+        <watch expression="&#10;            sample_temperatures=temperatures,&#10;            heating_powers=heating_powers," />
+        <watch expression="meas_times" />
+        <watch expression="&#10;            sample_temperatures=temperatures,&#10;            heating_powers=heating_powers,&#10;        template_file = self.template_file_path.text()&#10;&#10;" />
       </configuration>
     </watches-manager>
   </component>

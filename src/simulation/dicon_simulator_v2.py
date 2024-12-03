@@ -455,23 +455,31 @@ class TpProgramSimulator:
             plt.show()
 
         def get_program_times(self, start_time: datetime):
-            """returns temperatures pressures and times as a list.
+            """returns temperatures pressures and times as the total program and compressed
             can be used for scheduling measurement times in hotdisk software"""
             total_program = self.program.total_program(program=self.temperature_program,
                                                        repeat_start=self.repeat_start,
                                                        repeat_end=self.repeat_end,
                                                        repeat_count=self.repeat_count)
             compressed_program = combine_consecutive_temperatures(data=total_program)
-
+            start_time_copy = start_time
             end_times = []
-
             for index, row in compressed_program.iterrows():
                 end_time = start_time + row["duration"]
                 end_times.append(end_time)
                 start_time = end_time
-
             compressed_program['end_time'] = end_times
-            return compressed_program
+
+            df_total_program = pd.DataFrame(total_program, columns=['temperature', 'duration', 'measurement_power_watt', 'measurement_time'])
+            end_times = []
+            start_time = start_time_copy
+            for index, row in df_total_program.iterrows():
+                end_time = start_time + parse_duration(row["duration"])
+                end_times.append(end_time)
+                start_time = end_time
+            df_total_program['end_time'] = end_times
+
+            return compressed_program, df_total_program
 
 
 def parse_duration(duration_str):
