@@ -6,19 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/25_C_3_s_100_mW.hseq" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/WAE-WA-030-037-Cyc290C-390C_Copy.hotb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/asdf.hotb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/final_schedule.hseq" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/hjhgkjhgjhg.hotb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/sequenzer_temp.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/template.hotb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/template.hseq" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/waittenminutes.hseq" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/test.hseq" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/test.hseq" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/logger.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,7 +114,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\Trash" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.suquenzer_gui">
+  <component name="RunManager" selected="Python.connections">
     <configuration name="connections" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -237,9 +227,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.connections" />
         <item itemvalue="Python.suquenzer_gui" />
         <item itemvalue="Python.hot_disk_controller" />
-        <item itemvalue="Python.connections" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.tests" />
       </list>
@@ -358,12 +348,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py</url>
-          <line>53</line>
+          <line>54</line>
           <option name="timeStamp" value="445" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py</url>
-          <line>57</line>
+          <line>58</line>
           <option name="timeStamp" value="446" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

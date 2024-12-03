@@ -81,3 +81,32 @@ class AppLogger:
         for handler in logger.handlers[:]:  # Copy the list to avoid modification issues
             handler.close()                 # Close each handler to flush and release resources
             logger.removeHandler(handler)   # Remove the handler from the logger
+
+
+
+# src/config_connection_reading_management/logger.py
+import logging
+import os
+from datetime import datetime
+
+LOG_DIRECTORY = 'path/to/log_directory'
+LOG_FILE_NAME = 'Application_Log.log'
+LOG_FILE = os.path.join(LOG_DIRECTORY, datetime.now().strftime('%Y-%m-%d_%H') + '_' + LOG_FILE_NAME)
+
+def setup_logger():
+    if not os.path.exists(LOG_DIRECTORY):
+        os.makedirs(LOG_DIRECTORY)
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(LOG_FILE, mode='a'),
+            logging.StreamHandler()
+        ]
+    )
+
+def get_app_logger(name):
+    return logging.getLogger(name)
+
+# Initialize logging when the module is imported
+setup_logger()

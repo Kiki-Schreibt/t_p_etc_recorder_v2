@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 from src.config_connection_reading_management.connections import HotDiskConnection
 from src.config_connection_reading_management.logger import AppLogger
 
+
 temp_folder_path = r'C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk'
 local_tz = ZoneInfo("Europe/Berlin")
 

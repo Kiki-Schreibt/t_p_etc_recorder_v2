@@ -5,7 +5,8 @@ from pymodbus.client import ModbusTcpClient as ModbusClient
 from pymodbus.exceptions import ModbusException, ConnectionException
 import psycopg2
 
-from src.config_connection_reading_management.logger import AppLogger
+#todo: make applogger independent
+from src.config_connection_reading_management.logger import  AppLogger
 from src.config_connection_reading_management.config_reader import GetConfig
 
 
