@@ -2,7 +2,10 @@ import time
 from zoneinfo import ZoneInfo
 
 from src.config_connection_reading_management.connections import DatabaseConnection
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.table_data import TableConfig
@@ -18,7 +21,7 @@ class Problem:
     def __init__(self):
         self.running = False
         self.qb = qb
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.database_connection = DatabaseConnection()
        # self.database_connection.open_connection()  # Open the connection
         self.limit_datapoints = 10000

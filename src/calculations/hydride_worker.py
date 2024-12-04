@@ -2,7 +2,10 @@ import csv
 import json
 import re
 
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.standard_paths import standard_hydride_data_base_path, standard_periodic_table_path
 
 
@@ -25,7 +28,7 @@ class MetalHydrideDatabase:
         self.hydride_data_base_path = hydride_data_base_path
         self.hydride_data_base = []
         self.load_hydride_database()
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.periodic_table_of_elements = PeriodicTableOfElements()
 
     def load_hydride_database(self):
@@ -240,7 +243,7 @@ class MetalHydrideDatabase:
 class PeriodicTableOfElements:
 
     def __init__(self, periodic_table_path=standard_periodic_table_path):
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.periodic_table_path = periodic_table_path
         self.load_periodic_table()
 

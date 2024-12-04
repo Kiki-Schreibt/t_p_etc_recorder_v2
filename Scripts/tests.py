@@ -3,7 +3,12 @@ from scipy.optimize import differential_evolution
 import matplotlib.pyplot as plt
 import socket
 import xml.etree.ElementTree as ET
-from src.table_data import TableConfig
+#from src.table_data import TableConfig
+
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 
 
 np.random.seed(42)
@@ -31,3 +36,9 @@ def bla():
     plt.ylabel('y')
     plt.title('Differential Evolution Fit')
     plt.show()
+
+
+
+if __name__ == '__main__':
+    logger = logging.getLogger(__name__)
+    logger.info("hallo")

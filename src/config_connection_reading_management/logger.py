@@ -1,3 +1,5 @@
+# logger.py
+
 import os
 import logging
 import atexit
@@ -5,108 +7,81 @@ from datetime import datetime
 
 from src.standard_paths import standard_log_dir
 
+"""
+Custom logger module that mimics the standard logging interface.
+"""
 
-class AppLogger:
-    """
-    A class for setting up and providing access to a logger.
+LOG_DIRECTORY = standard_log_dir
+LOG_FILE_NAME = 'Application_Log.log'
+LOG_FILE = None
+_logger_initialized = False
 
-    This class configures a logger using settings from a configuration file. It sets up
-    logging to a specified file and optionally to the standard error stream.
 
-    Attributes:
-        LOG_DIRECTORY (str): Directory where the log files are stored.
-        LOG_FILE_NAME (str): Name of the log file.
-        LOG_FILE (str): Full path of the log file.
+def basicConfig(**kwargs):
+    logging.basicConfig(**kwargs)
 
-    Methods:
-        setup_logger(): Configures the logger with a FileHandler and optional StreamHandler.
-        get_logger(logger_name): Retrieves a logger with the specified name.
-        create_log_dir(): Creates the log directory if it does not exist.
-    """
-    LOG_DIRECTORY   = standard_log_dir
-    LOG_FILE_NAME        = 'Application_Log.log'
-    _logger_initialized = False
 
-    def __init__(self):
-        if not AppLogger._logger_initialized:
+def getLogger(name=None):
+    return logging.getLogger(name)
 
-            self.create_log_dir()
 
-            # Set up logging with FileHandler
-            self.LOG_FILE = os.path.join(
-                                            self.LOG_DIRECTORY,
-                                            datetime.now().strftime('%Y-%m-%d_%H') + '_' + self.LOG_FILE_NAME
-                                        )
+def shutdown():
+    logging.shutdown()
 
-            self.setup_logger()
-            atexit.register(self.close_logging_handlers, logging.getLogger())
-        AppLogger._logger_initialized = True
 
-    def setup_logger(self):
-        # Clear existing handlers if re-running this setup
-        logger = logging.getLogger()
-        if logger.handlers:
-            for handler in logger.handlers:
-                handler.close()
-                logger.removeHandler(handler)
+def init_logging():
+    global _logger_initialized, LOG_FILE
+    if not _logger_initialized:
+        create_log_dir()
 
-        # Configure new logging handlers
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(self.LOG_FILE, mode='a'),
-                logging.StreamHandler()  # Optional: also log to stderr
-            ]
+        # Set up logging with FileHandler
+        LOG_FILE = os.path.join(
+            LOG_DIRECTORY,
+            datetime.now().strftime('%Y-%m-%d_%H') + '_' + LOG_FILE_NAME
         )
 
-    def get_logger(self, logger_name):
-        return logging.getLogger(logger_name)
+        setup_logger()
+        atexit.register(close_logging_handlers, logging.getLogger())
+        _logger_initialized = True
 
-    def create_log_dir(self):
-        try:
-            if not os.path.exists(self.LOG_DIRECTORY):
-                os.makedirs(self.LOG_DIRECTORY)
-        except Exception as e:
-            print(f"Failed to create log directory {self.LOG_DIRECTORY}: {e}")
-
-    def close_logging_handlers(self, logger):
-        """
-        Close all handlers of the specified logger to ensure all resources are properly released.
-
-        Parameters:
-            logger (logging.Logger): The logger whose handlers should be closed.
-        """
-        # Loop over a copy of the handlers list to avoid modifying the list during iteration
-        for handler in logger.handlers[:]:  # Copy the list to avoid modification issues
-            handler.close()                 # Close each handler to flush and release resources
-            logger.removeHandler(handler)   # Remove the handler from the logger
-
-
-
-# src/config_connection_reading_management/logger.py
-import logging
-import os
-from datetime import datetime
-
-LOG_DIRECTORY = 'path/to/log_directory'
-LOG_FILE_NAME = 'Application_Log.log'
-LOG_FILE = os.path.join(LOG_DIRECTORY, datetime.now().strftime('%Y-%m-%d_%H') + '_' + LOG_FILE_NAME)
 
 def setup_logger():
-    if not os.path.exists(LOG_DIRECTORY):
-        os.makedirs(LOG_DIRECTORY)
+    # Clear existing handlers if re-running this setup
+    logger = logging.getLogger()
+    if logger.handlers:
+        for handler in logger.handlers:
+            handler.close()
+            logger.removeHandler(handler)
+
+    # Configure new logging handlers
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.FileHandler(LOG_FILE, mode='a'),
-            logging.StreamHandler()
+            logging.StreamHandler()  # Optional: also log to stderr
         ]
     )
 
-def get_app_logger(name):
-    return logging.getLogger(name)
+
+def create_log_dir():
+    try:
+        if not os.path.exists(LOG_DIRECTORY):
+            os.makedirs(LOG_DIRECTORY)
+    except Exception as e:
+        print(f"Failed to create log directory {LOG_DIRECTORY}: {e}")
+
+
+def close_logging_handlers(logger):
+    """
+    Close all handlers of the specified logger to ensure all resources are properly released.
+
+    Parameters:
+        logger (logging.Logger): The logger whose handlers should be closed.
+    """
+    for handler in logger.handlers[:]:
+        handler.close()
+        logger.removeHandler(handler)
 
 # Initialize logging when the module is imported
-setup_logger()
+init_logging()

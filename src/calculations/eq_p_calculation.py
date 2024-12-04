@@ -1,7 +1,10 @@
 import numpy as np
 
 from src.calculations.hydride_worker import MetalHydrideDatabase
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.meta_data.meta_data_handler import MetaData
 
 # Constants
@@ -11,7 +14,6 @@ V_pipes = 1e-7         # [m^3] Pipe volume
 
 
 class VantHoffCalcEq:
-    #todo: bring consistency in units. Sometimes conversion to SI is here sometimes in other methods
     def __init__(self, enthalpy=None, entropy=None, meta_data=None, sample_id=None, hydride=None):
         """
         Initialize the VantHoffCalcEq with default values for entropy and enthalpy.
@@ -23,7 +25,7 @@ class VantHoffCalcEq:
 
         """
 
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.enthalpy = None
         self.entropy = None
 

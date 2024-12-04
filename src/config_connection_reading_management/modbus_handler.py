@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 import numpy as np
 import struct
@@ -12,7 +13,10 @@ from psycopg2 import IntegrityError
 
 
 from src.config_connection_reading_management.connections import DatabaseConnection, GetConfig, ModbusConnection
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
@@ -75,7 +79,7 @@ class ModbusProcessor:
         self.meta_data = meta_data
         self.mb_host = mb_host
         self.mb_port = mb_port
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.running = False
         self.mb_reader = ModbusReader()
         self.mb_data_handler = ModbusDataHandler(meta_data=self.meta_data)
@@ -181,7 +185,7 @@ class ModbusReader:
         """
         self.running = False
         self.table = TableConfig().TPDataTable
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.max_retries = 10  # Maximum number of retries for Modbus connection
         self.retry_delay = 5  # Delay in seconds between retries
         self.retry_count = 0
@@ -394,7 +398,7 @@ class ModbusDataHandler:
         meta_data : MetaData, optional
             MetaData instance (default is MetaData()).
         """
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.data_retriever = DataRetriever()
         self.tp_table = TableConfig().TPDataTable
         self.meta_data = meta_data
@@ -556,7 +560,7 @@ class CycleCounter:
         self.current_state = current_state
         self.tp_table = TableConfig().TPDataTable
         self.cycle_table = TableConfig().CycleDataTable
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.data_retriever = DataRetriever()
         self.temp_tolerance = 10
         self.time_start_whole_cycle = None
@@ -1008,7 +1012,7 @@ class CycleCounter:
 
 class ModbusDBWriter:
     def __init__(self, meta_data=MetaData()):
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.qb = QueryBuilder()
         self.meta_data = meta_data

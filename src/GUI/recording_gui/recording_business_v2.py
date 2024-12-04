@@ -11,7 +11,10 @@ from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, QObject,
                             Signal, Slot)
 from PySide6.QtWidgets import QApplication
 
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
 from src.meta_data.meta_data_handler import MetaData
@@ -72,7 +75,7 @@ class Record(QObject):
         Initializes the Record class with specified metadata, calculation mode, and reservoir volume.
         """
         super().__init__()
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.update_lock = threading.Lock()
         self.mb_processor = self._initialize_mb_processor(meta_data)
         self.log_file_tracker = self._initialize_log_file_tracker(meta_data)
@@ -267,7 +270,7 @@ class ReadPlotUptake(pg.PlotWidget):
         """
 
         super().__init__(parent=parent)
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         axis_font = {'color': 'white', 'font-size': '12pt'}
         self.font_color = 'white'
         self.font_size = 10
@@ -394,7 +397,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
             Initializes the plot widget with two scatter plots and a legend.
             """
             super().__init__(parent=parent)
-            self.logger = AppLogger().get_logger(__name__)
+            self.logger = logging.getLogger(__name__)
             self.db_reader = DataRetriever()
             self.constraints = constraints
             # Customize plot appearance (you can adjust these settings as needed)
@@ -508,7 +511,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
             Initializes the plot widget with two scatter plots and a legend.
             """
             super().__init__(parent=parent)
-            self.logger = AppLogger().get_logger(__name__)
+            self.logger = logging.getLogger(__name__)
             self.reader = ReadPlotTpDependent.ReadTpDependent(parent=parent, constraints=constraints)
             # Customize plot appearance (you can adjust these settings as needed)
             # self.plotItem.showGrid(x=True, y=True)
@@ -649,7 +652,7 @@ class ReadPlotXY(pg.PlotWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         # Initialize legend
         self.plotItem.addLegend(offset=(0, 1))
         self.table = TableConfig().ThermalConductivityXyDataTable

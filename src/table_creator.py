@@ -1,3 +1,5 @@
+import logging
+
 from src.table_data import TableConfig
 from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
 
@@ -5,7 +7,7 @@ from src.config_connection_reading_management.connections import DatabaseConnect
 class TableCreator:
     def __init__(self):
         self.db_connection = DatabaseConnection()
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
 
     def create_all_tables(self):
         for attr_name, attr_value in vars(TableConfig).items():

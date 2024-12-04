@@ -11,8 +11,11 @@ from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, QObject,
                             Signal, Slot, QRunnable, QThreadPool)
 from PySide6.QtWidgets import QApplication
 
-from src.config_connection_reading_management.connections import  DatabaseConnection
-from src.config_connection_reading_management.logger import AppLogger
+from src.config_connection_reading_management.connections import DatabaseConnection
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
 from src.meta_data.meta_data_handler import MetaData
@@ -69,7 +72,7 @@ class ReadData(QThread):
 
     def __init__(self, meta_data=MetaData()):
         super().__init__()
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.db_retriever = DataRetriever()
         self.limit_amount_storage = self.db_retriever.limit_datapoints
         self.running = False
@@ -467,7 +470,7 @@ class PlotBaseStyle(pg.PlotWidget):
 
     def __init__(self, parent=None, y_axis=''):
         super().__init__(parent=parent)
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.axis_font = {'color': 'white', 'font-size': '12pt'}
         self.font_color = 'white'
         self.font_size = 10

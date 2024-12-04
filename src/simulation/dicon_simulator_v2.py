@@ -1,4 +1,4 @@
-
+import logging
 from datetime import datetime, timedelta
 import threading
 import os
@@ -11,7 +11,10 @@ import matplotlib.pyplot as plt
 from pyModbusTCP.server import ModbusServer
 from PySide6.QtCore import Signal, QObject
 
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.table_data import TableConfig
 
 local_tz = ZoneInfo("Europe/Berlin")
@@ -31,7 +34,7 @@ class MBServer(QObject):
         self.port = port
         self._server = ModbusServer(host=host_ip, port=port, no_block=True)
         self.folder_path = folder_path
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.mode = mode
         self.sleep_interval = sleep_interval
         self.sleep_interval_lock = threading.Lock()  # To safely update sleep_interval
@@ -310,7 +313,7 @@ class Simulator:
 class TpProgramSimulator:
     class TPProgram:
         def __init__(self):
-            self.logger = AppLogger().get_logger(__name__)
+            self.logger = logging.getLogger(__name__)
 
         def parse_duration(self, duration_str):
             """Converts duration string 'HH:MM:SS' to total seconds."""
@@ -387,7 +390,7 @@ class TpProgramSimulator:
         def __init__(self, temperature_program=None, repeat_start=None,
                      repeat_end=None, repeat_count=0):
             self.program = TpProgramSimulator.TPProgram()
-            self.logger = AppLogger().get_logger(__name__)
+            self.logger = logging.getLogger(__name__)
 
             if temperature_program is None:
                 # Default temperature program

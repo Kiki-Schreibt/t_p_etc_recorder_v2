@@ -1,3 +1,4 @@
+import logging
 import threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -7,7 +8,10 @@ import os
 
 from PySide6.QtCore import Signal, QObject
 
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor
 from src.standard_paths import standard_hot_disk_file_path
 
@@ -21,7 +25,7 @@ class LogFileTracker(QObject):
         self.hot_disk_log_dir_path = standard_hot_disk_file_path
         self.observer = None
         self.running = False
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.update_lock = threading.Lock()
         self.event_handler = LogFileHandler(self.meta_data)
         self.event_handler.time_range_from_export.connect(self._emit_times)
@@ -76,7 +80,7 @@ class LogFileHandler(FileSystemEventHandler, QObject):
         self.meta_data = meta_data
         latest_file = self.get_latest_file(folder_path=standard_hot_disk_file_path)
         self.latest_export_path = latest_file
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self._test_mode = False
 
     @staticmethod

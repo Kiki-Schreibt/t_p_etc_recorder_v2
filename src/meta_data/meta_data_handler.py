@@ -1,3 +1,4 @@
+import logging
 import time
 from datetime import timedelta
 from zoneinfo import ZoneInfo
@@ -5,7 +6,11 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 from src.config_connection_reading_management.config_reader import GetConfig
-from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
+from src.config_connection_reading_management.connections import DatabaseConnection
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.table_data import TableConfig
 meta_table = TableConfig().MetaDataTable
@@ -39,7 +44,7 @@ class MetaData:
         self.db = DatabaseConnection()
         self.config = GetConfig()
         self.qb = QueryBuilder()
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.table_name = TableConfig().MetaDataTable.table_name
         self.sample_id = sample_id
         self.start_time = None

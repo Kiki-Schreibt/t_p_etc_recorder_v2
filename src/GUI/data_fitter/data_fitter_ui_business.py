@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit, differential_evolution, brute
 
 from src.calculations.hydride_worker import MetalHydrideDatabase
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.table_data import TableConfig
 
@@ -30,7 +33,7 @@ def remove_order_term(input_string):
 
 class DataLoader:
     def __init__(self, file_path=None, sample_id=None, cycle_number=None, temperature=None):
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.file_path = file_path
         self.data_retriever = DataRetriever()
         self.standard_constraints_dict = standard_constraints_dict
@@ -117,7 +120,7 @@ class MaterialProperties:
                  material=None, de_hyd_state="Dehydrogenated", particle_diameter=45e-6):
         if not material:
             return
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.hydride_worker = MetalHydrideDatabase()
         self.material = material # material name MgH2
         self.particle_diameter = particle_diameter

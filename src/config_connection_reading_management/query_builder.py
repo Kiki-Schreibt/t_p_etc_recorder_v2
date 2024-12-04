@@ -2,7 +2,10 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from src.config_connection_reading_management.connections import DatabaseConnection
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.table_data import TableConfig
 local_tz = ZoneInfo("Europe/Berlin")
 
@@ -10,7 +13,7 @@ local_tz = ZoneInfo("Europe/Berlin")
 class QueryBuilder:
 
     def __init__(self):
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.etc_table = TableConfig().ETCDataTable
         self.etc_xy_table = TableConfig().ThermalConductivityXyDataTable

@@ -1,3 +1,4 @@
+import logging
 
 import numpy as np
 import win32com.client as win32
@@ -12,7 +13,10 @@ import pandas as pd
 from psycopg2 import IntegrityError
 
 from src.config_connection_reading_management.connections import DatabaseConnection
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
 from src.table_data import TableConfig
@@ -121,7 +125,7 @@ class DataRetriever:
     def __init__(self):
         self.running = False
         self.qb = qb
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.database_connection = DatabaseConnection()
         self.limit_datapoints = 10000
 
@@ -509,7 +513,7 @@ class DataBaseManipulator:
         Initializes the DataBaseManipulator with a logger.
         """
         self.running = False
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.database_connection = DatabaseConnection()
 
 
@@ -804,7 +808,7 @@ class ExcelDataProcessor:
         self.file_path = file_path
         self.results_sheet_name = results_sheet_name
         self.parameters_sheet_name = parameters_sheet_name
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
 
 
         if sample_id:

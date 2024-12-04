@@ -6,9 +6,26 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/testing_classes/optimization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/testing_classes/optimization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/calculations/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/calculations/eq_p_calculation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/calculations/hydride_worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/calculations/hydride_worker.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_log_file_tracker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_log_file_tracker.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/export_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/export_methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/meta_data/meta_data_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/meta_data/meta_data_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,7 +131,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\Trash" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.connections">
+  <component name="RunManager" selected="Python.main">
     <configuration name="connections" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -227,11 +244,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.tests" />
         <item itemvalue="Python.connections" />
         <item itemvalue="Python.suquenzer_gui" />
         <item itemvalue="Python.hot_disk_controller" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.tests" />
       </list>
     </recent_temporary>
   </component>
@@ -258,17 +275,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>396</line>
+          <line>400</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py</url>
-          <line>460</line>
+          <line>463</line>
           <option name="timeStamp" value="157" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/export_methods.py</url>
-          <line>78</line>
+          <line>80</line>
           <option name="timeStamp" value="171" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -278,88 +295,93 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py</url>
-          <line>1066</line>
+          <line>1070</line>
           <option name="timeStamp" value="318" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>519</line>
+          <line>523</line>
           <option name="timeStamp" value="375" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/recording_gui/recording_main.py</url>
-          <line>269</line>
+          <line>272</line>
           <option name="timeStamp" value="390" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py</url>
-          <line>770</line>
+          <line>773</line>
           <option name="timeStamp" value="391" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py</url>
-          <line>430</line>
+          <line>433</line>
           <option name="timeStamp" value="402" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>214</line>
+          <line>218</line>
           <option name="timeStamp" value="413" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>219</line>
+          <line>223</line>
           <option name="timeStamp" value="414" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>217</line>
+          <line>221</line>
           <option name="timeStamp" value="415" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>429</line>
+          <line>433</line>
           <option name="timeStamp" value="416" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>428</line>
+          <line>432</line>
           <option name="timeStamp" value="417" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>433</line>
+          <line>437</line>
           <option name="timeStamp" value="418" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>482</line>
+          <line>486</line>
           <option name="timeStamp" value="419" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>385</line>
+          <line>389</line>
           <option name="timeStamp" value="423" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/calculations/hydride_worker.py</url>
-          <line>23</line>
+          <line>26</line>
           <option name="timeStamp" value="432" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py</url>
-          <line>54</line>
+          <line>58</line>
           <option name="timeStamp" value="445" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py</url>
-          <line>58</line>
+          <line>62</line>
           <option name="timeStamp" value="446" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py</url>
-          <line>481</line>
+          <line>484</line>
           <option name="timeStamp" value="449" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/connections.py</url>
+          <line>15</line>
+          <option name="timeStamp" value="451" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -6,7 +6,10 @@ from pymodbus.exceptions import ModbusException, ConnectionException
 import psycopg2
 
 #todo: make applogger independent
-from src.config_connection_reading_management.logger import  AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.config_connection_reading_management.config_reader import GetConfig
 
 
@@ -35,7 +38,7 @@ class DatabaseConnection:
     def __init__(self):
         self.conn = None
         self.cursor = None
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.auto_close = True
 
     def __enter__(self):
@@ -107,7 +110,7 @@ class ModbusConnection:
 
     def __init__(self, mb_host=MODBUS_HOST, mb_port=MODBUS_PORT):
         self.client = None
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.mb_host = mb_host
         self.mb_port = mb_port
 
@@ -163,7 +166,7 @@ class HotDiskConnection:
     HOT_DISK_PORT = 50009
 
     def __init__(self, host=HOT_DISK_HOST, port=HOT_DISK_PORT):
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.host = host
         self.port = port
         self.sock = None

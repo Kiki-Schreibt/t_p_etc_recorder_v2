@@ -1,8 +1,10 @@
 import pandas as pd
 import os
 import numpy as np
-
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.table_data import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.standard_paths import standard_export_path
@@ -12,7 +14,7 @@ from src.meta_data.meta_data_handler import MetaData
 class QuickExport:
 
     def __init__(self):
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.etc_table = TableConfig().ETCDataTable
         self.cycle_table = TableConfig().CycleDataTable

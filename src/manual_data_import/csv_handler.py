@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -15,7 +17,10 @@ from src.config_connection_reading_management.modbus_handler import ModbusDBWrit
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, write_ETC_in_parallel
 from src.config_connection_reading_management.connections import DatabaseConnection, GetConfig
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.table_data import TableConfig
 
 local_tz = ZoneInfo("Europe/Berlin")
@@ -50,7 +55,7 @@ class CSVProcessor:
         """
 
         self.meta_data = MetaData(sample_id=sample_id)
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.folder_path = folder_path
         self.full_file_path = full_file_path
         if mode == 'auto':
@@ -182,7 +187,7 @@ class CSVImporter:
         """
         Initializes the CSVImporter with a logger and table configuration.
         """
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
 
     def import_csv(self, file_name: Optional[str] = None, file_path: Optional[str] = None,
@@ -511,7 +516,7 @@ class CSVWriter:
         Args:
             meta_data (MetaData): The metadata object containing sample information.
         """
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.writer = ModbusDBWriter(meta_data=meta_data)
         self.tp_table = TableConfig().TPDataTable
         self.compress_data = compress_data
@@ -571,7 +576,7 @@ class CSVCounter:
         """
         Initializes the CSVCounter with necessary configurations.
         """
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.cycle_table = TableConfig().CycleDataTable
 

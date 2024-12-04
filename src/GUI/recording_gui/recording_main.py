@@ -21,7 +21,10 @@ from src.standard_paths import (
 
 )
 
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 from src.GUI.qt_styles import aqua as style
 
 # Constants
@@ -51,7 +54,7 @@ class RecordingMainWindow(QMainWindow):
         self.setWindowTitle("T-p ETC Recorder")
         self.setStyleSheet(style)
         self.setFont(FONT)
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.load_ui_file(recording_ui_file_path)
 
         self.meta_data = MetaData()

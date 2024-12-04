@@ -1,3 +1,4 @@
+import logging
 import os
 import threading
 from datetime import datetime
@@ -6,7 +7,10 @@ import re
 from zoneinfo import ZoneInfo
 
 from src.config_connection_reading_management.connections import HotDiskConnection
-from src.config_connection_reading_management.logger import AppLogger
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 
 
 temp_folder_path = r'C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk'
@@ -76,7 +80,7 @@ class HotDiskScheduleGrabber:
 
 class HotDiskController:
     def __init__(self, template_folder_path=temp_folder_path, sensor_insulation="Mica", sensor_type="5465"):
-        self.logger = AppLogger().get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
         self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type)
         self.running_event = threading.Event()
         self.stop_event = threading.Event()
