@@ -5,7 +5,6 @@ from pymodbus.client import ModbusTcpClient as ModbusClient
 from pymodbus.exceptions import ModbusException, ConnectionException
 import psycopg2
 
-#todo: make applogger independent
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
@@ -197,7 +196,7 @@ class HotDiskConnection:
             self.logger.error("Not connected to the server.")
             return
         try:
-            self.sock.sendall(command.encode('ascii') + b'\r\n')
+            self.sock.sendall(command.encode('utf-8') + b'\r\n')
             self.logger.info(f"Sent command: {command}")
         except Exception as e:
             self.logger.error(f"An error occurred while sending command: {e}")
@@ -205,8 +204,9 @@ class HotDiskConnection:
     def receive_response(self):
         try:
             response = self.sock.recv(4096)
-            self.logger.info(f"Received response: {response.decode('ascii')}")
-            return response.decode('ascii')
+            decoded_response = response.decode('utf-8')
+            self.logger.info(f"Received response: {decoded_response}")
+            return decoded_response
         except socket.timeout:
             self.logger.warning("No response received within timeout period.")
         except Exception as e:
@@ -229,7 +229,7 @@ def test_functionality():
     START_REG = config.START_REG
 
     # Test the AppLogger
-    logger = AppLogger().get_logger("TestApp")
+    logger = logging.getLogger("TestApp")
     logger.info("Testing AppLogger functionality.")
 
     # Test the DatabaseConnection
@@ -282,7 +282,7 @@ def test_mb_connection():
     config = GetConfig()
     END_REG = config.END_REG
     START_REG = config.START_REG
-    logger = AppLogger().get_logger("TestApp")
+    logger = logging.getLogger("TestApp")
     with ModbusConnection() as connection:
         try:
             logger.info("Testing ModbusConnection functionality.")

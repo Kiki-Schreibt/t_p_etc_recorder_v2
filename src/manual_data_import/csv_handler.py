@@ -900,7 +900,7 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 if __name__ == '__main__':
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
     #sample_ids = ('WAE-WA-030',)
-    logger = AppLogger().get_logger(__name__)
+    logger = logging.getLogger(__name__)
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
         csv_processor = CSVProcessor(sample_id=sample_id)

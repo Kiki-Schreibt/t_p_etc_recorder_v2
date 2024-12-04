@@ -171,8 +171,9 @@ def test_hd_controller():
 if __name__ == '__main__':
    # test_hd_controller()
     command = r"BATCH:REPORT C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\t"
+    command = r"ROW:SEL?"
     with HotDiskConnection() as client:
 
-        client.send_command(command)
-        #client.send_command("*IDN?")
-        #response = client.receive_response()
+        #client.send_command(command)
+        client.send_command("*IDN?")
+        response = client.receive_response()
