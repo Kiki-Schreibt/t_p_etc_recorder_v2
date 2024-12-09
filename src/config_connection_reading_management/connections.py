@@ -212,6 +212,10 @@ class HotDiskConnection:
         except Exception as e:
             self.logger.error(f"An error occurred while receiving response: {e}")
 
+    def send_command_receive_response(self, command):
+        self.send_command(command=command)
+        return self.receive_response()
+
     def disconnect(self):
         if self.sock:
             try:

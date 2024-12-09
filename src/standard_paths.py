@@ -27,7 +27,7 @@ def get_user_home_path(subpath):
     user_home = os.path.expanduser("~")
     return os.path.join(user_home, subpath)
 
-
+#todo: try to import paths from config file and use standard paths if not possible. then delete from config class
 
 planner_ui_file_path = get_ui_file_path('planner_gui', 'planner_ui.ui')
 recording_ui_file_path = get_ui_file_path('recording_gui','recording_ui_design.ui')

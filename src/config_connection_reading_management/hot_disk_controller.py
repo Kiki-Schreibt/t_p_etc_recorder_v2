@@ -79,13 +79,21 @@ class HotDiskScheduleGrabber:
 
 
 class HotDiskController:
-    def __init__(self, template_folder_path=temp_folder_path, sensor_insulation="Mica", sensor_type="5465"):
+    def __init__(self, template_folder_path=temp_folder_path, sensor_insulation="Mica", sensor_type="5465", standard_number_of_measurements=3):
         self.logger = logging.getLogger(__name__)
         self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type)
         self.running_event = threading.Event()
         self.stop_event = threading.Event()
+        self.current_experiment_row = self.get_row_count()
+        self.number_of_measurements = standard_number_of_measurements
 
     def run(self, temp_schedule_dict_list):
+        """
+        selects correct schedule files and starts them in order. Always waits for next calculated starting time from temperature program.
+        :param temp_schedule_dict_list: dictionatry with measurement parameters and times for measurement execution
+        :return:
+        """
+
         self.running_event.set()  # Indicate that the thread is running
         temp_schedule_dict_list = self.schedule_grabber.add_file_names_to_dict(temp_schedule_dict_list)
         for measurement in temp_schedule_dict_list:
@@ -101,7 +109,6 @@ class HotDiskController:
                     break  # Exit if the stop event has been set
                 self.start_schedule_file(full_file_path=full_file_path)
             self.running_event.clear()  # Stop after one iteration
-
 
     def start_schedule_file(self, full_file_path):
         if full_file_path:
@@ -133,10 +140,56 @@ class HotDiskController:
                 self.stop_event.wait(timeout=wait_time)  # Wait for wait_time seconds or until stop_event is set
                 if self.stop_event.is_set():
                     break
+
     def end(self):
         self.running_event.clear()
         self.stop_event.set()
 
+    @staticmethod
+    def get_row_count():
+        with HotDiskConnection() as client:
+            client.send_command("ROW:COUNT?")
+            row_count = client.receive_response()
+            return int(row_count)
+
+    def select_rows(self, current_experiment_row=None, number_of_measurements=None, include_avg_div=False):
+        """
+        selects experiment rows in constants analyser. Auto selects rows based on the number of measurements to average either for calculation (include_avg_div = False)
+        or for exporting (include_avg_div = True)
+        :param current_experiment_row:
+        :param number_of_measurements:
+        :param include_avg_div:
+        :return:
+        """
+        start_idx = current_experiment_row if current_experiment_row else self.current_experiment_row
+        number_of_measurements = number_of_measurements if number_of_measurements else self.number_of_measurements
+
+        if include_avg_div:
+            end_idx = start_idx + number_of_measurements + 1
+        else:
+            end_idx = start_idx + number_of_measurements - 1
+
+        with HotDiskConnection() as client:
+            client.send_command(f"ROW:SEL {start_idx}-{end_idx}")
+
+    @staticmethod
+    def calculate_results():
+        with HotDiskConnection() as client:
+            client.send_command("CAlC:EXE")
+
+    def update_row_count(self, incr_increase=None):
+        """
+        updates self.current_experiment_row to last experiment row. or increases self.current_experiment_row by values (should be picked number of measurements + 2 for iterating through a batch file)
+        """
+        if not incr_increase:
+            self.current_experiment_row = self.get_row_count()
+        else:
+            self.current_experiment_row += incr_increase
+
+    def get_result_val(self):
+        with HotDiskConnection() as client:
+           result_val =  client.send_command_receive_response(command="CALC:TCOND?")
+        return result_val
 
 def test_hd_controller():
     from datetime import timedelta
@@ -169,11 +222,12 @@ def test_hd_controller():
 
 
 if __name__ == '__main__':
-   # test_hd_controller()
-    command = r"BATCH:REPORT C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\t"
-    command = r"ROW:SEL?"
-    with HotDiskConnection() as client:
+   hd_controller = HotDiskController()
+   with HotDiskConnection() as client:
+       client.send_command("ROW:SEL ALL")
+   rc = hd_controller.get_result_val()
+   print(rc)
 
-        #client.send_command(command)
-        client.send_command("*IDN?")
-        response = client.receive_response()
+
+
+     #   response = client.receive_response()
