@@ -230,6 +230,7 @@ class PlotContinuousWindow(PlotBaseWindow):
         self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
         self.reader.current_state_sig.connect(self.current_state_sig.emit)
         self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
+        self.enableAutoRange()
 
 
 class PlotStaticWindow(PlotBaseWindow):

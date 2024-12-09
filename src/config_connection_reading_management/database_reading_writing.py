@@ -849,7 +849,7 @@ class ExcelDataProcessor:
             return merged_df
         except Exception as e:
             self.logger.error(f"Error reading and processing sheets: %s", e)
-            return None
+            return pd.DataFrame()
 
     @staticmethod
     def _process_results_sheet_for_table(df):
@@ -1209,59 +1209,60 @@ class ExcelDataProcessor:
         table = TableConfig.ETCDataTable
         self._update_xlsx_file()
         combined_df = self._read_and_process_sheets()
+        if combined_df.empty:
+            return None, None
 
-        if combined_df is not None:
-            if self._test_mode:
-                combined_df = self._overwrite_with_example_data(df=combined_df)
 
-            thermal_conductivity_xy_data = self._get_measurement_xy_data(combined_df)
-            combined_df = combined_df.drop_duplicates(subset=table.get_clean("time"), keep='last')
+        if self._test_mode:
+            combined_df = self._overwrite_with_example_data(df=combined_df)
 
-            combined_df[self.etc_table.sample_id] = self.meta_data.sample_id
-            thermal_conductivity_xy_data[self.xy_table.sample_id] = self.meta_data.sample_id
-            combined_df = combined_df.dropna(subset=[table.get_clean("time")])
-            thermal_conductivity_xy_data = thermal_conductivity_xy_data.dropna(subset=[self.xy_table.time])
-            df_t_p = self._find_corresponding_t_p(combined_df)
-            if not combined_df.empty and not df_t_p.empty:
-                combined_df = pd.merge(combined_df, df_t_p, on=self.etc_table.get_clean('time'), how='inner')
-            else:
-                combined_df[self.etc_table.pressure] = None
-                combined_df[self.etc_table.temperature_sample] = None
-                combined_df[self.etc_table.cycle_number] = None
-                combined_df[self.etc_table.cycle_number_flag] = None
+        thermal_conductivity_xy_data = self._get_measurement_xy_data(combined_df)
+        combined_df = combined_df.drop_duplicates(subset=table.get_clean("time"), keep='last')
 
-            pd.set_option('future.no_silent_downcasting', True)
-            combined_df.replace('(no corr.)', 0, inplace=True)
-            ETC_insert_query, ETC_values = TableConfig().writing_query_from_df(df=combined_df,
-                                                                               map=self.etc_column_attribute_mapping,
-                                                                               table_name=self.etc_table.table_name)
-            xy_insert_query, xy_values = TableConfig().writing_query_from_df(df=thermal_conductivity_xy_data,
-                                                                             map=self.etc_xy_column_attribute_mapping,
-                                                                             table_name=self.xy_table.table_name)
+        combined_df[self.etc_table.sample_id] = self.meta_data.sample_id
+        thermal_conductivity_xy_data[self.xy_table.sample_id] = self.meta_data.sample_id
+        combined_df = combined_df.dropna(subset=[table.get_clean("time")])
+        thermal_conductivity_xy_data = thermal_conductivity_xy_data.dropna(subset=[self.xy_table.time])
+        df_t_p = self._find_corresponding_t_p(combined_df)
+        if not combined_df.empty and not df_t_p.empty:
+            combined_df = pd.merge(combined_df, df_t_p, on=self.etc_table.get_clean('time'), how='inner')
+        else:
+            combined_df[self.etc_table.pressure] = None
+            combined_df[self.etc_table.temperature_sample] = None
+            combined_df[self.etc_table.cycle_number] = None
+            combined_df[self.etc_table.cycle_number_flag] = None
 
-            #output_file_path = file_path.replace('.xlsx', '_combined.csv')
-            #processor.save_combined_data(combined_df, output_file_path)
-            error_checker = self._write_to_database(insert_query=ETC_insert_query,
-                                                    values=ETC_values,
-                                                    table_name=self.etc_table.table_name)
+        pd.set_option('future.no_silent_downcasting', True)
+        combined_df.replace('(no corr.)', 0, inplace=True)
+        ETC_insert_query, ETC_values = TableConfig().writing_query_from_df(df=combined_df,
+                                                                           map=self.etc_column_attribute_mapping,
+                                                                           table_name=self.etc_table.table_name)
+        xy_insert_query, xy_values = TableConfig().writing_query_from_df(df=thermal_conductivity_xy_data,
+                                                                         map=self.etc_xy_column_attribute_mapping,
+                                                                         table_name=self.xy_table.table_name)
 
-            if error_checker:
-                self._delete_data_from_table(combined_df)
-                self._write_to_database(insert_query=ETC_insert_query,
-                                        values=ETC_values,
-                                        table_name=self.etc_table.table_name)
-                self._write_to_database(insert_query=xy_insert_query,
-                                        values=xy_values,
-                                        table_name=self.xy_table.table_name)
+        #output_file_path = file_path.replace('.xlsx', '_combined.csv')
+        #processor.save_combined_data(combined_df, output_file_path)
+        error_checker = self._write_to_database(insert_query=ETC_insert_query,
+                                                values=ETC_values,
+                                                table_name=self.etc_table.table_name)
 
-            else:
-                self._write_to_database(insert_query=xy_insert_query,
-                                        values=xy_values,
-                                        table_name=self.xy_table.table_name)
-        if not combined_df.empty:
-            time_range = (min(combined_df[table.get_clean("time")]), max(combined_df[table.get_clean("time")]))
-            return time_range
-        return None, None
+        if error_checker:
+            self._delete_data_from_table(combined_df)
+            self._write_to_database(insert_query=ETC_insert_query,
+                                    values=ETC_values,
+                                    table_name=self.etc_table.table_name)
+            self._write_to_database(insert_query=xy_insert_query,
+                                    values=xy_values,
+                                    table_name=self.xy_table.table_name)
+
+        else:
+            self._write_to_database(insert_query=xy_insert_query,
+                                    values=xy_values,
+                                    table_name=self.xy_table.table_name)
+
+        time_range = (min(combined_df[table.get_clean("time")]), max(combined_df[table.get_clean("time")]))
+        return time_range
 
     def _overwrite_with_example_data(self, df):
         start_time = datetime.now(tz=local_tz)

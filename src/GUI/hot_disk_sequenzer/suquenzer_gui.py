@@ -390,7 +390,7 @@ class DateAxisItem(pg.AxisItem):
         elif span < 86400:  # less than a day
             fmt = "HH:mm"
         else:
-            fmt = "MMM dd"
+            fmt = "yyyy MM dd"
         tick_labels = []
         for value in values:
             qdt = QDateTime.fromSecsSinceEpoch(int(value))

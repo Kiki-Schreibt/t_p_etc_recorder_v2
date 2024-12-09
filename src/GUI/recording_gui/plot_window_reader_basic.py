@@ -348,6 +348,7 @@ class ReadContinuous(ReadData):
             self._attempt_reconnect()
 
     def _read_emit_etc_data(self):
+        #todo: only works if t_p_data exists in time_range of etc recording.....
         if not self.running:
             return
         try:
@@ -687,9 +688,7 @@ class PlotBaseWindow(PlotBaseStyle):
         if df.empty:
             return
 
-
         x = [t.timestamp() for t in df[self.etc_table.get_clean("time")]]
-
         # Initialize scatter_plot_items_dict if it doesn't exist
         if not hasattr(self, 'scatter_plot_items_dict'):
             self.scatter_plot_items_dict = {}
@@ -709,7 +708,6 @@ class PlotBaseWindow(PlotBaseStyle):
             if df[col].isna().all():
                 continue
             y = df[col].values
-
             if col in self.scatter_plot_items_dict:
                 scatter_plot_item = self.scatter_plot_items_dict[col]
                 scatter_plot_item.setData(x=x, y=y)
@@ -717,9 +715,12 @@ class PlotBaseWindow(PlotBaseStyle):
                     # Re-initialize point colors if necessary
                     x_data, y_data = scatter_plot_item.getData()
                     self.point_colors = [pg.mkBrush('w') for _ in range(len(x_data))]
+
             else:
                 # Plot item for this column does not exist, create it
                 self._create_plot_item_right(col, x, y)
+                self._update_x_range(x)
+
 
     def update_min_max_plot(self, df_cycles=pd.DataFrame()):
         if df_cycles.empty:
@@ -875,7 +876,7 @@ class DateAxisItem(pg.AxisItem):
         elif span < 86400:  # less than a day
             fmt = "HH:mm"
         else:
-            fmt = "MMM dd"
+            fmt = "yyyy MM dd"
         tick_labels = []
         for value in values:
             qdt = QDateTime.fromSecsSinceEpoch(int(value))
