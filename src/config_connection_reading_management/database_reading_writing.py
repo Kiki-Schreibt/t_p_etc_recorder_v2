@@ -1258,8 +1258,10 @@ class ExcelDataProcessor:
                 self._write_to_database(insert_query=xy_insert_query,
                                         values=xy_values,
                                         table_name=self.xy_table.table_name)
-        time_range = (min(combined_df[table.get_clean("time")]), max(combined_df[table.get_clean("time")]))
-        return time_range
+        if not combined_df.empty:
+            time_range = (min(combined_df[table.get_clean("time")]), max(combined_df[table.get_clean("time")]))
+            return time_range
+        return None, None
 
     def _overwrite_with_example_data(self, df):
         start_time = datetime.now(tz=local_tz)

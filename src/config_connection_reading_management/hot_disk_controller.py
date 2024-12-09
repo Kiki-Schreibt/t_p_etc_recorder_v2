@@ -191,6 +191,7 @@ class HotDiskController:
            result_val =  client.send_command_receive_response(command="CALC:TCOND?")
         return result_val
 
+
 def test_hd_controller():
     from datetime import timedelta
     measurements = [
