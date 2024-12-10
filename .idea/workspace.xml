@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_ui_design.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_ui_design.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +114,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\Trash" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.suquenzer_gui">
     <configuration name="hot_disk_controller" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -208,7 +203,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="tests" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="suquenzer_gui" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -217,11 +212,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/tests.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -232,11 +227,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.suquenzer_gui" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.recording_main_v2" />
         <item itemvalue="Python.recording_main" />
         <item itemvalue="Python.hot_disk_controller" />
-        <item itemvalue="Python.tests" />
       </list>
     </recent_temporary>
   </component>

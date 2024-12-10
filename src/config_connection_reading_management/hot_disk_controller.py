@@ -79,6 +79,7 @@ class HotDiskScheduleGrabber:
 
 
 class HotDiskController:
+
     def __init__(self, template_folder_path=temp_folder_path, sensor_insulation="Mica", sensor_type="5465", standard_number_of_measurements=3):
         self.logger = logging.getLogger(__name__)
         self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type)
@@ -136,9 +137,10 @@ class HotDiskController:
                 passed_time += wait_time
                 if passed_time >= 10:
                     passed_time = 0
-                    print(f"{time_left} s left till measurement")
+                    self.print_remaining_time(target_time=target_time, time_left=time_left)
                 self.stop_event.wait(timeout=wait_time)  # Wait for wait_time seconds or until stop_event is set
                 if self.stop_event.is_set():
+                    #todo: save current state maybe to reload in case of interruptions
                     break
 
     def end(self):
@@ -190,6 +192,13 @@ class HotDiskController:
         with HotDiskConnection() as client:
            result_val =  client.send_command_receive_response(command="CALC:TCOND?")
         return result_val
+
+    def print_remaining_time(self, target_time, time_left):
+
+        hours, remainder = divmod(int(time_left), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        formatted = f"{hours:02d}:{minutes:02d}:{seconds:02d} till next measurement at {target_time}"
+        #print(formatted)
 
 
 def test_hd_controller():

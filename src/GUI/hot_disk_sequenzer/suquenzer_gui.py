@@ -9,14 +9,26 @@ from PySide6.QtWidgets import (
     QHeaderView, QSizePolicy, QFormLayout, QGroupBox, QCompleter
 )
 from PySide6.QtGui import QIntValidator
-from PySide6.QtCore import Signal, QDateTime
+from PySide6.QtCore import Signal, QDateTime, QObject, QTimer
 import pyqtgraph as pg
 
 from src.simulation.dicon_simulator_v2 import TpProgramSimulator
-from src.config_connection_reading_management.hot_disk_controller import HotDiskController
+from src.config_connection_reading_management.hot_disk_controller import HotDiskController, temp_folder_path
 
 local_tz = ZoneInfo("Europe/Berlin")
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"
+
+
+class SignaledHotDiskController(QObject, HotDiskController):
+    latest_program_step_sig = Signal(datetime.datetime)
+
+    def __init__(self, template_folder_path=temp_folder_path, sensor_insulation="Mica", sensor_type="5465", standard_number_of_measurements=3, parent=None):
+        QObject.__init__(self, parent)
+        HotDiskController.__init__(self, template_folder_path=template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type, standard_number_of_measurements=standard_number_of_measurements)
+
+    def wait_until(self, target_time):
+        self.latest_program_step_sig.emit(target_time)
+        super().wait_until(target_time=target_time)
 
 
 class ScheduleGeneratorBase(QWidget):
@@ -40,6 +52,7 @@ class ScheduleGeneratorBase(QWidget):
         self._init_schedule_table()
         self._init_repetition_buttons()
 
+
         # Add the left layout to the main layout
         self.main_layout.addLayout(self.left_layout, stretch=1)
 
@@ -59,12 +72,8 @@ class ScheduleGeneratorBase(QWidget):
         self.add_measurement_button.clicked.connect(self.add_program_row)
         self.left_layout.addWidget(self.add_measurement_button)
 
-        self.generate_schedule_button = QPushButton('Generate Schedule')
-        self.left_layout.addWidget(self.generate_schedule_button)
-
-        self.plot_program_button = QPushButton('Plot Schedule')
-        self.plot_program_button.clicked.connect(self.plot_program)
-        self.left_layout.addWidget(self.plot_program_button)
+        self.start_schedule_button = QPushButton('Start Schedule')
+        self.left_layout.addWidget(self.start_schedule_button)
 
     def _init_measurement_settings(self):
         # Measurement settings group
@@ -192,6 +201,21 @@ class ScheduleGeneratorBase(QWidget):
         self.plot_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.right_layout.addWidget(self.plot_widget)
 
+    def _init_countdown_labels(self):
+        measurement_group = QGroupBox("Current status")
+        measurement_layout = QFormLayout()
+
+        self.countdown_label = QLabel("Time left: N/A", self)
+
+        self.status_label = QLabel("Status: Idle")
+
+
+        measurement_layout.addRow(self.countdown_label)
+        measurement_layout.addRow(self.status_label)
+        measurement_group.setLayout(measurement_layout)
+
+        self.left_layout.addWidget(measurement_group)
+
     def add_program_row(self):
         # Add to measurement table
         row_position = self.program_table.rowCount()
@@ -281,32 +305,44 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
 
     def __init__(self):
         super().__init__()
-        self.generate_schedule_button.clicked.connect(self.generate_schedule)
+        self.start_schedule_button.clicked.connect(self.start_schedule)
         self.complete_program_sig.connect(self.plot_program)
         self.meas_times_sig.connect(self.plot_meas_times)
         self.repeat_end_input.editingFinished.connect(self.parse_program)
         self.repeat_start_input.editingFinished.connect(self.parse_program)
         self.repeat_count_input.editingFinished.connect(self.parse_program)
         self.program_table.cellChanged.connect(self.parse_program)
+        self.target_time = None
+        self.countdown_timer = QTimer(self)
+        self.countdown_timer.timeout.connect(self.update_countdown)
 
-    def generate_schedule(self):
+    def start_schedule(self):
+
+        if not hasattr(self, 'countdown_label'):
+            self._init_countdown_labels()
 
         sensor_type = self.sensor_type_input.text()
         sensor_insulation = self.sensor_insulation_input.text()
         folder_path = self.template_folder_path.text()
 
+        scheduled_dict_list = self._generate_schedule()
+
+        self.hot_disk_controller = SignaledHotDiskController(sensor_type=sensor_type, sensor_insulation=sensor_insulation, template_folder_path=folder_path)
+        self.hot_disk_controller_thread = threading.Thread(target=self.hot_disk_controller.run, args=(scheduled_dict_list,), daemon=True)
+
+        self.hot_disk_controller.latest_program_step_sig.connect(self.set_target_time)
+
+        self.hot_disk_controller_thread.start()
+        self.status_label.setText("Status: Running")
+
+
+    def _generate_schedule(self):
         scheduled_program = self.parse_program()
 
         scheduled_program = scheduled_program.rename(columns={'measurement_time' : 'heating_time', 'measurement_power_watt' : 'heating_power'})
         scheduled_program['heating_power'] = scheduled_program['heating_power'] * 1e3
         scheduled_dict_list = scheduled_program.to_dict(orient='records')
-
-        self.hot_disk_controller = HotDiskController(sensor_type=sensor_type, sensor_insulation=sensor_insulation, template_folder_path=folder_path)
-        self.hot_disk_controller_thread = threading.Thread(target=self.hot_disk_controller.run, args=(scheduled_dict_list,), daemon=True)
-        self.hot_disk_controller_thread.start()
-
-        #import pprint
-        #pprint.pprint(scheduled_dict_list)
+        return scheduled_dict_list
 
     def get_temperature_program(self):
         temperature_program = []
@@ -346,6 +382,27 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         except ValueError:
             return None, None, None
 
+    def set_target_time(self, target_time):
+        self.target_time = target_time
+        self.countdown_timer.start(1000)  # update every second
+
+    def update_countdown(self):
+        if self.target_time is None:
+            return
+
+        now = datetime.datetime.now()
+        delta = self.target_time - now
+
+        if delta.total_seconds() <= 0:
+            self.countdown_label.setText("Time left: 0s")
+            self.countdown_timer.stop()
+        else:
+            # Format the remaining time as needed, for example HH:MM:SS
+            hours, remainder = divmod(int(delta.total_seconds()), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            formatted = f"{hours:02d}:{minutes:02d}:{seconds:02d} till next measurement at {self.target_time}"
+            self.countdown_label.setText(f"Time left: {formatted}")
+
     def parse_program(self):
         time_delay = float(self.measurement_delay_input.text())
         #
@@ -377,6 +434,7 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         if hasattr(self, "hot_disk_controller_thread"):
             self.hot_disk_controller.end()
             self.hot_disk_controller_thread.join(timeout=2)
+            self.status_label.setText("Status: Stopped")
         super().closeEvent(event)
 
 
