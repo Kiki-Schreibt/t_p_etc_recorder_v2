@@ -58,6 +58,7 @@ class DataLoader:
                  mean_temperature:
                  de_hyd_state:
         """
+
         isotherm = self._read_isotherm(sample_id=sample_id, cycle_number=cycle_number, temperature=temperature)
         mean_temperature, de_hyd_state = self._process_isotherm(isotherm)
         return isotherm, mean_temperature, de_hyd_state
@@ -79,11 +80,13 @@ class DataLoader:
         query += f" AND {self.etc_table.temperature} = %s "
         query += f" ORDER by {self.etc_table.pressure}"
         values += (sample_id, cycle_number, temperature)
-        print(query, values)
+        #print(query, values)
         results = self.data_retriever.execute_fetching(query=query, column_names=column_names, values=values)
         return results
 
     def _process_isotherm(self, df_isotherm):
+        if df_isotherm.empty:
+            return None, None
         mean_temperature = np.mean(df_isotherm[self.etc_table.temperature_sample])
         if df_isotherm[self.etc_table.de_hyd_state].iloc[0] == df_isotherm[self.etc_table.de_hyd_state].iloc[-1]:
             de_hyd_state = df_isotherm[self.etc_table.de_hyd_state].iloc[0]

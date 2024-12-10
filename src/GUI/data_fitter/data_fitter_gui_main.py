@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt
 import pyqtgraph as pg
 
 from data_fitter_ui_business import DataLoader
-from data_fitter_ui_business import main as fitting_main  # Assuming 'main' is your fitting function
+from data_fitter_ui_business import main as fitting_main
 
 
 class DataFitterGuiWindow(QMainWindow):
@@ -86,7 +86,6 @@ class DataFitterMain(DataFitterGuiWindow):
             )
             self.isotherm, self.mean_temperature, self.de_hyd_state = self.data_loader.get_isotherm()
             if self.isotherm is not None and not self.isotherm.empty:
-                QMessageBox.information(self, "Success", "Data loaded successfully.")
                 self.plot_data()
             else:
                 QMessageBox.warning(self, "No Data", "No data found for the given parameters.")
