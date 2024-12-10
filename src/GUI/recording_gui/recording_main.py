@@ -43,7 +43,7 @@ READING_MODE_BY_TIME = 'by_time'
 
 class RecordingMainWindow(QMainWindow):
     """
-    Main application window for recording and plotting T-p ETC data.
+    Main application window for recording and plotting T-p and ETC data.
     """
 
     def __init__(self):
@@ -360,13 +360,10 @@ class RecordingMainWindow(QMainWindow):
         self.update_meta_data_in_ui()
         # Update recorder and plot readers with new meta-data
         self.recorder.update_sample_id(self.meta_data.sample_id)
+
         self.left_upper_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
         self.left_lower_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
         # Clear plots
-        self.left_upper_plot.plotItem.clear()
-        self.left_upper_plot.rightViewBox.clear()
-        self.left_lower_plot.plotItem.clear()
-        self.left_lower_plot.rightViewBox.clear()
 
     def update_reservoir_volume(self, value=None):
         """

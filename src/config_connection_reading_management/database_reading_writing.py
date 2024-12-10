@@ -226,8 +226,6 @@ class DataRetriever:
                 #print(f"fetched by sample id {min_time}, {max_time}")
                 time_range = (min_time, max_time)
 
-
-
         elif sample_id and time_range:
             tp_data = self.fetch_data_by_time_2(time_range=time_range,
                                                 column_names=column_names_t_p,
@@ -238,13 +236,23 @@ class DataRetriever:
             tp_data = pd.DataFrame()
 
         if not tp_data.empty:
-                etc_data = self.fetch_data_by_time_2(time_range=time_range,
-                                                     column_names=column_names_etc,
-                                                     table_name=table_name_etc,
-                                                     constraints=constraints,
-                                                     sample_id=sample_id
-                                                     )
+            etc_data = self.fetch_data_by_time_2(time_range=time_range,
+                                                 column_names=column_names_etc,
+                                                 table_name=table_name_etc,
+                                                 constraints=constraints,
+                                                 sample_id=sample_id
+                                                 )
 
+        elif sample_id:
+            etc_data = self.fetch_data_by_sample_id_2(sample_id=sample_id,
+                                                      column_names=column_names_etc,
+                                                      table_name=table_name_etc,
+                                                      constraints=constraints)
+        elif time_range:
+            etc_data = self.fetch_data_by_time_2(time_range=time_range,
+                                                      column_names=column_names_etc,
+                                                      table_name=table_name_etc,
+                                                      constraints=constraints)
         else:
             etc_data = pd.DataFrame()
         return tp_data, etc_data

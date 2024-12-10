@@ -69,6 +69,8 @@ class ReadData(QThread):
     current_state_sig = Signal(str)
     current_uptake_sig = Signal(float)
     cycles_full_test_sig = Signal(pd.DataFrame)
+    auto_update_x_range_sig = Signal()
+
 
     def __init__(self, meta_data=MetaData()):
         super().__init__()
@@ -402,6 +404,7 @@ class ReadStatic(ReadData):
     """
     whole_test_emited_sig = Signal()
 
+
     def __init__(self, meta_data=MetaData()):
         super().__init__(meta_data)
         self.reading_mode = READING_MODE_FULL_TEST  # Could be "full test" or "by time"
@@ -458,6 +461,7 @@ class ReadStatic(ReadData):
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data)
             self.whole_test_emited_sig.emit()
+            self.auto_update_x_range_sig.emit()
         self._read_emit_cycles_full_test_thread()
 
     def _change_reading_mode(self, new_reading_mode: str):
@@ -657,6 +661,7 @@ class PlotBaseWindow(PlotBaseStyle):
         if hasattr(self, 'reader'):
             self.reader.cycles_full_test_sig.connect(self.update_min_max_plot)
             self.reader.etc_data_sig.connect(self.update_plot_right)
+            self.reader.auto_update_x_range_sig.connect(self.plotItem.autoRange)
 
             if y_axis == 'pressure':
                 self.reader.p_data_sig.connect(self.update_plot_left)
@@ -719,8 +724,7 @@ class PlotBaseWindow(PlotBaseStyle):
             else:
                 # Plot item for this column does not exist, create it
                 self._create_plot_item_right(col, x, y)
-                self._update_x_range(x)
-
+                #self._update_x_range(x)
 
     def update_min_max_plot(self, df_cycles=pd.DataFrame()):
         if df_cycles.empty:

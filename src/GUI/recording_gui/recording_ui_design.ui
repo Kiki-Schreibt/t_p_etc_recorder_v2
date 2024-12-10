@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1504</width>
-    <height>777</height>
+    <height>821</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>440</y>
-      <width>851</width>
-      <height>271</height>
+      <y>450</y>
+      <width>871</width>
+      <height>321</height>
      </rect>
     </property>
    </widget>
@@ -75,8 +75,8 @@
    <widget class="QLineEdit" name="MaxCharTimeEditField">
     <property name="geometry">
      <rect>
-      <x>1250</x>
-      <y>141</y>
+      <x>1260</x>
+      <y>61</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -86,7 +86,7 @@
     <property name="geometry">
      <rect>
       <x>240</x>
-      <y>160</y>
+      <y>130</y>
       <width>300</width>
       <height>26</height>
      </rect>
@@ -131,8 +131,8 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>1080</x>
-      <y>120</y>
+      <x>1090</x>
+      <y>40</y>
       <width>112</width>
       <height>16</height>
      </rect>
@@ -144,8 +144,8 @@
    <widget class="QLineEdit" name="dT_max_sample_measurement_edit_field">
     <property name="geometry">
      <rect>
-      <x>1200</x>
-      <y>160</y>
+      <x>1210</x>
+      <y>80</y>
       <width>101</width>
       <height>21</height>
      </rect>
@@ -167,8 +167,8 @@
    <widget class="QLineEdit" name="MinCharTimeEditField">
     <property name="geometry">
      <rect>
-      <x>1200</x>
-      <y>140</y>
+      <x>1210</x>
+      <y>60</y>
       <width>51</width>
       <height>22</height>
      </rect>
@@ -177,7 +177,7 @@
    <widget class="QPushButton" name="update_meta_data_button">
     <property name="geometry">
      <rect>
-      <x>500</x>
+      <x>640</x>
       <y>120</y>
       <width>151</width>
       <height>24</height>
@@ -190,8 +190,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>1220</x>
-      <y>100</y>
+      <x>1230</x>
+      <y>20</y>
       <width>21</width>
       <height>16</height>
      </rect>
@@ -203,8 +203,8 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>1320</x>
-      <y>91</y>
+      <x>1330</x>
+      <y>11</y>
       <width>161</width>
       <height>91</height>
      </rect>
@@ -261,7 +261,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>100</y>
+      <y>70</y>
       <width>233</width>
       <height>86</height>
      </rect>
@@ -326,8 +326,8 @@
    <widget class="QLineEdit" name="MinTempIncEditField">
     <property name="geometry">
      <rect>
-      <x>1200</x>
-      <y>120</y>
+      <x>1210</x>
+      <y>40</y>
       <width>51</width>
       <height>22</height>
      </rect>
@@ -337,7 +337,7 @@
     <property name="geometry">
      <rect>
       <x>880</x>
-      <y>190</y>
+      <y>160</y>
       <width>601</width>
       <height>521</height>
      </rect>
@@ -438,8 +438,8 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>1090</x>
-      <y>160</y>
+      <x>1100</x>
+      <y>80</y>
       <width>95</width>
       <height>16</height>
      </rect>
@@ -452,9 +452,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>190</y>
-      <width>851</width>
-      <height>251</height>
+      <y>160</y>
+      <width>871</width>
+      <height>291</height>
      </rect>
     </property>
    </widget>
@@ -603,8 +603,8 @@
    <widget class="QLineEdit" name="MaxTempIncEditField">
     <property name="geometry">
      <rect>
-      <x>1250</x>
-      <y>120</y>
+      <x>1260</x>
+      <y>40</y>
       <width>51</width>
       <height>22</height>
      </rect>
@@ -613,8 +613,8 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>1088</x>
-      <y>138</y>
+      <x>1098</x>
+      <y>58</y>
       <width>95</width>
       <height>16</height>
      </rect>
@@ -626,8 +626,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>1260</x>
-      <y>100</y>
+      <x>1270</x>
+      <y>20</y>
       <width>23</width>
       <height>16</height>
      </rect>

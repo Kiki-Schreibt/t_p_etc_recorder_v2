@@ -154,7 +154,7 @@ class Record(QObject):
         Args:
             new_sample_id (str): The new sample ID to be used.
         """
-        #todo: somewhere here slows down when sample_id changes... probably
+
         with self.update_lock:
             self.mb_processor.on_sample_id_change(new_val=new_sample_id)
             self.log_file_tracker.update_sample_id(new_val=new_sample_id)
