@@ -68,33 +68,33 @@ class MainProgram(RecordingMainWindow):
 
     def change_modbus_host_ip(self, host_ip=None, port=None):
         if host_ip and port:
-            if self.recorder.mb_processor_thread:
-                self.recorder.stop_t_p_recording_thread()
+            if self.controller.recorder.mb_processor_thread:
+                self.controller.recorder.stop_t_p_recording_thread()
                 recorder_was_running = True
             else:
                 recorder_was_running = False
 
-            self.prev_port = self.recorder.mb_processor.mb_port
-            self.prev_host = self.recorder.mb_processor.mb_host
+            self.prev_port = self.controller.recorder.mb_processor.mb_port
+            self.prev_host = self.controller.recorder.mb_processor.mb_host
             print(host_ip)
             print(port)
-            self.recorder.mb_processor.mb_port = port
-            self.recorder.mb_processor.mb_host = host_ip
+            self.controller.recorder.mb_processor.mb_port = port
+            self.controller.recorder.mb_processor.mb_host = host_ip
             if recorder_was_running:
-                self.recorder.start_t_p_recording_thread()
+                self.controller.recorder.start_t_p_recording_thread()
 
         elif self.prev_host and self.prev_port:
-            if self.recorder.mb_processor_thread:
-                self.recorder.stop_t_p_recording_thread()
+            if self.controller.recorder.mb_processor_thread:
+                self.controller.recorder.stop_t_p_recording_thread()
                 recorder_was_running = True
             else:
                 recorder_was_running = False
-            self.recorder.stop_t_p_recording_thread()
-            self.recorder.mb_processor.mb_port = self.prev_port
-            self.recorder.mb_processor.mb_host = self.prev_host
+            self.controller.recorder.stop_t_p_recording_thread()
+            self.controller.recorder.mb_processor.mb_port = self.prev_port
+            self.controller.recorder.mb_processor.mb_host = self.prev_host
 
             if recorder_was_running:
-                self.recorder.start_t_p_recording_thread()
+                self.controller.recorder.start_t_p_recording_thread()
 
     def closeEvent(self, event):
         super().closeEvent(event)
