@@ -447,6 +447,9 @@ class RecordingMainWindow(QMainWindow):
         sample_id = self.ui.sample_id_edit_field.text()
         self.controller.update_sample_id(sample_id)
         self.meta_data_manager.update_ui_fields(self.ui)
+        is_checked = self.ui.start_stop_static_plot_button.isChecked()
+        if is_checked:
+            self.controller.plot_full_test()
 
     def on_reservoir_volume_changed(self):
         val = self.ui.reservoir_volume_edit_field.text()

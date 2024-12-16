@@ -446,8 +446,6 @@ def main(mode='curve_fit'):
                 #fitted_values = model.ETC_fun_Zehner_Bauer_Schlunder(x_plot, popt)
                 #popt, pcov = model_fitter.fit_ETC_kaganer(x, y, bounds)
                 #fitted_values = model.ETC_fun_kaganer(x_plot, popt)
-
-
                 popt, pcov, metrics = model_fitter.fit_ETC(x=x, y=y, method=mode, bounds=bounds)
                 fitted_values = model.ETC_fun(x_plot, popt)
 
