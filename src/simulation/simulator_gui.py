@@ -61,6 +61,10 @@ class ModbusServerControlBusiness(QObject):
         self.server.set_sleep_interval(interval)
 
     def start_server(self):
+        """
+        starts server and emits server_started Signal (carrying host_ip and port)
+        :return:
+        """
         self.server.start_server()
         self.server_started.emit(self.server.host_ip, self.server.port)
 
