@@ -16,20 +16,38 @@ from src.GUI.hot_disk_sequenzer.suquenzer_gui import ScheduleGeneratorMain
 
 #main_ui_file_path = r"..\src\GUI\recording_gui\recording_ui_design_works.ui"
 def load_ui_file(ui_file_path):
-        try:
-            loader = QUiLoader()
-            ui_file = QFile(ui_file_path)
+    """
+    Loads a GUI's UI file using PySide6 QUiLoader.
 
-            ui_file.open(QFile.ReadOnly)
-            ui = loader.load(ui_file)
-            ui_file.close()
-            if not ui:
-                print("Failed to load UI file")
-                return
-            return ui
+    Args:
+        ui_file_path (str): The full file path to the UI file.
 
-        except Exception as e:
-            print("Unable to load ui file %s", e)
+    Returns:
+        QWidget: The loaded GUI object if successful.
+        None: If the UI file could not be loaded.
+
+    Raises:
+        Exception: If there is an issue during the loading process.
+
+    Example:
+         ui = load_ui_file("path/to/ui_file.ui")
+         if ui:
+            ui.show()
+    """
+    try:
+        loader = QUiLoader()
+        ui_file = QFile(ui_file_path)
+
+        ui_file.open(QFile.ReadOnly)
+        ui = loader.load(ui_file)
+        ui_file.close()
+        if not ui:
+            print("Failed to load UI file")
+            return
+        return ui
+
+    except Exception as e:
+        print("Unable to load ui file %s", e)
 
 
 class MainProgram(RecordingMainWindow):
