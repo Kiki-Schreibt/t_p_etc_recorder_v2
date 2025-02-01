@@ -152,7 +152,7 @@ class MetaData:
                 self.end_time = df[col_name].iloc[0]
 
             if "mass" in col_name.lower():
-                self.sample_mass = float(df[col_name].iloc[0])
+                self.sample_mass = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None
 
             if "cell" in col_name.lower() and "volume" not in col_name.lower():
                 self.measurement_cell = df[col_name].iloc[0]
@@ -170,10 +170,10 @@ class MetaData:
                 #self.first_hydrogenation = self._make_tz_aware(value=self.first_hydrogenation)
 
             if "max" in col_name.lower() and "pressure" in col_name.lower():
-                self.max_pressure_cycling = float(df[col_name].iloc[0])
+                self.max_pressure_cycling = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None
 
             if "min" in col_name.lower() and "temperature" in col_name.lower():
-                self.min_temperature_cycling = float(df[col_name].iloc[0])
+                self.min_temperature_cycling = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None
 
             if "duration" in col_name.lower():
                 if df[col_name].iloc[0]:
@@ -197,10 +197,10 @@ class MetaData:
                     self.average_cycle_duration = avg_dur
 
             if "reservoir" in col_name.lower():
-                self.reservoir_volume = float(df[col_name].iloc[0])  #[l]
+                self.reservoir_volume = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None #[l]
 
             if "number_cycles" in col_name.lower():
-                self.total_number_cycles = float(df[col_name].iloc[0])  #
+                self.total_number_cycles = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None  #
                 if not self.total_number_cycles and self.retry_counter > 0:
                     self.last_de_hyd_state, self.total_number_cycles = self.fetch_last_state_and_cycle()
                     self.write()
