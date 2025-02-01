@@ -904,7 +904,7 @@ if __name__ == '__main__':
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
         csv_processor = CSVProcessor(sample_id=sample_id)
-        #csv_processor.process()
+        csv_processor.process()
         write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id, logger=logger)
 
         print(f"{sample_id} processed")
