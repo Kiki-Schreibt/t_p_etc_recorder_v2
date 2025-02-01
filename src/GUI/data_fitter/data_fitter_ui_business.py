@@ -403,10 +403,13 @@ class Plotter:
         plt.show()
 
 
-def main(mode='curve_fit'):
+def main(mode='curve_fit', data_loader=None):
+    #todo: Benzin drauf, abfackeln, 10 Ave Maria und dann vielleicht alles von vorn
+    # oder einfach verschweigen dass ich das je versucht habe.
     #file_path = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\Results\Results-WAE-WA-028-044\WAE-WA-028-044-AllData.txt"
     # Load data
-    data_loader = DataLoader(sample_id="WAE-WA-040", cycle_number=0.5, temperature=200)
+    if not data_loader:
+        data_loader = DataLoader(sample_id="WAE-WA-040", cycle_number=0.5, temperature=200)
     isotherm, mean_temperature, de_hyd_state = data_loader.get_isotherm()
     #[Particle_Diameter,lambda_solid(1,mat_it),Porosity(mat_it), l_base]
     material_properties = MaterialProperties(material="MgH2", de_hyd_state=de_hyd_state)
