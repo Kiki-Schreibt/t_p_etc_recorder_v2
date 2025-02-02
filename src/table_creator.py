@@ -1,8 +1,11 @@
 import logging
 
 from src.table_data import TableConfig
-from src.config_connection_reading_management.connections import DatabaseConnection, AppLogger
-
+from src.config_connection_reading_management.connections import DatabaseConnection
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 
 class TableCreator:
     def __init__(self):
@@ -246,6 +249,7 @@ def test_create_table_from_class():
 
 
 if __name__ == "__main__":
-    test_create_table_from_class()
+    creator=TableCreator()
+    creator.create_all_tables()
         # Accessing class attributes with and without escaped quotes
 
