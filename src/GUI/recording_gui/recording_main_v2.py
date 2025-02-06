@@ -237,6 +237,7 @@ class MainController:
         self.recorder.start_t_p_recording_thread()
         lower_plot.reader.start()
         upper_plot.reader.start()
+
         # Connect signals
         self.recorder.new_etc_data_written_to_database.connect(lower_plot.update_plot_right)
         self.recorder.new_etc_data_written_to_database.connect(upper_plot.update_plot_right)
@@ -415,7 +416,10 @@ class RecordingMainWindow(QMainWindow):
         is_checked = self.ui.start_stop_tp_recording_button.isChecked()
         self.toggle_button(self.ui.start_stop_tp_recording_button, "Start T-p Recording", "Stop T-p Recording", is_checked)
         if is_checked:
-            self.controller.start_tp_recording()
+            left_upper_plot, __ = self.controller.start_tp_recording()
+            left_upper_plot.current_cycle_sig.connect(lambda number: self.set_text_current_state(arg="number", value=number))
+            left_upper_plot.current_state_sig.connect(lambda state: self.set_text_current_state(arg="state", value=state))
+            left_upper_plot.current_uptake_sig.connect(lambda uptake: self.set_text_current_state(arg="uptake", value=uptake))
         else:
             self.controller.stop_tp_recording()
 
