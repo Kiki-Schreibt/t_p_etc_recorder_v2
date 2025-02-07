@@ -99,6 +99,17 @@ class ReadData(QThread):
         self.quit()
         self.wait()
 
+    def _standard_constraints(self, mode="etc"):
+        """Return standard constraints based on the mode."""
+        if mode == "etc":
+            return {
+                "min_TotalCharTime": 0.33,
+                "max_TotalCharTime": 1,
+                "min_TotalTempIncr": 2,
+                "max_TotalTempIncr": 5
+            }
+        return None
+
     # Common methods used by both reading modes
     def _read_t_p(self, cursor=None, desc_limit=1, time_range=None):
         table = TableConfig().TPDataTable
@@ -137,35 +148,34 @@ class ReadData(QThread):
             return pd.DataFrame()
 
     def _read_data_by_time(self):
-        """
-        Reads data based on a specified time range.
-        """
+        """Read T-p and ETC data for a given time range and emit signals."""
         self.T_data = pd.DataFrame()
         self.p_data = pd.DataFrame()
         self.etc_data = pd.DataFrame()
-        etc_table = TableConfig().ETCDataTable
-        etc_cols = (etc_table.time,
-                    etc_table.th_conductivity,
-                    etc_table.thermal_conductivity_average)
-        tp_table = TableConfig().TPDataTable
 
+        tp_table = TableConfig().TPDataTable
+        # Read T-p data
         df_t_p = self.db_retriever.fetch_data_by_time_2(
                                                         time_range=self.time_range_to_read,
                                                         table_name=tp_table.table_name,
                                                         sample_id=self.meta_data.sample_id)
         self._separate_and_append_t_p(df_t_p=df_t_p)
+        # Read ETC data
         self.etc_data = self._read_etc(time_range=self.time_range_to_read)
+
         if not self.T_data.empty:
             self.T_data_sig.emit(self.T_data)
         if not self.p_data.empty:
             self.p_data_sig.emit(self.p_data)
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data)
+
         self._read_emit_cycles_full_test_thread()
 
     def _separate_and_append_t_p(self, df_t_p):
         """
-        Separates temperature and pressure data and appends to storage.
+        Separate T-p data into temperature and pressure subsets,
+        remove outliers, append to storage, and trim excess data.
         """
         table = TableConfig().TPDataTable
 
@@ -189,18 +199,16 @@ class ReadData(QThread):
         if not pressure_data.empty:
             self.p_data = pd.concat([self.p_data, pressure_data], ignore_index=True)
 
-        # Delete data points from storage if too many data points
-        if len(self.T_data) > self.limit_amount_storage:
-            drop_count = len(self.T_data) - self.limit_amount_storage
-            self.T_data = self.T_data.drop(self.T_data.index[:drop_count])
-
-        if len(self.p_data) > self.limit_amount_storage:
-            drop_count = len(self.p_data) - self.limit_amount_storage
-            self.p_data = self.p_data.drop(self.p_data.index[:drop_count])
+        # Limit storage to a fixed number of points
+        for data in [self.T_data, self.p_data]:
+            if len(data) > self.limit_amount_storage:
+                drop_count = len(data) - self.limit_amount_storage
+                data.drop(data.index[:drop_count], inplace=True)
 
     def _remove_outliers(self, df):
         """
-        Removes outliers from the DataFrame based on predefined thresholds.
+        Remove outliers from numeric columns.
+        Currently replaces values above T_max with NaN.
         """
         numeric_cols = df.select_dtypes(include=[np.number]).columns.difference(['time', 'state'])
         for col in numeric_cols:
@@ -208,16 +216,18 @@ class ReadData(QThread):
         return df
 
     def _read_etc(self, time_range):
+        """
+        Read ETC data for a given time range.
+        """
         table = TableConfig().ETCDataTable
-        column_names = (table.time,
+        cols = (table.time,
                         table.th_conductivity,
                         table.thermal_conductivity_average)
-        print(self.constraints_etc)
         try:
             df = self.db_retriever.fetch_data_by_time_2(
                 time_range=time_range,
                 table_name=table.table_name,
-                column_names=column_names,
+                column_names=cols,
                 constraints=self.constraints_etc,
                 sample_id=self.meta_data.sample_id)
             return df
@@ -287,7 +297,8 @@ class ReadData(QThread):
 
 class ReadContinuous(ReadData):
     """
-    Class for reading data continuously and emitting signals.
+    Thread class for continuously reading data and updating plots.
+    Uses QTimer to schedule periodic data reads.
     """
 
     def __init__(self, meta_data=MetaData()):
@@ -304,9 +315,12 @@ class ReadContinuous(ReadData):
             self.db_connection = DatabaseConnection()
             self.db_connection.open_connection()
             self.cursor = self.db_connection.cursor
+
+            # Set up timers for T-p and ETC data reads
             self.etc_timer = QTimer()
-            self.etc_timer.setInterval(60 * 60 * 15)  # 15 minutes in milliseconds
+            self.etc_timer.setInterval(15 * 60 * 1000)  # 15 minutes in milliseconds
             self.etc_timer.timeout.connect(self._read_emit_etc_data)
+
             self.tp_timer = QTimer()
             self.tp_timer.setInterval(1000)  # 1 second in milliseconds
             self.tp_timer.timeout.connect(self._read_emit_tp_data)
@@ -314,7 +328,8 @@ class ReadContinuous(ReadData):
 
             self.etc_timer.start()
             self.tp_timer.start()
-            self.exec()  # Start the event loop for QThread
+
+            self.exec()  # Start the event loop
         finally:
             # Ensure the connection is closed when the thread finishes
             self.stop()
@@ -325,7 +340,6 @@ class ReadContinuous(ReadData):
             return
         try:
             t_p_df = self._read_t_p(self.cursor)
-
             if t_p_df.empty:
                 self.logger.debug("No new T-p data available.")
                 return
@@ -334,6 +348,7 @@ class ReadContinuous(ReadData):
             self._separate_and_append_t_p(t_p_df)
             last_row = t_p_df.iloc[-1]
 
+            # Check for cycle or state change
             if (self.current_cycle != last_row[TableConfig().TPDataTable.cycle_number] or
                     self.current_state != last_row[TableConfig().TPDataTable.de_hyd_state]):
                 self.current_cycle = last_row[TableConfig().TPDataTable.cycle_number]
@@ -341,6 +356,7 @@ class ReadContinuous(ReadData):
                 self.current_cycle_sig.emit(self.current_cycle)
                 self.current_state_sig.emit(self.current_state)
                 self._read_emit_uptake_last_cycle()
+
             if not self.T_data.empty:
                 self.T_data_sig.emit(self.T_data)
             if not self.p_data.empty:
@@ -351,6 +367,7 @@ class ReadContinuous(ReadData):
             self._attempt_reconnect()
 
     def _read_emit_etc_data(self):
+        """Read ETC data and emit signal."""
         #todo: only works if t_p_data exists in time_range of etc recording.....
         if not self.running:
             return
@@ -381,7 +398,6 @@ class ReadContinuous(ReadData):
             self.logger.info("Reconnected to the database.")
         except Exception as e:
             self.logger.error(f"Failed to reconnect to the database: {e}")
-            # Optionally, you can implement a retry mechanism or stop the thread
             self.stop()
 
     def stop(self):
@@ -401,10 +417,9 @@ class ReadContinuous(ReadData):
 
 class ReadStatic(ReadData):
     """
-    Class for reading data for static plotting.
+    Thread class for static data reading (e.g., for full-test plots).
     """
     whole_test_emited_sig = Signal()
-
 
     def __init__(self, meta_data=MetaData()):
         super().__init__(meta_data)
@@ -471,7 +486,8 @@ class ReadStatic(ReadData):
 
 class PlotBaseStyle(pg.PlotWidget):
     """
-    Sets up basic style for the main plot windows for temperature pressure and ETC data
+    Base style for plotting windows.
+    Sets up left and right axes, legends, and tick fonts.
     """
 
     def __init__(self, parent=None, y_axis=''):
@@ -489,6 +505,7 @@ class PlotBaseStyle(pg.PlotWidget):
 
     ###style init
     def _init_col_names(self, y_axis):
+        """Set column names based on the chosen y-axis."""
         self.y_axis = y_axis
         self.t_p_table = TableConfig().TPDataTable
         self.de_hyd_state_col = (self.t_p_table.time, self.t_p_table.de_hyd_state)
@@ -517,7 +534,7 @@ class PlotBaseStyle(pg.PlotWidget):
         self._set_tick_fonts(self.plotItem.getAxis('left'))
 
     def _init_right_axis(self):
-        # Initialize a secondary ViewBox for the right axis
+        """Set up a secondary (right) axis and link it to a separate view box."""
         self.rightViewBox = pg.ViewBox()
         self.plotItem.showAxis('right')
         self.plotItem.scene().addItem(self.rightViewBox)
@@ -535,6 +552,7 @@ class PlotBaseStyle(pg.PlotWidget):
         self._set_tick_fonts(self.plotItem.getAxis('right'))
 
     def _set_tick_fonts(self, axis):
+        """Set fonts and colors for the axis ticks."""
         font = pg.QtGui.QFont('Arial', self.font_size)
         axis.setTickFont(font)
         axis.setStyle(tickTextOffset=10)
@@ -542,6 +560,7 @@ class PlotBaseStyle(pg.PlotWidget):
         axis.setTextPen(pg.mkPen(self.font_color))  # Set the color of the tick labels
 
     def _customize_legend(self, legend):
+
         # todo: does not work yet
         font = pg.QtGui.QFont()
         font.setPointSize(12)  # Set the font size
@@ -553,14 +572,17 @@ class PlotBaseStyle(pg.PlotWidget):
             label.setFont(font)
 
     def _update_view(self):
+        """Update the geometry of the right view box to match the main view."""
         self.rightViewBox.setGeometry(self.plotItem.vb.sceneBoundingRect())
         self.rightViewBox.linkedViewChanged(self.plotItem.vb, self.rightViewBox.XAxis)
 
     def adjust_plot_size(self):
+        """Adjust the plot size to fill the parent window."""
         self.setGeometry(self.parent().rect())
 
     ###create plot items
     def _create_plot_items_left(self, df, x):
+        """Create plot items for the left axis based on the DataFrame columns."""
         self.plot_items = {}
         for idx, col in enumerate(self.column_names_left):
             if col == self.t_p_table.time:
@@ -578,6 +600,7 @@ class PlotBaseStyle(pg.PlotWidget):
             self.plot_items[col] = plot_item
 
     def _create_plot_item_right(self, col, x, y):
+        """Create a scatter plot item for the right axis."""
         if "_avg" in col.lower():
             brush_color = "r"
         else:
@@ -596,9 +619,9 @@ class PlotBaseStyle(pg.PlotWidget):
             self.scatter_plot_item = scatter_plot_item  # Keep reference to this item
         self.rightViewBox.addItem(scatter_plot_item)
         self.rightViewBox.setXLink(self.plotItem)
+        if not hasattr(self, 'scatter_plot_items_dict'):
+            self.scatter_plot_items_dict = {}
         self.scatter_plot_items_dict[col] = scatter_plot_item
-
-
 
 
         self._customize_legend(self.plotItem.legend)
@@ -810,8 +833,6 @@ class PlotBaseWindow(PlotBaseStyle):
         if hasattr(self, 'reader'):
             self.reader.time_range_to_read = self.current_time_range
             self.reader.start(reading_mode=READING_MODE_BY_TIME)
-
-    ###
 
     ### updating reader contraints
     def update_constraints_etc(self, new_constraints):
