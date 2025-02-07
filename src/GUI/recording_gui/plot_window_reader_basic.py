@@ -57,6 +57,10 @@ READING_MODE_BY_TIME = 'by_time'
   #  def tickStrings(self, values, scale, spacing):
   #      global time_format_str
   #      return [QDateTime.fromSecsSinceEpoch(int(value)).toString(time_format_str) for value in values]
+
+###############################################################################
+#                         Data Reading Threads                                #
+###############################################################################
 class ReadData(QThread):
     """
     Base class for reading data and emitting signals.
@@ -484,6 +488,9 @@ class ReadStatic(ReadData):
         self.reading_mode = new_reading_mode
 
 
+###############################################################################
+#                        Plotting Classes                                     #
+###############################################################################
 class PlotBaseStyle(pg.PlotWidget):
     """
     Base style for plotting windows.
