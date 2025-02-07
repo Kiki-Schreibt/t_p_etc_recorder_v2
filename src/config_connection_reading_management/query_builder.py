@@ -162,62 +162,6 @@ class QueryBuilder:
         values += (sample_id,)
         return query_part, values
 
-    @staticmethod
-    def create_extreme_value_query(table, target_column, min_value=None,
-                               max_value=None, sample_id=None, time_range=None):
-        """
-        Constructs optimized queries to find the minimum and maximum values of a specified column,
-        optionally filtered by sample_id, time range, and min/max values.
-
-        Returns:
-        - tuple: (query_min, query_max, values)
-        """
-        temperature_tolerance = 5
-        where_clauses = []
-        values = []
-
-        sample_id_column = table.sample_id
-        time_column = table.time_start if table.table_name == TableConfig().CycleDataTable else table.time
-
-        # Build WHERE clauses
-        if sample_id:
-            where_clauses.append(f"{sample_id_column} = %s")
-            values.append(sample_id)
-
-        if time_range:
-            min_time, max_time = min(time_range), max(time_range)
-            where_clauses.append(f"{time_column} BETWEEN %s AND %s")
-            values.extend([min_time, max_time])
-
-        if min_value is not None:
-            where_clauses.append(f"{target_column} >= %s")
-            values.append(min_value)
-
-        if max_value is not None:
-            where_clauses.append(f"{target_column} <= %s")
-            values.append(max_value)
-
-        if table.table_name == TableConfig().TPDataTable:
-            where_clauses.append(f"ABS({table.temperature_sample} - {table.setpoint_sample}) <= %s")
-            values.append(temperature_tolerance)
-
-        where_clauses.append("h2_uptake_flag = 'True'")
-
-        where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
-
-        # Simplified query without CTE
-        base_query = f"""
-            SELECT {time_column}, {target_column}, {table.temperature_sample}, {table.reservoir_volume}
-            FROM {table.table_name}
-            {where_clause}
-            ORDER BY {target_column} {{order}}
-            LIMIT 1
-        """
-
-        query_min = base_query.format(order='ASC')
-        query_max = base_query.format(order='DESC')
-        return query_min, query_max, tuple(values)
-
     def create_continuous_reading_query(self, table_name, column_names=None, constraints=None, sample_id=None,desc_limit=1):
 
         query_part = self._build_base_query_reading(table_name=table_name, column_names=column_names)
@@ -228,17 +172,6 @@ class QueryBuilder:
             query_part += f" {self._is_constraint(base_query=query_part)} sample_id = %s"
             values += (sample_id,)
         return query_part + f" ORDER by {time_column} DESC Limit {desc_limit}", values
-
-    def create_update_by_sample_id_query(self, table_name, column_to_update, value_to_update, sample_id):
-
-        table_name, column_names_str = self._normalize_table_names(table_name=table_name, column_names="do_nothing")
-        sample_id_column = next((meta_key for meta_key in TableConfig().get_table_column_names(table_class=self.meta_data_table) if "sample_id" in meta_key), None)
-        if isinstance(value_to_update, datetime) or isinstance(value_to_update, str):
-            query = f"UPDATE {table_name} SET {column_to_update} = '{value_to_update}' WHERE {sample_id_column} = '{sample_id}'"
-            return query
-        else:
-            query = f"UPDATE {table_name} SET {column_to_update} = '{value_to_update}' WHERE {sample_id_column} = '{sample_id}'"
-            return query
 
     def create_writing_query(self, table_name=None, column_names=None):
 
@@ -583,6 +516,73 @@ class QueryBuilder:
             except Exception as e:
                 self.logger.error(f"Error occurred while fetching data: {e}")
 
+    ## maybe never used
+    @staticmethod
+    def create_extreme_value_query(table, target_column, min_value=None,
+                               max_value=None, sample_id=None, time_range=None):
+        """
+        Constructs optimized queries to find the minimum and maximum values of a specified column,
+        optionally filtered by sample_id, time range, and min/max values.
+
+        Returns:
+        - tuple: (query_min, query_max, values)
+        """
+        temperature_tolerance = 5
+        where_clauses = []
+        values = []
+
+        sample_id_column = table.sample_id
+        time_column = table.time_start if table.table_name == TableConfig().CycleDataTable else table.time
+
+        # Build WHERE clauses
+        if sample_id:
+            where_clauses.append(f"{sample_id_column} = %s")
+            values.append(sample_id)
+
+        if time_range:
+            min_time, max_time = min(time_range), max(time_range)
+            where_clauses.append(f"{time_column} BETWEEN %s AND %s")
+            values.extend([min_time, max_time])
+
+        if min_value is not None:
+            where_clauses.append(f"{target_column} >= %s")
+            values.append(min_value)
+
+        if max_value is not None:
+            where_clauses.append(f"{target_column} <= %s")
+            values.append(max_value)
+
+        if table.table_name == TableConfig().TPDataTable:
+            where_clauses.append(f"ABS({table.temperature_sample} - {table.setpoint_sample}) <= %s")
+            values.append(temperature_tolerance)
+
+        where_clauses.append("h2_uptake_flag = 'True'")
+
+        where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+
+        # Simplified query without CTE
+        base_query = f"""
+            SELECT {time_column}, {target_column}, {table.temperature_sample}, {table.reservoir_volume}
+            FROM {table.table_name}
+            {where_clause}
+            ORDER BY {target_column} {{order}}
+            LIMIT 1
+        """
+
+        query_min = base_query.format(order='ASC')
+        query_max = base_query.format(order='DESC')
+        return query_min, query_max, tuple(values)
+
+    def create_update_by_sample_id_query(self, table_name, column_to_update, value_to_update, sample_id):
+
+        table_name, column_names_str = self._normalize_table_names(table_name=table_name, column_names="do_nothing")
+        sample_id_column = next((meta_key for meta_key in TableConfig().get_table_column_names(table_class=self.meta_data_table) if "sample_id" in meta_key), None)
+        if isinstance(value_to_update, datetime) or isinstance(value_to_update, str):
+            query = f"UPDATE {table_name} SET {column_to_update} = '{value_to_update}' WHERE {sample_id_column} = '{sample_id}'"
+            return query
+        else:
+            query = f"UPDATE {table_name} SET {column_to_update} = '{value_to_update}' WHERE {sample_id_column} = '{sample_id}'"
+            return query
 
 def test_query_builder():
     qb = QueryBuilder()

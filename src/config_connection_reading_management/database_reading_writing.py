@@ -259,6 +259,32 @@ class DataRetriever:
             etc_data = pd.DataFrame()
         return tp_data, etc_data
 
+    def fetch_data_by_sample_id_2(self, sample_id, table_name, column_names=None, constraints=None):
+        """
+
+        """
+        query, values = qb.create_reading_query(sample_id=sample_id,
+                                                table_name=table_name,
+                                                column_names=column_names,
+                                                limit_data_points=self.limit_datapoints,
+                                                constraints=constraints)
+
+        return self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values = values)
+
+    def fetch_data_by_time_2(self, time_range, table_name, column_names=None, constraints=None, sample_id=None):
+        """
+
+        """
+        query, values = qb.create_reading_query(table_name=table_name,
+                                                time_window=time_range,
+                                                limit_data_points=self.limit_datapoints,
+                                                column_names=column_names,
+                                                constraints=constraints,
+                                                sample_id=sample_id)
+
+        return self.execute_fetching(query=query, column_names=column_names,
+                                     table_name=table_name, values=values)
+
     def fetch_xy_data(self, time_value, row_package_name='Transient'):
         """
         Fetch ETC_XY data by time value. Should always return 200 lines and 2 rows
@@ -318,32 +344,6 @@ class DataRetriever:
         meta_data = MetaData(sample_id=sample_id)
         return meta_data.last_de_hyd_state, meta_data.total_number_cycles
 
-    def fetch_data_by_sample_id_2(self, sample_id, table_name, column_names=None, constraints=None):
-        """
-
-        """
-        query, values = qb.create_reading_query(sample_id=sample_id,
-                                                table_name=table_name,
-                                                column_names=column_names,
-                                                limit_data_points=self.limit_datapoints,
-                                                constraints=constraints)
-        #print(query)
-        return self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values = values)
-
-    def fetch_data_by_time_2(self, time_range, table_name, column_names=None, constraints=None, sample_id=None):
-        """
-
-        """
-        query, values = qb.create_reading_query(table_name=table_name,
-                                                time_window=time_range,
-                                                limit_data_points=self.limit_datapoints,
-                                                column_names=column_names,
-                                                constraints=constraints,
-                                                sample_id=sample_id)
-
-        return self.execute_fetching(query=query, column_names=column_names,
-                                     table_name=table_name, values=values)
-
     def fetch_data_by_cycle(self, cycle_numbers, sample_id, column_names=None, constraints=None, table=None):
         """
         Fetches data from the database for the specified cycle numbers and sample ID.
@@ -393,20 +393,6 @@ class DataRetriever:
         df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
         return df
 
-    #todo: Not used...
-    def fetch_pressures_for_h2_uptake_calc(self, sample_id, cycle_number):
-        query = qb.create_pressure_query_for_uptake_calc(sample_id=sample_id, cycle_number=cycle_number)
-
-        try:
-            with DatabaseConnection() as db_conn:
-                db_conn.cursor.execute(query)
-                records = db_conn.cursor.fetchall()
-                df = pd.DataFrame.from_records(records, columns=["min_pressure", "max_pressure"])
-                return df
-        except Exception as e:
-            self.logger.error(f"Error occurred while fetching data by cycle number: {e}")
-        return None
-
     def fetch_data_by_time_no_limit(self, table, time_range, col_names=None):
         if not col_names:
             col_names = TableConfig().get_table_column_names(table_class=table)
@@ -420,6 +406,9 @@ class DataRetriever:
         return self.execute_fetching(query=query, values=time_range, column_names=col_names)
 
     def execute_fetching(self, query, column_names=None, table_name=None, values=None):
+        """
+        Executes a query and returns a DataFrame with adjusted data types and time zones.
+        """
         #todo cycle counter access from that
         if column_names is None:
             column_names = TableConfig().get_table_column_names(table_name=table_name)
