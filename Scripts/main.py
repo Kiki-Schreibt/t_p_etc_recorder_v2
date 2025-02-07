@@ -71,7 +71,8 @@ class MainProgram(RecordingMainWindow):
         from src.export_methods import QuickExport
         exporter = QuickExport()
         sample_id = self.meta_data.sample_id
-        export_thread = threading.Thread(target=exporter.export_all, args=(sample_id,), daemon=True)
+        constraints = self.controller.constraints_dict
+        export_thread = threading.Thread(target=exporter.export_all, args=(sample_id, constraints), daemon=True)
         export_thread.start()
 
     def _open_dicon_simulator(self):

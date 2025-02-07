@@ -212,6 +212,7 @@ class ReadData(QThread):
         column_names = (table.time,
                         table.th_conductivity,
                         table.thermal_conductivity_average)
+        print(self.constraints_etc)
         try:
             df = self.db_retriever.fetch_data_by_time_2(
                 time_range=time_range,
@@ -422,11 +423,11 @@ class ReadStatic(ReadData):
             return
         self.running = True
         if self.reading_mode.lower() == "full_test":
-
             self._read_full_test()
-        elif self.reading_mode.lower() == "by_time":
 
+        elif self.reading_mode.lower() == "by_time":
             self._read_data_by_time()
+
         if hasattr(self, '_previous_reading_mode') and self._previous_reading_mode is not None:
             self.reading_mode = self._previous_reading_mode
             del self._previous_reading_mode  # Clean up

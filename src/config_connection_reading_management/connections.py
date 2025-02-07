@@ -24,6 +24,12 @@ class DatabaseConnection:
         cursor (psycopg2.Cursor): Cursor object for database operations.
         logger (Logger): Logger for logging messages.
         auto_close (bool): Flag to indicate automatic closing of the connection.
+
+    Usage Example:
+    with DatabaseConnection() as db_conn:
+        db_conn.cursor.executemany(query, values)
+        records = db_conn.cursor.fetchall()
+
     """
     # Load the configuration
     config = GetConfig()
@@ -35,16 +41,24 @@ class DatabaseConnection:
     DB_PORT         = config.DB_PORT
 
     def __init__(self):
+        """
+        Initialises empty attributes for later use and sets up logging for DatabaseConnection
+        """
         self.conn = None
         self.cursor = None
         self.logger = logging.getLogger(__name__)
         self.auto_close = True
 
     def __enter__(self):
+        """Entry for context manager
+        :returns DatabaseConnection, self
+        """
         self.open_connection(auto_close=True)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit point for context manager. Closes connection, rolls back current transactions."""
+
         if exc_type is not None:
             # An exception occurred, rollback the transaction
             self.conn.rollback()
@@ -58,6 +72,10 @@ class DatabaseConnection:
             self.close_connection()
 
     def open_connection(self, auto_close=False):
+        """Can be used in case manually opening a connection is wanted.
+        Arguments:
+             auto_close (bool): Dont change. Just important for context manager. If you open manually, also close manually.
+        """
         if self.conn is None:
             conn_str = f"dbname={self.DB_DATABASE} user={self.DB_USERNAME} password={self.DB_PASSWORD} host={self.DB_SERVER} port={self.DB_PORT}"
             try:
@@ -70,6 +88,7 @@ class DatabaseConnection:
                 raise
 
     def close_connection(self):
+        """can be used for closing connection manually"""
         if self.cursor:
             self.cursor.close()
         if self.conn:
@@ -96,6 +115,10 @@ class ModbusConnection:
         close(): Closes the Modbus TCP connection.
         is_connected(): Checks if the Modbus TCP connection is still active.
         reconnect(): Re-establishes the Modbus TCP connection.
+
+    Usage Example:
+    with ModbusConnection() as mb_conn:
+        mb_conn.client.read_holding_registers(START_REG, FINAL_REG, MODBUS_SLAVE_ID)
     """
     config = GetConfig()
     MODBUS_HOST     = config.MODBUS_HOST
@@ -161,6 +184,31 @@ class ModbusConnection:
 
 
 class HotDiskConnection:
+    """
+    Class for managing HotDisk Constants Analyzer TCP/IP connections.
+
+    This class is designed to handle connections with the constants analyzer thermal conductivity measurement software which acts as server, using the socket
+    library. It can be used as a context manager to ensure that connections are properly
+    opened and closed.
+
+    Attributes:
+        host (str): Host address.
+        port (int): Host port
+        logger (Logger): Logger for logging messages.
+        sock (socket): socket to connect
+
+    Methods:
+        connect(): Establishes a connection with the TCP server.
+        disconnect(): Closes the TCP/IP connection.
+        send_command(str): Sends command to TCP server
+        receive_response(): Receives response from TCP server
+        send_command_receive_response: Sends a command to TCP server and returns the response
+
+    Usage Example:
+    with HotDiskConnection() as hd_conn:
+        hd_conn.send_command_receive_response(f"*IDN?")  #returns hot disk id
+    """
+
     HOT_DISK_HOST = 'localhost'
     HOT_DISK_PORT = 50009
 
@@ -192,6 +240,10 @@ class HotDiskConnection:
             self.logger.error(f"An error occurred during connection: {e}")
 
     def send_command(self, command):
+        """sends command to hot disk constants analyzer
+        :argument
+        command (str): the command that should be sent
+        """
         if not self.sock:
             self.logger.error("Not connected to the server.")
             return
@@ -325,3 +377,4 @@ if __name__ == "__main__":
     test_functionality()
     test_mb_connection()
     test_hot_disk_connection()
+    help(ModbusClient.read_holding_registers)

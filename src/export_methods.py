@@ -21,17 +21,17 @@ class QuickExport:
         self.db_retriever = DataRetriever()
         self.meta_data = MetaData()
 
-    def export_all(self, sample_id, subfolder_name_str=""):
+    def export_all(self, sample_id, constraints_etc: dict, subfolder_name_str=""):
         self.meta_data = MetaData(sample_id=sample_id)
-        self.export_etc_data(sample_id=sample_id, subfolder_name_str=subfolder_name_str)
+        self.export_etc_data(sample_id=sample_id, constraints_etc=constraints_etc, subfolder_name_str=subfolder_name_str)
         self.export_capacity_data(sample_id=sample_id, subfolder_name_str=subfolder_name_str)
         self.export_t_p_data(sample_id=sample_id, subfolder_name_str=subfolder_name_str)
 
-    def export_etc_data(self, sample_id, subfolder_name_str=""):
+    def export_etc_data(self, sample_id, constraints_etc: dict = {}, subfolder_name_str=""):
         if not self.meta_data.sample_id:
             self.meta_data = MetaData(sample_id=sample_id)
         self.logger.info(f"Starting ETC data export for {sample_id}")
-        etc_data, file_edition_etc = self._get_etc_data_full_test(sample_id=sample_id)
+        etc_data, file_edition_etc = self._get_etc_data_full_test(sample_id=sample_id, constraints_etc=constraints_etc)
         self._write_data(sample_id=sample_id,
                         data=etc_data,
                         file_addition=file_edition_etc,
@@ -47,7 +47,7 @@ class QuickExport:
                         file_addition=file_edition_cap,
                         subfolder_name=subfolder_name_str)
 
-    def _get_etc_data_full_test(self, sample_id):
+    def _get_etc_data_full_test(self, sample_id, constraints_etc: dict = {}):
         cols_to_export = (self.etc_table.time,
                           self.etc_table.pressure,
                           self.etc_table.temperature_sample,
@@ -61,24 +61,25 @@ class QuickExport:
                           self.etc_table.output_power,
                           self.etc_table.measurement_time,
                           self.etc_table.resistance)
-        constraints_dict = {
-                                "min_TotalCharTime": 0.3,
-                                "max_TotalCharTime": 1.1,
-                                "min_TotalTempIncr": 1.9,
-                                "max_TotalTempIncr": 5.2
-                            }
-        data_to_export = self.db_retriever.fetch_data_by_sample_id_2(table_name=self.etc_table.table_name,
-                                                            column_names=cols_to_export,
-                                                            constraints=constraints_dict,
-                                                                     sample_id=sample_id)
+        if not constraints_etc:
+            constraints_etc = {
+                                    "min_TotalCharTime": 0.3,
+                                    "max_TotalCharTime": 1.1,
+                                    "min_TotalTempIncr": 1.7,
+                                    "max_TotalTempIncr": 5.2
+                                }
 
+        data_to_export = self.db_retriever.fetch_data_by_sample_id_2(table_name=self.etc_table.table_name,
+                                                                     column_names=cols_to_export,
+                                                                     constraints=constraints_etc,
+                                                                     sample_id=sample_id)
 
         data_to_export = data_to_export.dropna(subset=self.etc_table.get_clean('time'))
         #calculate relative times
         time_start = self.meta_data.start_time
         time_shift = (data_to_export[self.etc_table.get_clean('time')].iloc[0] - time_start)
         time_shift = time_shift.total_seconds()/3600
-        print(time_shift)
+        print(f"Difference between test start and first etc measurement: {time_shift} s")
         time_intervall = data_to_export[self.etc_table.get_clean('time')].diff().dt.total_seconds() / 3600
         time_intervall[0] = 0
 
@@ -86,12 +87,10 @@ class QuickExport:
         data_to_export['hours'] = time_intervall.cumsum()
         data_to_export['hours'] = data_to_export['hours'] + time_shift
 
-
         return data_to_export, "_Conductivity_Data"
 
     def _get_capacity_data_full_test(self, sample_id):
         cols_to_export = (self.cycle_table.cycle_number,
-
                           self.cycle_table.h2_uptake)
 
         data_to_export = self.db_retriever.fetch_data_by_sample_id_2(table_name=self.cycle_table.table_name,

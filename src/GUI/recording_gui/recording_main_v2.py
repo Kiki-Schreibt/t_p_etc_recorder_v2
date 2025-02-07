@@ -307,7 +307,6 @@ class RecordingMainWindow(QMainWindow):
         self.setStyleSheet(style)
         self.setFont(FONT)
         self.logger = logging.getLogger(__name__)
-
         # Load UI
         self.ui = self.load_ui(recording_ui_file_path)
 
@@ -416,10 +415,10 @@ class RecordingMainWindow(QMainWindow):
         is_checked = self.ui.start_stop_tp_recording_button.isChecked()
         self.toggle_button(self.ui.start_stop_tp_recording_button, "Start T-p Recording", "Stop T-p Recording", is_checked)
         if is_checked:
-            left_upper_plot, __ = self.controller.start_tp_recording()
-            left_upper_plot.current_cycle_sig.connect(lambda number: self.set_text_current_state(arg="number", value=number))
-            left_upper_plot.current_state_sig.connect(lambda state: self.set_text_current_state(arg="state", value=state))
-            left_upper_plot.current_uptake_sig.connect(lambda uptake: self.set_text_current_state(arg="uptake", value=uptake))
+            self.controller.start_tp_recording()
+            self.controller.plot_manager.left_upper_plot.current_cycle_sig.connect(lambda number: self.set_text_current_state(arg="number", value=number))
+            self.controller.plot_manager.left_upper_plot.current_state_sig.connect(lambda state: self.set_text_current_state(arg="state", value=state))
+            self.controller.plot_manager.left_upper_plot.current_uptake_sig.connect(lambda uptake: self.set_text_current_state(arg="uptake", value=uptake))
         else:
             self.controller.stop_tp_recording()
 
@@ -476,6 +475,7 @@ class RecordingMainWindow(QMainWindow):
             self.ui.MinTempIncEditField.text(),
             self.ui.MaxTempIncEditField.text(),
         ]
+
         if all(self._is_numeric(val) for val in fields):
             constraints = {
                 "min_TotalCharTime": float(self.ui.MinCharTimeEditField.text()),
@@ -483,6 +483,7 @@ class RecordingMainWindow(QMainWindow):
                 "min_TotalTempIncr": float(self.ui.MinTempIncEditField.text()),
                 "max_TotalTempIncr": float(self.ui.MaxTempIncEditField.text())
             }
+
             self.controller.set_constraints(constraints)
         else:
             QMessageBox.warning(self, "Invalid Input", "Please enter numeric values for constraints.")

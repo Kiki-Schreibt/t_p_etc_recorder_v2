@@ -33,6 +33,7 @@ class GetConfig:
         HOT_DISK_LOG_FILE_PATH (str): Path for hot disk log files.
 
     Methods:
+        _has_uppercase(string): checks if string contains capital letters. returns true if capital found
         create_insert_query(table_name, column_names): Creates an SQL insert query for the given table and column names.
     """
 
@@ -119,6 +120,7 @@ Usage Example:
     prompter.prompt()
     prompter.save_to_file("config.json")
 """
+#todo: ConfigPrompter not really needed anymore. Can be replaced by smaller class or even method to create standard config file.
 
 
 class ConfigPrompter:
@@ -278,7 +280,7 @@ class ConfigPrompter:
 
 
 if __name__ == "__main__":
-
+    """just for testing if config reader is working"""
     config = GetConfig()
     print(config.LOG_FILE)
 
