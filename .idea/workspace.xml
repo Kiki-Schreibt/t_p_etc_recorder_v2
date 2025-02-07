@@ -6,10 +6,25 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/calculations/hydride_worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/calculations/hydride_worker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/path/to/log_directory/2024-12-03_16_Application_Log.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/standard_paths.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/standard_paths.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/Trash/general_stuff_for_plots/base_functions_plots.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/Trash/general_stuff_for_plots/qt_plots.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/project_visualization/dependency_graph" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/project_visualization/dependency_graph.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/project_visualization/project_graph.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/project_visualization/project_plot_graphviz.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/project_visualization/project_structure" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/project_visualization/project_structure.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/tcp_test_server.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/temp_for_hotdisk/asdf.hotb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/testing_classes/optimization.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/testing_classes/profile_data.prof" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/testing_classes/speed_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/testing_classes/test_database_reading_writing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/testing_classes/unittest_plotting.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/tests.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/config_creation/config_creator_ui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/config_creation/config_creator_ui_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +144,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\Trash" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.hydride_worker">
+  <component name="RunManager" selected="Python.test_planner">
     <configuration name="config_reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -174,28 +189,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="data_fitter_ui_business" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="t_p_etc_recorder_v2" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/data_fitter" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="hydride_worker" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -218,7 +211,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="project_plot_graphviz" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts/project_visualization" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/project_visualization/project_plot_graphviz.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_planner" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -231,7 +246,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/test_planner.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -242,11 +257,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.test_planner" />
+        <item itemvalue="Python.project_plot_graphviz" />
         <item itemvalue="Python.hydride_worker" />
         <item itemvalue="Python.connections" />
         <item itemvalue="Python.config_reader" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.data_fitter_ui_business" />
       </list>
     </recent_temporary>
   </component>
@@ -284,7 +299,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>403</line>
+          <line>405</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -304,7 +319,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>533</line>
+          <line>535</line>
           <option name="timeStamp" value="375" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -319,28 +334,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>436</line>
+          <line>438</line>
           <option name="timeStamp" value="416" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>435</line>
+          <line>437</line>
           <option name="timeStamp" value="417" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>440</line>
+          <line>442</line>
           <option name="timeStamp" value="418" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>489</line>
+          <line>491</line>
           <option name="timeStamp" value="419" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
-          <line>391</line>
-          <option name="timeStamp" value="423" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/calculations/hydride_worker.py</url>

@@ -179,6 +179,7 @@ class ModbusConnection:
             except Exception as e:
                 self.logger.error(f"Reconnect attempt {attempt} failed: {e}")
                 time.sleep(delay)
+                delay *= 2
         self.logger.error("Failed to reconnect after %s attempts.", retries)
         return False
 
@@ -377,4 +378,3 @@ if __name__ == "__main__":
     test_functionality()
     test_mb_connection()
     test_hot_disk_connection()
-    help(ModbusClient.read_holding_registers)

@@ -23,7 +23,6 @@ from src.table_data import TableConfig
 
 qb = QueryBuilder()
 local_tz = ZoneInfo("Europe/Berlin")
-table_rp = TableConfig().TPDataTable
 
 
 class DataRetriever:
@@ -112,7 +111,7 @@ class DataRetriever:
                                     etc_table.cycle_number: 'cycle_number',
                                     etc_table.cycle_number_flag: 'cycle_number_flag',
                                     etc_table.de_hyd_state: 'de_hyd_state'}
-    etc_xy_column_attribute_mapping ={  xy_table.point_number: 'point_nr',
+    etc_xy_column_attribute_mapping = {  xy_table.point_number: 'point_nr',
                                         xy_table.time: 'time',
                                         xy_table.t_f_tau: 't_f_tau',
                                         xy_table.temperature: 'temperature',
@@ -122,6 +121,7 @@ class DataRetriever:
                                         xy_table.temp_diff: 'diff_temperature',
                                         xy_table.drift_time: 'time_drift',
                                         xy_table.temperature_drift: 'temperature_drift'}
+
     def __init__(self):
         self.running = False
         self.qb = qb
@@ -134,7 +134,9 @@ class DataRetriever:
         Fetches the latest records from a specified table.
         Parameters:
             table_name (str): Name of the table you want to read from default='t_p_data'
-
+            cursor (DatabaseConnection()): cursor to fetch data
+            desc_limit (int): how many points to read (descending)
+            sample_id (str): sample id to read
             column_names (str): columns to read (tuple) default= ('time', 'pressure')
             constraints (dict): min max parameters for temp increase and char time
 

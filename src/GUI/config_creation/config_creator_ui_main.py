@@ -164,8 +164,6 @@ class ConfigWindow(QWidget):
             QMessageBox.critical(self, "Error", f"Failed to save configuration: {str(e)}")
 
     def test_connection(self):
-
-
         db_connection_successful, db_error_message = self._test_database_connection()
         modbus_connection_successful, modbus_error_message = self._test_modbus_connections()
 
