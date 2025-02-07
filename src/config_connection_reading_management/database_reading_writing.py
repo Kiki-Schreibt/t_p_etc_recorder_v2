@@ -517,7 +517,6 @@ class DataBaseManipulator:
         self.logger = logging.getLogger(__name__)
         self.database_connection = DatabaseConnection()
 
-
     def execute_updating(self, query, values, many_bool=True):
         with DatabaseConnection() as db_conn:
             try:
@@ -530,7 +529,6 @@ class DataBaseManipulator:
             except Exception as e:
                 db_conn.cursor.connection.rollback()
                 self.logger.error(f"An error occurred during executing update: {e}")
-
 
     def batch_update_data(self, sample_id: str=None, table: TableConfig()=None,
                           df_vals_to_update: pd.DataFrame() = None,
@@ -551,6 +549,7 @@ class DataBaseManipulator:
             update_between_max_list (Series): List of maximum values for the BETWEEN condition.
 
         """
+
         update_between_max_list = update_between_max_list.tolist()
         update_between_min_list = update_between_min_list.tolist()
         table_name = table.table_name
@@ -620,110 +619,6 @@ class DataBaseManipulator:
                     db_conn.cursor.connection.rollback()
                     self.logger.error(f"An error occured while update_data {e}")
                     return False
-
-    def _update_cycle_count_flag(self, sample_id=None, min_cycling_temperature=None):
-        tp_table = TableConfig().TPDataTable
-        table_name = tp_table.table_name
-        column_names = TableConfig().get_table_column_names()
-        for col_name in column_names:
-            if "cycle" in col_name.lower() and "flag" in col_name.lower():
-                column_to_update = col_name
-            if "sample" in col_name.lower() and "id" in col_name.lower():
-                sample_id_column = col_name
-            if "sample" in col_name.lower() and "temperature" in col_name.lower():
-                sample_temperature_column = col_name
-
-        query = f"UPDATE {table_name} SET {column_to_update} = CASE WHEN " \
-                f"{sample_temperature_column} < {min_cycling_temperature} THEN False " \
-                f"ELSE True END " \
-                f"WHERE {sample_id_column} = '{sample_id}'"
-
-        try:
-            with self.database_connection as db_conn:
-                db_conn.cursor.execute(query)
-                db_conn.cursor.connection.commit()
-            self.logger.info(f"Cycle count flag updated for {sample_id}")
-        except Exception as e:
-            self.logger.error("Error updating cycle count flag %s", e)
-
-    def _update_uptake_flag(self, sample_id=None, max_cycling_pressure=None):
-        table_name = self.tp_table.table_name
-        column_names = TableConfig().get_table_column_names(self.tp_table)
-        for col_name in column_names:
-            if "uptake" in col_name.lower() and "flag" in col_name.lower():
-                column_to_update = col_name
-            if "sample" in col_name.lower() and "id" in col_name.lower():
-                sample_id_column = col_name
-            if "pressure" in col_name.lower() and "eq" not in col_name.lower():
-                sample_pressure_column = col_name
-
-        try:
-            query = f"UPDATE {table_name} SET {column_to_update} = CASE WHEN " \
-                f"{sample_pressure_column} < {max_cycling_pressure}  THEN True " \
-                f"ELSE False END "\
-                f"WHERE {sample_id_column} = '{sample_id}'"
-            with DatabaseConnection() as db_conn:
-                db_conn.cursor.execute(query)
-                db_conn.cursor.connection.commit()
-                self.logger.info(f"Cycle count flag updated for {sample_id}")
-
-        except Exception as e:
-            self.logger.error("Error updating cycle count flag %s", e)
-
-    def _update_first_hyd_flag(self, sample_id=None, date_first_hydrogenation=None):
-        table_name = self.tp_table.table_name
-        column_names = TableConfig().get_table_column_names(self.tp_table)
-
-        for col_name in column_names:
-            if "uptake" in col_name.lower() and "flag" in col_name.lower():
-                column_to_update_1 = col_name
-            if "cycle" in col_name.lower() and "flag" in col_name.lower():
-                column_to_update_2 = col_name
-            if "sample" in col_name.lower() and "id" in col_name.lower():
-                sample_id_column = col_name
-            if "time" in col_name.lower():
-                time_column = col_name
-
-        try:
-            query = f"UPDATE {table_name} SET {column_to_update_1} = False, " \
-                f"{column_to_update_2} = False " \
-                f"WHERE {sample_id_column} = '{sample_id}' AND {time_column} < '{date_first_hydrogenation}'"
-            with DatabaseConnection() as db_conn:
-                db_conn.cursor.execute(query)
-                db_conn.cursor.connection.commit()
-                self.logger.info(f"Cycle count flag updated for {sample_id}")
-
-        except Exception as e:
-            self.logger.error("Error updating cycle count flag %s", e)
-
-    def update_flags(self, sample_id=None, min_cycling_temperature=None, max_cycling_pressure=None, date_first_hydrogenation=None):
-        """
-        Updatest and p data with date of first hydrogenation (everything before will be dehydrogenated) and if
-        pressures should be taken into account for uptake estimation (_update_uptake_flag)
-        :param sample_id:
-        :param min_cycling_temperature:
-        :param max_cycling_pressure:
-        :param date_first_hydrogenation:
-        :return:
-        """
-        start_time_all = time.time()
-        if min_cycling_temperature:
-            start_time = time.time()
-            self._update_cycle_count_flag(sample_id=sample_id, min_cycling_temperature=min_cycling_temperature)
-            passed_time = time.time()-start_time
-            print(f"Updating temperature flags takes {passed_time} s")
-        if max_cycling_pressure:
-            start_time = time.time()
-            self._update_uptake_flag(sample_id=sample_id, max_cycling_pressure=max_cycling_pressure)
-            passed_time = time.time()-start_time
-            print(f"Updating pressure flags takes {passed_time} s")
-        if date_first_hydrogenation:
-            start_time = time.time()
-            self._update_first_hyd_flag(sample_id=sample_id, date_first_hydrogenation=date_first_hydrogenation)
-            passed_time = time.time()-start_time
-            print(f"Updating first hydrogenation flag takes {passed_time} s in total")
-        passed_time = time.time()-start_time_all
-        print(f"Updating all flags takes {passed_time} s in total")
 
 
 class ExcelDataProcessor:
@@ -919,17 +814,6 @@ class ExcelDataProcessor:
             #print("The DataFrames have different lengths and cannot be concatenated directly.")
             self.logger.error("The DataFrames have different lengths and cannot be concatenated directly.")
             return None
-
-    def save_combined_data(self, combined_df, output_file_path):
-        try:
-            cols = combined_df.columns.tolist()
-            cols.insert(0, cols.pop(cols.index('Time')))
-            combined_df = combined_df[cols]
-
-            combined_df.to_csv(output_file_path, sep=';', index=False)
-            self.logger.info(f"Data saved to {output_file_path}")
-        except Exception as e:
-            self.logger.error(f"Error saving combined data: %s", e)
 
     def _t_f_tau_t_t_diff_reader(self, param_res_combined_df, sheet_name):
         df = pd.read_excel(self.file_path, sheet_name=sheet_name, header=3)
@@ -1175,48 +1059,12 @@ class ExcelDataProcessor:
 
         return df_merged
 
-    #todo: not used..
-    def _update_sample_id_col(self, time_range):
-        time_start = min(time_range)
-        time_end = max(time_range)
-        etc_table = TableConfig().ETCDataTable
-        table_name_etc = etc_table.table_name
-        time_col_etc = etc_table.time
-        xy_table = TableConfig().ThermalConductivityXyDataTable
-        table_name_xy = xy_table.table_name
-        time_col_xy = xy_table.time
-        values =  (self.meta_data.sample_id, time_start, time_end)
-
-
-        update_etc_query = f"Update {table_name_etc} " \
-                           f"SET " \
-                           f"sample_id = %s" \
-                           f" WHERE {time_col_etc} " \
-                           f"BETWEEN %s AND %s"
-        update_xy_query =  f"Update {table_name_xy} " \
-                            f"SET " \
-                            f"sample_id = %s" \
-                            f" WHERE {time_col_xy} " \
-                            f"BETWEEN %s AND %s"
-
-        with DatabaseConnection() as db_conn:
-            try:
-                db_conn.cursor.execute(update_etc_query, values)
-                db_conn.cursor.execute(update_xy_query, values)
-            except Exception as e:
-                self.logger.error(f"Error occurred while updating sample_id col for ETC and ETC_XY: %s", e)
-                db_conn.cursor.connection.rollback()
-
     def execute(self):
         table = TableConfig.ETCDataTable
         self._update_xlsx_file()
         combined_df = self._read_and_process_sheets()
         if combined_df.empty:
             return None, None
-
-
-        if self._test_mode:
-            combined_df = self._overwrite_with_example_data(df=combined_df)
 
         thermal_conductivity_xy_data = self._get_measurement_xy_data(combined_df)
         combined_df = combined_df.drop_duplicates(subset=table.get_clean("time"), keep='last')
@@ -1266,29 +1114,16 @@ class ExcelDataProcessor:
         time_range = (min(combined_df[table.get_clean("time")]), max(combined_df[table.get_clean("time")]))
         return time_range
 
-    def _overwrite_with_example_data(self, df):
-        start_time = datetime.now(tz=local_tz)
-        duration = timedelta(minutes=1)  # Example duration of 2 hours
-        x = len(df["Time"])  # Number of equidistant points
-        # Calculate the end time
-        end_time = start_time - duration
-        # Generate x equidistant time points between start_time and end_time
-        equidistant_points = np.linspace(0, 1, x)
-        time_points = [start_time - (start_time - end_time) * point for point in equidistant_points]
-        time_points = [tp.replace(microsecond=0) for tp in time_points]
+    def save_combined_data(self, combined_df, output_file_path):
+        try:
+            cols = combined_df.columns.tolist()
+            cols.insert(0, cols.pop(cols.index('Time')))
+            combined_df = combined_df[cols]
 
-        df["Time"] = time_points
-        #print(df['Time'])
-        self.logger.info("Data times overwritten for testing purpose")
-        return df
-
-
-def test_update_first_hydr():
-    db_manipulator = DataBaseManipulator()
-
-    date_first_hyd = datetime(2023, 5, 23, 10, 20, 00)
-    sample_id = "WAE-WA-040"
-    db_manipulator.update_flags(sample_id=sample_id, date_first_hydrogenation=date_first_hyd)
+            combined_df.to_csv(output_file_path, sep=';', index=False)
+            self.logger.info(f"Data saved to {output_file_path}")
+        except Exception as e:
+            self.logger.error(f"Error saving combined data: %s", e)
 
 
 def test_data_retriever():

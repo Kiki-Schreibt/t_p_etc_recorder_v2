@@ -126,14 +126,6 @@ class QueryBuilder:
 
         return query_part, values
 
-    def _create_etc_xy_reading_query(self,
-                                     base_query=None,
-                                     time_window=None,
-                                     sample_id=None,
-                                     time_list=None,
-                                     limit_data_points=50000):
-        pass
-
     def _create_cycle_data_reading_query(self,
                                      base_query=None,
                                      time_window=None,
