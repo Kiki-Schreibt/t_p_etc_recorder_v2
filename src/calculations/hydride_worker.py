@@ -2,6 +2,8 @@ import csv
 import json
 import re
 
+import src.standard_paths
+
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
@@ -277,8 +279,9 @@ class PeriodicTableOfElements:
 
 
 def create_periodic_table_of_elements():
+
     ## create periodic_table_of_elements.json
-    input_file_path = 'path/to/periodic_table_of_elements.txt'
+    input_file_path = src.standard_paths.standard_periodic_table_txt
 
     ## Replace 'output_data.json' with your desired output file name
     output_file_path = standard_periodic_table_path.replace('.txt', '.json')

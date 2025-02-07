@@ -34,6 +34,7 @@ recording_ui_file_path = get_ui_file_path('recording_gui','recording_ui_design.u
 main_ui_file_path = get_ui_file_path("recording_gui", "recording_ui_design.ui")
 
 # Paths relative to the script location
+standard_periodic_table_txt = get_config_path('Periodic_Table_of_Elements.txt')
 standard_config_file_path = get_config_path('config_logging_modbus_database.json')
 standard_hydride_data_base_path = get_config_path('hydride_data_base.json')
 standard_periodic_table_path = get_config_path('periodic_table_of_elements.json')

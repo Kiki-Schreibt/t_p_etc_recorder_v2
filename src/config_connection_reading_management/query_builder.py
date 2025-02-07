@@ -420,14 +420,6 @@ class QueryBuilder:
         if self.cycle_data_table.table_name in base_query:
             return self.cycle_data_table.time_start
 
-    def _get_sample_id_column(self, table_name):
-        """
-        Helper method to get the sample_id column name based on the table.
-        This is a placeholder method - implement based on your schema.
-        """
-        # Placeholder: Return a generic column name or customize based on the table
-        return "sample_id"
-
     def _build_query_part_etc(self, time_range=None, base_query="", time_list=None):
         """
         Creates a part of a reading query that can be added to the base query.
