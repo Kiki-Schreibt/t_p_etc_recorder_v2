@@ -311,12 +311,6 @@ class DataRetriever:
             self.logger.error(f"Error occurred while fetching x_y data: {e}")
         return pd.DataFrame()
 
-    def close_connection(self):
-        """
-        Closes the database connection when done.
-        """
-        self.database_connection.close_connection()
-
     @staticmethod
     def fetch_last_state_and_cycle(sample_id=None):
         meta_data = MetaData(sample_id=sample_id)
@@ -397,6 +391,7 @@ class DataRetriever:
         df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
         return df
 
+    #todo: Not used...
     def fetch_pressures_for_h2_uptake_calc(self, sample_id, cycle_number):
         query = qb.create_pressure_query_for_uptake_calc(sample_id=sample_id, cycle_number=cycle_number)
 
@@ -503,12 +498,19 @@ class DataRetriever:
                     df[col] = df[col].dt.tz_convert(local_tz)
         return df
 
+    #todo: not used...
     @staticmethod
     def remove_timezone(df):
         for col in df.columns:
             if pd.api.types.is_datetime64_any_dtype(df[col]):
                 df[col] = df[col].dt.tz_localize(None)
         return df
+
+    def close_connection(self):
+        """
+        Closes the database connection when done.
+        """
+        self.database_connection.close_connection()
 
 
 class DataBaseManipulator:
@@ -1182,6 +1184,7 @@ class ExcelDataProcessor:
 
         return df_merged
 
+    #todo: not used..
     def _update_sample_id_col(self, time_range):
         time_start = min(time_range)
         time_end = max(time_range)

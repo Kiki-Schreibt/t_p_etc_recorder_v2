@@ -212,6 +212,7 @@ class ModbusReader:
                                                              config.START_REG,
                                                              config.END_REG,
                                                              config.REGS_OF_INTEREST)
+                print(converted_dicon_data)
 
                 time.sleep(config.SLEEP_INTERVAL)
 
