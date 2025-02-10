@@ -340,7 +340,7 @@ class ReadPlotUptake(pg.PlotWidget):
             x_hyd = df_hyd[self.cycle_table.cycle_number]
             y_hyd = df_hyd[self.cycle_table.h2_uptake]
             x_dehyd = df_dehyd[self.cycle_table.cycle_number]
-            y_dehyd = df_dehyd[self.cycle_table.h2_uptake]
+            y_dehyd = -df_dehyd[self.cycle_table.h2_uptake]
 
             # Initialize scatter plots if they haven't been initialized
             if not hasattr(self, 'scatter_hyd'):
@@ -360,7 +360,7 @@ class ReadPlotUptake(pg.PlotWidget):
             # Set plot ranges if data is available
             if not x_hyd.empty and not y_hyd.empty:
                 self.plotItem.setXRange(min(x_hyd), max(x_hyd))
-                self.plotItem.setYRange(min(y_hyd), max(y_hyd))
+                self.plotItem.setYRange(-max(y_hyd), max(y_hyd))
 
             # Update the plot
             self.update()
