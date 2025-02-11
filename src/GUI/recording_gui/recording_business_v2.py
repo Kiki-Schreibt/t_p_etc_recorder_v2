@@ -367,6 +367,67 @@ class ReadPlotUptake(pg.PlotWidget):
         else:
             self.logger.error("Warning: Filtered dataframes are empty.")
 
+    def plot_etc_cycle_dependent(self, df):
+        etc_table = TableConfig.ETCDataTable()
+        self._set_tick_fonts(self.plotItem.getAxis("bottom"))
+        self._set_tick_fonts(self.plotItem.getAxis("left"))
+        if not df.empty:
+            self.plotItem.clear()
+
+            # Drop rows where 'th_conductivity' column has NaN values
+            df = df.dropna(subset=[etc_table.get_clean('th_conductivity')])
+
+            # Add a legend if not already added
+            if self.plotItem.legend is None:
+                self.plotItem.addLegend()
+
+        # Filter data for hydrogenated and dehydrogenated states
+            df_hyd = df[df[etc_table.get_clean('de_hyd_state')] == "Hydrogenated"]
+            df_dehyd = df[df[etc_table.get_clean('de_hyd_state')] == "Dehydrogenated"]
+
+            # Extract data
+            x_hyd = df_hyd[etc_table.get_clean('time')]
+            y_hyd = df_hyd[etc_table.get_clean('th_conductivity')]
+            y_hyd_avg = df_hyd[etc_table.get_clean('thermal_conductivity_average')]
+
+            x_dehyd = df_dehyd[etc_table.get_clean('time')]
+            y_dehyd = df_dehyd[etc_table.get_clean('th_conductivity')]
+            y_dehyd_avg = df_dehyd[etc_table.get_clean('thermal_conductivity_average')]
+
+
+            # Initialize scatter plots if they haven't been initialized
+            if not hasattr(self, 'scatter_hyd'):
+                self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='x', symbolBrush='r', name="Hydrogenated", size=self.symbol_size)
+                self.scatter_hyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', symbolBrush='r', name="Hydrogenated Average", size=self.symbol_size)
+
+            if not hasattr(self, 'scatter_dehyd'):
+                self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='x', symbolBrush='b', name="Dehydrogenated", size=self.symbol_size)
+                self.scatter_dehyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', symbolBrush='b', name="Dehydrogenated Average", size=self.symbol_size)
+
+            # Set data for scatter plots
+            self.scatter_hyd.setData(x_hyd, y_hyd)
+            self.scatter_hyd_avg.setData(x_hyd, y_hyd_avg)
+
+            self.scatter_dehyd.setData(x_dehyd, y_dehyd)
+            self.scatter_dehyd_avg.setData(x_dehyd, y_dehyd_avg)
+
+            # Add scatter plots to the plot item with legend names
+            self.plotItem.addItem(self.scatter_hyd)
+            self.plotItem.addItem(self.scatter_hyd_avg)
+            self.plotItem.addItem(self.scatter_dehyd)
+            self.plotItem.addItem(self.scatter_dehyd_avg)
+
+
+            # Set plot ranges if data is available
+            if not x_hyd.empty and not y_hyd.empty:
+                self.plotItem.setXRange(min(x_hyd), max(x_hyd))
+                self.plotItem.setYRange(max(y_hyd), max(y_hyd))
+
+            # Update the plot
+            self.update()
+        else:
+            self.logger.error("Warning: Filtered dataframes are empty.")
+
     def _set_tick_fonts(self, axis):
         font = pg.QtGui.QFont('Arial', self.font_size)
         axis.setTickFont(font)
