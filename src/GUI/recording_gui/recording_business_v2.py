@@ -859,6 +859,7 @@ if __name__ == '__main__':
     app = QApplication([])
     meta_data = MetaData('WAE-WA-030')
     win = PlotStaticWindow(y_axis='temperature')
+    win.point_clicked_time_received.connect(print)
     #win2 = PlotStaticWindow(y_axis='pressure')
     win.reader.meta_data = meta_data
 

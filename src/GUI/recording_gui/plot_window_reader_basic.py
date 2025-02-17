@@ -954,7 +954,6 @@ if __name__ == '__main__':
     app = QApplication()
     win = PlotBaseStyle()
     win.show()
-    meta_data = MetaData('WAE-WA-030')
     app.exec()
 
 
