@@ -1,3 +1,4 @@
+#connections.py
 import time
 import socket
 
@@ -62,7 +63,7 @@ class DatabaseConnection:
         if exc_type is not None:
             # An exception occurred, rollback the transaction
             self.conn.rollback()
-            print("Transaction rolled back due to an exception.")
+            self.logger.error("Transaction rolled back due to an exception.")
         else:
             # No exception, commit the transaction
             self.conn.commit()
@@ -239,6 +240,7 @@ class HotDiskConnection:
             return self
         except Exception as e:
             self.logger.error(f"An error occurred during connection: {e}")
+            raise
 
     def send_command(self, command):
         """sends command to hot disk constants analyzer
@@ -305,7 +307,7 @@ def test_functionality():
         with ModbusConnection() as modbus_connection:
             logger.info("Testing ModbusConnection functionality.")
             # Perform a simple Modbus operation, e.g., read a register
-            if END_REG-START_REG % 2 == 0:
+            if (END_REG-START_REG) % 2 == 0:
                 final_reg = END_REG-START_REG
             else:
                 final_reg = END_REG-START_REG+1
