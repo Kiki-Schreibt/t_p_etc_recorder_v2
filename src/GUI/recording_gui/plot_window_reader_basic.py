@@ -76,10 +76,11 @@ class ReadData(QThread):
     cycles_full_test_sig = Signal(pd.DataFrame)
     auto_update_x_range_sig = Signal()
 
-
     def __init__(self, meta_data=MetaData()):
         super().__init__()
         self.logger = logging.getLogger(__name__)
+        # Data retriever instance
+        from src.config_connection_reading_management.database_reading_writing import DataRetriever
         self.db_retriever = DataRetriever()
         self.limit_amount_storage = self.db_retriever.limit_datapoints
         self.running = False
@@ -97,14 +98,15 @@ class ReadData(QThread):
         self.time_range_to_read = None
 
     def run(self):
-        pass  # Implemented in subclasses
+        # run() is meant to be implemented in subclasses.
+        pass
 
     def stop(self):
         self.running = False
         self.quit()
         self.wait()
 
-    def _standard_constraints(self, mode="etc"):
+    def standard_constraints(self, mode="etc"):
         """Return standard constraints based on the mode."""
         if mode == "etc":
             return {
@@ -115,24 +117,21 @@ class ReadData(QThread):
             }
         return None
 
-    # Common methods used by both reading modes
     def _read_t_p(self, cursor=None, desc_limit=1, time_range=None):
         table = TableConfig().TPDataTable
         table_name = table.table_name
-
         try:
             if not cursor:
                 if time_range:
-                    previous_desc_limit = self.db_retriever.limit_datapoints
+                    previous_limit = self.db_retriever.limit_datapoints
                     self.db_retriever.limit_datapoints = desc_limit
                     df = self.db_retriever.fetch_data_by_time_2(
                         time_range=time_range,
-                        table_name=table.table_name)
-                    self.db_retriever.limit_datapoints = previous_desc_limit
+                        table_name=table_name)
+                    self.db_retriever.limit_datapoints = previous_limit
                     return df
                 else:
                     return pd.DataFrame()
-
             df = self.db_retriever.fetch_latest_records(
                 table_name=table_name,
                 cursor=cursor,
@@ -141,15 +140,13 @@ class ReadData(QThread):
                 sample_id=self.meta_data.sample_id)
             if not df.empty:
                 df = df.sort_values(by=table.time, ascending=True)
-
             if not df[table.sample_id].iloc[-1] == self.meta_data.sample_id:
                 self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1])
                 self.meta_data_sig.emit(self.meta_data)
-                self.logger.info(f"Sample ID changed to {self.meta_data.sample_id}")
-
+                self.logger.info("Sample ID changed to %s", self.meta_data.sample_id)
             return df
         except Exception as e:
-            self.logger.error(f"Error while loading T p data: {e}")
+            self.logger.error("Error while loading T-p data: %s", e)
             return pd.DataFrame()
 
     def _read_data_by_time(self):
@@ -157,33 +154,26 @@ class ReadData(QThread):
         self.T_data = pd.DataFrame()
         self.p_data = pd.DataFrame()
         self.etc_data = pd.DataFrame()
-
         tp_table = TableConfig().TPDataTable
-        # Read T-p data
-        df_t_p = self.db_retriever.fetch_data_by_time_2(
-                                                        time_range=self.time_range_to_read,
-                                                        table_name=tp_table.table_name,
-                                                        sample_id=self.meta_data.sample_id)
-        self._separate_and_append_t_p(df_t_p=df_t_p)
-        # Read ETC data
-        self.etc_data = self._read_etc(time_range=self.time_range_to_read)
 
+        self.logger.info("Reading T-p data for time range: %s", self.time_range_to_read)
+        df_t_p = self.db_retriever.fetch_data_by_time_2(
+            time_range=self.time_range_to_read,
+            table_name=tp_table.table_name,
+            sample_id=self.meta_data.sample_id)
+        self._separate_and_append_t_p(df_t_p=df_t_p)
+        self.logger.info("Reading ETC data for time range: %s", self.time_range_to_read)
+        self.etc_data = self._read_etc(time_range=self.time_range_to_read)
         if not self.T_data.empty:
             self.T_data_sig.emit(self.T_data)
         if not self.p_data.empty:
             self.p_data_sig.emit(self.p_data)
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data)
-
         self._read_emit_cycles_full_test_thread()
 
     def _separate_and_append_t_p(self, df_t_p):
-        """
-        Separate T-p data into temperature and pressure subsets,
-        remove outliers, append to storage, and trim excess data.
-        """
         table = TableConfig().TPDataTable
-
         time_temperature_columns = [col for col in df_t_p.columns if "time" in col.lower()
                                     or "temperature" in col.lower()
                                     or ("setpoint" in col.lower() and "sample" in col.lower())
@@ -191,43 +181,28 @@ class ReadData(QThread):
         time_pressure_columns = [col for col in df_t_p.columns if "time" in col.lower()
                                  or "pressure" in col.lower()
                                  or "state" in col.lower()]
-
         temperature_data = df_t_p[time_temperature_columns].copy()
         pressure_data = df_t_p[time_pressure_columns].copy()
         temperature_data = self._remove_outliers(temperature_data)
         pressure_data = self._remove_outliers(pressure_data)
-
-        # Append data to storage
         if not temperature_data.empty:
             self.T_data = pd.concat([self.T_data, temperature_data], ignore_index=True)
-
         if not pressure_data.empty:
             self.p_data = pd.concat([self.p_data, pressure_data], ignore_index=True)
-
-        # Limit storage to a fixed number of points
         for data in [self.T_data, self.p_data]:
             if len(data) > self.limit_amount_storage:
                 drop_count = len(data) - self.limit_amount_storage
                 data.drop(data.index[:drop_count], inplace=True)
 
     def _remove_outliers(self, df):
-        """
-        Remove outliers from numeric columns.
-        Currently replaces values above T_max with NaN.
-        """
         numeric_cols = df.select_dtypes(include=[np.number]).columns.difference(['time', 'state'])
         for col in numeric_cols:
             df.loc[df[col] > self.T_max, col] = np.nan
         return df
 
     def _read_etc(self, time_range):
-        """
-        Read ETC data for a given time range.
-        """
         table = TableConfig().ETCDataTable
-        cols = (table.time,
-                        table.th_conductivity,
-                        table.thermal_conductivity_average)
+        cols = (table.time, table.th_conductivity, table.thermal_conductivity_average)
         try:
             df = self.db_retriever.fetch_data_by_time_2(
                 time_range=time_range,
@@ -237,69 +212,50 @@ class ReadData(QThread):
                 sample_id=self.meta_data.sample_id)
             return df
         except Exception as e:
-            self.logger.error(f"Error while loading ETC data: {e}")
+            self.logger.error("Error while loading ETC data: %s", e)
             return pd.DataFrame()
 
     def update_constraints_etc(self, new_constraints: dict):
         self.constraints_etc = new_constraints
-        self.logger.info("Updated ETC constraints: {}".format(self.constraints_etc))
+        self.logger.info("Updated ETC constraints: %s", self.constraints_etc)
 
     def update_constraints_t_p(self, new_constraints: dict):
         self.constraints_t_p = new_constraints
-        self.logger.info("Updated T p constraints: {}".format(self.constraints_t_p))
-
-    def _read_emit_uptake_last_cycle(self):
-        table = TableConfig().CycleDataTable
-        if self.current_cycle:
-
-            df_one_cycle = self.db_retriever.fetch_data_by_cycle(
-                cycle_numbers=self.current_cycle - 0.5,
-                sample_id=self.meta_data.sample_id,
-                table=table)
-
-            if not df_one_cycle.empty:
-                self.current_uptake = df_one_cycle[TableConfig().CycleDataTable.h2_uptake].iloc[-1]
-                self.current_uptake_sig.emit(self.current_uptake)
+        self.logger.info("Updated T-p constraints: %s", self.constraints_t_p)
 
     def _read_emit_cycles_full_test_thread(self):
-        """
-        Reads and emits cycle data for the full test.
-        """
+        self.logger.info("Reading cycles data for full test...")
         cycle_table = TableConfig().CycleDataTable
         column_names = (cycle_table.time_min, cycle_table.pressure_min, cycle_table.temperature_min,
                         cycle_table.time_max, cycle_table.pressure_max, cycle_table.temperature_max)
-        if self.meta_data.sample_id:
-            if not self.time_range_to_read:
-                df_cycles = self.db_retriever.fetch_data_by_sample_id_2(
-                    sample_id=self.meta_data.sample_id,
-                    table_name=cycle_table.table_name,
-                    column_names=column_names)
+        try:
+            if self.meta_data.sample_id:
+                if not self.time_range_to_read:
+                    df_cycles = self.db_retriever.fetch_data_by_sample_id_2(
+                        sample_id=self.meta_data.sample_id,
+                        table_name=cycle_table.table_name,
+                        column_names=column_names)
+                else:
+                    df_cycles = self.db_retriever.fetch_data_by_time_2(
+                        time_range=self.time_range_to_read,
+                        table_name=cycle_table.table_name,
+                        column_names=column_names,
+                        sample_id=self.meta_data.sample_id)
+                if not df_cycles.empty:
+                    self.cycles_full_test_sig.emit(df_cycles)
+                    self.logger.info("Emitted cycle data with shape: %s", df_cycles.shape)
+                else:
+                    self.logger.info("No cycle data found.")
             else:
-                df_cycles = self.db_retriever.fetch_data_by_time_2(
-                    time_range=self.time_range_to_read,
-                    table_name=cycle_table.table_name,
-                    column_names=column_names,
-                    sample_id=self.meta_data.sample_id)
-            if not df_cycles.empty:
-                self.cycles_full_test_sig.emit(df_cycles)
+                self.logger.info("No sample_id in meta_data for cycles read.")
+        except Exception as e:
+            self.logger.error("Error while reading cycle data: %s", e)
 
     def on_meta_data_changed(self, new_meta_data=MetaData()):
         if new_meta_data.sample_id:
             self.meta_data = new_meta_data
 
-    def standard_constraints(self, mode="etc"):
-        if mode == "etc":
-            constraints_dict = {
-                "min_TotalCharTime": 0.33,
-                "max_TotalCharTime": 1,
-                "min_TotalTempIncr": 2,
-                "max_TotalTempIncr": 5
-            }
-        else:
-            constraints_dict = None
-        return constraints_dict
-
-
+            
 class ReadContinuous(ReadData):
     """
     Thread class for continuously reading data and updating plots.
@@ -428,66 +384,76 @@ class ReadStatic(ReadData):
 
     def __init__(self, meta_data=MetaData()):
         super().__init__(meta_data)
-        self.reading_mode = READING_MODE_FULL_TEST  # Could be "full test" or "by time"
+        self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
 
-    def start(self, reading_mode: str=None):
+    def start(self, reading_mode: str = None):
         if reading_mode is not None:
             self._previous_reading_mode = self.reading_mode
             self.reading_mode = reading_mode
         super().start()
-        #if reading_mode is not None:
-        #    self.reading_mode = reading_mode_buffer
 
     def run(self):
         if not self.reading_mode:
             return
         self.running = True
+        self.logger.info("ReadStatic started in '%s' mode.", self.reading_mode)
         if self.reading_mode.lower() == "full_test":
             self._read_full_test()
-
         elif self.reading_mode.lower() == "by_time":
             self._read_data_by_time()
-
-        if hasattr(self, '_previous_reading_mode') and self._previous_reading_mode is not None:
+        if hasattr(self, '_previous_reading_mode'):
             self.reading_mode = self._previous_reading_mode
-            del self._previous_reading_mode  # Clean up
+            del self._previous_reading_mode
         self.running = False
+        self.logger.info("ReadStatic finished.")
 
     def _read_full_test(self):
         """
-        Reads full test data.
+        Reads full test data with additional logging to help detect hanging calls.
         """
+        self.logger.info("Starting full test data read...")
         previous_limit = self.db_retriever.limit_datapoints
         self.db_retriever.limit_datapoints = self.limit_amount_storage
         self.T_data = pd.DataFrame()
         self.p_data = pd.DataFrame()
         self.etc_data = pd.DataFrame()
-        etc_table = TableConfig().ETCDataTable
-        etc_cols = (etc_table.time,
-                    etc_table.th_conductivity,
-                    etc_table.thermal_conductivity_average)
 
-        df_t_p, self.etc_data = self.db_retriever.fetch_tp_and_etc_data(
-            sample_id=self.meta_data.sample_id,
-            column_names_t_p=None,
-            column_names_etc=etc_cols,
-            constraints=self.constraints_etc)
+        etc_table = TableConfig().ETCDataTable
+        etc_cols = (etc_table.time, etc_table.th_conductivity, etc_table.thermal_conductivity_average)
+
+        try:
+            self.logger.info("Fetching TP and ETC data for sample_id: %s", self.meta_data.sample_id)
+            df_t_p, etc_data = self.db_retriever.fetch_tp_and_etc_data(
+                sample_id=self.meta_data.sample_id,
+                column_names_t_p=None,
+                column_names_etc=etc_cols,
+                constraints=self.constraints_etc)
+            self.etc_data = etc_data
+            self.logger.info("TP data shape: %s, ETC data shape: %s", df_t_p.shape, etc_data.shape)
+        except Exception as e:
+            self.logger.error("Exception during fetch_tp_and_etc_data: %s", e)
+            self.db_retriever.limit_datapoints = previous_limit
+            return
+
         self._separate_and_append_t_p(df_t_p=df_t_p)
         self.db_retriever.limit_datapoints = previous_limit
 
         if not self.T_data.empty:
             self.T_data_sig.emit(self.T_data)
+            self.logger.info("Emitted T_data signal, shape: %s", self.T_data.shape)
         if not self.p_data.empty:
             self.p_data_sig.emit(self.p_data)
+            self.logger.info("Emitted p_data signal, shape: %s", self.p_data.shape)
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data)
             self.whole_test_emited_sig.emit()
             self.auto_update_x_range_sig.emit()
+            self.logger.info("Emitted ETC and full test signals, ETC shape: %s", self.etc_data.shape)
         self._read_emit_cycles_full_test_thread()
+        self.logger.info("Full test data read completed.")
 
     def _change_reading_mode(self, new_reading_mode: str):
         self.reading_mode = new_reading_mode
-
 
 ###############################################################################
 #                        Plotting Classes                                     #
