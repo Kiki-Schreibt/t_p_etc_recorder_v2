@@ -1,3 +1,4 @@
+#plot_window_reader_basic.py
 import sys
 import threading
 import time
@@ -857,7 +858,7 @@ class PlotBaseWindow(PlotBaseStyle):
             # Take only the first point
             point = points[0]
             point_datetime = datetime.fromtimestamp(point.pos().x(), tz=local_tz_reg)
-            #print('clicked a point', point_datetime)
+            print('clicked a point', point_datetime)
             self._change_point_color(point.pos().x())
             self.point_clicked_time_received.emit(point_datetime,  self.current_color_scatter)
 
