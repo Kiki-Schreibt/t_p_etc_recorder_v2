@@ -1,5 +1,3 @@
-#database_reading_writing.py
-
 import logging
 import numpy as np
 import win32com.client as win32
@@ -657,7 +655,7 @@ class ExcelDataProcessor:
             current_length = df['Point nr.'].shape[0]
             if current_length < 200:
                 additional_points = range(current_length + 1, 201)
-                df = df.append([{'Point nr.': i} for i in additional_points], ignore_index=True)
+                df = df._append([{'Point nr.': i} for i in additional_points], ignore_index=True)
             df.loc[100, 'Point nr.'] = 101
             df['Point nr.'] = df['Point nr.'].sort_values().values
 
@@ -872,8 +870,8 @@ class ExcelDataProcessor:
 
 def test_data_retriever() -> None:
     data_retriever = DataRetriever()
-    sample_id = 'WAE-WA-040'
-    table_name = TableConfig().ETCDataTable.table_name
+    sample_id = 'WAE-WA-030'
+    table_name = TableConfig().TPDataTable.table_name
     df = data_retriever.fetch_data_by_sample_id_2(
         column_names=None,
         table_name=table_name,
@@ -887,7 +885,7 @@ def test_excel_data_processor(etc_dir: str, sample_id: str) -> None:
     etc_processor.execute()
 
 
-def process_ETC_file(args: Tuple[str, str, logging.Logger]) -> None:
+def process_ETC_file(args: Tuple[str, str, logging.getLogger]) -> None:
     file_path, sample_id, logger_inst = args
     try:
         logger_inst.info("Start writing %s to database", os.path.basename(file_path))
@@ -898,7 +896,7 @@ def process_ETC_file(args: Tuple[str, str, logging.Logger]) -> None:
         logger_inst.error("Error processing %s: %s", os.path.basename(file_path), e)
 
 
-def write_ETC_in_parallel(dir_etc_folder: str, sample_id: str, logger_inst: logging.Logger) -> None:
+def write_ETC_in_parallel(dir_etc_folder: str, sample_id: str, logger_inst) -> None:
     start_time = time.time()
     file_paths = [
         os.path.join(dir_etc_folder, filename)
@@ -915,3 +913,4 @@ if __name__ == "__main__":
     sample_id = 'WAE-WA-030'
     dir_etc = r"C:\Daten\Kiki\WAE-WA-030-Mg2NiH4\WAE-WA-030-All\WAE-WA-030-045-400C-ParameterTest.xlsx"
     test_excel_data_processor(etc_dir=dir_etc, sample_id=sample_id)
+    test_data_retriever()
