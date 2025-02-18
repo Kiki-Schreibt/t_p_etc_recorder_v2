@@ -127,7 +127,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\Trash" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.database_reading_writing">
+  <component name="RunManager" selected="Python.main">
     <configuration name="config_reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -216,7 +216,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="recording_main_v2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="query_builder_v2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -225,11 +225,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/recording_gui" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/config_connection_reading_management" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/config_connection_reading_management/query_builder_v2.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -240,11 +240,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.database_reading_writing" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.query_builder_v2" />
+        <item itemvalue="Python.database_reading_writing" />
         <item itemvalue="Python.config_reader" />
         <item itemvalue="Python.connections" />
-        <item itemvalue="Python.recording_main_v2" />
       </list>
     </recent_temporary>
   </component>
