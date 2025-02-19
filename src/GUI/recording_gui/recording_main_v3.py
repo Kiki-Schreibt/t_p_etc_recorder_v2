@@ -437,6 +437,9 @@ class MainController:
         except Exception as e:
             self.logger.exception("Error toggling cycling in MainController:")
 
+    def is_tp_recording_running(self):
+        return self.recorder.is_running()
+
 
 # -------------------------------
 # Main Window

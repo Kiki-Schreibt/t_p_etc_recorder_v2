@@ -1,3 +1,5 @@
+#main.py
+
 import os
 import threading
 import sys
@@ -12,7 +14,12 @@ from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainW
 from src.simulation.simulator_gui import ModbusServerControlGUI
 from test_planner import TestPlannerMain
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import ScheduleGeneratorMain
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 
+logger = logging.getLogger()
 
 #main_ui_file_path = r"..\src\GUI\recording_gui\recording_ui_design_works.ui"
 def load_ui_file(ui_file_path):
@@ -42,12 +49,12 @@ def load_ui_file(ui_file_path):
         ui = loader.load(ui_file)
         ui_file.close()
         if not ui:
-            print("Failed to load UI file")
+            logger.error("Failed to load UI file")
             return
         return ui
 
     except Exception as e:
-        print("Unable to load ui file %s", e)
+        logger.exception("Unable to load ui file %s", e)
 
 
 class MainProgram(RecordingMainWindow):
@@ -86,34 +93,22 @@ class MainProgram(RecordingMainWindow):
         self.schedule_creator.show()
 
     def change_modbus_host_ip(self, host_ip=None, port=None):
-        if host_ip and port:
-            if self.controller.recorder.mb_processor_thread:
-                self.controller.recorder.stop_t_p_recording_thread()
-                recorder_was_running = True
-            else:
-                recorder_was_running = False
+        recorder_was_running = self.controller.is_tp_recording_running()
+        if self.controller.is_tp_recording_running:
+                self.controller.stop_tp_recording()
 
+        if host_ip and port:
             self.prev_port = self.controller.recorder.mb_processor.mb_port
             self.prev_host = self.controller.recorder.mb_processor.mb_host
-            print(host_ip)
-            print(port)
             self.controller.recorder.mb_processor.mb_port = port
             self.controller.recorder.mb_processor.mb_host = host_ip
-            if recorder_was_running:
-                self.controller.recorder.start_t_p_recording_thread()
 
         elif self.prev_host and self.prev_port:
-            if self.controller.recorder.mb_processor_thread:
-                self.controller.recorder.stop_t_p_recording_thread()
-                recorder_was_running = True
-            else:
-                recorder_was_running = False
-            self.controller.recorder.stop_t_p_recording_thread()
             self.controller.recorder.mb_processor.mb_port = self.prev_port
             self.controller.recorder.mb_processor.mb_host = self.prev_host
 
-            if recorder_was_running:
-                self.controller.recorder.start_t_p_recording_thread()
+        if recorder_was_running:
+            self.controller.start_tp_recording()
 
     def closeEvent(self, event):
         super().closeEvent(event)

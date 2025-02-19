@@ -1,3 +1,4 @@
+#suquenzer_gui.py
 import datetime
 import threading
 from zoneinfo import ZoneInfo
@@ -12,7 +13,7 @@ from PySide6.QtGui import QIntValidator
 from PySide6.QtCore import Signal, QDateTime, QObject, QTimer
 import pyqtgraph as pg
 
-from src.simulation.dicon_simulator_v2 import TpProgramSimulator
+from src.tp_program_simulator import TemperatureControllerHotDiskSequenzer
 from src.config_connection_reading_management.hot_disk_controller import HotDiskController, temp_folder_path
 
 local_tz = ZoneInfo("Europe/Berlin")
@@ -220,8 +221,11 @@ class ScheduleGeneratorBase(QWidget):
         # Add to measurement table
         row_position = self.program_table.rowCount()
         self.program_table.insertRow(row_position)
-        self.program_table.setItem(row_position, 0, QTableWidgetItem('00'))
+        self.program_table.setItem(row_position, 0, QTableWidgetItem('100'))
         self.program_table.setItem(row_position, 1, QTableWidgetItem('00:10:00'))
+        self.program_table.setItem(row_position, 2, QTableWidgetItem('0.01'))
+        self.program_table.setItem(row_position, 3, QTableWidgetItem('3'))
+
 
     @staticmethod
     def validate_duration(duration_str):
@@ -326,7 +330,9 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         folder_path = self.template_folder_path.text()
 
         scheduled_dict_list = self._generate_schedule()
-
+        if not scheduled_dict_list:
+            print("couldnt start because couldnt generate")
+            raise
         self.hot_disk_controller = SignaledHotDiskController(sensor_type=sensor_type, sensor_insulation=sensor_insulation, template_folder_path=folder_path)
         self.hot_disk_controller_thread = threading.Thread(target=self.hot_disk_controller.run, args=(scheduled_dict_list,), daemon=True)
 
@@ -338,6 +344,8 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
 
     def _generate_schedule(self):
         scheduled_program = self.parse_program()
+        if scheduled_program.empty:
+            return []
 
         scheduled_program = scheduled_program.rename(columns={'measurement_time' : 'heating_time', 'measurement_power_watt' : 'heating_power'})
         scheduled_program['heating_power'] = scheduled_program['heating_power'] * 1e3
@@ -353,18 +361,21 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
                 meas_power_item = self.program_table.item(row, 2)
                 meas_time_item = self.program_table.item(row, 3)
 
-                if temp_item is None or duration_item is None:
+                if temp_item is None or duration_item is None or meas_time_item is None or meas_power_item is None:
                     return None
                 temp = float(temp_item.text())
                 duration = duration_item.text()
-                meas_power = float(meas_power_item.text()) if meas_power_item else None
-                meas_time = float(meas_time_item.text()) if meas_time_item else None
+                meas_power = float(meas_power_item.text())
+                meas_time = float(meas_time_item.text())
 
                 if not self.validate_duration(duration):
                     return None
                 temperature_program.append((temp, duration, meas_power, meas_time))
             except ValueError:
+                print("value error ")
                 return None
+            except Exception as e:
+                print(e)
         return temperature_program
 
     def get_repetition_parameters(self):
@@ -405,18 +416,20 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
 
     def parse_program(self):
         time_delay = float(self.measurement_delay_input.text())
-        #
         #time_delay = datetime.timedelta(minutes=float(inputfieldasdfasdf))
         time_delay = datetime.timedelta(minutes=time_delay)
         program = self.get_temperature_program()
+
         repeat_start, repeat_end, repeat_count = self.get_repetition_parameters()
-        temperature_controller = TpProgramSimulator().TemperatureController(
+        if not program:
+            return None
+
+        temperature_controller = TemperatureControllerHotDiskSequenzer(
                                                                             temperature_program=program,
                                                                             repeat_start=repeat_start,
                                                                             repeat_end=repeat_end,
                                                                             repeat_count=repeat_count
                                                                             )
-
         start_time = datetime.datetime.strptime(self.start_measurements_input.text(), "%Y-%m-%d %H:%M:%S")
         start_time.replace(tzinfo=local_tz)
 
@@ -487,8 +500,6 @@ class AxisLabel:
             unit_str = " "  # Default unit if neither temperature nor pressure
 
         return f"{variable_name} ({unit_str})"
-
-
 
 
 if __name__ == '__main__':

@@ -246,6 +246,8 @@ class DataRecorder(QObject):
         except Exception as e:
             self.logger.exception("Error emitting ETC data:")
 
+    def is_running(self):
+        return True if self._mb_thread else False
 
 # -------------------------------
 # Presentation Layer / Plotting

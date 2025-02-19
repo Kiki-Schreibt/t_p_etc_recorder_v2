@@ -1,3 +1,4 @@
+#simulator_gui.py
 import sys
 
 import pandas as pd
@@ -12,8 +13,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from src.simulation.dicon_simulator_v2 import MBServer, TpProgramSimulator  # Import your MBServer class
-
+from src.simulation.dicon_simulator_v2 import MBServer  # Import your MBServer class
+from src.tp_program_simulator import TemperatureControllerDiconSimulator
 
 class ModbusServerControlBusiness(QObject):
     server_started = Signal(str, int)
@@ -129,8 +130,7 @@ class ModbusServerControlBusiness(QObject):
         repeat_start = self.repeat_start if self.repeat_start > 0 else None
         repeat_end = self.repeat_end     if self.repeat_end > 0 else None
         repeat_count = self.repeat_count
-        print(self.repeat_start, self.repeat_end, self.repeat_count)
-        tp_simulator = TpProgramSimulator().TemperatureController(temperature_program=temperature_program,
+        tp_simulator = TemperatureControllerDiconSimulator(temperature_program=temperature_program,
                                                                   repeat_start=repeat_start,
                                                                   repeat_end=repeat_end,
                                                                   repeat_count=repeat_count)
