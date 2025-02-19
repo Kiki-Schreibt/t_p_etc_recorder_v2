@@ -226,7 +226,6 @@ class ScheduleGeneratorBase(QWidget):
         self.program_table.setItem(row_position, 2, QTableWidgetItem('0.01'))
         self.program_table.setItem(row_position, 3, QTableWidgetItem('3'))
 
-
     @staticmethod
     def validate_duration(duration_str):
         try:
@@ -240,69 +239,6 @@ class ScheduleGeneratorBase(QWidget):
 
     def plot_meas_times(self, program):
         self.plot_widget.update_scatter_plot(df=program)
-
-
-class ProgramPlotWidget(pg.PlotWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        self.setWindowTitle("Temperature Program")
-        self.scatter_plot = None  # Initialize scatter plot item
-        self.line_plot = None     # Initialize line plot item
-
-        # Call axis initialization method if needed
-        self._init_left_axis(y_axis="Temperature")
-
-    def _init_left_axis(self, y_axis):
-        x_axis = DateAxisItem(orientation='bottom')
-        self.plotItem.setAxisItems({'bottom': x_axis})
-        x_axis_label = "Time"  # Simplified for this example
-        self.plotItem.getAxis('bottom').setLabel(x_axis_label)
-        self.plotItem.addLegend(offset=(0, 1))
-        y_axis_label = y_axis
-        self.plotItem.getAxis('left').setLabel(y_axis_label)
-        # Assuming you have methods to set fonts; else, you can omit these
-        # self._set_tick_fonts(self.plotItem.getAxis('bottom'))
-        # self._set_tick_fonts(self.plotItem.getAxis('left'))
-
-    def update_plot(self, df):
-        if df.empty:
-            return
-        x = [t.timestamp() for t in df['end_time']]
-        y = df['temperature']
-
-        if self.line_plot is None:
-            # Create a new line plot item
-            self.line_plot = self.plotItem.plot(
-                x=x,
-                y=y,
-                name="Temperature",
-                pen=pg.mkPen(color="#FF0000", width=2)  # Red
-            )
-        else:
-            # Update existing line plot data
-            self.line_plot.setData(x=x, y=y)
-
-    def update_scatter_plot(self, df):
-        if df.empty:
-            return
-        x = [t.timestamp() for t in df['meas_time']]
-        y = df['temperature']
-
-        if self.scatter_plot is None:
-            # Create a new scatter plot item
-            self.scatter_plot = pg.ScatterPlotItem(
-                x=x,
-                y=y,
-                symbol='o',
-                size=8,
-                pen=pg.mkPen(color='b'),
-                brush=pg.mkBrush(color='b'),
-                name="Measurements"
-            )
-            self.plotItem.addItem(self.scatter_plot)
-        else:
-            # Update existing scatter plot data
-            self.scatter_plot.setData(x=x, y=y)
 
 
 class ScheduleGeneratorMain(ScheduleGeneratorBase):
@@ -340,7 +276,6 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
 
         self.hot_disk_controller_thread.start()
         self.status_label.setText("Status: Running")
-
 
     def _generate_schedule(self):
         scheduled_program = self.parse_program()
@@ -449,6 +384,69 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
             self.hot_disk_controller_thread.join(timeout=2)
             self.status_label.setText("Status: Stopped")
         super().closeEvent(event)
+
+
+class ProgramPlotWidget(pg.PlotWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        self.setWindowTitle("Temperature Program")
+        self.scatter_plot = None  # Initialize scatter plot item
+        self.line_plot = None     # Initialize line plot item
+
+        # Call axis initialization method if needed
+        self._init_left_axis(y_axis="Temperature")
+
+    def _init_left_axis(self, y_axis):
+        x_axis = DateAxisItem(orientation='bottom')
+        self.plotItem.setAxisItems({'bottom': x_axis})
+        x_axis_label = "Time"  # Simplified for this example
+        self.plotItem.getAxis('bottom').setLabel(x_axis_label)
+        self.plotItem.addLegend(offset=(0, 1))
+        y_axis_label = y_axis
+        self.plotItem.getAxis('left').setLabel(y_axis_label)
+        # Assuming you have methods to set fonts; else, you can omit these
+        # self._set_tick_fonts(self.plotItem.getAxis('bottom'))
+        # self._set_tick_fonts(self.plotItem.getAxis('left'))
+
+    def update_plot(self, df):
+        if df.empty:
+            return
+        x = [t.timestamp() for t in df['end_time']]
+        y = df['temperature']
+
+        if self.line_plot is None:
+            # Create a new line plot item
+            self.line_plot = self.plotItem.plot(
+                x=x,
+                y=y,
+                name="Temperature",
+                pen=pg.mkPen(color="#FF0000", width=2)  # Red
+            )
+        else:
+            # Update existing line plot data
+            self.line_plot.setData(x=x, y=y)
+
+    def update_scatter_plot(self, df):
+        if df.empty:
+            return
+        x = [t.timestamp() for t in df['meas_time']]
+        y = df['temperature']
+
+        if self.scatter_plot is None:
+            # Create a new scatter plot item
+            self.scatter_plot = pg.ScatterPlotItem(
+                x=x,
+                y=y,
+                symbol='o',
+                size=8,
+                pen=pg.mkPen(color='b'),
+                brush=pg.mkBrush(color='b'),
+                name="Measurements"
+            )
+            self.plotItem.addItem(self.scatter_plot)
+        else:
+            # Update existing scatter plot data
+            self.scatter_plot.setData(x=x, y=y)
 
 
 class DateAxisItem(pg.AxisItem):

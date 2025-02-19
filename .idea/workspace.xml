@@ -242,9 +242,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.suquenzer_gui" />
+        <item itemvalue="Python.simulator_gui" />
         <item itemvalue="Python.sequenzer" />
         <item itemvalue="Python.dicon_simulator_v2" />
-        <item itemvalue="Python.simulator_gui" />
         <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
@@ -343,12 +343,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py</url>
-          <line>363</line>
+          <line>298</line>
           <option name="timeStamp" value="466" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py</url>
-          <line>365</line>
+          <line>300</line>
           <option name="timeStamp" value="467" />
         </line-breakpoint>
       </breakpoints>
