@@ -8,7 +8,7 @@ from PySide6.QtCore import QFile
 
 from src.GUI.config_creation.config_creator_ui_main import ConfigWindow
 from src.standard_paths import standard_config_file_path
-from src.GUI.recording_gui.recording_main_v2 import RecordingMainWindow
+from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow
 from src.simulation.simulator_gui import ModbusServerControlGUI
 from test_planner import TestPlannerMain
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import ScheduleGeneratorMain

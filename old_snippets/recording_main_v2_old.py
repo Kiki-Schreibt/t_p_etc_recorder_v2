@@ -1,4 +1,4 @@
-#recording_main_v2.py
+#recording_main_v2_old.py
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
@@ -14,7 +14,7 @@ from src.GUI.recording_gui.recording_business_v2 import (
     Record,
     ReadPlotUptake,
     ReadPlotTpDependent,
-    ReadPlotXY
+    XYPlot
 )
 from src.meta_data.meta_data_handler import MetaData
 from src.standard_paths import (
@@ -147,7 +147,7 @@ class PlotManager:
 
     def init_right_plot_xy(self, current_text):
         self.remove_right_plot()
-        self.right_plot = ReadPlotXY()
+        self.right_plot = XYPlot()
         self.ui.xy_plot_window.layout().addWidget(self.right_plot)
 
         self.ui.XyDataSelectDropDown.currentIndexChanged.connect(self.right_plot.clear_plot)

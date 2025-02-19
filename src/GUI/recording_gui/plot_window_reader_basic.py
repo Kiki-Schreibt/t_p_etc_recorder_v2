@@ -215,6 +215,19 @@ class ReadData(QThread):
             self.logger.error("Error while loading ETC data: %s", e)
             return pd.DataFrame()
 
+    def _read_emit_uptake_last_cycle(self):
+        table = TableConfig().CycleDataTable
+        if self.current_cycle:
+
+            df_one_cycle = self.db_retriever.fetch_data_by_cycle(
+                cycle_numbers=self.current_cycle - 0.5,
+                sample_id=self.meta_data.sample_id,
+                table=table)
+
+            if not df_one_cycle.empty:
+                self.current_uptake = df_one_cycle[TableConfig().CycleDataTable.h2_uptake].iloc[-1]
+                self.current_uptake_sig.emit(self.current_uptake)
+
     def update_constraints_etc(self, new_constraints: dict):
         self.constraints_etc = new_constraints
         self.logger.info("Updated ETC constraints: %s", self.constraints_etc)

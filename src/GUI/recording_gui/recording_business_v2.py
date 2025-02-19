@@ -1,243 +1,175 @@
 #recording_busines_v2
+#!/usr/bin/env python
+"""
+Revised recording application
+----------------------------------
+This module contains the revised business logic (data recording) and main-window UI code.
+The plotting “reader” code in plot_window_reader_basic.py is assumed to be structured well
+and remains unchanged.
+"""
 
+# ===============================
+#         BUSINESS LOGIC
+# ===============================
 import sys
 import threading
 import time
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-import numpy as np
 
+import numpy as np
 import pandas as pd
 import pyqtgraph as pg
-from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, QObject,
-                            Signal, Slot)
-from PySide6.QtWidgets import QApplication
 
+from PySide6.QtCore import QThread, Signal, QObject
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
+
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
 from src.meta_data.meta_data_handler import MetaData
 from src.config_connection_reading_management.modbus_handler import ModbusProcessor
 from src.table_data import TableConfig
-from src.GUI.recording_gui.plot_window_reader_basic import PlotBaseWindow, ReadStatic, ReadContinuous, DateAxisItem, AxisLabel
+# Import plot window base classes (unchanged)
+from src.GUI.recording_gui.plot_window_reader_basic import (
+    PlotBaseWindow, ReadStatic, ReadContinuous, DateAxisItem, AxisLabel
+)
 
 
-time_format_str = "yyyy-MM-dd HH:mm:ss"
-local_tz = QTimeZone(b'Europe/Berlin')
-local_tz_reg = ZoneInfo('Europe/Berlin')
-colors = [
-    "#FF0000",  # Red
-    "#00FF00",  # Lime
-    "#0000FF",  # Blue
-    "#FFFF00",  # Yellow
-    "#00FFFF",  # Cyan
-    "#FF00FF",  # Magenta
-    "#800000",  # Maroon
-    "#808000",  # Olive
-    "#008000",  # Green
-    "#800080",  # Purple
-    "#008080",  # Teal
-    "#000080",  # Navy
-    "#FFA500",  # Orange
-    "#A52A2A",  # Brown
-    "#20B2AA",  # Light Sea Green
-    "#778899",  # Light Slate Gray
-    "#D2691E",  # Chocolate
-    "#DC143C",  # Crimson
-    "#7FFF00",  # Chartreuse
-    "#6495ED"   # Cornflower Blue
+# Global colors (if needed)
+COLORS = [
+    "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF", "#FF00FF",
+    "#800000", "#808000", "#008000", "#800080", "#008080", "#000080",
+    "#FFA500", "#A52A2A", "#20B2AA", "#778899", "#D2691E", "#DC143C",
+    "#7FFF00", "#6495ED"
 ]
-colors_scatter = colors.copy()
+COLORS_SCATTER = COLORS.copy()
 
 
-class Record(QObject):
-
+class DataRecorder(QObject):
     """
-    A class to handle the recording of temperature and pressure data via a Modbus connection,
-    supporting operations to start, stop, and manage the recording process.
-
-    Attributes:
-        logger (Logger): An instance of a logger for logging information, warnings, and errors.
-        mb_processor (ModbusProcessor): The ModbusProcessor responsible for handling Modbus communication.
-        update_lock (Lock): A threading lock to ensure thread-safe updates to the ModbusProcessor's settings.
-        mb_processor_thread (Thread or None): A thread for running the ModbusProcessor's long-running tasks.
-
-    Args:
-        meta_data (MetaData): Meta data containing essential information for the ModbusProcessor.
-
-        reservoir_volume (float or None): The volume of the reservoir, default is None.
+    Encapsulates data recording via Modbus (T-p data) and log file tracking (ETC data).
+    Provides methods to start/stop recording and to update configuration.
     """
-    new_etc_data_written_to_database = Signal(pd.DataFrame)
+    newEtcDataWritten = Signal(pd.DataFrame)
 
-    def __init__(self, meta_data=MetaData(), reservoir_volume=None):
-        """
-        Initializes the Record class with specified metadata, calculation mode, and reservoir volume.
-        """
+    def __init__(self, meta_data: MetaData = MetaData(), reservoir_volume: float = None):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        self.update_lock = threading.Lock()
-        self.mb_processor = self._initialize_mb_processor(meta_data)
-        self.log_file_tracker = self._initialize_log_file_tracker(meta_data)
-        self.mb_processor_thread = None
-        self.log_file_tracker_thread = None
-
+        self.meta_data = meta_data
+        self._update_lock = threading.Lock()
+        self.mb_processor = self._create_mb_processor(meta_data)
+        self.log_tracker = self._create_log_tracker(meta_data)
+        self._mb_thread = None
+        self._log_tracker_thread = None
         self.etc_constraints = None
 
-    def _initialize_mb_processor(self, meta_data):
+    def _create_mb_processor(self, meta_data):
         return ModbusProcessor(meta_data=meta_data)
 
-    def _initialize_log_file_tracker(self, meta_data):
+    def _create_log_tracker(self, meta_data):
         return LogFileTracker(meta_data=meta_data)
 
-    def start_recording_all(self):
-        self.start_t_p_recording_thread()
-        self.start_etc_recording_thread()
+    def start_all_recording(self):
+        """Start both T-p and ETC recording threads."""
+        self.start_tp_recording()
+        self.start_etc_recording()
 
-    def stop_recording_all(self):
-        self.stop_t_p_recording_thread()
-        self.stop_etc_recording_thread()
+    def stop_all_recording(self):
+        """Stop both T-p and ETC recording threads."""
+        self.stop_tp_recording()
+        self.stop_etc_recording()
 
-    def start_t_p_recording_thread(self):
-        """
-        Starts the recording thread for Modbus data acquisition.
-        """
-        self.logger.info("Starting T p recording thread...")
-        try:
-            if not self.mb_processor_thread:
-                self.mb_processor_thread = threading.Thread(target=self.mb_processor.run, daemon=True)
-                self.mb_processor_thread.start()
-                self.logger.info("Tp Recording thread started successfully.")
-        except Exception as e:
-            self.logger.error("An error occurred starting the T p recording thread: %s", e)
+    def start_tp_recording(self):
+        self.logger.info("Starting T-p recording thread...")
+        if self._mb_thread is None:
+            self._mb_thread = threading.Thread(target=self.mb_processor.run, daemon=True)
+            self._mb_thread.start()
+            self.logger.info("T-p recording thread started.")
 
-    def stop_t_p_recording_thread(self):
-        """
-        Stops the recording thread and ensures all resources are cleanly released.
-        """
-        self.logger.info("Stopping Tp recording recording thread...")
-        if self.mb_processor_thread:
+    def stop_tp_recording(self):
+        self.logger.info("Stopping T-p recording thread...")
+        if self._mb_thread is not None:
             self.mb_processor.stop()
-            self.mb_processor_thread.join()
-            self.mb_processor_thread = None
-            self.logger.info("Tp recording stopped")
+            self._mb_thread.join()
+            self._mb_thread = None
+            self.logger.info("T-p recording thread stopped.")
 
-    def start_etc_recording_thread(self):
-        """
-        Starts the recording thread for Modbus data acquisition.
-        """
+    def start_etc_recording(self):
         self.logger.info("Starting ETC recording thread...")
-        try:
-            if not self.log_file_tracker_thread:
-                self.log_file_tracker_thread = threading.Thread(target=self.log_file_tracker.start, daemon=True)
-                self.log_file_tracker_thread.start()
-                self.log_file_tracker.time_range_etc_import.connect(self._load_emit_etc_export)
-                self.logger.info("ETC Recording thread started successfully.")
-        except Exception as e:
-            self.logger.error("An error occurred starting ETC recording thread: %s", e)
+        if self._log_tracker_thread is None:
+            self._log_tracker_thread = threading.Thread(target=self.log_tracker.start, daemon=True)
+            self._log_tracker_thread.start()
+            self.log_tracker.time_range_etc_import.connect(self._emit_etc_data)
+            self.logger.info("ETC recording thread started.")
 
-    def stop_etc_recording_thread(self):
-        """
-        Stops the recording thread and ensures all resources are cleanly released.
-        """
-        self.logger.info("Stopping ETC recording recording thread...")
-        if self.log_file_tracker_thread:
+    def stop_etc_recording(self):
+        self.logger.info("Stopping ETC recording thread...")
+        if self._log_tracker_thread is not None:
+            self._log_tracker_thread.join()
+            self._log_tracker_thread = None
+            self.logger.info("ETC recording thread stopped.")
 
-            self.log_file_tracker_thread.join()
-            self.log_file_tracker_thread = None
-            self.logger.info("ETC recording stopped")
-
-    def update_sample_id(self, new_sample_id):
-        """
-        Updates the sample ID in the Modbus processor and log file tracker.
-
-        Args:
-            new_sample_id (str): The new sample ID to be used.
-        """
-
-        with self.update_lock:
+    def update_sample_id(self, new_sample_id: str):
+        with self._update_lock:
             self.mb_processor.on_sample_id_change(new_val=new_sample_id)
-            self.log_file_tracker.update_sample_id(new_val=new_sample_id)
-            self.logger.info(f"Sample ID updated. New ID: {new_sample_id}")
+            self.log_tracker.update_sample_id(new_val=new_sample_id)
+        self.logger.info(f"Updated sample ID to: {new_sample_id}")
 
-    def update_meta_data(self, new_meta_data):
-        """
-        Updates the metadata in the Modbus processor and log file tracker.
-
-        Args:
-            new_meta_data (MetaData): The new sample ID to be used.
-        """
-        with self.update_lock:
+    def update_meta_data(self, new_meta_data: MetaData):
+        with self._update_lock:
             self.mb_processor.on_sample_id_change(new_val=new_meta_data, mode="meta")
-            self.log_file_tracker.update_sample_id(new_val=new_meta_data, mode="meta")
-            self.logger.info(f"Sample ID updated. New ID: {new_meta_data.sample_id}")
+            self.log_tracker.update_sample_id(new_val=new_meta_data, mode="meta")
+        self.logger.info(f"Meta data updated: {new_meta_data.sample_id}")
 
-    def update_reservoir_volume(self, new_reservoir_volume):
-        """
-        Updates the reservoir volume in the Modbus processor.
+    def update_reservoir_volume(self, new_volume: float):
+        with self._update_lock:
+            self.mb_processor.reservoir_volume = new_volume
+        self.logger.info(f"Reservoir volume updated to: {new_volume}")
 
-        Args:
-            new_reservoir_volume (float): The new reservoir volume to be set.
-        """
-        with self.update_lock:
-            self.mb_processor.reservoir_volume = new_reservoir_volume
-        self.logger.info(f"Reservoir volume updated to: {new_reservoir_volume} l")
+    def update_cycling_flag(self, flag: bool):
+        with self._update_lock:
+            self.mb_processor.cycling_flag = flag
+            self.mb_processor.mb_data_handler.cycling_flag = flag
+        self.logger.info(f"Cycling flag set to: {flag}")
 
-    def update_cycling_flag(self, new_flag):
-        """
-        Updates the cycling flag state in the Modbus processor.
+    def update_h2_uptake_flag(self, flag: bool):
+        with self._update_lock:
+            self.mb_processor.h2_uptake_flag = flag
+            self.mb_processor.mb_data_handler.h2_uptake_flag = flag
+        self.logger.info(f"H2 uptake flag set to: {flag}")
 
-        Args:
-            new_flag (bool): The new state for the cycling flag.
-        """
-        with self.update_lock:
-            self.mb_processor.cycling_flag = new_flag
-            self.mb_processor.mb_data_handler.cycling_flag = new_flag
-            self.logger.info(f"Cycling flag updated. New state: {new_flag}")
-
-    def update_h2_uptake_flag(self, new_flag):
-        """
-        Updates the hydrogen uptake flag in the Modbus processor.
-
-        Args:
-            new_flag (bool): The new state for the hydrogen uptake flag.
-        """
-        with self.update_lock:
-            self.mb_processor.h2_uptake_flag = new_flag
-            self.mb_processor.mb_data_handler.h2_uptake_flag =new_flag
-            self.logger.info(f"Uptake flag updated. New state: {new_flag}")
-
-    def _load_emit_etc_export(self, time_range):
+    def _emit_etc_data(self, time_range):
         etc_table = TableConfig().ETCDataTable
-        columns = (etc_table.time,
-                   etc_table.th_conductivity,
-                   etc_table.thermal_conductivity_average)
-
+        columns = (etc_table.time, etc_table.th_conductivity, etc_table.thermal_conductivity_average)
         db_reader = DataRetriever()
-        df_etc = db_reader.fetch_data_by_time_2(time_range=time_range,
-                                                table_name=etc_table.table_name,
-                                                constraints=self.etc_constraints,
-                                                column_names=columns)
+        df_etc = db_reader.fetch_data_by_time_2(
+            time_range=time_range,
+            table_name=etc_table.table_name,
+            constraints=self.etc_constraints,
+            column_names=columns
+        )
         if not df_etc.empty:
-            self.new_etc_data_written_to_database.emit(df_etc)
+            self.newEtcDataWritten.emit(df_etc)
 
 
-class PlotContinuousWindow(PlotBaseWindow):
+# For the presentation layer, we derive our plot windows from PlotBaseWindow.
+# Here are two example subclasses for continuous and static plotting.
 
-    def __init__(self, parent=None, y_axis='', meta_data=MetaData()):
+class ContinuousPlotWindow(PlotBaseWindow):
+    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData()):
         self.reader = ReadContinuous(meta_data=meta_data)
         super().__init__(parent=parent, y_axis=y_axis)
+        # Relay key signals to be used by the controller
         self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
         self.reader.current_state_sig.connect(self.current_state_sig.emit)
         self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
         self.enableAutoRange()
 
 
-class PlotStaticWindow(PlotBaseWindow):
-
-    def __init__(self, parent=None, y_axis='', meta_data=MetaData()):
+class StaticPlotWindow(PlotBaseWindow):
+    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData()):
         self.reader = ReadStatic(meta_data=meta_data)
         super().__init__(parent=parent, y_axis=y_axis)
         self.enableAutoRange(axis=pg.ViewBox.XYAxes)
@@ -249,193 +181,65 @@ class PlotStaticWindow(PlotBaseWindow):
         self.plotItem.sigXRangeChanged.connect(self._on_x_range_changed)
 
 
-class ReadPlotUptake(pg.PlotWidget):
+# An example of a specialized plot widget for hydrogen uptake:
+class UptakePlot(pg.PlotWidget):
     """
-    A PlotWidget class designed to display H2-capacity over cycles, visually differentiating
-    between hydrogenated and dehydrogenated states.
-
-    Attributes:
-        uptake_data (Signal): PyQt signal that emits a pandas DataFrame when new data is available for plotting.
-        df_uptake (DataFrame): Stores the latest uptake data retrieved for plotting.
-        cycle_table (TableConfig.CycleDataTable): Configuration for accessing cycle data table attributes.
-        scatter_hyd (ScatterPlotItem): Scatter plot item for hydrogenated state data.
-        scatter_dehyd (ScatterPlotItem): Scatter plot item for dehydrogenated state data.
-
-    Args:
-        parent (Optional[QWidget]): The parent widget, passed to the PlotWidget constructor.
+    Displays H2 capacity versus cycle.
     """
-
-    uptake_data = Signal(pd.DataFrame)
+    uptakeDataReceived = Signal(pd.DataFrame)
 
     def __init__(self, parent=None):
-        """
-        Initializes the plot widget with custom settings for grid, legend, axis labels, and scatter plot items.
-        """
-
         super().__init__(parent=parent)
         self.logger = logging.getLogger(__name__)
-        axis_font = {'color': 'white', 'font-size': '12pt'}
-        self.font_color = 'white'
-        self.font_size = 10
-        x_axis = AxisLabel.create_axis_label(column_name="cycle")
-        y_axis = AxisLabel.create_axis_label(column_name="uptake")
-        self.plotItem.getAxis('bottom').setLabel(x_axis, **axis_font)
-        self.plotItem.getAxis('left').setLabel(y_axis, **axis_font)
-
+        self._init_ui()
         self.df_uptake = pd.DataFrame()
-        self.uptake_data.connect(self.plot_uptake_over_cycle)
+        self.uptakeDataReceived.connect(self.plot_uptake)
         self.cycle_table = TableConfig().CycleDataTable
         self.symbol_size = 12
-        self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='o',
-                                              size=self.symbol_size, brush=pg.mkBrush('r'),
-                                              name="Hydrogenated",)
-        self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='x',
-                                                size=self.symbol_size, brush=pg.mkBrush('b'),
-                                                name="Dehydrogenated")
+        self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='o', size=self.symbol_size,
+                                               brush=pg.mkBrush('r'), name="Hydrogenated")
+        self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='x', size=self.symbol_size,
+                                                 brush=pg.mkBrush('b'), name="Dehydrogenated")
         self.plotItem.addLegend(offset=(0, 1))
 
-    def load_data(self, meta_data, time_range=None):
-        """
-        Fetches uptake data for the specified sample ID and emits it for plotting.
+    def _init_ui(self):
+        axis_font = {'color': 'white', 'font-size': '12pt'}
+        self.plotItem.getAxis('bottom').setLabel(AxisLabel.create_axis_label("cycle"), **axis_font)
+        self.plotItem.getAxis('left').setLabel(AxisLabel.create_axis_label("uptake"), **axis_font)
 
-        Args:
-            meta_data (MetaData): Contains the sample ID and other metadata necessary for data retrieval.
-        """
+    def load_data(self, meta_data: MetaData, time_range=None):
         db_reader = DataRetriever()
-        df_uptake = pd.DataFrame()
         if time_range:
-            df_uptake = db_reader.fetch_data_by_time_2(sample_id=meta_data.sample_id,
-                                                       table_name=self.cycle_table.table_name,
-                                                       time_range=time_range)
+            df = db_reader.fetch_data_by_time_2(sample_id=meta_data.sample_id,
+                                                table_name=self.cycle_table.table_name,
+                                                time_range=time_range)
         else:
-            df_uptake = db_reader.fetch_data_by_sample_id_2(sample_id=meta_data.sample_id,
-                                                            table_name=self.cycle_table.table_name)
-
-        if not df_uptake.empty:
-            self.uptake_data.emit(df_uptake)
-
-    def plot_uptake_over_cycle(self, df):
-        """
-        Plots H2 capacity for hydrogenated and dehydrogenated states over the driven cycles.
-
-        Args:
-            df (DataFrame): The dataframe containing uptake data to be plotted.
-        """
-        self._set_tick_fonts(self.plotItem.getAxis("bottom"))
-        self._set_tick_fonts(self.plotItem.getAxis("left"))
-
+            df = db_reader.fetch_data_by_sample_id_2(sample_id=meta_data.sample_id,
+                                                     table_name=self.cycle_table.table_name)
         if not df.empty:
-            self.plotItem.clear()
+            self.uptakeDataReceived.emit(df)
 
-            # Drop rows where 'h2_uptake' column has NaN values
-            df = df.dropna(subset=[self.cycle_table.h2_uptake])
+    def plot_uptake(self, df: pd.DataFrame):
+        self.plotItem.clear()
+        df = df.dropna(subset=[self.cycle_table.h2_uptake])
+        if self.plotItem.legend() is None:
+            self.plotItem.addLegend()
+        df_hyd = df[df[self.cycle_table.de_hyd_state] == "Hydrogenated"]
+        df_dehyd = df[df[self.cycle_table.de_hyd_state] == "Dehydrogenated"]
 
-            # Add a legend if not already added
-            if self.plotItem.legend is None:
-                self.plotItem.addLegend()
+        x_hyd = df_hyd[self.cycle_table.cycle_number]
+        y_hyd = df_hyd[self.cycle_table.h2_uptake]
+        x_dehyd = df_dehyd[self.cycle_table.cycle_number]
+        y_dehyd = -df_dehyd[self.cycle_table.h2_uptake]
 
-            # Filter data for hydrogenated and dehydrogenated states
-            df_hyd = df[df[self.cycle_table.de_hyd_state] == "Hydrogenated"]
-            df_dehyd = df[df[self.cycle_table.de_hyd_state] == "Dehydrogenated"]
-
-            # Extract data
-            x_hyd = df_hyd[self.cycle_table.cycle_number]
-            y_hyd = df_hyd[self.cycle_table.h2_uptake]
-            x_dehyd = df_dehyd[self.cycle_table.cycle_number]
-            y_dehyd = -df_dehyd[self.cycle_table.h2_uptake]
-
-            # Initialize scatter plots if they haven't been initialized
-            if not hasattr(self, 'scatter_hyd'):
-                self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='o', symbolBrush='r', name="Hydrogenated", size=self.symbol_size)
-            if not hasattr(self, 'scatter_dehyd'):
-                self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='x', symbolBrush='b', name="Dehydrogenated", size=self.symbol_size)
-
-            # Set data for scatter plots
-            self.scatter_hyd.setData(x_hyd, y_hyd)
-            self.scatter_dehyd.setData(x_dehyd, y_dehyd)
-
-            # Add scatter plots to the plot item with legend names
-            self.plotItem.addItem(self.scatter_hyd)
-            self.plotItem.addItem(self.scatter_dehyd)
-
-
-            # Set plot ranges if data is available
-            if not x_hyd.empty and not y_hyd.empty:
-                self.plotItem.setXRange(min(x_hyd), max(x_hyd))
-                self.plotItem.setYRange(-max(y_hyd), max(y_hyd))
-
-            # Update the plot
-            self.update()
-        else:
-            self.logger.error("Warning: Filtered dataframes are empty.")
-
-    def plot_etc_cycle_dependent(self, df):
-        etc_table = TableConfig.ETCDataTable()
-        self._set_tick_fonts(self.plotItem.getAxis("bottom"))
-        self._set_tick_fonts(self.plotItem.getAxis("left"))
-        if not df.empty:
-            self.plotItem.clear()
-
-            # Drop rows where 'th_conductivity' column has NaN values
-            df = df.dropna(subset=[etc_table.get_clean('th_conductivity')])
-
-            # Add a legend if not already added
-            if self.plotItem.legend is None:
-                self.plotItem.addLegend()
-
-        # Filter data for hydrogenated and dehydrogenated states
-            df_hyd = df[df[etc_table.get_clean('de_hyd_state')] == "Hydrogenated"]
-            df_dehyd = df[df[etc_table.get_clean('de_hyd_state')] == "Dehydrogenated"]
-
-            # Extract data
-            x_hyd = df_hyd[etc_table.get_clean('time')]
-            y_hyd = df_hyd[etc_table.get_clean('th_conductivity')]
-            y_hyd_avg = df_hyd[etc_table.get_clean('thermal_conductivity_average')]
-
-            x_dehyd = df_dehyd[etc_table.get_clean('time')]
-            y_dehyd = df_dehyd[etc_table.get_clean('th_conductivity')]
-            y_dehyd_avg = df_dehyd[etc_table.get_clean('thermal_conductivity_average')]
-
-
-            # Initialize scatter plots if they haven't been initialized
-            if not hasattr(self, 'scatter_hyd'):
-                self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='x', symbolBrush='r', name="Hydrogenated", size=self.symbol_size)
-                self.scatter_hyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', symbolBrush='r', name="Hydrogenated Average", size=self.symbol_size)
-
-            if not hasattr(self, 'scatter_dehyd'):
-                self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='x', symbolBrush='b', name="Dehydrogenated", size=self.symbol_size)
-                self.scatter_dehyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', symbolBrush='b', name="Dehydrogenated Average", size=self.symbol_size)
-
-            # Set data for scatter plots
-            self.scatter_hyd.setData(x_hyd, y_hyd)
-            self.scatter_hyd_avg.setData(x_hyd, y_hyd_avg)
-
-            self.scatter_dehyd.setData(x_dehyd, y_dehyd)
-            self.scatter_dehyd_avg.setData(x_dehyd, y_dehyd_avg)
-
-            # Add scatter plots to the plot item with legend names
-            self.plotItem.addItem(self.scatter_hyd)
-            self.plotItem.addItem(self.scatter_hyd_avg)
-            self.plotItem.addItem(self.scatter_dehyd)
-            self.plotItem.addItem(self.scatter_dehyd_avg)
-
-
-            # Set plot ranges if data is available
-            if not x_hyd.empty and not y_hyd.empty:
-                self.plotItem.setXRange(min(x_hyd), max(x_hyd))
-                self.plotItem.setYRange(max(y_hyd), max(y_hyd))
-
-            # Update the plot
-            self.update()
-        else:
-            self.logger.error("Warning: Filtered dataframes are empty.")
-
-    def _set_tick_fonts(self, axis):
-        font = pg.QtGui.QFont('Arial', self.font_size)
-        axis.setTickFont(font)
-        axis.setStyle(tickTextOffset=10)
-        axis.setPen(pg.mkPen(self.font_color))  # Set the color of the axis line
-        axis.setTextPen(pg.mkPen(self.font_color))  # Set the color of the tick labels
+        self.scatter_hyd.setData(x_hyd, y_hyd)
+        self.scatter_dehyd.setData(x_dehyd, y_dehyd)
+        self.plotItem.addItem(self.scatter_hyd)
+        self.plotItem.addItem(self.scatter_dehyd)
+        if not x_hyd.empty and not y_hyd.empty:
+            self.plotItem.setXRange(min(x_hyd), max(x_hyd))
+            self.plotItem.setYRange(-max(y_hyd), max(y_hyd))
+        self.update()
 
 
 class ReadPlotTpDependent(pg.PlotWidget):
@@ -710,7 +514,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
             super().closeEvent(event)
 
 
-class ReadPlotXY(pg.PlotWidget):
+class XYPlot(pg.PlotWidget):
     plot_cleared = Signal()
     cycle_number_sig = Signal(float)
 
@@ -816,7 +620,7 @@ class ReadPlotXY(pg.PlotWidget):
 
 def test_read_plot_uptake():
     meta_data = MetaData(sample_id='WAE-WA-040')
-    uptake_win = ReadPlotUptake()
+    uptake_win = UptakePlot()
     uptake_win.load_data(meta_data=meta_data)
     return uptake_win
 
@@ -853,7 +657,7 @@ def test_reading():
 def test_xy_read_plot():
     time_plot = PlotStaticWindow(y_axis="Temperature")
     time_plot.reader.is_test = True
-    xy_plot = ReadPlotXY()
+    xy_plot = XYPlot()
     return time_plot, xy_plot
 
 
