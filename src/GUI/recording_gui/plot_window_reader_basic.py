@@ -79,7 +79,6 @@ class ReadData(QThread):
     def __init__(self, meta_data=MetaData()):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        # Data retriever instance
         from src.config_connection_reading_management.database_reading_writing import DataRetriever
         self.db_retriever = DataRetriever()
         self.limit_amount_storage = self.db_retriever.limit_datapoints
@@ -107,7 +106,6 @@ class ReadData(QThread):
         self.wait()
 
     def standard_constraints(self, mode="etc"):
-        """Return standard constraints based on the mode."""
         if mode == "etc":
             return {
                 "min_TotalCharTime": 0.33,
@@ -150,7 +148,6 @@ class ReadData(QThread):
             return pd.DataFrame()
 
     def _read_data_by_time(self):
-        """Read T-p and ETC data for a given time range and emit signals."""
         self.T_data = pd.DataFrame()
         self.p_data = pd.DataFrame()
         self.etc_data = pd.DataFrame()
@@ -218,12 +215,10 @@ class ReadData(QThread):
     def _read_emit_uptake_last_cycle(self):
         table = TableConfig().CycleDataTable
         if self.current_cycle:
-
             df_one_cycle = self.db_retriever.fetch_data_by_cycle(
                 cycle_numbers=self.current_cycle - 0.5,
                 sample_id=self.meta_data.sample_id,
                 table=table)
-
             if not df_one_cycle.empty:
                 self.current_uptake = df_one_cycle[TableConfig().CycleDataTable.h2_uptake].iloc[-1]
                 self.current_uptake_sig.emit(self.current_uptake)
@@ -468,6 +463,7 @@ class ReadStatic(ReadData):
     def _change_reading_mode(self, new_reading_mode: str):
         self.reading_mode = new_reading_mode
 
+
 ###############################################################################
 #                        Plotting Classes                                     #
 ###############################################################################
@@ -476,7 +472,6 @@ class PlotBaseStyle(pg.PlotWidget):
     Base style for plotting windows.
     Sets up left and right axes, legends, and tick fonts.
     """
-
     def __init__(self, parent=None, y_axis=''):
         super().__init__(parent=parent)
         self.logger = logging.getLogger(__name__)
@@ -490,9 +485,7 @@ class PlotBaseStyle(pg.PlotWidget):
         self._init_col_names(y_axis=y_axis)
         self._init_right_axis()
 
-    ###style init
     def _init_col_names(self, y_axis):
-        """Set column names based on the chosen y-axis."""
         self.y_axis = y_axis
         self.t_p_table = TableConfig().TPDataTable
         self.de_hyd_state_col = (self.t_p_table.time, self.t_p_table.de_hyd_state)
@@ -508,12 +501,10 @@ class PlotBaseStyle(pg.PlotWidget):
                                       self.t_p_table.eq_pressure)
 
     def _init_left_axis(self, y_axis):
-
         x_axis = DateAxisItem(orientation='bottom')
         self.plotItem.setAxisItems({'bottom': x_axis})
         x_axis_label = AxisLabel.create_axis_label(column_name="Time")
         self.plotItem.getAxis('bottom').setLabel(x_axis_label, **self.axis_font)
-
         self.plotItem.addLegend(offset=(0, 1))
         y_axis_label = AxisLabel.create_axis_label(column_name=y_axis)
         self.plotItem.getAxis('left').setLabel(y_axis_label, **self.axis_font)
@@ -521,7 +512,6 @@ class PlotBaseStyle(pg.PlotWidget):
         self._set_tick_fonts(self.plotItem.getAxis('left'))
 
     def _init_right_axis(self):
-        """Set up a secondary (right) axis and link it to a separate view box."""
         self.rightViewBox = pg.ViewBox()
         self.plotItem.showAxis('right')
         self.plotItem.scene().addItem(self.rightViewBox)
@@ -539,37 +529,28 @@ class PlotBaseStyle(pg.PlotWidget):
         self._set_tick_fonts(self.plotItem.getAxis('right'))
 
     def _set_tick_fonts(self, axis):
-        """Set fonts and colors for the axis ticks."""
         font = pg.QtGui.QFont('Arial', self.font_size)
         axis.setTickFont(font)
         axis.setStyle(tickTextOffset=10)
-        axis.setPen(pg.mkPen(self.font_color))  # Set the color of the axis line
-        axis.setTextPen(pg.mkPen(self.font_color))  # Set the color of the tick labels
+        axis.setPen(pg.mkPen(self.font_color))
+        axis.setTextPen(pg.mkPen(self.font_color))
 
     def _customize_legend(self, legend):
-
-        # todo: does not work yet
         font = pg.QtGui.QFont()
-        font.setPointSize(12)  # Set the font size
-        font.setItalic(True)  # Set the font to italic
-        font.setFamily('Arial')  # Set the font family
-
-        # Iterate through the legend items and set their font
+        font.setPointSize(12)
+        font.setItalic(True)
+        font.setFamily('Arial')
         for sample, label in legend.items:
             label.setFont(font)
 
     def _update_view(self):
-        """Update the geometry of the right view box to match the main view."""
         self.rightViewBox.setGeometry(self.plotItem.vb.sceneBoundingRect())
         self.rightViewBox.linkedViewChanged(self.plotItem.vb, self.rightViewBox.XAxis)
 
     def adjust_plot_size(self):
-        """Adjust the plot size to fill the parent window."""
         self.setGeometry(self.parent().rect())
 
-    ###create plot items
     def _create_plot_items_left(self, df, x):
-        """Create plot items for the left axis based on the DataFrame columns."""
         self.plot_items = {}
         for idx, col in enumerate(self.column_names_left):
             if col == self.t_p_table.time:
@@ -587,7 +568,6 @@ class PlotBaseStyle(pg.PlotWidget):
             self.plot_items[col] = plot_item
 
     def _create_plot_item_right(self, col, x, y):
-        """Create a scatter plot item for the right axis."""
         if "_avg" in col.lower():
             brush_color = "r"
         else:
@@ -603,14 +583,12 @@ class PlotBaseStyle(pg.PlotWidget):
             scatter_plot_item.sigClicked.connect(self._on_point_clicked)
             x_data, y_data = scatter_plot_item.getData()
             self.point_colors = [pg.mkBrush(brush_color) for _ in range(len(x_data))]
-            self.scatter_plot_item = scatter_plot_item  # Keep reference to this item
+            self.scatter_plot_item = scatter_plot_item
         self.rightViewBox.addItem(scatter_plot_item)
         self.rightViewBox.setXLink(self.plotItem)
         if not hasattr(self, 'scatter_plot_items_dict'):
             self.scatter_plot_items_dict = {}
         self.scatter_plot_items_dict[col] = scatter_plot_item
-
-
         self._customize_legend(self.plotItem.legend)
 
     def _create_min_max_plot(self, x, y, mode):
@@ -637,12 +615,14 @@ class PlotBaseStyle(pg.PlotWidget):
 
     def closeEvent(self, event):
         self.logger.info("Window is being closed.")
-        # Perform any cleanup or save tasks
         if hasattr(self, 'reader'):
             self.reader.stop()
         super().closeEvent(event)
 
 
+###############################################################################
+#                        Plotting Window Classes                              #
+###############################################################################
 class PlotBaseWindow(PlotBaseStyle):
     """
     Base plotting window for displaying data.
@@ -654,39 +634,32 @@ class PlotBaseWindow(PlotBaseStyle):
 
     def __init__(self, parent=None, y_axis=''):
         super().__init__(parent=parent, y_axis=y_axis)
-
         self.range_change_timer = QTimer(self)
         self.current_time_range = [datetime.now(tz=local_tz_reg),
-                                   (datetime.now(tz=local_tz_reg)+timedelta(days=2))]  # Placeholder
+                                   (datetime.now(tz=local_tz_reg)+timedelta(days=2))]
         self.plotItem.setXRange(min(self.current_time_range).timestamp(),
                                 max(self.current_time_range).timestamp())
         self.plotItem.vb.sigResized.connect(self._update_view)
         self.range_change_timer = QTimer()
         self.range_change_timer.setSingleShot(True)
-
         self._init_connections(y_axis=y_axis)
 
     def _init_connections(self, y_axis):
         self.range_change_timer.timeout.connect(self._on_range_change_timeout)
-
         if hasattr(self, 'reader'):
             self.reader.cycles_full_test_sig.connect(self.update_min_max_plot)
             self.reader.etc_data_sig.connect(self.update_plot_right)
             self.reader.auto_update_x_range_sig.connect(self.plotItem.autoRange)
-
             if y_axis == 'pressure':
                 self.reader.p_data_sig.connect(self.update_plot_left)
             elif y_axis == 'temperature':
-
                 self.reader.T_data_sig.connect(self.update_plot_left)
 
     ###updating plot items
     def update_plot_left(self, df):
-
         if df.empty:
             return
         x = [t.timestamp() for t in df[self.t_p_table.time]]
-        # If plot items already exist, update them
         if hasattr(self, 'plot_items') and self.plot_items:
             for col, plot_item in self.plot_items.items():
                 if col not in df.columns:
@@ -697,27 +670,20 @@ class PlotBaseWindow(PlotBaseStyle):
                 plot_item.setData(x=x, y=y)
         else:
             self._create_plot_items_left(df=df, x=x)
-
         self._customize_legend(self.plotItem.legend)
 
     def update_plot_right(self, df):
         if df.empty:
             return
-
         x = [t.timestamp() for t in df[self.etc_table.get_clean("time")]]
-        # Initialize scatter_plot_items_dict if it doesn't exist
         if not hasattr(self, 'scatter_plot_items_dict'):
             self.scatter_plot_items_dict = {}
-
-        # Remove plot items for columns that are no longer present
         existing_cols = set(self.scatter_plot_items_dict.keys())
         new_cols = set(df.columns) - {'time'}
         cols_to_remove = existing_cols - new_cols
         for col in cols_to_remove:
             plot_item = self.scatter_plot_items_dict.pop(col)
             self.rightViewBox.removeItem(plot_item)
-
-        # Update existing plot items and create new ones as needed
         for col in df.columns:
             if col.lower() == 'time':
                 continue
@@ -728,22 +694,17 @@ class PlotBaseWindow(PlotBaseStyle):
                 scatter_plot_item = self.scatter_plot_items_dict[col]
                 scatter_plot_item.setData(x=x, y=y)
                 if "_avg" not in col.lower():
-                    # Re-initialize point colors if necessary
                     x_data, y_data = scatter_plot_item.getData()
                     self.point_colors = [pg.mkBrush('w') for _ in range(len(x_data))]
-
             else:
-                # Plot item for this column does not exist, create it
                 self._create_plot_item_right(col, x, y)
-                #self._update_x_range(x)
+        self._customize_legend(self.plotItem.legend)
 
     def update_min_max_plot(self, df_cycles=pd.DataFrame()):
         if df_cycles.empty:
             return
-
         cycle_table = TableConfig().CycleDataTable
         df_cycles = df_cycles.dropna(subset=[cycle_table.time_min, cycle_table.time_max])
-
         if 'pressure' in self.y_axis_str.lower():
             x_min = df_cycles[cycle_table.time_min]
             y_min = df_cycles[cycle_table.pressure_min]
@@ -756,24 +717,15 @@ class PlotBaseWindow(PlotBaseStyle):
             y_max = df_cycles[cycle_table.temperature_max]
         else:
             return
-
         x_min = [t.timestamp() for t in x_min]
         x_max = [t.timestamp() for t in x_max]
-
-        # Update existing plot items or create them if they don't exist
         if hasattr(self, 'cycle_data_plot_item_min') and self.cycle_data_plot_item_min is not None:
-            # Update existing plot item for min values
             self.cycle_data_plot_item_min.setData(x=x_min, y=y_min)
         else:
-            # Create plot item for min values
             self._create_min_max_plot(x=x_min, y=y_min, mode='min')
-
-
         if hasattr(self, 'cycle_data_plot_item_max') and self.cycle_data_plot_item_max is not None:
-            # Update existing plot item for max values
             self.cycle_data_plot_item_max.setData(x=x_max, y=y_max)
         else:
-            # Create plot item for max values
             self._create_min_max_plot(x=x_max, y=y_max, mode='max')
 
     ### handle zooming in plot
@@ -799,7 +751,7 @@ class PlotBaseWindow(PlotBaseStyle):
         new_range = end_time - start_time
 
         # Threshold for significant change (e.g., 10%)
-        threshold = 0.1  # 10%
+        threshold = 0.2  # 10%
 
         # Calculate the relative change in range
         range_change = abs(new_range - current_range) / current_range
@@ -816,7 +768,15 @@ class PlotBaseWindow(PlotBaseStyle):
         return is_covered
 
     def load_visible_data(self, start_time, end_time):
-        self.current_time_range = (start_time, end_time)
+        """
+        Load data for the visible range, expanding the range by 50% on each side.
+        This buffers the data so that small zoom adjustments won’t trigger a reload.
+        """
+        visible_duration = end_time - start_time
+        buffer = visible_duration * 0.5  # 50% buffer on each side
+        buffered_start = start_time - buffer
+        buffered_end = end_time + buffer
+        self.current_time_range = (buffered_start, buffered_end)
         if hasattr(self, 'reader'):
             self.reader.time_range_to_read = self.current_time_range
             self.reader.start(reading_mode=READING_MODE_BY_TIME)
@@ -829,12 +789,9 @@ class PlotBaseWindow(PlotBaseStyle):
     def update_constraints_t_p(self, new_constraints):
         if hasattr(self, 'reader'):
             self.reader.update_constraints_t_p(new_constraints)
-    ###
-
     ### handle point clicking
     def _on_point_clicked(self, plot, points):
         if len(points) > 0:
-            # Take only the first point
             point = points[0]
             point_datetime = datetime.fromtimestamp(point.pos().x(), tz=local_tz_reg)
             print('clicked a point', point_datetime)
@@ -842,41 +799,45 @@ class PlotBaseWindow(PlotBaseStyle):
             self.point_clicked_time_received.emit(point_datetime,  self.current_color_scatter)
 
     def _change_point_color(self, target_timestamp):
-        # Retrieve the data from the scatter plot item
         x_data, y_data = self.scatter_plot_item.getData()
-        # Find the index of the point with the target timestamp
         point_index = None
         for i, x in enumerate(x_data):
             if x == target_timestamp:
                 point_index = i
                 break
-
         if point_index is not None:
-            # Update the color of the specific point
             self.current_color_scatter = colors_scatter[self.color_index_scatter % len(colors_scatter)]
             self.color_index_scatter += 1
             self.point_colors[point_index] = pg.mkBrush(self.current_color_scatter)
-
-            # Update the scatter plot item with the new color
             self.scatter_plot_item.setData(x=x_data, y=y_data, brush=self.point_colors)
 
     def _reset_point_colors(self):
-        # Define the default color for resetting
         self.current_color_scatter = []
         self.color_index_scatter = 0
-        default_color = pg.mkBrush('w')  # Replace 'w' with your desired default color
-        # Reset the color of each point to the default color
+        default_color = pg.mkBrush('w')
         if not self.point_colors:
             return
         self.point_colors = [default_color for _ in self.point_colors]
-        # Retrieve the data from the scatter plot item
         x_data, y_data = self.scatter_plot_item.getData()
-        # Update the scatter plot item with the default colors
         self.scatter_plot_item.setData(x=x_data, y=y_data, brush=self.point_colors)
     ###
-
     def _update_x_range(self, time_range):
         self.plotItem.setXRange(min(time_range), max(time_range))
+
+    ### handle point clicking continues below...
+    def _on_point_clicked(self, plot, points):
+        if len(points) > 0:
+            point = points[0]
+            point_datetime = datetime.fromtimestamp(point.pos().x(), tz=local_tz_reg)
+            print('clicked a point', point_datetime)
+            self._change_point_color(point.pos().x())
+            self.point_clicked_time_received.emit(point_datetime,  self.current_color_scatter)
+
+    def closeEvent(self, event):
+        self.logger.info("Window is being closed.")
+        if hasattr(self, 'reader'):
+            self.reader.stop()
+        super().closeEvent(event)
 
 
 class DateAxisItem(pg.AxisItem):
@@ -884,9 +845,9 @@ class DateAxisItem(pg.AxisItem):
         if not values:
             return []
         span = max(values) - min(values)
-        if span < 3600:  # less than an hour
+        if span < 3600:
             fmt = "HH:mm:ss"
-        elif span < 86400:  # less than a day
+        elif span < 86400:
             fmt = "HH:mm"
         else:
             fmt = "yyyy MM dd"
@@ -898,13 +859,8 @@ class DateAxisItem(pg.AxisItem):
 
 
 class AxisLabel:
-
     @staticmethod
     def create_axis_label(column_name):
-        """
-        :param column_name: (str) name of the parameter that is plotted
-        :return: axis title str
-        """
         if "temperature" in column_name.lower():
             unit_str = "°C"
             variable_name = "Temperature"
@@ -925,10 +881,8 @@ class AxisLabel:
             variable_name = 'Cycle Number'
         else:
             variable_name = ""
-            unit_str = " "  # Default unit if neither temperature nor pressure
-
+            unit_str = " "
         return f"{variable_name} ({unit_str})"
-
 
 if __name__ == '__main__':
     app = QApplication()
