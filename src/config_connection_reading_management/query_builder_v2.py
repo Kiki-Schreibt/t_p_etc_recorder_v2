@@ -405,7 +405,7 @@ def test_query_builder():
         table_name="t_p",
         column_names="eq_pressure",
         sample_id=sample_id,
-        time_window=time_window
+        #time_window=time_window
     )
     print("Generated Query:")
     print(query)

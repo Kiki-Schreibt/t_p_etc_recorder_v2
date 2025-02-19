@@ -255,7 +255,7 @@ class ReadData(QThread):
         if new_meta_data.sample_id:
             self.meta_data = new_meta_data
 
-            
+
 class ReadContinuous(ReadData):
     """
     Thread class for continuously reading data and updating plots.
