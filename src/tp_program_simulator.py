@@ -85,7 +85,7 @@ def combine_consecutive_temperatures(data, expected_columns=None):
                 current_meas_power = meas_power
                 current_meas_time = meas_time
         result.append([current_temp, current_duration, current_meas_power, current_meas_time])
-        return pd.DataFrame(result, columns=['temperature', 'duration', 'measurement_power_watt', 'measurement_time'])
+        return pd.DataFrame(result, columns=['temperature', 'duration', 'measurement_power_watt', 'heat_pulse_duration'])
 
 
 # ---------------------------------------------------------------------------
@@ -281,7 +281,7 @@ class TemperatureControllerHotDiskSequenzer(BaseTemperatureController):
             start_time = end_time
         compressed_program['end_time'] = end_times
 
-        expected_cols = ['temperature', 'duration', 'measurement_power_watt', 'measurement_time']
+        expected_cols = ['temperature', 'duration', 'measurement_power_watt', 'heat_pulsé_duration']
 
         df_total_program = pd.DataFrame(total_program, columns=expected_cols)
         end_times = []

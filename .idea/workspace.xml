@@ -151,7 +151,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="hot_disk_controller" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -160,11 +160,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/config_connection_reading_management" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -242,10 +242,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.suquenzer_gui" />
+        <item itemvalue="Python.hot_disk_controller" />
         <item itemvalue="Python.simulator_gui" />
         <item itemvalue="Python.sequenzer" />
         <item itemvalue="Python.dicon_simulator_v2" />
-        <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
@@ -343,13 +343,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py</url>
-          <line>298</line>
+          <line>1</line>
           <option name="timeStamp" value="466" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py</url>
-          <line>300</line>
-          <option name="timeStamp" value="467" />
+          <line>391</line>
+          <option name="timeStamp" value="477" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
