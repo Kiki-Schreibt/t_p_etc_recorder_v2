@@ -130,15 +130,18 @@ def main():
         config_window.config_saved_sig.connect(lambda: config_window.close())
         config_window.show()
     else:
-        from src.config_connection_reading_management.config_reader import GetConfig
-        config = GetConfig()
-        launch_main_program(app, config)
+        launch_main_program(app)
 
     sys.exit(app.exec())
 
-def launch_main_program(app, config):
-    main_program = MainProgram(config=config)
-    main_program.show()
+def launch_main_program(app):
+    try:
+        from src.config_connection_reading_management.config_reader import GetConfig
+        config = GetConfig()
+        main_program = MainProgram(config=config)
+        main_program.show()
+    except Exception as e:
+        logger.error(f"Uhpsi daisy: {e}")
 
 
 if __name__ == '__main__':

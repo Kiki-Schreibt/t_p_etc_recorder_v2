@@ -280,7 +280,7 @@ class ReadContinuous(ReadData):
         try:
             # Open the database connection
             self.running = True
-            self.db_connection = DatabaseConnection()
+            self.db_connection = DatabaseConnection(**self.db_conn_params)
             self.db_connection.open_connection()
             self.cursor = self.db_connection.cursor
 

@@ -83,7 +83,7 @@ class ModbusProcessor:
         self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
         self.running = False
-        self.mb_reader = ModbusReader()
+        self.mb_reader = ModbusReader(mb_reading_params=self.mb_reading_params, mb_conn_params=self.mb_conn_params)
         self.mb_data_handler = ModbusDataHandler(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
         self.mb_db_writer = ModbusDBWriter(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
 
@@ -195,7 +195,7 @@ class ModbusReader:
         self.retry_count = 0
         self.none_T_p = 1e20
 
-    def run(self, client, START_REG=None, END_REG=None, REGS_OF_INTEREST=None, SLEEP_INTERVAL=None):
+    def run(self, client):
         """
         Starts the continuous data recording process.
 
@@ -204,6 +204,7 @@ class ModbusReader:
         client : Modbus client instance
             The client instance to communicate with the Modbus device.
         """
+        SLEEP_INTERVAL = self.mb_reading_params['SLEEP_INTERVAL']
 
         self.running = True
         retry_count = 0  # Initialize retry count
@@ -211,11 +212,7 @@ class ModbusReader:
            # print("Starting temperature and pressure recording...")
         while self.running:
             try:
-                converted_dicon_data = self.read_from_dicon(
-                                                             client,
-                                                             START_REG,
-                                                             END_REG,
-                                                             REGS_OF_INTEREST)
+                converted_dicon_data = self.read_from_dicon(client)
                 print(converted_dicon_data)
 
                 time.sleep(SLEEP_INTERVAL)
@@ -245,7 +242,7 @@ class ModbusReader:
         #print("Temperature and pressure recording stopped")
         self.logger.info("Temperature and pressure recording stopped")
 
-    def read_from_dicon(self, client, START_REG=None, END_REG=None, REGS_OF_INTEREST=None, SLEEP_INTERVAL=None):
+    def read_from_dicon(self, client):
         """
         Reads and processes data from the Modbus device.
 
@@ -290,6 +287,9 @@ class ModbusReader:
             pandas.DataFrame
                 A DataFrame containing the converted data.
         """
+        START_REG = self.mb_reading_params['START_REG']
+        END_REG = self.mb_reading_params['END_REG']
+        REGS_OF_INTEREST = self.mb_reading_params['REGS_OF_INTEREST']
 
         filtered_regs = []
         if (END_REG-START_REG) % 2 == 0:
