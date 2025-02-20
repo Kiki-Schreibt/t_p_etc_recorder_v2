@@ -41,8 +41,9 @@ class MetaData:
         meta_table.last_de_hyd_state: 'last_de_hyd_state'
     }
 
-    def __init__(self, sample_id=None):
-        self.db = DatabaseConnection()
+    def __init__(self, sample_id=None, db_conn_params=None):
+        self.db_conn_params = db_conn_params or {}
+
         self.config = GetConfig()
         self.qb = QueryBuilder()
         self.logger = logging.getLogger(__name__)
@@ -78,7 +79,7 @@ class MetaData:
                                                              sample_id=self.sample_id,
                                                              column_names=column_names)
                 #print(query)
-                with self.db as conn:
+                with DatabaseConnection(**self.db_conn_params) as conn:
                    # print(f"meta_data query = {query} meta_data values = {values}")
                     conn.cursor.execute(query, values)
                     records = conn.cursor.fetchall()
@@ -129,7 +130,7 @@ class MetaData:
         column_value_mapping = {col: val for col, val in column_value_mapping.items() if val is not None}
 
         if self._sample_id_exists():
-            with self.db as conn:
+            with DatabaseConnection(**self.db_conn_params) as conn:
                 # Construct the SET clause
                 set_clauses = ', '.join([f'"{col}" = %s' for col in column_value_mapping.keys()])
                 values = list(column_value_mapping.values())
@@ -219,7 +220,7 @@ class MetaData:
         column_name = TableConfig().MetaDataTable.sample_id
         value = (self.sample_id,)
         query = f"INSERT INTO {table_name} ({column_name}) VALUES (%s)"
-        with self.db as conn:
+        with DatabaseConnection(**self.db_conn_params) as conn:
             conn.cursor.execute(query, value)
             conn.cursor.connection.commit()
 
@@ -230,7 +231,7 @@ class MetaData:
         table_name = self.table_name
         column_name = TableConfig().MetaDataTable.sample_id
         query = f"SELECT 1 FROM {table_name} WHERE {column_name} = '{self.sample_id}'"
-        with self.db as conn:
+        with DatabaseConnection(**self.db_conn_params) as conn:
 
             conn.cursor.execute(query)
             record = conn.cursor.fetchone() is not None
@@ -321,7 +322,7 @@ class MetaData:
                 """
         try:
             time_start_query_exec = time.time()
-            with self.db as conn:
+            with DatabaseConnection(**self.db_conn_params) as conn:
                 conn.cursor.execute(query, (sample_id,))
                 record = conn.cursor.fetchone()
 

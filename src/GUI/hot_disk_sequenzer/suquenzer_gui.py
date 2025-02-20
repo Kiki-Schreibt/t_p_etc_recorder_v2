@@ -39,6 +39,7 @@ class SignaledHotDiskController(QObject, HotDiskController):
         self.latest_program_step_sig.emit(target_time)
         super().wait_until(target_time=target_time)
 
+ 
 # =============================================================================
 # Worker for HotDiskController – runs inside a QThread
 # =============================================================================

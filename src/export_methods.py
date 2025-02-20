@@ -13,23 +13,24 @@ from src.meta_data.meta_data_handler import MetaData
 
 class QuickExport:
 
-    def __init__(self):
+    def __init__(self, db_conn_params=None):
+        self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.etc_table = TableConfig().ETCDataTable
         self.cycle_table = TableConfig().CycleDataTable
         self.db_retriever = DataRetriever()
-        self.meta_data = MetaData()
+        self.meta_data = MetaData(db_conn_params=self.db_conn_params)
 
     def export_all(self, sample_id, constraints_etc: dict, subfolder_name_str=""):
-        self.meta_data = MetaData(sample_id=sample_id)
+        self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         self.export_etc_data(sample_id=sample_id, constraints_etc=constraints_etc, subfolder_name_str=subfolder_name_str)
         self.export_capacity_data(sample_id=sample_id, subfolder_name_str=subfolder_name_str)
         self.export_t_p_data(sample_id=sample_id, subfolder_name_str=subfolder_name_str)
 
     def export_etc_data(self, sample_id, constraints_etc: dict = {}, subfolder_name_str=""):
         if not self.meta_data.sample_id:
-            self.meta_data = MetaData(sample_id=sample_id)
+            self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         self.logger.info(f"Starting ETC data export for {sample_id}")
         etc_data, file_edition_etc = self._get_etc_data_full_test(sample_id=sample_id, constraints_etc=constraints_etc)
         self._write_data(sample_id=sample_id,
@@ -39,7 +40,7 @@ class QuickExport:
 
     def export_capacity_data(self, sample_id, subfolder_name_str=""):
         if not self.meta_data.sample_id:
-            self.meta_data = MetaData(sample_id=sample_id)
+            self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         self.logger.info(f"Starting capacity over cycles data export for {sample_id}")
         capacity_data, file_edition_cap = self._get_capacity_data_full_test(sample_id=sample_id)
         self._write_data(sample_id=sample_id,
@@ -133,7 +134,7 @@ class QuickExport:
 
     def export_t_p_data(self, sample_id, subfolder_name_str=""):
         if not self.meta_data.sample_id:
-            self.meta_data = MetaData(sample_id=sample_id)
+            self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         self.logger.info(f"Starting temperature-pressure data export for {sample_id}")
         t_p_data, file_edition_etc = self._get_tp_data(sample_id=sample_id)
         self._write_data(sample_id=sample_id,

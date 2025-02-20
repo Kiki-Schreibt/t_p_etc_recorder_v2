@@ -4,8 +4,8 @@ import threading
 import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import numpy as np
 
+import numpy as np
 import pandas as pd
 import pyqtgraph as pg
 from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, QObject,
@@ -17,10 +17,8 @@ try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
-from src.config_connection_reading_management.database_reading_writing import DataRetriever
-from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
 from src.meta_data.meta_data_handler import MetaData
-from src.config_connection_reading_management.modbus_handler import ModbusProcessor
+
 from src.table_data import TableConfig
 
 
@@ -76,11 +74,12 @@ class ReadData(QThread):
     cycles_full_test_sig = Signal(pd.DataFrame)
     auto_update_x_range_sig = Signal()
 
-    def __init__(self, meta_data=MetaData()):
+    def __init__(self, meta_data=MetaData(), db_conn_params=None):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         from src.config_connection_reading_management.database_reading_writing import DataRetriever
-        self.db_retriever = DataRetriever()
+        self.db_conn_params = db_conn_params or {}
+        self.db_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self.limit_amount_storage = self.db_retriever.limit_datapoints
         self.running = False
         self.T_max = 1000
@@ -270,8 +269,8 @@ class ReadContinuous(ReadData):
     Uses QTimer to schedule periodic data reads.
     """
 
-    def __init__(self, meta_data=MetaData()):
-        super().__init__(meta_data)
+    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+        super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = "continuous"
         self.db_connection = None  # Initialize the database connection to None
 
@@ -390,8 +389,8 @@ class ReadStatic(ReadData):
     """
     whole_test_emited_sig = Signal()
 
-    def __init__(self, meta_data=MetaData()):
-        super().__init__(meta_data)
+    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+        super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
 
     def start(self, reading_mode: str = None):
@@ -632,7 +631,7 @@ class PlotBaseWindow(PlotBaseStyle):
     current_state_sig = Signal(str)
     current_uptake_sig = Signal(float)
 
-    def __init__(self, parent=None, y_axis=''):
+    def __init__(self, parent=None, y_axis='', db_conn_params=None):
         super().__init__(parent=parent, y_axis=y_axis)
         self.range_change_timer = QTimer(self)
         self.current_time_range = [datetime.now(tz=local_tz_reg),
@@ -643,6 +642,7 @@ class PlotBaseWindow(PlotBaseStyle):
         self.range_change_timer = QTimer()
         self.range_change_timer.setSingleShot(True)
         self._init_connections(y_axis=y_axis)
+        self.db_conn_params = db_conn_params or {}
 
     def _init_connections(self, y_axis):
         self.range_change_timer.timeout.connect(self._on_range_change_timeout)

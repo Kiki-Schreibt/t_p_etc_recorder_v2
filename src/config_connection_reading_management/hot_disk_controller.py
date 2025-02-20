@@ -84,8 +84,9 @@ class HotDiskScheduleGrabber:
 
 class HotDiskController:
 
-    def __init__(self, template_folder_path=standard_hot_disk_schedule_folder, sensor_insulation="Mica", sensor_type="5465", standard_number_of_measurements=3):
+    def __init__(self, template_folder_path=standard_hot_disk_schedule_folder, sensor_insulation="Mica", sensor_type="5465", standard_number_of_measurements=3, hd_conn_params=None):
         self.logger = logging.getLogger(__name__)
+        self.hd_conn_params = hd_conn_params or {}
         self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type)
         self.running_event = threading.Event()
         self.stop_event = threading.Event()
@@ -125,7 +126,7 @@ class HotDiskController:
     def start_schedule_file(self, full_file_path):
         if full_file_path:
             try:
-                with HotDiskConnection() as client:
+                with HotDiskConnection(**self.hd_conn_params) as client:
                     client.send_command(f"SCHED:INIT {full_file_path}")
                     self.logger.info(f"Measurement started with schedule {full_file_path}")
             except Exception as e:
@@ -162,9 +163,8 @@ class HotDiskController:
         self.running_event.clear()
         self.stop_event.set()
 
-    @staticmethod
-    def get_row_count():
-        with HotDiskConnection() as client:
+    def get_row_count(self):
+        with HotDiskConnection(**self.hd_conn_params) as client:
             client.send_command("ROW:COUNT?")
             row_count = client.receive_response()
             return int(row_count)
@@ -186,12 +186,11 @@ class HotDiskController:
         else:
             end_idx = start_idx + number_of_measurements - 1
 
-        with HotDiskConnection() as client:
+        with HotDiskConnection(**self.hd_conn_params) as client:
             client.send_command(f"ROW:SEL {start_idx}-{end_idx}")
 
-    @staticmethod
-    def calculate_results():
-        with HotDiskConnection() as client:
+    def calculate_results(self):
+        with HotDiskConnection(**self.hd_conn_params) as client:
             client.send_command("CAlC:EXE")
 
     def update_row_count(self, incr_increase=None):
@@ -204,7 +203,7 @@ class HotDiskController:
             self.current_experiment_row += incr_increase
 
     def get_result_val(self):
-        with HotDiskConnection() as client:
+        with HotDiskConnection(**self.hd_conn_params) as client:
            result_val =  client.send_command_receive_response(command="CALC:TCOND?")
         return result_val
 
@@ -248,8 +247,9 @@ def test_hd_controller():
 
 if __name__ == '__main__':
    test_hd_controller()
+   hd_conn_params = {}
    #hd_controller = HotDiskController()
-   #with HotDiskConnection() as client:
+   #with HotDiskConnection(**hd_conn_params) as client:
    #    client.send_command("ROW:SEL ALL")
    #rc = hd_controller.get_result_val()
    #print(rc)

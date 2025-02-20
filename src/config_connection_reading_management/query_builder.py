@@ -13,7 +13,8 @@ local_tz = ZoneInfo("Europe/Berlin")
 
 class QueryBuilder:
 
-    def __init__(self):
+    def __init__(self, db_con_params=None):
+        self.db_conn_params = db_con_params or {}
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.etc_table = TableConfig().ETCDataTable
@@ -318,7 +319,7 @@ class QueryBuilder:
 
     def _get_times_by_meta_data(self, sample_id):
         from src.meta_data.meta_data_handler import MetaData
-        meta_data = MetaData(sample_id=sample_id)
+        meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         meta_data.read()
 
         if not meta_data.start_time and not meta_data.end_time:
@@ -496,7 +497,7 @@ class QueryBuilder:
                     f"WHERE {sample_id_column} = '{sample_id}'"
         else:
             return None, None
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
                 db_conn.cursor.execute(query)
                 occurence_sample_id = db_conn.cursor.fetchone()
@@ -578,7 +579,9 @@ class QueryBuilder:
             return query
 
 def test_query_builder():
-    qb = QueryBuilder()
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    qb = QueryBuilder(db_con_params=config.db_conn_params)
     constraints = {
         'min_TotalTempIncr': 0,
         'max_TotalTempIncr': 20,
@@ -600,7 +603,7 @@ def test_query_builder():
 
    # query, values = qb.create_reading_query(limit_data_points=50000, table_name=table_name_etc, sample_id=sample_id, constraints=constraints)
     print(query)
-    with DatabaseConnection() as db_conn:
+    with DatabaseConnection(**config.db_conn_params) as db_conn:
         db_conn.cursor.execute(query, values)
         records = db_conn.cursor.fetchall()
         print(records)
@@ -608,8 +611,9 @@ def test_query_builder():
 
 if __name__ == "__main__":
 
-
-    qb = QueryBuilder()
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    qb = QueryBuilder(db_con_params=config.db_conn_params)
     qb.create_reading_query(table_name=TableConfig().TPDataTable.table_name,
                             sample_id='WAE-WA-030',
                             time_window=(datetime(2023, 1, 1), datetime(2023, 1, 2)))

@@ -20,10 +20,10 @@ from src.standard_paths import standard_hot_disk_file_path
 class LogFileTracker(QObject):
     time_range_etc_import = Signal(tuple)
 
-    def __init__(self, meta_data):
+    def __init__(self, meta_data, hd_log_file_tracker_params):
         super().__init__()
         self.meta_data = meta_data
-        self.hot_disk_log_dir_path = standard_hot_disk_file_path
+        self.hot_disk_log_dir_path = hd_log_file_tracker_params['HOT_DISK_LOG_FILE_PATH']
         self.observer = None
         self.running = False
         self.logger = logging.getLogger(__name__)

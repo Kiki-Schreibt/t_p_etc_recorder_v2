@@ -21,8 +21,9 @@ class BaseQueryBuilder:
     """
     Provides helper methods common to all query builders.
     """
-    def __init__(self):
+    def __init__(self, db_conn_params=None):
         self.logger = logging.getLogger(__name__)
+        self.db_conn_params = db_conn_params or {}
         self.table_config = TableConfig()
         self.tp_table = self.table_config.TPDataTable
         self.etc_table = self.table_config.ETCDataTable
@@ -236,7 +237,7 @@ class TPQueryBuilder(BaseQueryBuilder):
 
     def _get_times_by_meta_data(self, sample_id):
         from src.meta_data.meta_data_handler import MetaData
-        meta_data = MetaData(sample_id=sample_id)
+        meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         meta_data.read()
         if not meta_data.start_time and not meta_data.end_time:
             first, last = self._fetch_first_and_last_match_by_sample_id(sample_id)
@@ -260,7 +261,7 @@ class TPQueryBuilder(BaseQueryBuilder):
             query = f"SELECT MIN({time_column}), MAX({time_column}) FROM {table_name} WHERE {sample_id_column} = %s"
         else:
             return None, None
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
                 db_conn.cursor.execute(query, (sample_id,))
                 result = db_conn.cursor.fetchone()
@@ -350,12 +351,13 @@ class QueryBuilder:
     Facade class that selects the appropriate builder based on the table name.
     Also includes methods for continuous reading and writing queries.
     """
-    def __init__(self):
-        self.tp_builder = TPQueryBuilder()
-        self.etc_builder = ETCQueryBuilder()
-        self.cycle_builder = CycleDataQueryBuilder()
-        self.meta_builder = MetaDataQueryBuilder()
-        self.base_builder = BaseQueryBuilder()  # For common methods
+    def __init__(self, db_conn_params=None):
+        self.db_conn_params = db_conn_params or {}
+        self.tp_builder = TPQueryBuilder(db_conn_params=self.db_conn_params)
+        self.etc_builder = ETCQueryBuilder(db_conn_params=self.db_conn_params)
+        self.cycle_builder = CycleDataQueryBuilder(db_conn_params=self.db_conn_params)
+        self.meta_builder = MetaDataQueryBuilder(db_conn_params=self.db_conn_params)
+        self.base_builder = BaseQueryBuilder(db_conn_params=self.db_conn_params)  # For common methods
 
     def create_reading_query(self, table_name, **kwargs):
         table_name_lower = table_name.lower()
@@ -395,7 +397,9 @@ class QueryBuilder:
 
 # --- Test function for quick verification ---
 def test_query_builder():
-    qb = QueryBuilder()
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    qb = QueryBuilder(db_conn_params=config.db_conn_params)
     sample_id = "WAE-WA-040"
     start_time = datetime(2022, 1, 1, 20, 21, 22)
     end_time = datetime(2023, 1, 5, 20, 22, 22)
@@ -412,7 +416,7 @@ def test_query_builder():
     print("With values:")
     print(values)
     # Optionally, test executing the query:
-    with DatabaseConnection() as db_conn:
+    with DatabaseConnection(config.db_conn_params) as db_conn:
         db_conn.cursor.execute(query, values)
         records = db_conn.cursor.fetchall()
         print("Records:")

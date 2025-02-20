@@ -139,8 +139,9 @@ class PlotManager:
         init_uptake_plot(): Initialize the hydrogen uptake plot.
         init_tp_dependent_plot(): Initialize the TP-dependent ETC plot.
     """
-    def __init__(self, ui, meta_data: MetaData, logger):
+    def __init__(self, ui, meta_data: MetaData, logger, db_conn_params=None):
         self.ui = ui
+        self.db_conn_params = db_conn_params or {}
         self.meta_data = meta_data
         self.logger = logger
         self.top_plot = None
@@ -168,8 +169,8 @@ class PlotManager:
         try:
             from src.GUI.recording_gui.recording_business_v2 import ContinuousPlotWindow
             self.clear_plots()
-            self.top_plot = ContinuousPlotWindow(y_axis="temperature", meta_data=self.meta_data)
-            self.bottom_plot = ContinuousPlotWindow(y_axis="pressure", meta_data=self.meta_data)
+            self.top_plot = ContinuousPlotWindow(y_axis="temperature", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
+            self.bottom_plot = ContinuousPlotWindow(y_axis="pressure", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
             self._ensure_layout(self.ui.ExpMetaPlotLeft)
             self._ensure_layout(self.ui.ExpMetaPlotLeftLower)
             self.ui.ExpMetaPlotLeft.layout().addWidget(self.top_plot)
@@ -187,8 +188,8 @@ class PlotManager:
         try:
             from src.GUI.recording_gui.recording_business_v2 import StaticPlotWindow
             self.clear_plots()
-            self.top_plot = StaticPlotWindow(y_axis="temperature", meta_data=self.meta_data)
-            self.bottom_plot = StaticPlotWindow(y_axis="pressure", meta_data=self.meta_data)
+            self.top_plot = StaticPlotWindow(y_axis="temperature", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
+            self.bottom_plot = StaticPlotWindow(y_axis="pressure", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
             self._ensure_layout(self.ui.ExpMetaPlotLeft)
             self._ensure_layout(self.ui.ExpMetaPlotLeftLower)
             self.ui.ExpMetaPlotLeft.layout().addWidget(self.top_plot)
@@ -214,7 +215,7 @@ class PlotManager:
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
             from src.GUI.recording_gui.recording_business_v2 import XYPlot
-            self.right_plot = XYPlot()
+            self.right_plot = XYPlot(db_conn_params=self.db_conn_params)
             self._ensure_layout(self.ui.xy_plot_window)
             self.ui.xy_plot_window.layout().addWidget(self.right_plot)
             if self.top_plot:
@@ -234,7 +235,7 @@ class PlotManager:
             if self.right_plot:
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
-            self.right_plot = UptakePlot()
+            self.right_plot = UptakePlot(db_conn_params=self.db_conn_params)
             self.right_plot.load_data(meta_data=self.meta_data, time_range=time_range)
             self._ensure_layout(self.ui.xy_plot_window)
             self.ui.xy_plot_window.layout().addWidget(self.right_plot)
@@ -252,7 +253,7 @@ class PlotManager:
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
             from src.GUI.recording_gui.recording_business_v2 import ReadPlotTpDependent
-            self.right_plot = ReadPlotTpDependent.PlotTpDependent()
+            self.right_plot = ReadPlotTpDependent.PlotTpDependent(db_conn_params=self.db_conn_params)
             self.right_plot.load_data(time_range=time_range, x_col=x_col)
             self._ensure_layout(self.ui.xy_plot_window)
             self.ui.xy_plot_window.layout().addWidget(self.right_plot)
@@ -287,12 +288,27 @@ class MainController:
         toggle_h2_uptake(): Enable or disable H2 uptake measurements.
         toggle_cycling(): Enable or disable cycling.
     """
-    def __init__(self, meta_data: MetaData, plot_manager: PlotManager, logger):
+    def __init__(self, meta_data: MetaData,
+                 plot_manager: PlotManager,
+                 logger,
+                 config):
         self.meta_data = meta_data
         self.plot_manager = plot_manager
         self.logger = logger
+        if config:
+                self.db_conn_params = config.db_conn_params
+                self.mb_conn_params = config.mb_conn_params
+                self.mb_reading_params = config.mb_reading_params
+                self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
+
+
         try:
-            self.recorder = DataRecorder(meta_data=self.meta_data)
+            self.recorder = DataRecorder(meta_data=self.meta_data,
+                                         db_conn_params=self.db_conn_params,
+                                         mb_reading_params=self.mb_reading_params,
+                                         mb_conn_params=self.mb_conn_params,
+                                         hd_log_file_tracker_params=self.hd_log_file_tracker_params
+                                         )
         except Exception as e:
             self.logger.exception("Error initializing DataRecorder in MainController:")
             self.recorder = None
@@ -449,20 +465,29 @@ class MainWindow(QMainWindow):
     The main application window. Sets up the UI, connects signals and slots,
     and handles user interactions.
     """
-    def __init__(self):
+    def __init__(self, config=None):
         try:
             super().__init__()
+            self.config = config
+
             self.setWindowTitle("T-p ETC Recorder")
             from src.GUI.qt_styles import aqua as style
             self.setStyleSheet(style)
             self.setFont(FONT)
             self.logger = logging.getLogger(__name__)
+            try:
+                self.db_conn_params = config.db_conn_params
+                self.mb_conn_params = config.mb_conn_params
+                self.mb_reading_params = config.mb_reading_params
+                self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
+            except Exception as e:
+                self.logger.error(f"No config provided: {e}")
             self.ui = self._load_ui(recording_ui_file_path)
             self.setCentralWidget(self.ui)
-            self.meta_data = MetaData()
+            self.meta_data = MetaData(db_conn_params=self.db_conn_params)
             self.meta_manager = MetaDataManager(self.meta_data)
-            self.plot_manager = PlotManager(self.ui, self.meta_data, self.logger)
-            self.controller = MainController(self.meta_data, self.plot_manager, self.logger)
+            self.plot_manager = PlotManager(self.ui, self.meta_data, self.logger, db_conn_params=self.db_conn_params)
+            self.controller = MainController(self.meta_data, self.plot_manager, self.logger, config)
             self._init_ui()
             self._init_connections()
             self._setup_validators()

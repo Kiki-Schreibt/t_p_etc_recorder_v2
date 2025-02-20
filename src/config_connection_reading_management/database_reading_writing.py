@@ -21,8 +21,7 @@ from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
 from src.table_data import TableConfig
 
-# Global instances and constants
-qb = QueryBuilder()
+
 local_tz = ZoneInfo("Europe/Berlin")
 
 
@@ -110,12 +109,13 @@ class DataRetriever:
         xy_table.temperature_drift: 'temperature_drift'
     }
 
-    def __init__(self):
+    def __init__(self, db_conn_params=None):
         self.running = False
-        self.qb = qb
+        self.db_conn_params = db_conn_params or {}
+        self.qb = QueryBuilder(db_con_params=self.db_conn_params)
         self.logger = logging.getLogger(__name__)
-        self.database_connection = DatabaseConnection()
         self.limit_datapoints = 10000
+
 
     def fetch_latest_records(
         self,
@@ -129,7 +129,7 @@ class DataRetriever:
         """
         Fetches the latest records from a specified table.
         """
-        query, values = qb.create_continuous_reading_query(
+        query, values = self.qb.create_continuous_reading_query(
             column_names=column_names,
             table_name=table_name,
             constraints=constraints,
@@ -220,7 +220,7 @@ class DataRetriever:
         column_names: Optional[Union[List[str], Tuple[str, ...]]] = None,
         constraints: Optional[dict] = None
     ) -> pd.DataFrame:
-        query, values = qb.create_reading_query(
+        query, values = self.qb.create_reading_query(
             sample_id=sample_id,
             table_name=table_name,
             column_names=column_names,
@@ -242,7 +242,7 @@ class DataRetriever:
         constraints: Optional[dict] = None,
         sample_id: Optional[str] = None
     ) -> pd.DataFrame:
-        query, values = qb.create_reading_query(
+        query, values = self.qb.create_reading_query(
             table_name=table_name,
             time_window=time_range,
             limit_data_points=self.limit_datapoints,
@@ -294,7 +294,7 @@ class DataRetriever:
         params = (time_value,)
 
         try:
-            with DatabaseConnection() as db_conn:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
                 db_conn.cursor.execute(query, params)
                 records = db_conn.cursor.fetchall()
                 col_names_clean = tuple(s.replace("\"", "") for s in column_names)
@@ -307,9 +307,9 @@ class DataRetriever:
             self.logger.error("Error occurred while fetching xy data: %s", e)
             return pd.DataFrame()
 
-    @staticmethod
-    def fetch_last_state_and_cycle(sample_id: Optional[str] = None) -> Tuple:
-        meta_data = MetaData(sample_id=sample_id)
+
+    def fetch_last_state_and_cycle(self, sample_id: Optional[str] = None) -> Tuple:
+        meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         return meta_data.last_de_hyd_state, meta_data.total_number_cycles
 
     def fetch_data_by_cycle(
@@ -346,7 +346,9 @@ class DataRetriever:
         df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
         return df
 
-    def fetch_data_by_time_no_limit(self, table: TableConfig, time_range: Tuple[datetime, datetime], col_names: Optional[List[str]] = None) -> pd.DataFrame:
+    def fetch_data_by_time_no_limit(self, table: TableConfig,
+                                    time_range: Tuple[datetime, datetime],
+                                    col_names: Optional[List[str]] = None) -> pd.DataFrame:
         if not col_names:
             col_names = TableConfig().get_table_column_names(table_class=table)
         col_name_str = ", ".join(col_names)
@@ -364,7 +366,7 @@ class DataRetriever:
         if column_names is None:
             column_names = TableConfig().get_table_column_names(table_name=table_name)
         try:
-            with DatabaseConnection() as db_conn:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
                 db_conn.cursor.execute(query, values)
                 records = db_conn.cursor.fetchall()
             col_names_clean = (tuple(s.replace("\"", "") for s in column_names)
@@ -429,7 +431,7 @@ class DataRetriever:
         return df
 
     def close_connection(self) -> None:
-        self.database_connection.close_connection()
+        pass
 
 
 class DataBaseManipulator:
@@ -438,13 +440,13 @@ class DataBaseManipulator:
     """
     tp_table = TableConfig().TPDataTable
 
-    def __init__(self):
+    def __init__(self, db_conn_params=None):
         self.running = False
         self.logger = logging.getLogger(__name__)
-        self.database_connection = DatabaseConnection()
+        self.db_conn_params = db_conn_params or {}
 
     def execute_updating(self, query: str, values: list, many_bool: bool = True) -> None:
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
                 if many_bool:
                     db_conn.cursor.executemany(query, values)
@@ -521,7 +523,7 @@ class DataBaseManipulator:
                  f"AND {col_to_match} BETWEEN %s and %s")
         values = tuple_values + (sample_id,) + update_between_vals
 
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
                 db_conn.cursor.execute(query, values)
                 db_conn.cursor.connection.commit()
@@ -549,14 +551,17 @@ class ExcelDataProcessor:
         results_sheet_name: str = 'Results',
         parameters_sheet_name: str = 'Parameters',
         sample_id: Optional[str] = None,
-        meta_data: Optional[MetaData] = None
+        meta_data: Optional[MetaData] = None,
+        db_conn_params=None
     ):
         self.file_path = file_path
         self.results_sheet_name = results_sheet_name
         self.parameters_sheet_name = parameters_sheet_name
+        self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
-        self.meta_data = MetaData(sample_id=sample_id) if sample_id else (meta_data or MetaData())
+        self.meta_data = MetaData(sample_id=sample_id, db_conn_params=db_conn_params) if (sample_id and db_conn_params) else (meta_data or MetaData(db_conn_params=db_conn_params))
         self._test_mode = False
+
 
     def _update_xlsx_file(self) -> None:
         try:
@@ -718,7 +723,7 @@ class ExcelDataProcessor:
         return measurement_xy_data
 
     def _write_to_database(self, insert_query: str, values: list, table_name: str = "") -> bool:
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             self.logger.info("Starting writing thermal conductivity data to %s database...", table_name)
             try:
                 db_conn.cursor.executemany(insert_query, values)
@@ -735,7 +740,7 @@ class ExcelDataProcessor:
                 return True
 
     def _delete_data_from_table(self, data_to_delete: pd.DataFrame) -> None:
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             self.logger.info("Starting deletion of data from %s database...", self.etc_table.table_name)
             data_identifiers = [(time_val,) for time_val in data_to_delete['Time']]
             try:
@@ -881,7 +886,9 @@ def test_data_retriever() -> None:
 
 
 def test_excel_data_processor(etc_dir: str, sample_id: str) -> None:
-    etc_processor = ExcelDataProcessor(sample_id=sample_id, file_path=etc_dir)
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    etc_processor = ExcelDataProcessor(sample_id=sample_id, file_path=etc_dir, db_conn_params=config.db_conn_params)
     etc_processor.execute()
 
 

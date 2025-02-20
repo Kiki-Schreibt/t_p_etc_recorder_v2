@@ -42,32 +42,34 @@ class GetConfig:
         with open(config_file_path, 'r') as file:
             config = json.load(file)
 
-        # Set up configuration values.
-        self.LOG_DIRECTORY = standard_log_dir
-        self.LOG_FILE = config['LOG_FILE']
+        self.db_conn_params = {
+                        "DB_SERVER": config['DB_SERVER'],
+                        "DB_DATABASE": config['DB_DATABASE'],
+                        "DB_USERNAME": config['DB_USERNAME'],
+                        "DB_PASSWORD": config['DB_PASSWORD'],
+                        "DB_PORT": config['DB_PORT'],
+                    }
 
-        self.DB_SERVER = config['DB_SERVER']
-        self.DB_DATABASE = config['DB_DATABASE']
-        self.DB_USERNAME = config['DB_USERNAME']
-        self.DB_PASSWORD = config['DB_PASSWORD']
-        self.DB_PORT = config['DB_PORT']  # Expected to be an integer
+        self.mb_conn_params = {
+                            "MB_HOST": config['MODBUS_HOST'],
+                            "MB_PORT": config['MODBUS_PORT']
+                        }
+        self.mb_reading_params = {
+                            "START_REG": int(config['START_REG']),
+                            "END_REG": int(config['END_REG']),
+                            "REGS_OF_INTEREST": [int(x) for x in config['REGS_OF_INTEREST']],
+                            "SLEEP_INTERVAL": int(config['SLEEP_INTERVAL'])
+                                }
 
-        self.MODBUS_HOST = config['MODBUS_HOST']
-        self.MODBUS_PORT = config['MODBUS_PORT']
-        self.REGS_OF_INTEREST = config['REGS_OF_INTEREST']
-        self.START_REG = config['START_REG']
-        self.END_REG = config['END_REG']
-        self.SLEEP_INTERVAL = config['SLEEP_INTERVAL']
+        self.app_logger_params = {
+                            "LOG_DIRECTORY": standard_log_dir,
+                            "LOG_FILE": config['LOG_FILE']
+                                    }
+
+        self.hd_log_file_tracker_params = {"HOT_DISK_LOG_FILE_PATH": config['HOT_DISK_LOG_FILE_PATH']}
 
         self.HOT_DISK_LOG_FILE_PATH = config['HOT_DISK_LOG_FILE_PATH']
 
-        self.connection_string = {
-            'host': self.DB_SERVER,
-            'dbname': self.DB_DATABASE,
-            'user': self.DB_USERNAME,
-            'password': self.DB_PASSWORD,
-            'port': self.DB_PORT
-        }
 
     @staticmethod
     def _has_uppercase(string):

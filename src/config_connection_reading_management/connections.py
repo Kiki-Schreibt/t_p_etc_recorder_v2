@@ -10,7 +10,6 @@ try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
-from src.config_connection_reading_management.config_reader import GetConfig
 
 
 class DatabaseConnection:
@@ -27,21 +26,13 @@ class DatabaseConnection:
         auto_close (bool): Flag to indicate automatic closing of the connection.
 
     Usage Example:
-    with DatabaseConnection() as db_conn:
+    with DatabaseConnection(**db_conn_params) as db_conn:
         db_conn.cursor.executemany(query, values)
         records = db_conn.cursor.fetchall()
 
     """
-    # Load the configuration
-    config = GetConfig()
-    # Accessing the variables
-    DB_SERVER       = config.DB_SERVER
-    DB_DATABASE     = config.DB_DATABASE
-    DB_USERNAME     = config.DB_USERNAME
-    DB_PASSWORD     = config.DB_PASSWORD
-    DB_PORT         = config.DB_PORT
 
-    def __init__(self):
+    def __init__(self, DB_SERVER=None, DB_DATABASE=None, DB_USERNAME=None, DB_PASSWORD=None, DB_PORT=None):
         """
         Initialises empty attributes for later use and sets up logging for DatabaseConnection
         """
@@ -49,6 +40,11 @@ class DatabaseConnection:
         self.cursor = None
         self.logger = logging.getLogger(__name__)
         self.auto_close = True
+        self.DB_SERVER       = DB_SERVER or 'localhost'
+        self.DB_DATABASE     = DB_DATABASE or 'postgres'
+        self.DB_USERNAME     = DB_USERNAME or 'postgres'
+        self.DB_PASSWORD     = DB_PASSWORD or "pw12345"
+        self.DB_PORT         = DB_PORT or 502
 
     def __enter__(self):
         """Entry for context manager
@@ -118,24 +114,15 @@ class ModbusConnection:
         reconnect(): Re-establishes the Modbus TCP connection.
 
     Usage Example:
-    with ModbusConnection() as mb_conn:
+    with ModbusConnection(**mb_conn_params) as mb_conn:
         mb_conn.client.read_holding_registers(START_REG, FINAL_REG, MODBUS_SLAVE_ID)
     """
-    config = GetConfig()
-    MODBUS_HOST     = config.MODBUS_HOST
-    MODBUS_PORT     = config.MODBUS_PORT
-    REGS_OF_INTEREST = config.REGS_OF_INTEREST
-    START_REG       = config.START_REG
-    END_REG         = config.END_REG
-    SLEEP_INTERVAL  = config.SLEEP_INTERVAL
 
-
-
-    def __init__(self, mb_host=MODBUS_HOST, mb_port=MODBUS_PORT):
+    def __init__(self, MB_HOST=None, MB_PORT=None):
         self.client = None
         self.logger = logging.getLogger(__name__)
-        self.mb_host = mb_host
-        self.mb_port = mb_port
+        self.MB_HOST = MB_HOST or "192.168.178.1"
+        self.MB_PORT = MB_PORT or 502
 
     def __enter__(self):
         self.connect()
@@ -146,11 +133,11 @@ class ModbusConnection:
 
     def connect(self):
         try:
-            self.client = ModbusClient(host=self.mb_host, port=self.mb_port)
+            self.client = ModbusClient(host=self.MB_HOST, port=self.MB_PORT)
             if not self.client.connect():
-                self.logger.error("Failed to connect to Modbus server at %s:%s", self.mb_host, self.mb_port)
-                raise ConnectionException(f"Unable to connect to {self.mb_host}:{self.mb_port}")
-            self.logger.info("Connected to Modbus server at %s:%s.", self.mb_host, self.mb_port)
+                self.logger.error("Failed to connect to Modbus server at %s:%s", self.MB_HOST, self.MB_PORT)
+                raise ConnectionException(f"Unable to connect to {self.MB_HOST}:{self.MB_PORT}")
+            self.logger.info("Connected to Modbus server at %s:%s.", self.MB_HOST, self.MB_PORT)
         except ConnectionException as e:
             self.logger.error("ConnectionException: %s", e)
             raise
@@ -194,8 +181,8 @@ class HotDiskConnection:
     opened and closed.
 
     Attributes:
-        host (str): Host address.
-        port (int): Host port
+        HD_HOST (str): Host address.
+        HD_PORT (int): Host port
         logger (Logger): Logger for logging messages.
         sock (socket): socket to connect
 
@@ -211,13 +198,10 @@ class HotDiskConnection:
         hd_conn.send_command_receive_response(f"*IDN?")  #returns hot disk id
     """
 
-    HOT_DISK_HOST = 'localhost'
-    HOT_DISK_PORT = 50009
-
-    def __init__(self, host=HOT_DISK_HOST, port=HOT_DISK_PORT):
+    def __init__(self, HD_HOST=None, HD_PORT=None):
         self.logger = logging.getLogger(__name__)
-        self.host = host
-        self.port = port
+        self.HD_HOST = HD_HOST or 'localhost'
+        self.HD_PORT = HD_PORT or 50009
         self.sock = None
 
     def __enter__(self):
@@ -234,8 +218,8 @@ class HotDiskConnection:
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(10)  # Set timeout [s]
-            self.logger.info(f"Connecting to {self.host}:{self.port}...")
-            self.sock.connect((self.host, self.port))
+            self.logger.info(f"Connecting to {self.HD_HOST}:{self.HD_PORT}...")
+            self.sock.connect((self.HD_HOST, self.HD_PORT))
             self.logger.info("Connected.")
             return self
         except Exception as e:
@@ -281,19 +265,19 @@ class HotDiskConnection:
                 self.logger.error(f"Couldn't disconnect from server: {e}")
 
 
+def test_functionality(config):
+    test_db_connection(config=config)
+    test_mb_connection(config=config)
 
-def test_functionality():
-    config = GetConfig()
-    END_REG = config.END_REG
-    START_REG = config.START_REG
 
+def test_db_connection(config):
+    # Test the DatabaseConnection
     # Test the AppLogger
     logger = logging.getLogger("TestApp")
     logger.info("Testing AppLogger functionality.")
 
-    # Test the DatabaseConnection
     try:
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**config.db_conn_params) as db_conn:
             logger.info("Testing DatabaseConnection functionality.")
             # Perform a simple database operation, e.g., fetch version
             db_conn.cursor.execute("SELECT version();")
@@ -302,9 +286,19 @@ def test_functionality():
     except Exception as e:
         logger.error(f"DatabaseConnection test failed: {e}")
 
+
+def test_mb_connection(config):
     # Test the ModbusConnection
+    # Test the AppLogger
+    logger = logging.getLogger("TestApp")
+    logger.info("Testing AppLogger functionality.")
+    END_REG = config.mb_reading_params["END_REG"]
+    START_REG = config.mb_reading_params["START_REG"]
+    REGS_OF_INTEREST = config.mb_reading_params["REGS_OF_INTEREST"]
+    SLEEP_INTERVAL = config.mb_reading_params["SLEEP_INTERVAL"]
     try:
-        with ModbusConnection() as modbus_connection:
+        with ModbusConnection(**config.mb_conn_params) as modbus_connection:
+
             logger.info("Testing ModbusConnection functionality.")
             # Perform a simple Modbus operation, e.g., read a register
             if (END_REG-START_REG) % 2 == 0:
@@ -337,30 +331,6 @@ def test_connection_simulated_modbus():
             print("An error occurred:", e)
 
 
-def test_mb_connection():
-    config = GetConfig()
-    END_REG = config.END_REG
-    START_REG = config.START_REG
-    logger = logging.getLogger("TestApp")
-    with ModbusConnection() as connection:
-        try:
-            logger.info("Testing ModbusConnection functionality.")
-            if END_REG-START_REG % 2 == 0:
-                final_reg = END_REG-START_REG
-            else:
-                final_reg = END_REG-START_REG+1
-            result = connection.client.read_holding_registers(START_REG, final_reg, 255)
-            if result.isError():
-                logger.error(f"Error reading registers: {result}")
-            else:
-
-                logger.info(f"Modbus register read result: {result}")
-        except ModbusException as e:
-            logger.error(f"Modbus communication error: {e}")
-        except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-    logger.info("Functionality test completed.")
-
 def test_hot_disk_connection():
     try:
         with HotDiskConnection() as client:
@@ -375,8 +345,13 @@ def test_hot_disk_connection():
 # Run the test function
 
 if __name__ == "__main__":
+    from src.config_connection_reading_management.config_reader import GetConfig
+
+    # Load the configuration
+    config = GetConfig()
+
+
     file = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\waittenminutes.hseq"
 
-    test_functionality()
-    test_mb_connection()
-    test_hot_disk_connection()
+    test_functionality(config)
+    #test_hot_disk_connection()

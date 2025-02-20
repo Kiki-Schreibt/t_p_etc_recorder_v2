@@ -13,7 +13,7 @@ from pymodbus.pdu import ExceptionResponse
 from psycopg2 import IntegrityError
 
 
-from src.config_connection_reading_management.connections import DatabaseConnection, GetConfig, ModbusConnection
+from src.config_connection_reading_management.connections import DatabaseConnection, ModbusConnection
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
@@ -25,7 +25,7 @@ from src.table_data import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, DataBaseManipulator
 
 local_tz = ZoneInfo("Europe/Berlin")
-config = GetConfig()
+
 STANDARD_MODE = 'recording'
 STATE_HYD = 'Hydrogenated'
 STATE_DEHYD = 'Dehydrogenated'
@@ -64,7 +64,7 @@ class ModbusProcessor:
     on_sample_id_change(new_val, mode="sample_id")
         Handles changes in sample ID.
     """
-    def __init__(self, meta_data=MetaData(), mb_host=config.MODBUS_HOST, mb_port=config.MODBUS_PORT):
+    def __init__(self, meta_data=MetaData(), mb_conn_params=None, mb_reading_params=None, db_conn_params=None):
         """
         Initializes the ModbusProcessor with the provided meta_data, host, and port.
 
@@ -78,13 +78,14 @@ class ModbusProcessor:
             Port number for the Modbus connection (default is config.MODBUS_PORT).
         """
         self.meta_data = meta_data
-        self.mb_host = mb_host
-        self.mb_port = mb_port
+        self.mb_conn_params = mb_conn_params or {}
+        self.mb_reading_params = mb_reading_params or {}
+        self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
         self.running = False
         self.mb_reader = ModbusReader()
-        self.mb_data_handler = ModbusDataHandler(meta_data=self.meta_data)
-        self.mb_db_writer = ModbusDBWriter(meta_data=self.meta_data)
+        self.mb_data_handler = ModbusDataHandler(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
+        self.mb_db_writer = ModbusDBWriter(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
 
     def run(self):
         """
@@ -93,8 +94,8 @@ class ModbusProcessor:
         self.running = True
         retry_count = 0  # Initialize retry count
 
-        with (ModbusConnection(mb_port=self.mb_port, mb_host=self.mb_host) as modbus_connection,
-              DatabaseConnection() as db_conn):
+        with (ModbusConnection(**self.mb_conn_params) as modbus_connection,
+              DatabaseConnection(**self.db_conn_params) as db_conn):
             self.logger.info("Starting continuous data recording...")
            # print("Starting temperature and pressure recording...")
             while self.running:
@@ -106,7 +107,7 @@ class ModbusProcessor:
                     for index, row in df.iterrows():
                         tp_df = self.mb_data_handler.process_data(index, row)
                         self.mb_db_writer.insert_data_into_table(data=tp_df, cursor=db_conn.cursor)
-                    time.sleep(config.SLEEP_INTERVAL)
+                    time.sleep(self.mb_reading_params["SLEEP_INTERVAL"])
                 except Exception as e:
                     self.running = False
                     self.logger.error("An error occurred in the main loop: %s", e)
@@ -180,11 +181,13 @@ class ModbusReader:
         Filters out invalid readings based on a threshold value.
     """
 
-    def __init__(self):
+    def __init__(self, mb_conn_params=None, mb_reading_params=None):
         """
         Initializes the ModbusReader with default values and configurations.
         """
         self.running = False
+        self.mb_conn_params = mb_conn_params or {}
+        self.mb_reading_params = mb_reading_params or {}
         self.table = TableConfig().TPDataTable
         self.logger = logging.getLogger(__name__)
         self.max_retries = 10  # Maximum number of retries for Modbus connection
@@ -192,7 +195,7 @@ class ModbusReader:
         self.retry_count = 0
         self.none_T_p = 1e20
 
-    def run(self, client):
+    def run(self, client, START_REG=None, END_REG=None, REGS_OF_INTEREST=None, SLEEP_INTERVAL=None):
         """
         Starts the continuous data recording process.
 
@@ -210,12 +213,12 @@ class ModbusReader:
             try:
                 converted_dicon_data = self.read_from_dicon(
                                                              client,
-                                                             config.START_REG,
-                                                             config.END_REG,
-                                                             config.REGS_OF_INTEREST)
+                                                             START_REG,
+                                                             END_REG,
+                                                             REGS_OF_INTEREST)
                 print(converted_dicon_data)
 
-                time.sleep(config.SLEEP_INTERVAL)
+                time.sleep(SLEEP_INTERVAL)
 
             except Exception as e:
                 self.logger.error("An error occurred in the main loop: %s", e)
@@ -242,7 +245,7 @@ class ModbusReader:
         #print("Temperature and pressure recording stopped")
         self.logger.info("Temperature and pressure recording stopped")
 
-    def read_from_dicon(self, client, start_reg=config.START_REG, end_reg=config.END_REG, regs_of_interest=config.REGS_OF_INTEREST):
+    def read_from_dicon(self, client, START_REG=None, END_REG=None, REGS_OF_INTEREST=None, SLEEP_INTERVAL=None):
         """
         Reads and processes data from the Modbus device.
 
@@ -250,11 +253,11 @@ class ModbusReader:
         ----------
         client : Modbus client instance
             The client instance to communicate with the Modbus device.
-        start_reg : int
+        START_REG : int
             The starting register to read from.
-        end_reg : int
+        END_REG : int
             The ending register to read from.
-        regs_of_interest : list of int
+        REGS_OF_INTEREST : list of int
             The list of registers of interest to be processed.
 
         Returns
@@ -289,14 +292,14 @@ class ModbusReader:
         """
 
         filtered_regs = []
-        if end_reg-start_reg % 2 == 0:
-            final_reg = end_reg-start_reg
+        if (END_REG-START_REG) % 2 == 0:
+            final_reg = END_REG - START_REG
         else:
-            final_reg = end_reg-start_reg+1
+            final_reg = END_REG - START_REG + 1
 
-        index_of_interest = [num - start_reg for num in regs_of_interest]
+        index_of_interest = [num - START_REG for num in REGS_OF_INTEREST]
         try:
-            rr = client.read_holding_registers(start_reg, final_reg, 255)
+            rr = client.read_holding_registers(START_REG, final_reg, 255)
         except ModbusException as exc:
             self.logger.error(f"Received ModbusException({exc}) from library")
             client.close()
@@ -391,7 +394,7 @@ class ModbusDataHandler:
     on_meta_data_changed(new_meta_data)
         Handles changes in metadata.
     """
-    def __init__(self, meta_data=MetaData()):
+    def __init__(self, meta_data=MetaData(), db_conn_params=None):
         """
         Initializes the ModbusDataHandler with the provided metadata.
 
@@ -401,7 +404,8 @@ class ModbusDataHandler:
             MetaData instance (default is MetaData()).
         """
         self.logger = logging.getLogger(__name__)
-        self.data_retriever = DataRetriever()
+        self.db_conn_params = db_conn_params or {}
+        self.data_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self.tp_table = TableConfig().TPDataTable
         self.meta_data = meta_data
         if self.meta_data.sample_id:
@@ -518,7 +522,7 @@ class ModbusDataHandler:
         """
         Handles changes in cycle number by starting a thread to estimate H2-Uptake and updates cycle_data table in database.
         """
-        cycle_counter = CycleCounter(meta_data=self.meta_data, current_cycle=self.cycle, current_state=self.de_hyd_state)
+        cycle_counter = CycleCounter(meta_data=self.meta_data, current_cycle=self.cycle, current_state=self.de_hyd_state, db_conn_params=self.db_conn_params)
         cycle_counter_thread = threading.Thread(target=cycle_counter.count, daemon=True)
         cycle_counter_thread.start()
         cycle_counter_thread.join()
@@ -548,7 +552,7 @@ class CycleCounter:
     Counts and processes hydrogenation and dehydrogenation cycles.
     """
 
-    def __init__(self, meta_data: MetaData, current_cycle: float, current_state: str):
+    def __init__(self, meta_data: MetaData, current_cycle: float, current_state: str, db_conn_params=None):
         """
         Initializes the CycleCounter.
 
@@ -557,13 +561,14 @@ class CycleCounter:
             current_cycle (int): The current cycle number.
             current_state (str): The current de/hydrogenation state.
         """
+        self.db_conn_params = db_conn_params or {}
         self.meta_data = meta_data
         self.cycle = current_cycle
         self.current_state = current_state
         self.tp_table = TableConfig().TPDataTable
         self.cycle_table = TableConfig().CycleDataTable
         self.logger = logging.getLogger(__name__)
-        self.data_retriever = DataRetriever()
+        self.data_retriever = DataRetriever(db_conn_params=db_conn_params)
         self.temp_tolerance = 10
         self.time_start_whole_cycle = None
         self.time_end_whole_cycle = None
@@ -1013,10 +1018,11 @@ class CycleCounter:
 
 
 class ModbusDBWriter:
-    def __init__(self, meta_data=MetaData()):
+    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+        self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
-        self.qb = QueryBuilder()
+        self.qb = QueryBuilder(db_con_params=self.db_conn_params)
         self.meta_data = meta_data
 
     def insert_data_into_table(self, cursor, data, mode=STANDARD_MODE):
@@ -1053,7 +1059,7 @@ class ModbusDBWriter:
 
     def _delete_data_from_tp_table(self, data_to_delete_time=None, time_min=None, time_max=None):
 
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             self.logger.info("Starting deletion of data from %s data base...", self.tp_table.table_name)
             # Assuming data_to_delete is a DataFrame or list of identifiers (like primary keys) of the rows to be deleted
             try:
@@ -1077,7 +1083,7 @@ class ModbusDBWriter:
         cycle_table = TableConfig().CycleDataTable
         t_p_table = TableConfig().TPDataTable
 
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             data_written = self._write_new_line_cycle(new_line_cycle=new_line_cycle,
                                                        cycle_table=cycle_table,
                                                        time_start=time_start,
@@ -1085,7 +1091,7 @@ class ModbusDBWriter:
                                                        cursor=db_conn.cursor)
 
         if data_written:
-            with DatabaseConnection() as db_conn:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
                 self._update_cycle_t_p_table(new_line_cycle=new_line_cycle,
                                              t_p_table=t_p_table,
                                              time_start=time_start_half_cycle,
@@ -1111,7 +1117,7 @@ class ModbusDBWriter:
         except IntegrityError as e:
 
             self.logger.error("Error occurred while inserting data method _write_new_line_cycle: %s", e)
-            with DatabaseConnection() as db_conn:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
                 self._delete_line_cycle(cursor=db_conn.cursor,
                                         time_data=new_line_cycle[cycle_table.time_start],
                                         time_col=cycle_table.time_start,
@@ -1148,7 +1154,7 @@ class ModbusDBWriter:
         self.logger.info(f"Start deletion from {table_name}")
         delete_query = f"DELETE from {table_name} WHERE {time_col} = %s"
         try:
-            with DatabaseConnection() as db_conn:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
                 db_conn.cursor.execute(delete_query, (convert_value(time_data),))
                 db_conn.cursor.connection.commit()
                 self.logger.info("Data deleted successfully")
@@ -1163,6 +1169,7 @@ class ModbusDBWriter:
         else:
             self.meta_data.end_time = time_end
             self.meta_data.write()
+
 
 #global methods
 def convert_value(value):
@@ -1180,19 +1187,23 @@ def convert_value(value):
     else:
         return value
 
-def test_mb_reading_writing(meta):
-    mb_reader = ModbusReader()
 
-    mb_processor = ModbusDataHandler(meta_data=meta)
-    mb_writer = ModbusDBWriter(meta_data=meta)
+def test_mb_reading_writing(sample_id):
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    meta = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
+    mb_reader = ModbusReader(mb_reading_params=config.mb_reading_params, mb_conn_params=config.mb_conn_params)
+
+    mb_processor = ModbusDataHandler(meta_data=meta, db_conn_params=config.db_conn_params)
+    mb_writer = ModbusDBWriter(meta_data=meta, db_conn_params=config.db_conn_params)
     i = 10
-    with ModbusConnection() as modbus_connection, DatabaseConnection() as db_conn:
+
+    with ModbusConnection(**config.mb_conn_params) as modbus_connection, DatabaseConnection(**config.db_conn_params) as db_conn:
         while i > 0:
             df = mb_reader.read_from_dicon(modbus_connection.client,
-                                            config.START_REG,
-                                            config.END_REG,
-                                            config.REGS_OF_INTEREST)
-            df_tp = mb_processor.process_data(df_Tp=df)
+                                           **config.mb_reading_params)
+            for index, row in df.iterrows():
+                df_tp = mb_processor.process_data(index, row)
 
             mb_writer.insert_data_into_table(cursor=db_conn.cursor, data=df_tp)
             time.sleep(1)
@@ -1201,7 +1212,8 @@ def test_mb_reading_writing(meta):
 
 if __name__ == "__main__":
 
-    meta = MetaData(sample_id="028-test-simulator")
-    test_mb_reading_writing(meta=meta)
+
+    sample_id = "test-simulator-01"
+    test_mb_reading_writing(sample_id=sample_id)
 
 

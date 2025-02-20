@@ -29,7 +29,7 @@ from src.config_connection_reading_management.modbus_handler import ModbusProces
 from src.table_data import TableConfig
 # Import plot window base classes (assumed to be unchanged)
 from src.GUI.recording_gui.plot_window_reader_basic import (
-    PlotBaseWindow, ReadStatic, ReadContinuous, DateAxisItem, AxisLabel
+    PlotBaseWindow, ReadStatic, ReadContinuous, AxisLabel
 )
 try:
     import src.config_connection_reading_management.logger as logging
@@ -60,13 +60,22 @@ class DataRecorder(QObject):
     """
     newEtcDataWritten = Signal(pd.DataFrame)
 
-    def __init__(self, meta_data: MetaData = MetaData(), reservoir_volume: float = None):
+    def __init__(self, meta_data: MetaData = MetaData(),
+                 reservoir_volume: float = None,
+                 db_conn_params=None,
+                 mb_conn_params=None,
+                 mb_reading_params=None,
+                 hd_log_file_tracker_params=None):
         """
         Initialize the DataRecorder with metadata and optional reservoir volume.
         """
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.meta_data = meta_data
+        self.db_conn_params = db_conn_params or {}
+        self.mb_conn_params = mb_conn_params or {}
+        self.mb_reading_params = mb_reading_params or {}
+        self.hd_log_file_tracker_params = hd_log_file_tracker_params or {}
         self._update_lock = threading.Lock()
         self.mb_processor = self._create_mb_processor(meta_data)
         self.log_tracker = self._create_log_tracker(meta_data)
@@ -79,7 +88,10 @@ class DataRecorder(QObject):
         Create and return a ModbusProcessor for T-p data recording.
         """
         try:
-            return ModbusProcessor(meta_data=meta_data)
+            return ModbusProcessor(meta_data=meta_data,
+                                   db_conn_params=self.db_conn_params,
+                                   mb_conn_params=self.mb_conn_params,
+                                   mb_reading_params=self.mb_reading_params)
         except Exception as e:
             self.logger.exception("Error creating ModbusProcessor:")
             raise
@@ -88,8 +100,9 @@ class DataRecorder(QObject):
         """
         Create and return a LogFileTracker for ETC log file tracking.
         """
+
         try:
-            return LogFileTracker(meta_data=meta_data)
+            return LogFileTracker(meta_data=meta_data, hd_log_file_tracker_params=self.hd_log_file_tracker_params)
         except Exception as e:
             self.logger.exception("Error creating LogFileTracker:")
             raise
@@ -234,7 +247,7 @@ class DataRecorder(QObject):
         try:
             etc_table = TableConfig().ETCDataTable
             columns = (etc_table.time, etc_table.th_conductivity, etc_table.thermal_conductivity_average)
-            db_reader = DataRetriever()
+            db_reader = DataRetriever(**self.db_conn_params)
             df_etc = db_reader.fetch_data_by_time_2(
                 time_range=time_range,
                 table_name=etc_table.table_name,
@@ -249,6 +262,7 @@ class DataRecorder(QObject):
     def is_running(self):
         return True if self._mb_thread else False
 
+
 # -------------------------------
 # Presentation Layer / Plotting
 # -------------------------------
@@ -259,10 +273,10 @@ class ContinuousPlotWindow(PlotBaseWindow):
     Signals:
         current_cycle_sig, current_state_sig, current_uptake_sig: Relayed signals from the reader.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData()):
+    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData(), db_conn_params=None):
         try:
-            self.reader = ReadContinuous(meta_data=meta_data)
-            super().__init__(parent=parent, y_axis=y_axis)
+            self.reader = ReadContinuous(meta_data=meta_data, db_conn_params=db_conn_params)
+            super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
             # Relay key signals to be used by the controller
             self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
             self.reader.current_state_sig.connect(self.current_state_sig.emit)
@@ -276,10 +290,10 @@ class StaticPlotWindow(PlotBaseWindow):
     """
     A PlotBaseWindow subclass for static plotting.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData()):
+    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData(), db_conn_params=None):
         try:
-            self.reader = ReadStatic(meta_data=meta_data)
-            super().__init__(parent=parent, y_axis=y_axis)
+            self.reader = ReadStatic(meta_data=meta_data, db_conn_params=db_conn_params)
+            super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
             self.enableAutoRange(axis=pg.ViewBox.XYAxes)
             self.reader.start()
             self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
@@ -306,13 +320,14 @@ class UptakePlot(pg.PlotWidget):
     """
     uptakeDataReceived = Signal(pd.DataFrame)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, db_conn_params=None):
         """
         Initialize the UptakePlot widget and its UI elements.
         """
         try:
             super().__init__(parent=parent)
             self.logger = logging.getLogger(__name__)
+            self.db_conn_params = db_conn_params or {}
             self._init_ui()
             self.df_uptake = pd.DataFrame()
             self.uptakeDataReceived.connect(self.plot_uptake)
@@ -342,7 +357,7 @@ class UptakePlot(pg.PlotWidget):
         Load uptake data from the database based on the sample ID and time range.
         """
         try:
-            db_reader = DataRetriever()
+            db_reader = DataRetriever(db_conn_params=self.db_conn_params)
             if time_range:
                 df = db_reader.fetch_data_by_time_2(sample_id=meta_data.sample_id,
                                                     table_name=self.cycle_table.table_name,
@@ -399,13 +414,13 @@ class ReadPlotTpDependent(pg.PlotWidget):
         """
         tp_etc_data = Signal(pd.DataFrame, str, str)
 
-        def __init__(self, parent=None, constraints=None):
+        def __init__(self, parent=None, constraints=None, db_conn_params=None):
             """
             Initialize the data loading thread.
             """
             super().__init__(parent=parent)
             self.logger = logging.getLogger(__name__)
-            self.db_reader = DataRetriever()
+            self.db_reader = DataRetriever(db_conn_params=db_conn_params)
             self.constraints = constraints
             self.tp_table = TableConfig().TPDataTable
             self.etc_table = TableConfig().ETCDataTable
@@ -505,11 +520,11 @@ class ReadPlotTpDependent(pg.PlotWidget):
         """
         PlotWidget subclass to display ETC data that depends on either pressure or temperature.
         """
-        def __init__(self, parent=None, constraints=None):
+        def __init__(self, parent=None, constraints=None, db_conn_params=None):
             try:
                 super().__init__(parent=parent)
                 self.logger = logging.getLogger(__name__)
-                self.reader = ReadPlotTpDependent.ReadTpDependent(parent=parent, constraints=constraints)
+                self.reader = ReadPlotTpDependent.ReadTpDependent(parent=parent, constraints=constraints, db_conn_params=db_conn_params)
                 self.legend = self.plotItem.addLegend(offset=(0, 1))
                 self.reader.tp_etc_data.connect(self.plot_ETC)
                 self.tp_table = TableConfig().TPDataTable
@@ -647,7 +662,7 @@ class XYPlot(pg.PlotWidget):
     plot_cleared = Signal()
     cycle_number_sig = Signal(float)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, db_conn_params=None):
         """
         Initialize the XYPlot widget.
         """
@@ -658,7 +673,7 @@ class XYPlot(pg.PlotWidget):
             self.table = TableConfig().ThermalConductivityXyDataTable
             self.last_click_time = 0
             self.debounce_interval = 0.5
-            self.db_reader = DataRetriever()
+            self.db_reader = DataRetriever(db_conn_params=db_conn_params)
         except Exception as e:
             logging.getLogger(__name__).exception("Error initializing XYPlot:")
 
@@ -828,9 +843,11 @@ if __name__ == '__main__':
     try:
         from PySide6.QtWidgets import QApplication
         app = QApplication([])
-        from src.GUI.recording_gui.plot_window_reader_basic import PlotStaticWindow
-        meta_data = MetaData('WAE-WA-030')
-        win = PlotStaticWindow(y_axis='temperature')
+
+        from src.config_connection_reading_management.config_reader import GetConfig
+        db_conn_params = GetConfig().db_conn_params
+        meta_data = MetaData('WAE-WA-030', db_conn_params=db_conn_params)
+        win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params)
         win.point_clicked_time_received.connect(print)
         win.reader.meta_data = meta_data
         win.show()

@@ -58,8 +58,9 @@ def load_ui_file(ui_file_path):
 
 
 class MainProgram(RecordingMainWindow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, config):
+        super().__init__(config=config)
+
         self.ui.actionTest_Planner.triggered.connect(self.open_test_planner)
         self.ui.actionConfig_Settings.triggered.connect(self.open_config_settings)
         self.ui.actionQuick_Export.triggered.connect(self._quick_export)
@@ -98,14 +99,14 @@ class MainProgram(RecordingMainWindow):
                 self.controller.stop_tp_recording()
 
         if host_ip and port:
-            self.prev_port = self.controller.recorder.mb_processor.mb_port
-            self.prev_host = self.controller.recorder.mb_processor.mb_host
-            self.controller.recorder.mb_processor.mb_port = port
-            self.controller.recorder.mb_processor.mb_host = host_ip
+            self.prev_port = self.controller.recorder.mb_processor.MB_PORT
+            self.prev_host = self.controller.recorder.mb_processor.MB_HOST
+            self.controller.recorder.mb_processor.MB_PORT = port
+            self.controller.recorder.mb_processor.MB_HOST = host_ip
 
         elif self.prev_host and self.prev_port:
-            self.controller.recorder.mb_processor.mb_port = self.prev_port
-            self.controller.recorder.mb_processor.mb_host = self.prev_host
+            self.controller.recorder.mb_processor.MB_PORT = self.prev_port
+            self.controller.recorder.mb_processor.MB_HOST = self.prev_host
 
         if recorder_was_running:
             self.controller.start_tp_recording()
@@ -129,12 +130,14 @@ def main():
         config_window.config_saved_sig.connect(lambda: config_window.close())
         config_window.show()
     else:
-        launch_main_program(app)
+        from src.config_connection_reading_management.config_reader import GetConfig
+        config = GetConfig()
+        launch_main_program(app, config)
 
     sys.exit(app.exec())
 
-def launch_main_program(app):
-    main_program = MainProgram()
+def launch_main_program(app, config):
+    main_program = MainProgram(config=config)
     main_program.show()
 
 
