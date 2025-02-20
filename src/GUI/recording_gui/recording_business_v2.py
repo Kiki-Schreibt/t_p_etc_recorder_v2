@@ -61,8 +61,8 @@ class DataRecorder(QObject):
     newEtcDataWritten = Signal(pd.DataFrame)
 
     def __init__(self, meta_data: MetaData,
-                 config,
-                 reservoir_volume: float=None):
+                         config,
+                         reservoir_volume: float=None):
         """
         Initialize the DataRecorder with metadata and optional reservoir volume.
         """

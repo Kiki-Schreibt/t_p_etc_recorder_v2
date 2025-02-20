@@ -16,7 +16,7 @@ from src.meta_data.meta_data_handler import MetaData
 from src.config_connection_reading_management.modbus_handler import ModbusDBWriter, CycleCounter
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, write_ETC_in_parallel
-from src.config_connection_reading_management.connections import DatabaseConnection, GetConfig
+from src.config_connection_reading_management.connections import DatabaseConnection
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
@@ -899,9 +899,8 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
         plt.gca().autoscale()
         plt.show()
 
-
     config = GetConfig()
-    data_retriever = DataRetriever()
+    data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
     data_retriever.limit_datapoints = data_points_max
     table_name = TableConfig().TPDataTable.table_name
     if not sample_id:

@@ -6,20 +6,22 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-from src.config_connection_reading_management.config_reader import GetConfig
 from src.config_connection_reading_management.connections import DatabaseConnection
+from src.config_connection_reading_management.query_builder import QueryBuilder
+from src.table_data import TableConfig
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
-from src.config_connection_reading_management.query_builder import QueryBuilder
-from src.table_data import TableConfig
 meta_table = TableConfig().MetaDataTable
 
 
+#todo: implement used sensor type radius and tcr values
+# (maybe exists already in ETC data)
+#       self.sensor_radius = None
+#       self.sensor_insulation = None
+#       self.sensor_coil = None
 
-
-#todo: implement used sensor type radius and tcr values (maybe exists already in ETC data)
 local_tz = ZoneInfo("Europe/Berlin")
 class MetaData:
 
@@ -44,7 +46,6 @@ class MetaData:
     def __init__(self, sample_id=None, db_conn_params=None):
         self.db_conn_params = db_conn_params or {}
 
-        self.config = GetConfig()
         self.qb = QueryBuilder()
         self.logger = logging.getLogger(__name__)
         self.table_name = TableConfig().MetaDataTable.table_name
@@ -66,6 +67,9 @@ class MetaData:
         self.theoretical_uptake = None
         self.total_number_cycles = None
         self.last_de_hyd_state = None
+        self.sensor_radius = None
+        self.sensor_insulation = None
+        self.sensor_coil = None
         self.retry_counter = 1
         self.read()
 
