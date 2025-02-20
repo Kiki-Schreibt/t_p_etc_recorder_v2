@@ -60,22 +60,21 @@ class DataRecorder(QObject):
     """
     newEtcDataWritten = Signal(pd.DataFrame)
 
-    def __init__(self, meta_data: MetaData = MetaData(),
-                 reservoir_volume: float = None,
-                 db_conn_params=None,
-                 mb_conn_params=None,
-                 mb_reading_params=None,
-                 hd_log_file_tracker_params=None):
+    def __init__(self, meta_data: MetaData,
+                 config,
+                 reservoir_volume: float=None):
         """
         Initialize the DataRecorder with metadata and optional reservoir volume.
         """
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.meta_data = meta_data
-        self.db_conn_params = db_conn_params or {}
-        self.mb_conn_params = mb_conn_params or {}
-        self.mb_reading_params = mb_reading_params or {}
-        self.hd_log_file_tracker_params = hd_log_file_tracker_params or {}
+        try:
+            self.config = config
+        except Exception as e:
+            self.logger.error(f"No config provided: {e}")
+            raise
+
         self._update_lock = threading.Lock()
         self.mb_processor = self._create_mb_processor(meta_data)
         self.log_tracker = self._create_log_tracker(meta_data)
@@ -89,9 +88,7 @@ class DataRecorder(QObject):
         """
         try:
             return ModbusProcessor(meta_data=meta_data,
-                                   db_conn_params=self.db_conn_params,
-                                   mb_conn_params=self.mb_conn_params,
-                                   mb_reading_params=self.mb_reading_params)
+                                   config=self.config)
         except Exception as e:
             self.logger.exception("Error creating ModbusProcessor:")
             raise
@@ -102,7 +99,8 @@ class DataRecorder(QObject):
         """
 
         try:
-            return LogFileTracker(meta_data=meta_data, hd_log_file_tracker_params=self.hd_log_file_tracker_params)
+            hd_log_file_tracker_params = self.config.hd_log_file_tracker_params
+            return LogFileTracker(meta_data=meta_data, hd_log_file_tracker_params=hd_log_file_tracker_params)
         except Exception as e:
             self.logger.exception("Error creating LogFileTracker:")
             raise

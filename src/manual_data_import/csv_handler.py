@@ -43,7 +43,7 @@ class CSVProcessor:
 
     def __init__(self, sample_id: str, folder_path: Optional[str] = None,
                 full_file_path: Optional[str] = None, mode: str = 'auto',
-                 compress_data: Optional[bool] = False):
+                 compress_data: Optional[bool] = False, config=None):
         """
         Initializes the CSVProcessor with metadata and file paths.
 
@@ -53,9 +53,17 @@ class CSVProcessor:
             full_file_path (Optional[str]): The full path to a specific CSV file.
             mode (str): The mode of operation ('auto' or manual).
         """
-
-        self.meta_data = MetaData(sample_id=sample_id)
         self.logger = logging.getLogger(__name__)
+        try:
+            self.config = config
+            self.db_conn_params = config.db_conn_params
+            self.mb_conn_params = config.mb_conn_params
+            self.mb_reading_params = config.mb_reading_params
+            self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
+        except Exception as e:
+            self.logger.error(f"No config provided: {e}")
+            raise
+        self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         self.folder_path = folder_path
         self.full_file_path = full_file_path
         if mode == 'auto':
@@ -174,7 +182,7 @@ class CSVProcessor:
             sample_id (str): The sample identifier.
             init_state (str): The initial state for cycle counting ('Hydrogenated' or 'Dehydrogenated').
         """
-        csv_counter = CSVCounter()
+        csv_counter = CSVCounter(config=self.config)
         csv_counter.count(sample_id=sample_id, init_state=init_state)
 
 
@@ -509,7 +517,7 @@ class CSVWriter:
     Writes processed CSV data to the database.
     """
 
-    def __init__(self, meta_data: MetaData, compress_data=False):
+    def __init__(self, meta_data: MetaData, compress_data=False, config=None):
         """
         Initializes the CSVWriter with metadata.
 
@@ -517,7 +525,15 @@ class CSVWriter:
             meta_data (MetaData): The metadata object containing sample information.
         """
         self.logger = logging.getLogger(__name__)
-        self.writer = ModbusDBWriter(meta_data=meta_data)
+        try:
+            self.db_conn_params = config.db_conn_params
+            self.mb_conn_params = config.mb_conn_params
+            self.mb_reading_params = config.mb_reading_params
+            self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
+        except Exception as e:
+            self.logger.error(f"No config provided: {e}")
+            raise
+        self.writer = ModbusDBWriter(meta_data=meta_data, db_conn_params=self.db_conn_params)
         self.tp_table = TableConfig().TPDataTable
         self.compress_data = compress_data
 
@@ -572,13 +588,21 @@ class CSVCounter:
     Counts cycles based on the processed CSV data and updates the database.
     """
 
-    def __init__(self):
+    def __init__(self, config):
         """
         Initializes the CSVCounter with necessary configurations.
         """
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.cycle_table = TableConfig().CycleDataTable
+        try:
+            self.db_conn_params = config.db_conn_params
+            self.mb_conn_params = config.mb_conn_params
+            self.mb_reading_params = config.mb_reading_params
+            self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
+        except Exception as e:
+            self.logger.error(f"No config provided: {e}")
+            raise
 
     def count(self, sample_id: str, init_state: str = STATE_DEHYD) -> None:
         """
@@ -705,6 +729,7 @@ class CSVCounter:
         calculate uptake based on your specific requirements.
         """
         self.logger.info(f"Start precise cycle count and uptake calculation for {sample_id}")
+
         total_number_cycles = df[self.tp_table.cycle_number].max()
 
         cycles_counted = already_counted
@@ -712,6 +737,7 @@ class CSVCounter:
         cycle_counter = CycleCounter(meta_data=MetaData(sample_id=sample_id),
                                      current_cycle=cycles_counted,
                                      current_state='Dehydrogenated' if cycles_counted//1 == 0 else 'Hydrogenated',
+                                     db_conn_params=self.db_conn_params
                                      )
 
         while cycles_counted <= total_number_cycles:
@@ -901,11 +927,13 @@ if __name__ == '__main__':
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
     #sample_ids = ('WAE-WA-030',)
     logger = logging.getLogger(__name__)
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
-        csv_processor = CSVProcessor(sample_id=sample_id)
+        csv_processor = CSVProcessor(sample_id=sample_id, config=config)
         csv_processor.process()
-        write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id, logger=logger)
+        write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id)
 
         print(f"{sample_id} processed")
     #csv_counter = CSVCounter()

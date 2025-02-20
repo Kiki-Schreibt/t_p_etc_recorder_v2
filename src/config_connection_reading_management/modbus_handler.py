@@ -64,7 +64,7 @@ class ModbusProcessor:
     on_sample_id_change(new_val, mode="sample_id")
         Handles changes in sample ID.
     """
-    def __init__(self, meta_data=MetaData(), mb_conn_params=None, mb_reading_params=None, db_conn_params=None):
+    def __init__(self, meta_data, config):
         """
         Initializes the ModbusProcessor with the provided meta_data, host, and port.
 
@@ -78,9 +78,14 @@ class ModbusProcessor:
             Port number for the Modbus connection (default is config.MODBUS_PORT).
         """
         self.meta_data = meta_data
-        self.mb_conn_params = mb_conn_params or {}
-        self.mb_reading_params = mb_reading_params or {}
-        self.db_conn_params = db_conn_params or {}
+        try:
+            self.db_conn_params = config.db_conn_params
+            self.mb_conn_params = config.mb_conn_params
+            self.mb_reading_params = config.mb_reading_params
+            self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
+        except Exception as e:
+            self.logger.error(f"No config provided: {e}")
+            raise
         self.logger = logging.getLogger(__name__)
         self.running = False
         self.mb_reader = ModbusReader(mb_reading_params=self.mb_reading_params, mb_conn_params=self.mb_conn_params)
@@ -181,7 +186,7 @@ class ModbusReader:
         Filters out invalid readings based on a threshold value.
     """
 
-    def __init__(self, mb_conn_params=None, mb_reading_params=None):
+    def __init__(self, mb_conn_params, mb_reading_params):
         """
         Initializes the ModbusReader with default values and configurations.
         """
@@ -394,7 +399,7 @@ class ModbusDataHandler:
     on_meta_data_changed(new_meta_data)
         Handles changes in metadata.
     """
-    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+    def __init__(self, meta_data, db_conn_params):
         """
         Initializes the ModbusDataHandler with the provided metadata.
 
@@ -404,7 +409,7 @@ class ModbusDataHandler:
             MetaData instance (default is MetaData()).
         """
         self.logger = logging.getLogger(__name__)
-        self.db_conn_params = db_conn_params or {}
+        self.db_conn_params = db_conn_params
         self.data_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self.tp_table = TableConfig().TPDataTable
         self.meta_data = meta_data
@@ -552,7 +557,7 @@ class CycleCounter:
     Counts and processes hydrogenation and dehydrogenation cycles.
     """
 
-    def __init__(self, meta_data: MetaData, current_cycle: float, current_state: str, db_conn_params=None):
+    def __init__(self, meta_data: MetaData, current_cycle: float, current_state: str, db_conn_params):
         """
         Initializes the CycleCounter.
 
@@ -561,7 +566,7 @@ class CycleCounter:
             current_cycle (int): The current cycle number.
             current_state (str): The current de/hydrogenation state.
         """
-        self.db_conn_params = db_conn_params or {}
+        self.db_conn_params = db_conn_params
         self.meta_data = meta_data
         self.cycle = current_cycle
         self.current_state = current_state
@@ -1018,7 +1023,7 @@ class CycleCounter:
 
 
 class ModbusDBWriter:
-    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+    def __init__(self, meta_data, db_conn_params):
         self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable

@@ -295,19 +295,10 @@ class MainController:
         self.meta_data = meta_data
         self.plot_manager = plot_manager
         self.logger = logger
-        if config:
-                self.db_conn_params = config.db_conn_params
-                self.mb_conn_params = config.mb_conn_params
-                self.mb_reading_params = config.mb_reading_params
-                self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
-
 
         try:
             self.recorder = DataRecorder(meta_data=self.meta_data,
-                                         db_conn_params=self.db_conn_params,
-                                         mb_reading_params=self.mb_reading_params,
-                                         mb_conn_params=self.mb_conn_params,
-                                         hd_log_file_tracker_params=self.hd_log_file_tracker_params
+                                         config=config
                                          )
         except Exception as e:
             self.logger.exception("Error initializing DataRecorder in MainController:")
