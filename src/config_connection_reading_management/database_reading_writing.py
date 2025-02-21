@@ -112,7 +112,7 @@ class DataRetriever:
     def __init__(self, db_conn_params=None):
         self.running = False
         self.db_conn_params = db_conn_params or {}
-        self.qb = QueryBuilder(db_con_params=self.db_conn_params)
+        self.qb = QueryBuilder(db_conn_params=self.db_conn_params)
         self.logger = logging.getLogger(__name__)
         self.limit_datapoints = 10000
 

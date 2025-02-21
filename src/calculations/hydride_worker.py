@@ -1,119 +1,130 @@
+#hydride_worker.py
+"""
+Module for managing a metal hydride database and the periodic table of elements.
+"""
+
 import csv
 import json
 import re
+import logging
 
-import src.standard_paths
+from src.standard_paths import (
+    standard_hydride_data_base_path,
+    standard_periodic_table_path,
+    standard_periodic_table_txt,  # assumed to be defined
+)
 
+# Use a custom logger if available, otherwise default to the standard logging module.
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.config_connection_reading_management.logger as custom_logging
+    logging = custom_logging
 except ImportError:
     import logging
-from src.standard_paths import standard_hydride_data_base_path, standard_periodic_table_path
 
 
-def parse_chemical_formula(hydride_name):
-    # Regular expression to match elements and optional quantities
-    pattern = r'([A-Z][a-z]*)(\d*)'
-    parts = re.findall(pattern, hydride_name)
+def parse_chemical_formula(formula: str) -> dict:
+    """
+    Parse a chemical formula string into its constituent elements and their counts.
 
-    # Convert quantity to integer, default to 1 if not present
-    result = {}
-    for element, quantity in parts:
-        result[element] = int(quantity) if quantity else 1
+    Parameters:
+        formula (str): Chemical formula (e.g., "MgH2").
 
-    return result
+    Returns:
+        dict: A dictionary with element symbols as keys and their counts as values.
+    """
+    pattern = r"([A-Z][a-z]*)(\d*)"
+    parts = re.findall(pattern, formula)
+    return {element: int(quantity) if quantity else 1 for element, quantity in parts}
 
 
 class MetalHydrideDatabase:
+    """
+    Class for managing a metal hydride database.
+    Provides methods to load, update, and retrieve hydride properties.
+    """
 
-    def __init__(self, hydride_data_base_path=standard_hydride_data_base_path):
-        self.hydride_data_base_path = hydride_data_base_path
+    def __init__(self, hydride_db_path: str = standard_hydride_data_base_path):
+        """
+        Initialize the MetalHydrideDatabase.
+
+        Parameters:
+            hydride_db_path (str): Path to the hydride database JSON file.
+        """
+        self.hydride_data_base_path = hydride_db_path
         self.hydride_data_base = []
-        self.load_hydride_database()
         self.logger = logging.getLogger(__name__)
+        self.load_hydride_database()
         self.periodic_table_of_elements = PeriodicTableOfElements()
 
-    def load_hydride_database(self):
-        with open(self.hydride_data_base_path, 'r') as file:
+    def load_hydride_database(self) -> None:
+        """Load the hydride database from a JSON file."""
+        with open(self.hydride_data_base_path, "r") as file:
             self.hydride_data_base = json.load(file)
 
-    def get_enthalpy_entropy(self, hydride_to_grab):
+    def get_enthalpy_entropy(self, hydride_name: str) -> tuple:
         """
-        Choose hydride for test
+        Retrieve the enthalpy and entropy for a given hydride.
+
         Parameters:
-            hydride_to_grab: hydride enthalpy and entropy will be returned from
+            hydride_name (str): The hydride identifier.
+
         Returns:
-            enthalpy in J mol^-1: float
-            entropy in J mol^-1 K^-1 : float
+            tuple: (enthalpy in J/mol, entropy in J/(mol*K)) or (None, None) if not found.
         """
-        # Search for hydride
-        hydride_to_grab = self._normalize_hydride_string(hydride_to_grab)
-
-        for hydride in self.hydride_data_base:
-            if hydride['Hydride'] == hydride_to_grab:
-                self.logger.info(f"Found {hydride_to_grab}: Enthalpy = {hydride['Enthalpy']}, Entropy = {hydride['Entropy']}")
-                enthalpy = float(hydride['Enthalpy'])
-                entropy = float(hydride['Entropy'])
-                return enthalpy, entropy
-
-        self.logger.error(f" {hydride_to_grab}: is not in data base yet")
+        normalized = self._normalize_hydride_string(hydride_name)
+        for entry in self.hydride_data_base:
+            if entry.get("Hydride") == normalized:
+                self.logger.info(
+                    f"Found {normalized}: Enthalpy = {entry['Enthalpy']}, Entropy = {entry['Entropy']}"
+                )
+                return float(entry["Enthalpy"]), float(entry["Entropy"])
+        self.logger.error(f"{normalized} is not in the database.")
         return None, None
 
-    def hydride_adder(self, hydride_to_add_name, enthalpy, entropy):
+    def hydride_adder(self, hydride_name: str, enthalpy: float, entropy: float) -> None:
         """
-        Adds a new hydride to the database, if it does not already exist.
+        Add a new hydride to the database if it does not already exist.
+
         Parameters:
-            hydride_to_add_name: Name of the hydride to add.
-            enthalpy: Enthalpy of the hydride in J mol^-1.
-            entropy: Entropy of the hydride in J mol^-1 K^-1.
+            hydride_name (str): Name of the hydride.
+            enthalpy (float): Enthalpy in kJ/mol (will be converted to J/mol).
+            entropy (float): Entropy in kJ/(mol*K) (will be converted to J/(mol*K)).
         """
-        # Convert enthalpy and entropy values
+        # Convert values from kJ to J
         enthalpy *= 1e3
         entropy *= 1e3
 
         # Check if the hydride already exists
-        for hydride in self.hydride_data_base:
-            if hydride['Hydride'] == hydride_to_add_name:
-                self.logger.info(f"{hydride_to_add_name} already exists in the database.")
+        for entry in self.hydride_data_base:
+            if entry.get("Hydride") == hydride_name:
+                self.logger.info(f"{hydride_name} already exists in the database.")
                 return
 
-        # Add the new hydride
-        hydride_to_add = {
-            "Hydride": hydride_to_add_name,
+        new_entry = {
+            "Hydride": hydride_name,
             "Enthalpy": enthalpy,
-            "Entropy": entropy
+            "Entropy": entropy,
         }
-        self.hydride_data_base.append(hydride_to_add)
-        self.logger.info(f"Added {hydride_to_add_name} to the database.")
+        self.hydride_data_base.append(new_entry)
+        self.logger.info(f"Added {hydride_name} to the database.")
+        self._save_database()
 
-        # Save the updated data
-        with open(self.hydride_data_base_path, 'w') as file:
-            json.dump(self.hydride_data_base, file, indent=4)
-        self.load_hydride_database()
-
-    def hydride_remover(self, hydride_to_remove_name):
+    def hydride_remover(self, hydride_name: str) -> None:
         """
-        Removes a specified hydride from the database.
+        Remove a specified hydride from the database.
 
         Parameters:
-            hydride_to_remove_name (str): The name of the hydride to remove.
+            hydride_name (str): The name of the hydride to remove.
         """
-        # Iterate through the database and find the hydride to remove
-        for hydride in self.hydride_data_base:
-            if hydride['Hydride'] == hydride_to_remove_name:
-                self.hydride_data_base.remove(hydride)
-                self.logger.info(f"Removed {hydride_to_remove_name} from the database.")
-                break
-        else:
-            self.logger.info(f"{hydride_to_remove_name} not found in the database.")
-            return
+        for entry in self.hydride_data_base:
+            if entry.get("Hydride") == hydride_name:
+                self.hydride_data_base.remove(entry)
+                self.logger.info(f"Removed {hydride_name} from the database.")
+                self._save_database()
+                return
+        self.logger.info(f"{hydride_name} not found in the database.")
 
-        # Save the updated database
-        with open(self.hydride_data_base_path, 'w') as file:
-            json.dump(self.hydride_data_base, file, indent=4)
-        self.load_hydride_database()
-
-    def update_hydride_info(self, hydride_name, new_info):
+    def update_hydride_info(self, hydride_name: str, new_info: dict) -> None:
         """
         Update or add additional information for a specific hydride.
 
@@ -121,254 +132,299 @@ class MetalHydrideDatabase:
             hydride_name (str): The name of the hydride to update.
             new_info (dict): A dictionary containing new attributes and their values.
         """
-        # Search for the hydride and update its info
-        for hydride in self.hydride_data_base:
-            if hydride['Hydride'] == hydride_name:
-                for key, value in new_info.items():
-                    hydride[key] = value
+        for entry in self.hydride_data_base:
+            if entry.get("Hydride") == hydride_name:
+                entry.update(new_info)
                 self.logger.info(f"Updated {hydride_name} with new information.")
-                break
-        else:
-            self.logger.info(f"{hydride_name} not found in the database. Adding new hydride.")
-            new_hydride = {"Hydride": hydride_name}
-            new_hydride.update(new_info)
-            self.hydride_data_base.append(new_hydride)
+                self._save_database()
+                return
 
-        # Save the updated database
-        with open(self.hydride_data_base_path, 'w') as file:
-            json.dump(self.hydride_data_base, file, indent=4)
-        self.load_hydride_database()
+        self.logger.info(f"{hydride_name} not found in the database. Adding new hydride.")
+        new_entry = {"Hydride": hydride_name}
+        new_entry.update(new_info)
+        self.hydride_data_base.append(new_entry)
+        self._save_database()
 
-    def get_capacity(self, hydride_name):
-        material = self._normalize_hydride_string(hydride_name)
-        hydride_mass, hydrogen_mass_in_hydride = self.get_molar_mass_hydride(hydride_name=hydride_name, return_hydrogen_mass=True)
-        if hydrogen_mass_in_hydride and hydride_mass:
-            theoretical_capacity = hydrogen_mass_in_hydride/hydride_mass * 100
-            self.logger.info(f"Capacity of {material} = {theoretical_capacity} wt-%")
-            return theoretical_capacity
-        else:
-            return None
+    def get_capacity(self, hydride_name: str) -> float:
+        """
+        Calculate the theoretical capacity (wt-%) of a hydride.
 
-    def get_molar_mass_hydride(self, hydride_name, return_hydrogen_mass=False):
-        material = self._normalize_hydride_string(hydride_name)
-        # Using findall to extract elements and counts
-        element_dict = self.extract_elements(material)
-        hydride_mass = 0
-        hydrogen_mass_in_hydride = None
-        for element, quantity in element_dict.items():
+        Parameters:
+            hydride_name (str): The hydride identifier.
+
+        Returns:
+            float: Theoretical capacity in wt-% or None if data is insufficient.
+        """
+        total_mass, hydrogen_mass = self.get_molar_mass_hydride(
+            hydride_name, return_hydrogen_mass=True
+        )
+        if total_mass and hydrogen_mass:
+            capacity = (hydrogen_mass / total_mass) * 100
+            self.logger.info(f"Capacity of {hydride_name} = {capacity:.2f} wt-%")
+            return capacity
+        return None
+
+    def get_molar_mass_hydride(self, hydride_name: str, return_hydrogen_mass: bool = False):
+        """
+        Calculate the molar mass of a hydride and optionally the mass of hydrogen in it.
+
+        Parameters:
+            hydride_name (str): The hydride identifier.
+            return_hydrogen_mass (bool): If True, return a tuple (total_mass, hydrogen_mass).
+
+        Returns:
+            float or tuple: Total molar mass in u, or a tuple (total_mass, hydrogen_mass).
+        """
+        normalized = self._normalize_hydride_string(hydride_name)
+        element_counts = self.extract_elements(normalized)
+        total_mass = 0.0
+        hydrogen_mass = 0.0
+
+        for element, count in element_counts.items():
             atomic_mass = self.periodic_table_of_elements.atomic_mass_grabber(element)
-            # TODO: Make this work also for hydrides that have Hydrogen left in structure in dehydrogenated state
-            if atomic_mass:
-                mass_in_hydride = atomic_mass * quantity
-                hydride_mass += mass_in_hydride
+            if atomic_mass is not None:
+                total_mass += atomic_mass * count
                 if element == "H":
-                    hydrogen_mass_in_hydride = atomic_mass * quantity
+                    hydrogen_mass += atomic_mass * count
 
         if return_hydrogen_mass:
-            return hydride_mass, hydrogen_mass_in_hydride
-        else:
-            return hydride_mass
+            return total_mass, hydrogen_mass
+        return total_mass
 
-    def get_density(self, hydride_to_grab, de_hyd_state="Dehydrogenated"):
+    def get_density(self, hydride_name: str, state: str = "Dehydrogenated") -> float:
         """
-        Choose hydride for test
+        Retrieve the density of a hydride for a specified state.
+
         Parameters:
-            hydride_to_grab: hydride enthalpy and entropy will be returned from
+            hydride_name (str): The hydride identifier.
+            state (str): The material state (e.g., "Dehydrogenated").
+
         Returns:
-            density: float
+            float: Density value or None if not found.
         """
-        material = hydride_to_grab
-        density = None
-        # Search for hydride
-        hydride_to_grab = self._normalize_hydride_string(hydride_to_grab)
-
-        for hydride in self.hydride_data_base:
-            if hydride['Hydride'] == hydride_to_grab:
-                self.logger.info(f"Found {hydride_to_grab}: Density = {hydride['Density'][de_hyd_state]}")
-                density = float(hydride['Density'][de_hyd_state])
-                return density
-
-        if not density and len(material) <= 2:
-            for element in self.periodic_table_of_elements.periodic_table:
-                if element['Symbol'] == material:
-                    self.logger.info(f"Found {hydride_to_grab}: Density = {element['Density']}")
-
-                    density = element['Density']
+        normalized = self._normalize_hydride_string(hydride_name)
+        for entry in self.hydride_data_base:
+            if entry.get("Hydride") == normalized:
+                try:
+                    density = float(entry["Density"][state])
+                    self.logger.info(f"Found {normalized}: Density = {density}")
                     return density
+                except (KeyError, ValueError):
+                    self.logger.error(
+                        f"Density information for {normalized} in state '{state}' is missing or invalid."
+                    )
+                    return None
 
-        self.logger.error(f" {hydride_to_grab}: is not in data base yet")
+        # If not found in the hydride database, check if the input is an element symbol.
+        if len(hydride_name) <= 2:
+            for element in self.periodic_table_of_elements.periodic_table:
+                if element.get("Symbol") == hydride_name:
+                    self.logger.info(
+                        f"Found element {hydride_name}: Density = {element.get('Density')}"
+                    )
+                    return element.get("Density")
+        self.logger.error(f"{normalized} is not in the database.")
         return None
 
-    def get_bulk_conductivity(self, hydride_to_grab, de_hyd_state="Hydrogenated"):
+    def get_bulk_conductivity(self, hydride_name: str, state: str = "Hydrogenated") -> float:
         """
-        Choose hydride for test
+        Retrieve the bulk conductivity of a hydride for a specified state.
+
         Parameters:
-            hydride_to_grab: hydride enthalpy and entropy will be returned from
+            hydride_name (str): The hydride identifier.
+            state (str): The material state (e.g., "Hydrogenated").
+
         Returns:
-            conductivity: float
+            float: Bulk conductivity value or None if not found.
         """
-
-        # Search for hydride
-        hydride_to_grab = self._normalize_hydride_string(hydride_to_grab)
-
-        for hydride in self.hydride_data_base:
-            if hydride['Hydride'] == hydride_to_grab:
-                self.logger.info(f"Found {hydride_to_grab}: Bulk conductivity = {hydride['Conductivity_Bulk'][de_hyd_state]}")
-                value = float(hydride['Conductivity_Bulk'][de_hyd_state])
-                return value
-
-        self.logger.error(f" {hydride_to_grab}: is not in data base yet")
+        normalized = self._normalize_hydride_string(hydride_name)
+        for entry in self.hydride_data_base:
+            if entry.get("Hydride") == normalized:
+                try:
+                    conductivity = float(entry["Conductivity_Bulk"][state])
+                    self.logger.info(
+                        f"Found {normalized}: Bulk conductivity = {conductivity}"
+                    )
+                    return conductivity
+                except (KeyError, ValueError):
+                    self.logger.error(
+                        f"Conductivity information for {normalized} in state '{state}' is missing or invalid."
+                    )
+                    return None
+        self.logger.error(f"{normalized} is not in the database.")
         return None
 
     @staticmethod
-    def _normalize_hydride_string(s):
+    def _normalize_hydride_string(raw_str: str) -> str:
         """
-        Takes a string with metal hydride system like MgH2 + 3 wt-% Fe / Mg and turns it into standard form Mg1H2
-        :param s: string with chemical formular
-        :return:
+        Normalize a hydride string to a standard format.
+        For example, converts "MgH2 + 3 wt-% Fe / Mg" to "Mg1H2".
+
+        Parameters:
+            raw_str (str): The raw hydride string.
+
+        Returns:
+            str: Normalized hydride string.
         """
-        match = re.search(r'^[^+/]*', s)
+        match = re.search(r"^[^+/]*", raw_str)
         if match:
             hydride_name = match.group(0).strip()
-            parsed_hydride_name = parse_chemical_formula(hydride_name=hydride_name)
-            normalized_hydride_name = ''.join([f'{key}{value}' for key, value in parsed_hydride_name.items()])
-            return normalized_hydride_name
-        return ''  # Return an empty string if no match is found
+            parsed = parse_chemical_formula(hydride_name)
+            normalized = "".join(f"{elem}{count}" for elem, count in parsed.items())
+            return normalized
+        return ""
 
     @staticmethod
-    def extract_elements(formula):
+    def extract_elements(formula: str) -> dict:
+        """
+        Extract elements and their counts from a chemical formula.
+
+        Parameters:
+            formula (str): Chemical formula (e.g., "MgH2").
+
+        Returns:
+            dict: Dictionary mapping element symbols to counts.
+        """
         pattern = r"([A-Z][a-z]*)(\d*)"
         elements = re.findall(pattern, formula)
         return {elem: int(count) if count else 1 for elem, count in elements}
 
+    def _save_database(self) -> None:
+        """Save the current hydride database to the JSON file and reload it."""
+        with open(self.hydride_data_base_path, "w") as file:
+            json.dump(self.hydride_data_base, file, indent=4)
+        self.load_hydride_database()
+
 
 class PeriodicTableOfElements:
+    """
+    Class for managing the periodic table of elements.
+    Loads element data from a JSON file.
+    """
 
-    def __init__(self, periodic_table_path=standard_periodic_table_path):
+    def __init__(self, table_path: str = standard_periodic_table_path):
+        """
+        Initialize the PeriodicTableOfElements.
+
+        Parameters:
+            table_path (str): Path to the periodic table JSON file.
+        """
         self.logger = logging.getLogger(__name__)
-        self.periodic_table_path = periodic_table_path
+        self.periodic_table_path = table_path
         self.load_periodic_table()
 
-    def load_periodic_table(self):
-        with open(self.periodic_table_path, 'r') as file:
+    def load_periodic_table(self) -> None:
+        """Load the periodic table from a JSON file."""
+        with open(self.periodic_table_path, "r") as file:
             self.periodic_table = json.load(file)
 
-    def atomic_mass_grabber(self, element_to_grab):
+    def atomic_mass_grabber(self, element: str) -> float:
         """
+        Retrieve the atomic mass for a given element.
+
         Parameters:
-            element_to_grab: element the atomic mass is wanted from
+            element (str): The element symbol (e.g., "H").
+
         Returns:
-            atomic_mass: atomic mass of the input element in u (as a float, if possible)
+            float: Atomic mass in atomic mass units (u) or None if not found.
         """
-        # Search for element
-        for element in self.periodic_table:
-            if element['Symbol'] == element_to_grab:
+        for entry in self.periodic_table:
+            if entry.get("Symbol") == element:
                 try:
-                    # Attempt to convert atomic mass to float
-                    atomic_mass = float(element['AtomicMass'])
-                    self.logger.info(f"Found {element_to_grab}: Mass = {atomic_mass} u")
+                    atomic_mass = float(entry["AtomicMass"])
+                    self.logger.info(f"Found {element}: Mass = {atomic_mass} u")
                     return atomic_mass
                 except ValueError:
-                    # Log an error if conversion fails
-                    self.logger.error(f"Atomic mass of {element_to_grab} is not a valid number.")
+                    self.logger.error(
+                        f"Atomic mass of {element} is not a valid number."
+                    )
                     return None
-
-        # Log error if element is not found
-        self.logger.error(f"{element_to_grab} is not an element.")
+        self.logger.error(f"{element} is not recognized as a valid element.")
         return None
 
 
-def create_periodic_table_of_elements():
+def create_periodic_table_of_elements() -> None:
+    """
+    Create a JSON file for the periodic table of elements from a CSV/text file.
+    """
+    input_file_path = standard_periodic_table_txt
+    output_file_path = standard_periodic_table_path.replace(".txt", ".json")
 
-    ## create periodic_table_of_elements.json
-    input_file_path = src.standard_paths.standard_periodic_table_txt
-
-    ## Replace 'output_data.json' with your desired output file name
-    output_file_path = standard_periodic_table_path.replace('.txt', '.json')
-
-    ## Read and parse the .txt file
     data = []
-    with open(input_file_path, newline='') as file:
+    with open(input_file_path, newline="") as file:
         reader = csv.DictReader(file)
         for row in reader:
             data.append(row)
 
-    # Write the data to a .json file
-    with open(output_file_path, 'w', encoding='utf-8') as jsonfile:
+    with open(output_file_path, "w", encoding="utf-8") as jsonfile:
         json.dump(data, jsonfile, ensure_ascii=False, indent=4)
 
     print(f"Data successfully written to {output_file_path}")
 
 
-def create_hydride_data_base():
-    #DataBase Creator
-    data = """
-    Hydride,Enthalpy,Entropy
-    Fe1H1,42300,52
-    Mg1H2,74701,134.7
-    Mg2Al3H4,62700,123
-    Mg2Fe1H6,79211.124243,137.188755
-    Mg2Ni1H4,61858,118.9
+def create_hydride_data_base() -> None:
     """
-
-
-    # Splitting data into lines and then into columns
-    lines = data.strip().split('\n')
-    headers = lines[0].split(',')
-    hydride_data = []
-
-    for line in lines[1:]:
-        values = line.split(',')
-        hydride_data.append(dict(zip(headers, values)))
-    # Saving data to a JSON file at the specified path
-    with open(standard_hydride_data_base_path, 'w') as file:
+    Create a hydride database JSON file from embedded CSV data.
+    """
+    csv_data = """
+Hydride,Enthalpy,Entropy
+Fe1H1,42300,52
+Mg1H2,74701,134.7
+Mg2Al3H4,62700,123
+Mg2Fe1H6,79211.124243,137.188755
+Mg2Ni1H4,61858,118.9
+    """
+    lines = csv_data.strip().split("\n")
+    headers = lines[0].split(",")
+    hydride_data = [dict(zip(headers, line.split(","))) for line in lines[1:]]
+    with open(standard_hydride_data_base_path, "w") as file:
         json.dump(hydride_data, file, indent=4)
 
 
-def test_metal_hydride_database_and_periodic_table():
-    # Initialize the classes
+def test_metal_hydride_database_and_periodic_table() -> None:
+    """
+    Test the functionality of the MetalHydrideDatabase and PeriodicTableOfElements classes.
+    """
     hydride_db = MetalHydrideDatabase()
     periodic_table = PeriodicTableOfElements()
 
     # Test adding a new hydride
-    hydride_to_add = "TestHydride"
-    hydride_db.hydride_adder(hydride_to_add, 1000, 50)
+    test_hydride = "TestHydride"
+    hydride_db.hydride_adder(test_hydride, 1000, 50)
 
-    # Test grabbing hydride data
-    enthalpy, entropy = hydride_db.hydride_grabber(hydride_to_add)
+    # Test retrieving enthalpy and entropy
+    enthalpy, entropy = hydride_db.get_enthalpy_entropy(test_hydride)
     print(f"Enthalpy: {enthalpy}, Entropy: {entropy}")
 
     # Test updating hydride information
-    new_info = {"AdditionalInfo": "Test info"}
-    hydride_db.update_hydride_info(hydride_to_add, new_info)
+    hydride_db.update_hydride_info(test_hydride, {"AdditionalInfo": "Test info"})
 
-    # Test removing a hydride
-    hydride_db.hydride_remover(hydride_to_add)
+    # Test removing the hydride
+    hydride_db.hydride_remover(test_hydride)
 
-    # Test grabbing atomic mass
-    element_to_grab = "H"  # Hydrogen
-    atomic_mass = periodic_table.atomic_mass_grabber(element_to_grab)
-    print(f"Atomic Mass of {element_to_grab}: {atomic_mass} u")
+    # Test retrieving atomic mass
+    atomic_mass = periodic_table.atomic_mass_grabber("H")
+    print(f"Atomic Mass of H: {atomic_mass} u")
 
-     # Example usage
+    # Test parsing chemical formula
     formula = "Mg2FeH6"
     parsed_formula = parse_chemical_formula(formula)
-    print(formula,"parsed into", parsed_formula)  # Output: {'Mg': 1, 'H': 2}
-
+    print(f"{formula} parsed into {parsed_formula}")
 
     print("Test completed successfully.")
 
-# Run the test function
+
 if __name__ == "__main__":
-    #test_metal_hydride_database_and_periodic_table()
-    # Example usage
-    string = "MgH2"
-    mh_data = MetalHydrideDatabase()
-    print("density " + str(mh_data.get_density(string)))
-    print("conductivity " + str(mh_data.get_bulk_conductivity(string)))
-    print("capacity " + str(mh_data.get_capacity(string)))
+    # Uncomment the following line to run tests:
+    # test_metal_hydride_database_and_periodic_table()
 
+    # Example usage:
+    hydride_str = "MgH2"
+    mh_database = MetalHydrideDatabase()
+    density = mh_database.get_density(hydride_str)
+    conductivity = mh_database.get_bulk_conductivity(hydride_str)
+    capacity = mh_database.get_capacity(hydride_str)
 
-
-
-
+    print(f"Density: {density}")
+    print(f"Bulk Conductivity: {conductivity}")
+    print(f"Capacity: {capacity}")

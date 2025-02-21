@@ -15,14 +15,14 @@ except ImportError:
     import logging
 meta_table = TableConfig().MetaDataTable
 
-
 #todo: implement used sensor type radius and tcr values
 # (maybe exists already in ETC data)
 #       self.sensor_radius = None
 #       self.sensor_insulation = None
 #       self.sensor_coil = None
-
 local_tz = ZoneInfo("Europe/Berlin")
+
+
 class MetaData:
 
     column_attribute_mapping = {

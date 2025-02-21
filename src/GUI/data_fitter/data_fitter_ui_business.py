@@ -32,10 +32,11 @@ def remove_order_term(input_string):
 
 
 class DataLoader:
-    def __init__(self, file_path=None, sample_id=None, cycle_number=None, temperature=None):
+    def __init__(self, file_path=None, sample_id=None, cycle_number=None, temperature=None, db_conn_params=None):
         self.logger = logging.getLogger(__name__)
         self.file_path = file_path
-        self.data_retriever = DataRetriever()
+        self.db_conn_params = db_conn_params or {}
+        self.data_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self.standard_constraints_dict = standard_constraints_dict
         self.etc_table = TableConfig().ETCDataTable
         self.sample_id = sample_id
@@ -173,7 +174,7 @@ class MaterialProperties:
         return self.hydride_worker.get_molar_mass_hydride(hydride_name=material)  # g/mol
 
     def get_density(self, material):
-        return self.hydride_worker.get_density(hydride_to_grab=material) * 1e3 #kg/m
+        return self.hydride_worker.get_density(hydride_name=material) * 1e3 #kg/m
 
     def get_mass(self, material, sample_mass):
         capacity = self.hydride_worker.get_capacity(hydride_name=material)
@@ -183,7 +184,7 @@ class MaterialProperties:
             return sample_mass
 
     def get_initial_conductivity(self, material, de_hyd_state):
-        conductivity = self.hydride_worker.get_bulk_conductivity(hydride_to_grab=material, de_hyd_state=de_hyd_state)
+        conductivity = self.hydride_worker.get_bulk_conductivity(hydride_name=material, state=de_hyd_state)
         return conductivity
 
     def alpha_funs(self, M_gas, M_solid):
@@ -408,9 +409,12 @@ def main(mode='curve_fit', data_loader=None):
     # oder einfach verschweigen dass ich das je versucht habe.
     #file_path = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\Results\Results-WAE-WA-028-044\WAE-WA-028-044-AllData.txt"
     # Load data
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
     if not data_loader:
-        data_loader = DataLoader(sample_id="WAE-WA-040", cycle_number=0.5, temperature=200)
+        data_loader = DataLoader(sample_id="WAE-WA-040", cycle_number=0.5, temperature=200, db_conn_params=config.db_conn_params)
     isotherm, mean_temperature, de_hyd_state = data_loader.get_isotherm()
+
     #[Particle_Diameter,lambda_solid(1,mat_it),Porosity(mat_it), l_base]
     material_properties = MaterialProperties(material="MgH2", de_hyd_state=de_hyd_state)
     lb = [1e-8, 1e-6, 1e-8, 1e-8]

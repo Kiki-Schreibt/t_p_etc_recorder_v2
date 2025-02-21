@@ -1027,7 +1027,7 @@ class ModbusDBWriter:
         self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
-        self.qb = QueryBuilder(db_con_params=self.db_conn_params)
+        self.qb = QueryBuilder(db_conn_params=self.db_conn_params)
         self.meta_data = meta_data
 
     def insert_data_into_table(self, cursor, data, mode=STANDARD_MODE):
