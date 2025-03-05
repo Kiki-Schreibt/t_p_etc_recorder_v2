@@ -221,6 +221,7 @@ class PlotManager:
             if self.top_plot:
                 self.top_plot.point_clicked_time_received.connect(
                     lambda time, color: self.right_plot.add_curve_to_plot(time_value=time, color=color, xy_data_to_load=dropdown_text))
+                #todo connect point_clicked_time_received to reader function and emit state, cycle and uptake for gui
             return self.right_plot
         except Exception as e:
             self.logger.exception("Error initializing right XY plot:")

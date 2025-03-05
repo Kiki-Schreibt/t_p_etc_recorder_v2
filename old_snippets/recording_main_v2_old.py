@@ -158,6 +158,7 @@ class PlotManager:
             lambda d1, d2: self.right_plot.add_curve_to_plot(d1, d2, self.ui.XyDataSelectDropDown.currentText())
         )
 
+
         return self.right_plot
 
     def init_plot_uptake(self, time_range):

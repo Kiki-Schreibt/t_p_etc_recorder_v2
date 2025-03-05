@@ -1,6 +1,8 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
+import pandas as pd
+
 from data_loader import DataLoader
 from material_properties import MaterialProperties
 from models import KaganerModel, ZehnerBauerSchluenderModel  # Use appropriate model here
@@ -208,6 +210,7 @@ def try_fitting():
                                      2.084308118,
                                      2.115438222,
                                      2.159283779])
+
                 popt=None
                 for i in range(1):
                     # Fit the model to the experimental data
