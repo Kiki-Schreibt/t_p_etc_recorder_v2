@@ -554,7 +554,7 @@ class CSVWriter:
             del df
             df = df_copy
 
-        with DatabaseConnection(**config.db_conn_params) as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
                 self.logger.info(f"Start writing {file_name} to database")
                 self.writer.insert_data_into_table(data=df,
@@ -658,7 +658,7 @@ class CSVCounter:
         ORDER BY start_time;
         """
         try:
-            with DatabaseConnection() as db_conn:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
                 db_conn.cursor.execute(query, query_vals)
                 records = db_conn.cursor.fetchall()
 

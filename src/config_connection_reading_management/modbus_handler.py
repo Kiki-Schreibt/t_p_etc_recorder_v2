@@ -527,7 +527,10 @@ class ModbusDataHandler:
         """
         Handles changes in cycle number by starting a thread to estimate H2-Uptake and updates cycle_data table in database.
         """
-        cycle_counter = CycleCounter(meta_data=self.meta_data, current_cycle=self.cycle, current_state=self.de_hyd_state, db_conn_params=self.db_conn_params)
+        cycle_counter = CycleCounter(meta_data=self.meta_data,
+                                     current_cycle=self.cycle,
+                                     current_state=self.de_hyd_state,
+                                     db_conn_params=self.db_conn_params)
         cycle_counter_thread = threading.Thread(target=cycle_counter.count, daemon=True)
         cycle_counter_thread.start()
         cycle_counter_thread.join()
