@@ -698,7 +698,7 @@ class XYPlot(pg.PlotWidget):
 
     def load_cycle_number(self, time_value):
         """
-        Load and emit the cycle number for a given time value.
+        Load and emit the cycle number and de_hyd_state for a given time value.
         """
         try:
             etc_table = TableConfig().ETCDataTable

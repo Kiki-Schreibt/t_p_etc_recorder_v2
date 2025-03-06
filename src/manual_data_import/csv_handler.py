@@ -74,8 +74,8 @@ class CSVProcessor:
             self.folder_path = dir_t_p
 
         self.csv_importer = CSVImporter()
-        self.csv_handler = CSVDataHandler(meta_data=self.meta_data)
-        self.csv_writer = CSVWriter(meta_data=self.meta_data, compress_data=compress_data)
+        self.csv_handler = CSVDataHandler(meta_data=self.meta_data, config=self.config)
+        self.csv_writer = CSVWriter(meta_data=self.meta_data, compress_data=compress_data, config=self.config)
 
     def process(self, init_state: str = STATE_DEHYD) -> None:
         """
@@ -156,6 +156,7 @@ class CSVProcessor:
             self.csv_writer.write_to_database(df=df_processed, file_name=file_name)
             file_reference = file_name or full_file_path
             self.logger.info(f"{file_reference} written to database.")
+
         except Exception as e:
             file_reference = file_name or full_file_path
             self.logger.error(f"Error occurred while processing {file_reference}: {e}")
@@ -327,7 +328,7 @@ class CSVDataHandler:
     Handles processing of the imported CSV data for cycle counting.
     """
 
-    def __init__(self, meta_data: MetaData):
+    def __init__(self, meta_data: MetaData, config):
         """
         Initializes the CSVDataHandler with metadata.
 
@@ -337,7 +338,7 @@ class CSVDataHandler:
         self.current_de_hyd_state = STATE_DEHYD
         self.tp_table = TableConfig().TPDataTable
         self.meta_data = meta_data
-        self.eq_calculator = EqCalculator(meta_data=meta_data)
+        self.eq_calculator = EqCalculator(meta_data=meta_data, db_conn_params=config.db_conn_params)
 
     def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -350,6 +351,7 @@ class CSVDataHandler:
             DataFrame: The processed DataFrame.
         """
         df['sample_id'] = self.meta_data.sample_id
+
         df_conditioned = self._conditioning_for_cycle_count(df=df)
         df_conditioned = self._treat_special_cases(df=df_conditioned, mode='res_volume')
         return df_conditioned
@@ -367,7 +369,6 @@ class CSVDataHandler:
         df = df.copy()
         if df.empty:
             return pd.DataFrame()
-
         # Pre-process the DataFrame
         self._add_equilibrium_pressure(df)
         self._add_cycle_flags(df)
@@ -376,11 +377,11 @@ class CSVDataHandler:
         condition_is_cycle = self._condition_is_cycle(df)
         condition_uptake = self._condition_uptake(df, condition_is_cycle)
 
+
         df[self.tp_table.h2_uptake_flag] = False
         df[self.tp_table.cycle_number_flag] = False
         df.loc[condition_uptake, self.tp_table.h2_uptake_flag] = True
         df.loc[condition_is_cycle, self.tp_table.cycle_number_flag] = True
-
         self._set_hydrogenation_states(df)
 
         if pd.isna(df.loc[0, self.tp_table.de_hyd_state]) or df.loc[0, self.tp_table.de_hyd_state] in ["nan", "NaN"]:
@@ -389,7 +390,6 @@ class CSVDataHandler:
         # Clean up 'nan' strings and handle missing values
         df[self.tp_table.de_hyd_state] = df[self.tp_table.de_hyd_state].replace('nan', pd.NA).ffill()
         check_nan_values(df, "conditioning for cycle count after ffill")
-
         # Update current state
         self.current_de_hyd_state = df[self.tp_table.de_hyd_state].iloc[-1]
 
@@ -402,6 +402,7 @@ class CSVDataHandler:
         Args:
             df (DataFrame): The DataFrame to update.
         """
+        #print(df[self.tp_table.setpoint_sample])
         df[self.tp_table.eq_pressure] = self.eq_calculator.calc_eq(df[self.tp_table.setpoint_sample])
         df[self.tp_table.eq_pressure] = self.eq_calculator.calc_eq(df[self.tp_table.temperature_sample])
 
@@ -553,7 +554,7 @@ class CSVWriter:
             del df
             df = df_copy
 
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**config.db_conn_params) as db_conn:
             try:
                 self.logger.info(f"Start writing {file_name} to database")
                 self.writer.insert_data_into_table(data=df,
@@ -707,7 +708,7 @@ class CSVCounter:
             df (DataFrame): The DataFrame containing cycle information.
             sample_id (str): The sample identifier.
         """
-        db_manipulator = DataBaseManipulator()
+        db_manipulator = DataBaseManipulator(db_conn_params=self.db_conn_params)
         self.logger.info(f"Updating cycle numbers for {sample_id} in {self.tp_table.table_name}")
 
         db_manipulator.batch_update_data(
