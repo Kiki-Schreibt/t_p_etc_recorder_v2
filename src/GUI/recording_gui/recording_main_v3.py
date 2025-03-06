@@ -16,6 +16,7 @@ All methods are wrapped with try/except blocks for robust error handling.
 
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import warnings
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
 from PySide6.QtUiTools import QUiLoader
@@ -214,13 +215,19 @@ class PlotManager:
             if self.right_plot:
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
+
             from src.GUI.recording_gui.recording_business_v2 import XYPlot
             self.right_plot = XYPlot(db_conn_params=self.db_conn_params)
             self._ensure_layout(self.ui.xy_plot_window)
             self.ui.xy_plot_window.layout().addWidget(self.right_plot)
             if self.top_plot:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=RuntimeWarning)
+                    self.top_plot.point_clicked_time_received.disconnect()
+
                 self.top_plot.point_clicked_time_received.connect(
                     lambda time, color: self.right_plot.add_curve_to_plot(time_value=time, color=color, xy_data_to_load=dropdown_text))
+
                 #todo connect point_clicked_time_received to reader function and emit state, cycle and uptake for gui
             return self.right_plot
         except Exception as e:
@@ -538,7 +545,7 @@ class MainWindow(QMainWindow):
             self.ui.start_stop_static_plot_button.setCheckable(True)
             self.ui.start_stop_static_plot_button.clicked.connect(self._toggle_plotting_mode)
             self.ui.plot_uptake_button.clicked.connect(self._init_uptake_plot)
-            self.ui.XyDataSelectDropDown.highlighted.connect(self._init_right_plot_xy)
+            self.ui.XyDataSelectDropDown.activated.connect(self._init_right_plot_xy)
             self.ui.T_p_dependent_drop_down.currentIndexChanged.connect(self._init_tp_dependent_plot)
             self.ui.h2_uptake_check_box.clicked.connect(lambda: self.controller.toggle_h2_uptake(
                 self.ui.h2_uptake_check_box.isChecked()))
@@ -560,6 +567,7 @@ class MainWindow(QMainWindow):
             self.ui.MaxCharTimeEditField.editingFinished.connect(self._on_constraints_changed)
             self.ui.MinTempIncEditField.editingFinished.connect(self._on_constraints_changed)
             self.ui.MaxTempIncEditField.editingFinished.connect(self._on_constraints_changed)
+
         except Exception as e:
             self.logger.exception("Error initializing connections in MainWindow:")
 
@@ -675,8 +683,11 @@ class MainWindow(QMainWindow):
         """
         try:
             self.plot_manager.init_right_plot_xy(self.ui.XyDataSelectDropDown.currentText())
+            self.plot_manager.right_plot.cycle_number_sig.connect(lambda number: self._set_current_state(key="number", value=number))
+            self.plot_manager.right_plot.de_hyd_state_sig.connect(lambda value: self._set_current_state(key="state", value=value))
+
         except Exception as e:
-            self.logger.exception("Error initializing right plot XY in MainWindow:")
+            self.logger.exception(f"Error initializing right plot XY in MainWindow: {e}")
 
     def _init_uptake_plot(self):
         """

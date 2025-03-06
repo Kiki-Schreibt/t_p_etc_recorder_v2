@@ -106,7 +106,6 @@ class MetaData:
         #time_start_reading = time.time()
         if self.sample_id:
             self.reading_thread(column_names)
-        #todo: maybe threading not necessary
         #thread = threading.Thread(target=self.reading_thread, args=(column_names,))
         #thread.start()
         #thread.join()

@@ -659,6 +659,7 @@ class XYPlot(pg.PlotWidget):
     """
     plot_cleared = Signal()
     cycle_number_sig = Signal(float)
+    de_hyd_state_sig = Signal(str)
 
     def __init__(self, parent=None, db_conn_params=None):
         """
@@ -701,12 +702,18 @@ class XYPlot(pg.PlotWidget):
         """
         try:
             etc_table = TableConfig().ETCDataTable
-            query = f"SELECT {etc_table.cycle_number} from {etc_table.table_name} WHERE {etc_table.time} = %s"
-            cycle_number = self.db_reader.execute_fetching(query=query, values=(time_value,), column_names=etc_table.cycle_number)
-            if not cycle_number.empty:
-                self.cycle_number_sig.emit(cycle_number.iloc[0, 0])
+            col_names = [etc_table.cycle_number, etc_table.de_hyd_state]
+            col_str = ', '.join(col_names)
+            query = f"SELECT {col_str} from {etc_table.table_name} WHERE {etc_table.time} = %s"
+            data = self.db_reader.execute_fetching(query=query, values=(time_value,), column_names=col_names)
+            cycle_number = data[etc_table.cycle_number].iloc[0]
+            de_hyd_state = data[etc_table.de_hyd_state].iloc[0]
+            if cycle_number:
+                self.cycle_number_sig.emit(cycle_number)
+            if de_hyd_state:
+                self.de_hyd_state_sig.emit(de_hyd_state)
         except Exception as e:
-            self.logger.exception("Error in load_cycle_number in XYPlot:")
+            self.logger.exception("Error in load_cycle_number in XYPlot: %s", e)
 
     def add_curve_to_plot(self, time_value, color, xy_data_to_load):
         """
