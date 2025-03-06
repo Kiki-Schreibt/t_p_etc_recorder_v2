@@ -564,17 +564,30 @@ class ExcelDataProcessor:
 
 
     def _update_xlsx_file(self) -> None:
-        try:
-            excel = win32.gencache.EnsureDispatch('Excel.Application')
-            workbook = excel.Workbooks.Open(self.file_path)
-            workbook.RefreshAll()
-            excel.Calculate()
-            workbook.Save()
-            workbook.Close()
-            excel.Quit()
-            self.logger.info("Excel file updated successfully.")
-        except Exception as e:
-            self.logger.error("Error updating Excel file: %s", e)
+        max_retries = 30
+        delay = 0.1  # start with 100 ms delay
+        for attempt in range(max_retries):
+            try:
+                excel = win32.gencache.EnsureDispatch('Excel.Application')
+                workbook = excel.Workbooks.Open(self.file_path)
+                workbook.RefreshAll()
+                excel.Calculate()
+                workbook.Save()
+                workbook.Close()
+                excel.Quit()
+                self.logger.info("Excel file updated successfully.")
+                return
+            except Exception as e:
+                error_str = str(e)
+                # Check if the error message contains the OLE busy error code.
+                if "0x800ac472" in error_str:
+                    self.logger.warning("Excel busy (attempt %d/%d): %s", attempt + 1, max_retries, e)
+                    time.sleep(delay)
+                    delay *= 2  # Optional: increase delay with each attempt.
+                else:
+                    self.logger.error("Error updating Excel file: %s", e)
+                    return
+        self.logger.error("Failed to update Excel file after %d attempts.", max_retries)
 
     def _read_and_process_sheets(self) -> pd.DataFrame:
         try:
@@ -788,7 +801,7 @@ class ExcelDataProcessor:
                     t_p_table.cycle_number,
                     t_p_table.cycle_number_flag,
                     t_p_table.de_hyd_state]
-        db_retriever = DataRetriever()
+        db_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         df_tp = db_retriever.fetch_data_by_time_no_limit(table=t_p_table, time_range=time_range, col_names=list(cols))
         if df_tp.empty:
             self.logger.info("No corresponding t_p_data found")
@@ -874,7 +887,9 @@ class ExcelDataProcessor:
 
 
 def test_data_retriever() -> None:
-    data_retriever = DataRetriever()
+    from src.config_connection_reading_management.config_reader import GetConfig
+
+    data_retriever = DataRetriever(db_conn_params=GetConfig().db_conn_params)
     sample_id = 'WAE-WA-030'
     table_name = TableConfig().TPDataTable.table_name
     df = data_retriever.fetch_data_by_sample_id_2(
@@ -893,26 +908,39 @@ def test_excel_data_processor(etc_dir: str, sample_id: str) -> None:
 
 
 def process_ETC_file(args: Tuple[str, str, logging.getLogger]) -> None:
-    file_path, sample_id, logger_inst = args
+    file_path, sample_id, logger_inst, config = args
     try:
         logger_inst.info("Start writing %s to database", os.path.basename(file_path))
-        etc_processor = ExcelDataProcessor(file_path=file_path, sample_id=sample_id)
+        etc_processor = ExcelDataProcessor(file_path=file_path, sample_id=sample_id, db_conn_params=config.db_conn_params)
         etc_processor.execute()
         logger_inst.info("%s written to database", os.path.basename(file_path))
     except Exception as e:
         logger_inst.error("Error processing %s: %s", os.path.basename(file_path), e)
 
 
-def write_ETC_in_parallel(dir_etc_folder: str, sample_id: str, logger_inst) -> None:
+def write_ETC_in_parallel(dir_etc_folder: str, sample_id: str, logger_inst, config) -> None:
     start_time = time.time()
     file_paths = [
         os.path.join(dir_etc_folder, filename)
         for filename in os.listdir(dir_etc_folder)
         if filename.endswith('.xlsx') and "$" not in filename
     ]
-    args = [(file_path, sample_id, logger_inst) for file_path in file_paths]
+    args = [(file_path, sample_id, logger_inst, config) for file_path in file_paths]
     with Pool(processes=4) as pool:
         pool.map(process_ETC_file, args)
+    logger_inst.info("Import took %.2f hours", (time.time() - start_time) / 3600)
+
+def write_ETC_foler(dir_etc_folder: str, sample_id: str, logger_inst, config) -> None:
+    start_time = time.time()
+    file_paths = [
+        os.path.join(dir_etc_folder, filename)
+        for filename in os.listdir(dir_etc_folder)
+        if filename.endswith('.xlsx') and "$" not in filename
+    ]
+    for file_path in file_paths:
+        args = (file_path, sample_id, logger_inst, config)
+
+        process_ETC_file(args)
     logger_inst.info("Import took %.2f hours", (time.time() - start_time) / 3600)
 
 

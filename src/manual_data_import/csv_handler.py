@@ -15,7 +15,7 @@ from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.meta_data.meta_data_handler import MetaData
 from src.config_connection_reading_management.modbus_handler import ModbusDBWriter, CycleCounter
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
-from src.config_connection_reading_management.database_reading_writing import DataRetriever, write_ETC_in_parallel
+from src.config_connection_reading_management.database_reading_writing import DataRetriever, write_ETC_in_parallel, write_ETC_foler
 from src.config_connection_reading_management.connections import DatabaseConnection
 try:
     import src.config_connection_reading_management.logger as logging
@@ -101,7 +101,7 @@ class CSVProcessor:
 
         self.logger.info(f"Temperature and pressure data for {self.meta_data.sample_id} imported. {files_processed} files processed in total")
 
-        self.count_cycles(init_state=init_state, sample_id=sample_id)
+        self.count_cycles(init_state=init_state, sample_id=self.meta_data.sample_id)
 
     def _read_process_write_threading(self, file_names: List[str]) -> int:
         """
@@ -404,7 +404,7 @@ class CSVDataHandler:
         """
         #print(df[self.tp_table.setpoint_sample])
         df[self.tp_table.eq_pressure] = self.eq_calculator.calc_eq(df[self.tp_table.setpoint_sample])
-        df[self.tp_table.eq_pressure] = self.eq_calculator.calc_eq(df[self.tp_table.temperature_sample])
+        df[self.tp_table.eq_pressure_real] = self.eq_calculator.calc_eq(df[self.tp_table.temperature_sample])
 
     def _add_cycle_flags(self, df: pd.DataFrame) -> None:
         """
@@ -458,7 +458,7 @@ class CSVDataHandler:
         Args:
             df (DataFrame): The DataFrame to update.
         """
-        eq_pressure_real = df[self.tp_table.eq_pressure]
+        eq_pressure_real = df[self.tp_table.eq_pressure_real]
 
         condition_hydrogenated = (
             (df[self.tp_table.pressure] > df[self.tp_table.eq_pressure]) &
@@ -735,7 +735,7 @@ class CSVCounter:
 
         cycles_counted = already_counted
         cycle_number_checker = already_counted
-        cycle_counter = CycleCounter(meta_data=MetaData(sample_id=sample_id),
+        cycle_counter = CycleCounter(meta_data=MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params),
                                      current_cycle=cycles_counted,
                                      current_state='Dehydrogenated' if cycles_counted//1 == 0 else 'Hydrogenated',
                                      db_conn_params=self.db_conn_params
@@ -807,6 +807,33 @@ def check_nan_values(df, fun_str=""):
                 for idx, val in df[col].items():
                     if pd.isna(val) or val in ["nan", "NaN"]:
                         print(f"NaN value found during {fun_str}in df at row {idx}, column '{col}': {val}")
+
+
+def import_all():
+    sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
+    #sample_ids = ('WAE-WA-030',)
+    logger = logging.getLogger(__name__)
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    for sample_id in sample_ids:
+        dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
+        csv_processor = CSVProcessor(sample_id=sample_id, config=config)
+        csv_processor.process()
+        write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
+        print(f"{sample_id} processed")
+
+def _import_one_example():
+    logger = logging.getLogger(__name__)
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    sample_id = "WAE-WA-028"
+    file_path = r'C:\Daten\Kiki\WAE-WA-028-MgFe3wt\WAE-WA-028-TundP-Verläufe\WAE-WA-028-Mg3wtFe_2021_ 9_16_12_05_Uhr_WAE-WA-028-014.csv'
+    dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
+    #csv_processor = CSVProcessor(sample_id=sample_id, config=config, full_file_path=file_path, mode="")
+    #csv_processor.process()
+    write_ETC_foler(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
+
+    print(f"{sample_id} processed")
 
 
 def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=100000):
@@ -899,7 +926,7 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
         plt.gcf().autofmt_xdate()
         plt.gca().autoscale()
         plt.show()
-
+    from src.config_connection_reading_management.config_reader import GetConfig
     config = GetConfig()
     data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
     data_retriever.limit_datapoints = data_points_max
@@ -924,23 +951,5 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 
 #Methods for usage
 if __name__ == '__main__':
-    sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    #sample_ids = ('WAE-WA-030',)
-    logger = logging.getLogger(__name__)
-    from src.config_connection_reading_management.config_reader import GetConfig
-    config = GetConfig()
-    for sample_id in sample_ids:
-        dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
-        csv_processor = CSVProcessor(sample_id=sample_id, config=config)
-        csv_processor.process()
-        write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id)
+    import_all()
 
-        print(f"{sample_id} processed")
-    #csv_counter = CSVCounter()
-    #writer = ModbusDBWriter(meta_data=MetaData(sample_id=sample_id))
-    #sample_id = 'WAE-WA-030'
-    #dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
-    #write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id)
-
-
-    #csv_counter.count(sample_id=sample_id)

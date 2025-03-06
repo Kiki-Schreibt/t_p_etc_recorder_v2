@@ -421,7 +421,7 @@ class ModbusDataHandler:
         self.cycling_flag = False
         self.h2_uptake_flag = False
 
-        self.eq_calculator = EqCalculator(meta_data=self.meta_data)
+        self.eq_calculator = EqCalculator(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
         self.de_hyd_state, self.cycle = self.data_retriever.fetch_last_state_and_cycle(sample_id=self.meta_data.sample_id)
         if not self.cycle:
             self._new_test_handling()
@@ -796,7 +796,7 @@ class CycleCounter:
             return None
 
 
-        eq_calculator = EqCalculator(meta_data=self.meta_data)
+        eq_calculator = EqCalculator(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
 
         try:
             wt_percent = eq_calculator.calc_h2_uptake(
@@ -874,7 +874,7 @@ class CycleCounter:
         Writes the cycle data to the database.
         """
         try:
-            mb_writer = ModbusDBWriter(meta_data=self.meta_data)
+            mb_writer = ModbusDBWriter(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
             mb_writer.write_cycle_to_table(
                 new_line_cycle=self.cycle_line,
                 time_start=self.time_start_whole_cycle,
@@ -953,7 +953,7 @@ class CycleCounter:
                                       f"WHERE {self.tp_table.time} > %s")
         values = (end_time_cycle,)
         #print(f"{query_update_rest_of_table}, {end_time_cycle}")
-        DataBaseManipulator().execute_updating(query=query_update_rest_of_table,
+        DataBaseManipulator(db_conn_params=self.db_conn_params).execute_updating(query=query_update_rest_of_table,
                                                values=values,
                                                many_bool=False)
 
@@ -967,7 +967,7 @@ class CycleCounter:
         treat_cycle_bool = False
         de_hyd_state_to_update = self._get_state_to_overwrite(df=df)
         series_to_update = self._create_series_to_overwrite(de_hyd_state=de_hyd_state_to_update)
-        db_manipulator = DataBaseManipulator()
+        db_manipulator = DataBaseManipulator(db_conn_params=self.db_conn_params)
 
         update_success_flag = db_manipulator.update_data(table=self.tp_table,
                                                          sample_id=self.meta_data.sample_id,
