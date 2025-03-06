@@ -125,7 +125,10 @@ class VantHoffCalcEq:
         if (not p_hyd or not p_dehyd or not T_hyd
             or not T_dehyd or not V_res or not V_cell
             or not m_sample or not T_reservoir):
-            raise "Some values for uptake calculation are None"
+            self.logger.error("No sufficient data for uptake calculation")
+            return None
+
+
 
         m_hyd = self._H2_mass_fun(p_list=p_hyd, T_list=T_hyd, V_res_list=V_res, V_cell=V_cell, T_res_list=T_reservoir)
         m_dehyd = self._H2_mass_fun(p_list=p_dehyd, T_list=T_dehyd, V_res_list=V_res, V_cell=V_cell, T_res_list=T_reservoir)
