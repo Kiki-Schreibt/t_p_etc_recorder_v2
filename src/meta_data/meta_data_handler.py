@@ -73,7 +73,7 @@ class MetaData:
         self.retry_counter = 1
         self.read()
 
-    def reading_thread(self, column_names=None, mode="create"):
+    def reading_thread(self, column_names=None, mode="read"):
         if self.sample_id:
             if not column_names:
                 column_names = TableConfig().get_table_column_names(table_name=self.table_name)
