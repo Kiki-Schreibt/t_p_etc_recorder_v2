@@ -216,7 +216,6 @@ class VantHoffCalcEq:
 
 
 def test_calc_eq(meta_data, db_conn_params):
-    from src.meta_data.meta_data_handler import MetaData
     calculator = VantHoffCalcEq(meta_data=meta_data)
     # Scalar input
     eq_pressure_scalar = calculator.calc_eq(temperature=350)

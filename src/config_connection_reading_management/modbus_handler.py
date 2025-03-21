@@ -145,12 +145,12 @@ class ModbusProcessor:
         else:
             self.meta_data = new_val
         self.mb_data_handler.meta_data = self.meta_data
-        self.mb_data_handler.de_hyd_state, self.cycle = self.mb_data_handler.data_retriever.fetch_last_state_and_cycle(sample_id=self.meta_data.sample_id)
+        self.mb_data_handler.de_hyd_state, self.cycle = self.mb_data_handler.data_retriever.fetch_last_state_and_cycle(meta_data=self.meta_data)
         self.mb_data_handler.cycle = self.cycle
         self.logger.info(f"Sample ID changed to: {self.meta_data.sample_id}")
         if self.cycle == 0:
             self.mb_data_handler._new_test_handling()
-        #self.meta_data.print()
+        #self.meta_data.print()F
 
 
 class ModbusReader:
@@ -422,7 +422,7 @@ class ModbusDataHandler:
         self.h2_uptake_flag = False
 
         self.eq_calculator = EqCalculator(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
-        self.de_hyd_state, self.cycle = self.data_retriever.fetch_last_state_and_cycle(sample_id=self.meta_data.sample_id)
+        self.de_hyd_state, self.cycle = self.data_retriever.fetch_last_state_and_cycle(meta_data=self.meta_data)
         if not self.cycle:
             self._new_test_handling()
 

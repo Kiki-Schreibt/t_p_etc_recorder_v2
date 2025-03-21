@@ -308,8 +308,7 @@ class DataRetriever:
             return pd.DataFrame()
 
 
-    def fetch_last_state_and_cycle(self, sample_id: Optional[str] = None) -> Tuple:
-        meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
+    def fetch_last_state_and_cycle(self, meta_data) -> Tuple:
         return meta_data.last_de_hyd_state, meta_data.total_number_cycles
 
     def fetch_data_by_cycle(
