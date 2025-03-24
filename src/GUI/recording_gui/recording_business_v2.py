@@ -271,7 +271,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
     Signals:
         current_cycle_sig, current_state_sig, current_uptake_sig: Relayed signals from the reader.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData(), db_conn_params=None):
+    def __init__(self, parent=None, y_axis='', meta_data: MetaData = object, db_conn_params=None):
         try:
             self.reader = ReadContinuous(meta_data=meta_data, db_conn_params=db_conn_params)
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
@@ -288,7 +288,7 @@ class StaticPlotWindow(PlotBaseWindow):
     """
     A PlotBaseWindow subclass for static plotting.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: MetaData = MetaData(), db_conn_params=None):
+    def __init__(self, parent=None, y_axis='', meta_data: MetaData = object, db_conn_params=None):
         try:
             self.reader = ReadStatic(meta_data=meta_data, db_conn_params=db_conn_params)
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
@@ -778,7 +778,9 @@ def test_read_plot_uptake():
     Test function for UptakePlot.
     """
     try:
-        meta_data = MetaData(sample_id='WAE-WA-040')
+        from src.config_connection_reading_management.config_reader import GetConfig
+        from src.meta_data.meta_data_handler import MetaData
+        meta_data = MetaData(sample_id='WAE-WA-040', db_conn_params=GetConfig().db_conn_params)
         uptake_win = UptakePlot()
         uptake_win.load_data(meta_data=meta_data)
         return uptake_win
@@ -850,6 +852,7 @@ if __name__ == '__main__':
         app = QApplication([])
 
         from src.config_connection_reading_management.config_reader import GetConfig
+        from src.meta_data.meta_data_handler import MetaData
         db_conn_params = GetConfig().db_conn_params
         meta_data = MetaData('WAE-WA-030', db_conn_params=db_conn_params)
         win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params)
