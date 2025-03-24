@@ -1,5 +1,4 @@
 #modbus_handler.py
-import logging
 from datetime import datetime, timedelta
 import numpy as np
 import struct
@@ -12,17 +11,16 @@ from pymodbus.exceptions import ModbusException, ConnectionException
 from pymodbus.pdu import ExceptionResponse
 from psycopg2 import IntegrityError
 
-
 from src.config_connection_reading_management.connections import DatabaseConnection, ModbusConnection
-try:
-    import src.config_connection_reading_management.logger as logging
-except ImportError:
-    import logging
 from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.meta_data.meta_data_handler import MetaData
 from src.table_data import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, DataBaseManipulator
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 
 local_tz = ZoneInfo("Europe/Berlin")
 
@@ -78,6 +76,7 @@ class ModbusProcessor:
             Port number for the Modbus connection (default is config.MODBUS_PORT).
         """
         self.meta_data = meta_data
+        self.logger = logging.getLogger(__name__)
         try:
             self.db_conn_params = config.db_conn_params
             self.mb_conn_params = config.mb_conn_params
@@ -86,7 +85,6 @@ class ModbusProcessor:
         except Exception as e:
             self.logger.error(f"No config provided: {e}")
             raise
-        self.logger = logging.getLogger(__name__)
         self.running = False
         self.mb_reader = ModbusReader(mb_reading_params=self.mb_reading_params, mb_conn_params=self.mb_conn_params)
         self.mb_data_handler = ModbusDataHandler(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
@@ -1027,7 +1025,7 @@ class CycleCounter:
 
 class ModbusDBWriter:
     def __init__(self, meta_data, db_conn_params):
-        self.db_conn_params = db_conn_params or {}
+        self.db_conn_params = db_conn_params
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.qb = QueryBuilder(db_conn_params=self.db_conn_params)

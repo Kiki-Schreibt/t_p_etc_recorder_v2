@@ -17,7 +17,6 @@ try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
-from src.meta_data.meta_data_handler import MetaData
 
 from src.table_data import TableConfig
 
@@ -67,18 +66,18 @@ class ReadData(QThread):
     T_data_sig = Signal(pd.DataFrame)
     p_data_sig = Signal(pd.DataFrame)
     etc_data_sig = Signal(pd.DataFrame)
-    meta_data_sig = Signal(MetaData)
+    meta_data_sig = Signal(object)
     current_cycle_sig = Signal(float)
     current_state_sig = Signal(str)
     current_uptake_sig = Signal(float)
     cycles_full_test_sig = Signal(pd.DataFrame)
     auto_update_x_range_sig = Signal()
 
-    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+    def __init__(self, meta_data, db_conn_params):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         from src.config_connection_reading_management.database_reading_writing import DataRetriever
-        self.db_conn_params = db_conn_params or {}
+        self.db_conn_params = db_conn_params
         self.db_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self.limit_amount_storage = self.db_retriever.limit_datapoints
         self.running = False
@@ -138,7 +137,8 @@ class ReadData(QThread):
             if not df.empty:
                 df = df.sort_values(by=table.time, ascending=True)
             if not df[table.sample_id].iloc[-1] == self.meta_data.sample_id:
-                self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1])
+                from src.meta_data.meta_data_handler import MetaData
+                self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1], db_conn_params=self.db_conn_params)
                 self.meta_data_sig.emit(self.meta_data)
                 self.logger.info("Sample ID changed to %s", self.meta_data.sample_id)
             return df
@@ -258,7 +258,7 @@ class ReadData(QThread):
         except Exception as e:
             self.logger.error("Error while reading cycle data: %s", e)
 
-    def on_meta_data_changed(self, new_meta_data=MetaData()):
+    def on_meta_data_changed(self, new_meta_data):
         if new_meta_data.sample_id:
             self.meta_data = new_meta_data
 
@@ -269,10 +269,9 @@ class ReadContinuous(ReadData):
     Uses QTimer to schedule periodic data reads.
     """
 
-    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+    def __init__(self, meta_data, db_conn_params):
         super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = "continuous"
-        self.db_connection = None  # Initialize the database connection to None
 
         #self.tp_timer.timeout.connect(print("fire"))
 
@@ -389,7 +388,7 @@ class ReadStatic(ReadData):
     """
     whole_test_emited_sig = Signal()
 
-    def __init__(self, meta_data=MetaData(), db_conn_params=None):
+    def __init__(self, meta_data, db_conn_params):
         super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
 

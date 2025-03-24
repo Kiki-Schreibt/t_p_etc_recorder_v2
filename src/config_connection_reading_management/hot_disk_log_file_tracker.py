@@ -9,12 +9,12 @@ import os
 
 from PySide6.QtCore import Signal, QObject
 
+from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor
+from src.standard_paths import standard_hot_disk_file_path
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
-from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor
-from src.standard_paths import standard_hot_disk_file_path
 
 
 class LogFileTracker(QObject):

@@ -8,47 +8,42 @@ except ImportError:
 from src.table_data import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.standard_paths import standard_export_path
-from src.meta_data.meta_data_handler import MetaData
+
 
 
 class QuickExport:
 
-    def __init__(self, db_conn_params=None):
-        self.db_conn_params = db_conn_params or {}
+    def __init__(self, db_conn_params, meta_data):
+        self.db_conn_params = db_conn_params
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.etc_table = TableConfig().ETCDataTable
         self.cycle_table = TableConfig().CycleDataTable
-        self.db_retriever = DataRetriever()
-        self.meta_data = MetaData(db_conn_params=self.db_conn_params)
+        self.db_retriever = DataRetriever(db_conn_params=db_conn_params)
+        self.meta_data = meta_data
 
-    def export_all(self, sample_id, constraints_etc: dict, subfolder_name_str=""):
-        self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
-        self.export_etc_data(sample_id=sample_id, constraints_etc=constraints_etc, subfolder_name_str=subfolder_name_str)
-        self.export_capacity_data(sample_id=sample_id, subfolder_name_str=subfolder_name_str)
-        self.export_t_p_data(sample_id=sample_id, subfolder_name_str=subfolder_name_str)
+    def export_all(self, constraints_etc: dict= {}, subfolder_name_str=""):
+        self.export_etc_data(constraints_etc=constraints_etc, subfolder_name_str=subfolder_name_str)
+        self.export_capacity_data(subfolder_name_str=subfolder_name_str)
+        self.export_t_p_data(subfolder_name_str=subfolder_name_str)
 
-    def export_etc_data(self, sample_id, constraints_etc: dict = {}, subfolder_name_str=""):
-        if not self.meta_data.sample_id:
-            self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
-        self.logger.info(f"Starting ETC data export for {sample_id}")
-        etc_data, file_edition_etc = self._get_etc_data_full_test(sample_id=sample_id, constraints_etc=constraints_etc)
-        self._write_data(sample_id=sample_id,
-                        data=etc_data,
-                        file_addition=file_edition_etc,
-                        subfolder_name=subfolder_name_str)
+    def export_etc_data(self, constraints_etc: dict = {}, subfolder_name_str=""):
+        self.logger.info(f"Starting ETC data export for {self.meta_data.sample_id}")
+        etc_data, file_edition_etc = self._get_etc_data_full_test(constraints_etc=constraints_etc)
+        self._write_data(
+                         data=etc_data,
+                         file_addition=file_edition_etc,
+                         subfolder_name=subfolder_name_str)
 
-    def export_capacity_data(self, sample_id, subfolder_name_str=""):
-        if not self.meta_data.sample_id:
-            self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
-        self.logger.info(f"Starting capacity over cycles data export for {sample_id}")
-        capacity_data, file_edition_cap = self._get_capacity_data_full_test(sample_id=sample_id)
-        self._write_data(sample_id=sample_id,
+    def export_capacity_data(self, subfolder_name_str=""):
+        self.logger.info(f"Starting capacity over cycles data export for {self.meta_data.sample_id}")
+        capacity_data, file_edition_cap = self._get_capacity_data_full_test()
+        self._write_data(
                         data=capacity_data,
                         file_addition=file_edition_cap,
                         subfolder_name=subfolder_name_str)
 
-    def _get_etc_data_full_test(self, sample_id, constraints_etc: dict = {}):
+    def _get_etc_data_full_test(self, constraints_etc: dict = {}):
         cols_to_export = (self.etc_table.time,
                           self.etc_table.pressure,
                           self.etc_table.temperature_sample,
@@ -73,7 +68,8 @@ class QuickExport:
         data_to_export = self.db_retriever.fetch_data_by_sample_id_2(table_name=self.etc_table.table_name,
                                                                      column_names=cols_to_export,
                                                                      constraints=constraints_etc,
-                                                                     sample_id=sample_id)
+                                                                     sample_id=self.meta_data.sample_id
+                                                                    )
 
         data_to_export = data_to_export.dropna(subset=self.etc_table.get_clean('time'))
         #calculate relative times
@@ -90,13 +86,13 @@ class QuickExport:
 
         return data_to_export, "_Conductivity_Data"
 
-    def _get_capacity_data_full_test(self, sample_id):
+    def _get_capacity_data_full_test(self):
         cols_to_export = (self.cycle_table.cycle_number,
                           self.cycle_table.h2_uptake)
 
         data_to_export = self.db_retriever.fetch_data_by_sample_id_2(table_name=self.cycle_table.table_name,
                                                                      column_names=cols_to_export,
-                                                                     sample_id=sample_id)
+                                                                     sample_id=self.meta_data.sample_id)
         min_value = data_to_export[self.cycle_table.cycle_number].min()
         max_value = data_to_export[self.cycle_table.cycle_number].max()
         expected_values = np.arange(min_value, max_value + 0.1, 0.5)
@@ -112,18 +108,18 @@ class QuickExport:
 
         return merged_df, "_Capacity_Data"
 
-    def _write_data(self, sample_id="", data=pd.DataFrame(), file_addition="", subfolder_name=""):
+    def _write_data(self, data=pd.DataFrame(), file_addition="", subfolder_name=""):
 
-        file_name = sample_id + file_addition + ".txt"
+        file_name = str(self.meta_data.sample_id) + file_addition + ".txt"
         # Combine them into a full file path
         full_file_path = os.path.join(standard_export_path,
-                                      sample_id,
+                                      str(self.meta_data.sample_id),
                                       subfolder_name,
                                       file_name)
 
         # Ensure the directory exists
         os.makedirs(standard_export_path, exist_ok=True)
-        os.makedirs(os.path.join(standard_export_path, sample_id, subfolder_name), exist_ok=True)
+        os.makedirs(os.path.join(standard_export_path, self.meta_data.sample_id, subfolder_name), exist_ok=True)
         try:
             # Write the data to the file
             data.to_csv(full_file_path, sep=';', index=False)
@@ -132,17 +128,17 @@ class QuickExport:
         except Exception as e:
             self.logger.error(f"Error exporting data: {e}")
 
-    def export_t_p_data(self, sample_id, subfolder_name_str=""):
-        if not self.meta_data.sample_id:
-            self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
+    def export_t_p_data(self, subfolder_name_str=""):
+        sample_id = self.meta_data.sample_id
         self.logger.info(f"Starting temperature-pressure data export for {sample_id}")
-        t_p_data, file_edition_etc = self._get_tp_data(sample_id=sample_id)
-        self._write_data(sample_id=sample_id,
+        t_p_data, file_edition_etc = self._get_tp_data()
+        self._write_data(
                         data=t_p_data,
                         file_addition=file_edition_etc,
                         subfolder_name=subfolder_name_str)
 
-    def _get_tp_data(self, sample_id):
+    def _get_tp_data(self):
+        sample_id = self.meta_data.sample_id
         table = self.tp_table
         column_names_first = [self.tp_table.time,
                               self.tp_table.temperature_sample,
@@ -226,8 +222,12 @@ class QuickExport:
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
     sample_id = 'WAE-WA-030'
-    exporter = QuickExport()
-    exporter.export_all(sample_id=sample_id)
+
+    from src.meta_data.meta_data_handler import MetaData
+    from src.config_connection_reading_management.config_reader import GetConfig
+    meta_data = MetaData(sample_id=sample_id, db_conn_params=GetConfig().db_conn_params)
+    exporter = QuickExport(meta_data=meta_data, db_conn_params=GetConfig().db_conn_params)
+    exporter.export_all(constraints_etc={})
     #5344,289444522186 origin
     #5345,30476 python
     #31-03-2022 15:25:05 origin
