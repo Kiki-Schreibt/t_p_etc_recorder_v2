@@ -421,8 +421,10 @@ class ModbusDataHandler:
 
         self.eq_calculator = EqCalculator(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
         self.de_hyd_state, self.cycle = self.data_retriever.fetch_last_state_and_cycle(meta_data=self.meta_data)
+        print(self.cycle)
         if not self.cycle:
             self._new_test_handling()
+        print(self.cycle)
 
     def process_data(self, index, row, reservoir_volume=None):
         """
@@ -569,7 +571,7 @@ class CycleCounter:
         """
         self.db_conn_params = db_conn_params
         self.meta_data = meta_data
-        self.cycle = current_cycle
+        self.cycle = current_cycle or 0
         self.current_state = current_state
         self.tp_table = TableConfig().TPDataTable
         self.cycle_table = TableConfig().CycleDataTable
@@ -655,6 +657,7 @@ class CycleCounter:
         prev_cycle = self.cycle-0.5 if not special_case else self.cycle
 
         df_one_cycle = self._retrieve_cycle_data_by_cycle_number(prev_cycle=prev_cycle)
+
         if df_one_cycle.empty:
             return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), False
 
