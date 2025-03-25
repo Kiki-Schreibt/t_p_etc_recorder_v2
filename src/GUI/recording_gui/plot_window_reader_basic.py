@@ -360,7 +360,7 @@ class ReadContinuous(ReadData):
         try:
             if self.db_connection:
                 self.db_connection.close_connection()
-            self.db_connection = DatabaseConnection()
+            self.db_connection = DatabaseConnection(**self.db_conn_params)
             self.cursor = self.db_connection.cursor
             self.logger.info("Reconnected to the database.")
         except Exception as e:
