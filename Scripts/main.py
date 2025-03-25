@@ -83,6 +83,7 @@ class MainProgram(RecordingMainWindow):
         export_thread.start()
 
     def _open_dicon_simulator(self):
+        self.prev_mb_conn_params = None
         self.dicon_simulator = ModbusServerControlGUI()
         self.dicon_simulator.show()
         self.dicon_simulator.server_started.connect(self.change_modbus_host_ip)
@@ -94,19 +95,17 @@ class MainProgram(RecordingMainWindow):
 
     def change_modbus_host_ip(self, host_ip=None, port=None):
         recorder_was_running = self.controller.is_tp_recording_running()
-        if self.controller.is_tp_recording_running:
-                self.controller.stop_tp_recording()
+        if recorder_was_running:
+            self.controller.stop_tp_recording()
 
         if host_ip and port:
-            self.prev_port = self.controller.recorder.mb_processor.MB_PORT
-            self.prev_host = self.controller.recorder.mb_processor.MB_HOST
-            self.controller.recorder.mb_processor.MB_PORT = port
-            self.controller.recorder.mb_processor.MB_HOST = host_ip
+            self.prev_mb_conn_params = self.controller.recorder.mb_processor.mb_conn_params
 
-        elif self.prev_host and self.prev_port:
-            self.controller.recorder.mb_processor.MB_PORT = self.prev_port
-            self.controller.recorder.mb_processor.MB_HOST = self.prev_host
+            self.controller.recorder.mb_processor.mb_conn_params["MB_HOST"] = port
+            self.controller.recorder.mb_processor.mb_conn_params["MB_PORT"] = host_ip
 
+        elif self.prev_mb_conn_params:
+            self.controller.recorder.mb_processor.mb_conn_params = self.prev_mb_conn_params
         if recorder_was_running:
             self.controller.start_tp_recording()
 

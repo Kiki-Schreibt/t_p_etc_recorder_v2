@@ -272,6 +272,7 @@ class ReadContinuous(ReadData):
     def __init__(self, meta_data, db_conn_params):
         super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = "continuous"
+        self.db_connection = None
 
         #self.tp_timer.timeout.connect(print("fire"))
 
