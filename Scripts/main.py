@@ -101,8 +101,8 @@ class MainProgram(RecordingMainWindow):
         if host_ip and port:
             self.prev_mb_conn_params = self.controller.recorder.mb_processor.mb_conn_params
 
-            self.controller.recorder.mb_processor.mb_conn_params["MB_HOST"] = port
-            self.controller.recorder.mb_processor.mb_conn_params["MB_PORT"] = host_ip
+            self.controller.recorder.mb_processor.mb_conn_params["MB_PORT"] = str(port)
+            self.controller.recorder.mb_processor.mb_conn_params["MB_HOST"] = str(host_ip)
 
         elif self.prev_mb_conn_params:
             self.controller.recorder.mb_processor.mb_conn_params = self.prev_mb_conn_params

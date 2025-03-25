@@ -382,7 +382,7 @@ class ModbusServerControlGUI(QWidget):
         self.repeat_end_input.setEnabled(False)
         self.repeat_count_input.setEnabled(False)
 
-        QMessageBox.information(self, "Server Started", "Modbus Server has been started.")
+        #QMessageBox.information(self, "Server Started", "Modbus Server has been started.")
 
     @Slot()
     def stop_server(self):
@@ -392,7 +392,7 @@ class ModbusServerControlGUI(QWidget):
         self.mode_combo.setEnabled(True)
         self.sleep_input.setEnabled(True)
         self.update_mode(self.mode_combo.currentText())
-        QMessageBox.information(self, "Server Stopped", "Modbus Server has been stopped.")
+        #QMessageBox.information(self, "Server Stopped", "Modbus Server has been stopped.")
 
     @Slot()
     def update_sleep_interval(self):
