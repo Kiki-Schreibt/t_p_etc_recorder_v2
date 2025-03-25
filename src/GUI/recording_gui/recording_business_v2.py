@@ -24,7 +24,6 @@ import pyqtgraph as pg
 from PySide6.QtCore import QThread, Signal, QObject
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
-from src.meta_data.meta_data_handler import MetaData
 from src.config_connection_reading_management.modbus_handler import ModbusProcessor
 from src.table_data import TableConfig
 # Import plot window base classes (assumed to be unchanged)
@@ -60,7 +59,7 @@ class DataRecorder(QObject):
     """
     newEtcDataWritten = Signal(pd.DataFrame)
 
-    def __init__(self, meta_data: MetaData,
+    def __init__(self, meta_data: object,
                          config,
                          reservoir_volume: float=None):
         """
@@ -191,7 +190,7 @@ class DataRecorder(QObject):
         except Exception as e:
             self.logger.exception("Error updating sample ID:")
 
-    def update_meta_data(self, new_meta_data: MetaData):
+    def update_meta_data(self, new_meta_data: object):
         """
         Update metadata information.
         """
@@ -271,7 +270,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
     Signals:
         current_cycle_sig, current_state_sig, current_uptake_sig: Relayed signals from the reader.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: MetaData = object, db_conn_params=None):
+    def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None):
         try:
             self.reader = ReadContinuous(meta_data=meta_data, db_conn_params=db_conn_params)
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
@@ -288,7 +287,7 @@ class StaticPlotWindow(PlotBaseWindow):
     """
     A PlotBaseWindow subclass for static plotting.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: MetaData = object, db_conn_params=None):
+    def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None):
         try:
             self.reader = ReadStatic(meta_data=meta_data, db_conn_params=db_conn_params)
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
@@ -350,7 +349,7 @@ class UptakePlot(pg.PlotWidget):
         except Exception as e:
             self.logger.exception("Error initializing UI in UptakePlot:")
 
-    def load_data(self, meta_data: MetaData, time_range=None):
+    def load_data(self, meta_data: object, time_range=None):
         """
         Load uptake data from the database based on the sample ID and time range.
         """

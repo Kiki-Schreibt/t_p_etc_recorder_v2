@@ -550,7 +550,7 @@ class ExcelDataProcessor:
         results_sheet_name: str = 'Results',
         parameters_sheet_name: str = 'Parameters',
         sample_id: Optional[str] = None,
-        meta_data: Optional[MetaData] = None,
+        meta_data: Optional[object] = None,
         db_conn_params=None
     ):
         self.file_path = file_path
