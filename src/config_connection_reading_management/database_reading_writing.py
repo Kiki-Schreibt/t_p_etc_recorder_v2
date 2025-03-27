@@ -172,6 +172,7 @@ class DataRetriever:
                 column_names=column_names_t_p,
                 table_name=table_name_tp
             )
+
             if not tp_data.empty:
                 min_time = tp_data['time'].min()
                 max_time = tp_data['time'].max()

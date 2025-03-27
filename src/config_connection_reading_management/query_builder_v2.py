@@ -238,13 +238,16 @@ class TPQueryBuilder(BaseQueryBuilder):
     def _get_times_by_meta_data(self, sample_id):
         from src.meta_data.meta_data_handler import MetaData
         meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
+
         if not meta_data.start_time and not meta_data.end_time:
             first, last = self._fetch_first_and_last_match_by_sample_id(sample_id)
+
             if first and last:
                 meta_data.start_time = first
                 meta_data.end_time = last
                 meta_data.write()
                 return first, last
+
             else:
                 self.logger.error("Cannot determine time window for sample_id: %s", sample_id)
                 return None, None
@@ -252,12 +255,15 @@ class TPQueryBuilder(BaseQueryBuilder):
             return meta_data.start_time, meta_data.end_time
 
     def _fetch_first_and_last_match_by_sample_id(self, sample_id):
+        print("at least correct method started")
         table_name = self.tp_table.table_name
         time_column = self.tp_table.time
         columns = TableConfig().get_table_column_names(self.tp_table)
+        print("made it to here")
         sample_id_column = next((col for col in columns if "sample_id" in col.lower()), None)
         if sample_id is not None:
             query = f"SELECT MIN({time_column}), MAX({time_column}) FROM {table_name} WHERE {sample_id_column} = %s"
+            print(query)
         else:
             return None, None
         with DatabaseConnection(**self.db_conn_params) as db_conn:

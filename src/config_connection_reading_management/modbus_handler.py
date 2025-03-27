@@ -100,7 +100,6 @@ class ModbusProcessor:
         with (ModbusConnection(**self.mb_conn_params) as modbus_connection,
               DatabaseConnection(**self.db_conn_params) as db_conn):
             self.logger.info("Starting continuous data recording...")
-           # print("Starting temperature and pressure recording...")
             while self.running:
                 try:
                     df = self.mb_reader.read_from_dicon(client=modbus_connection.client)
@@ -119,11 +118,9 @@ class ModbusProcessor:
         """
         Stops the data recording, processing and writing.
         """
-        #print("Ending temperature and pressure recording...")
         self.logger.info("Ending temperature and pressure recording")
         self.running = False
         self.mb_reader.running = False
-        #print("Temperature and pressure recording stopped")
         self.logger.info("Temperature and pressure recording stopped")
 
     def on_sample_id_change(self, new_val, mode="sample_id"):
@@ -148,7 +145,6 @@ class ModbusProcessor:
         self.logger.info(f"Sample ID changed to: {self.meta_data.sample_id}")
         if self.cycle == 0:
             self.mb_data_handler._new_test_handling()
-        #self.meta_data.print()F
 
 
 class ModbusReader:
@@ -212,12 +208,9 @@ class ModbusReader:
         self.running = True
         retry_count = 0  # Initialize retry count
         self.logger.info("Starting continuous data recording...")
-           # print("Starting temperature and pressure recording...")
         while self.running:
             try:
                 converted_dicon_data = self.read_from_dicon(client)
-                print(converted_dicon_data)
-
                 time.sleep(SLEEP_INTERVAL)
 
             except Exception as e:
@@ -242,7 +235,6 @@ class ModbusReader:
         self.running = False
         if client:
             client.close()
-        #print("Temperature and pressure recording stopped")
         self.logger.info("Temperature and pressure recording stopped")
 
     def read_from_dicon(self, client):
@@ -268,13 +260,14 @@ class ModbusReader:
 
         def _convert_dicon_to_df(numbers_to_convert):
             values = []
+            df_Tp = pd.DataFrame()
+
             for i in range(0, len(numbers_to_convert), 2):
                 raw = struct.pack('>HH', numbers_to_convert[i + 1], numbers_to_convert[i])
                 values.append(struct.unpack('>f', raw)[0])
+
             if values:
                 df_Tp = pd.DataFrame([values], columns=[self.table.pressure, self.table.temperature_sample, self.table.setpoint_sample, self.table.temperature_heater, self.table.setpoint_heater])
-
-            #print(values)
             return df_Tp  # Returning df
 
         """
@@ -608,7 +601,7 @@ class CycleCounter:
 
         cycle_long_enough_bool = self._is_valid_cycle_duration(df_current_cycle=df_current_cycle, df_previous_cycle=df_previous_cycle)
         if not cycle_long_enough_bool:
-            print("not long enough")
+            self.logger.info("cycle not long enough")
             #treat_cycle_bool is true in case cycle should be handled. Will be true if matches manual wrote exceptions
             treat_cycle_bool = self._on_cycle_too_short(df=df_current_cycle, mode=mode)
             if not treat_cycle_bool:
@@ -953,7 +946,7 @@ class CycleCounter:
                                       f"{self.tp_table.cycle_number} = {self.tp_table.cycle_number} - 1 "
                                       f"WHERE {self.tp_table.time} > %s")
         values = (end_time_cycle,)
-        #print(f"{query_update_rest_of_table}, {end_time_cycle}")
+
         DataBaseManipulator(db_conn_params=self.db_conn_params).execute_updating(query=query_update_rest_of_table,
                                                values=values,
                                                many_bool=False)
@@ -1148,7 +1141,7 @@ class ModbusDBWriter:
         update_tp_query = f"UPDATE {t_p_table_name} SET {t_p_table.h2_uptake} = %s" \
                           f" WHERE {t_p_table.time} BETWEEN %s AND %s"
         value = convert_value(new_line_cycle[cycle_table.h2_uptake])
-        #print(update_tp_query)
+
         try:
             cursor.execute(update_tp_query, (value, time_start, time_end))
             cursor.connection.commit()
