@@ -240,6 +240,7 @@ class TPQueryBuilder(BaseQueryBuilder):
         meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
 
         if not meta_data.start_time and not meta_data.end_time:
+
             first, last = self._fetch_first_and_last_match_by_sample_id(sample_id)
 
             if first and last:

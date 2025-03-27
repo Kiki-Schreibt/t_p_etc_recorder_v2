@@ -414,10 +414,10 @@ class ModbusDataHandler:
 
         self.eq_calculator = EqCalculator(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
         self.de_hyd_state, self.cycle = self.data_retriever.fetch_last_state_and_cycle(meta_data=self.meta_data)
-        print(self.cycle)
+
         if not self.cycle:
             self._new_test_handling()
-        print(self.cycle)
+
 
     def process_data(self, index, row, reservoir_volume=None):
         """
