@@ -113,7 +113,7 @@ class MetaData:
         #if time_passed > 1:
         #    print(f"Reading meta data took longer than 1 s: {time_passed} s")
 
-    def write(self):
+    def write(self, quiet=False):
         if not self._sample_id_exists():
             if not self.sample_id:
                 return
@@ -143,7 +143,8 @@ class MetaData:
                 update_query = f'UPDATE "{self.table_name}" SET {set_clauses} WHERE "sample_id" = %s'
                 conn.cursor.execute(update_query, values)
                 conn.cursor.connection.commit()
-                self.logger.info(f"Meta data updated for sample_id: {self.sample_id}")
+                if not quiet:
+                    self.logger.info(f"Meta data updated for sample_id: {self.sample_id}")
 
     def _assign_column_names_and_values(self, column_names, df):
         for col_name in column_names:

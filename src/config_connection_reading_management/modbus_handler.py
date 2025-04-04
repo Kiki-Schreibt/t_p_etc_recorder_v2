@@ -1040,6 +1040,9 @@ class ModbusDBWriter:
                 self.meta_data.start_time = data[self.tp_table.time].min()
             self.meta_data.write()
 
+        self.meta_data.end_time = datetime.now(tz=local_tz)
+        self.meta_data.write(quiet=True)
+
         # Generate the insert query
         insert_query = self.qb.create_writing_query(
             table_name=self.tp_table.table_name,

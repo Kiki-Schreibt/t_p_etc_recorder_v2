@@ -78,7 +78,7 @@ class DatabaseConnection:
             try:
                 self.conn = psycopg2.connect(conn_str)
                 self.cursor = self.conn.cursor()  # Optional
-                self.logger.info("Database connection opened.")
+                self.logger.debug("Database connection opened.")
                 self.auto_close = auto_close
             except Exception as e:
                 self.logger.error("Database connection error: %s", str(e))
@@ -90,7 +90,7 @@ class DatabaseConnection:
             self.cursor.close()
         if self.conn:
             self.conn.close()
-        self.logger.info("Database connection closed.")
+        self.logger.debug("Database connection closed.")
         self.conn = None
         self.cursor = None
 

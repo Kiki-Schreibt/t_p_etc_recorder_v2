@@ -276,7 +276,6 @@ class TPQueryBuilder(BaseQueryBuilder):
                 db_conn.cursor.execute(query, (sample_id,))
                 result = db_conn.cursor.fetchone()
                 first_occ, last_occ = result[0], result[1]
-                db_conn.close_connection()
                 return first_occ, last_occ
             except Exception as e:
                 self.logger.error("Error fetching times for sample_id %s: %s", sample_id, e)
