@@ -95,24 +95,35 @@ class ModbusProcessor:
         Starts data reading, processing and writing in a continuous loop.
         """
         self.running = True
-        retry_count = 0  # Initialize retry count
+        retry_count = 0
+        max_retries = 5
+        reconnect_delay = 5  # seconds to wait between reconnect attempts
 
         with (ModbusConnection(**self.mb_conn_params) as modbus_connection,
               DatabaseConnection(**self.db_conn_params) as db_conn):
             self.logger.info("Starting continuous data recording...")
+            retry_count = 0  # reset retry count on a successful connection
             while self.running:
                 try:
                     df = self.mb_reader.read_from_dicon(client=modbus_connection.client)
                     if df.empty:
                         self.logger.error("No data to write")
                         continue
+                        
                     for index, row in df.iterrows():
                         tp_df = self.mb_data_handler.process_data(index, row)
                         self.mb_db_writer.insert_data_into_table(data=tp_df, cursor=db_conn.cursor)
                     time.sleep(self.mb_reading_params["SLEEP_INTERVAL"])
                 except Exception as e:
-                    self.running = False
-                    self.logger.error("An error occurred in the main loop: %s", e)
+                    # When an exception (other than IntegrityError) occurs, attempt to reconnect.
+                    retry_count += 1
+                    self.logger.error("Error occurred in main loop: %s", e)
+                    self.logger.info("Attempting to reconnect (%d/%d)...", retry_count, max_retries)
+                    if retry_count >= max_retries:
+                        self.logger.error("Max reconnect attempts reached. Terminating recording.")
+                        self.running = False
+                        break
+                    time.sleep(reconnect_delay)
 
     def stop(self):
         """
@@ -1057,6 +1068,10 @@ class ModbusDBWriter:
             cursor.executemany(insert_query, data_tuples)
             cursor.connection.commit()
             # self.logger.info("Data inserted")
+        except IntegrityError as e:
+            cursor.connection.rollback()
+            self.logger.error("Error occured while inserting data: Unique constraints. Skipping value")
+
         except Exception as e:
             self.logger.error("Error occurred while inserting data: %s", e)
             cursor.connection.rollback()

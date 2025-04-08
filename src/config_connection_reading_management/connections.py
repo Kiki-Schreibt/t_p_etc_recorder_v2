@@ -244,7 +244,7 @@ class HotDiskConnection:
         try:
             response = self.sock.recv(4096)
             decoded_response = response.decode('utf-8')
-            self.logger.info(f"Received response: {decoded_response}")
+            self.logger.debug(f"Received response: {decoded_response}")
             return decoded_response
         except socket.timeout:
             self.logger.warning("No response received within timeout period.")
