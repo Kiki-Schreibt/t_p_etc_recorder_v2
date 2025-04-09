@@ -865,8 +865,9 @@ def main():
     Entry point for the application.
     """
     try:
+        from src.config_connection_reading_management.config_reader import GetConfig
         app = QApplication([])
-        main_window = MainWindow()
+        main_window = MainWindow(config=GetConfig())
         main_window.show()
         app.exec()
     except Exception as e:
