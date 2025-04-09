@@ -429,7 +429,6 @@ class ModbusDataHandler:
         if not self.cycle:
             self._new_test_handling()
 
-
     def process_data(self, index, row, reservoir_volume=None):
         """
         Processes the DataFrame containing Modbus data.
@@ -904,7 +903,7 @@ class CycleCounter:
         start_time_current = df_current_cycle[self.tp_table.time].min()
         end_time_current = df_current_cycle[self.tp_table.time].max()
 
-
+        #todo: use times where cycle_update_flag is true even if uptake flag is false
         #prev_cycle_long_enough_bool = end_time_prev-start_time_prev >= self.meta_data.average_cycle_duration
         current_cycle_long_enough_bool = end_time_current-start_time_current >= self.meta_data.average_cycle_duration
         full_cycle_long_enough = end_time_current - start_time_prev >= self.meta_data.average_cycle_duration
@@ -969,6 +968,8 @@ class CycleCounter:
         return treat_cycle_bool
 
     def _handle_too_short_cycles_recording(self, df: pd.DataFrame, time_range_to_update: tuple):
+        if self.cycle == 1:
+            return True
         treat_cycle_bool = False
         de_hyd_state_to_update = self._get_state_to_overwrite(df=df)
         series_to_update = self._create_series_to_overwrite(de_hyd_state=de_hyd_state_to_update)
@@ -1157,13 +1158,15 @@ class ModbusDBWriter:
         t_p_table_name = t_p_table.table_name
 
         update_tp_query = f"UPDATE {t_p_table_name} SET {t_p_table.h2_uptake} = %s" \
-                          f" WHERE {t_p_table.time} BETWEEN %s AND %s"
+                          f" WHERE {t_p_table.sample_id} = %s AND {t_p_table.cycle_number} = %s "\
+                          f"AND {t_p_table.time} BETWEEN %s AND %s"
+
         value = convert_value(new_line_cycle[cycle_table.h2_uptake])
 
         try:
-            cursor.execute(update_tp_query, (value, time_start, time_end))
+            cursor.execute(update_tp_query, (value, self.meta_data.sample_id, new_line_cycle[cycle_table.cycle_number], time_start, time_end))
             cursor.connection.commit()
-            self.logger.info(f"{t_p_table_name} updated for cycle #{new_line_cycle[cycle_table.cycle_number]-0.5}: "
+            self.logger.info(f"{t_p_table_name} updated for cycle #{new_line_cycle[cycle_table.cycle_number]}: "
                              f"{t_p_table.h2_uptake} = {new_line_cycle[cycle_table.h2_uptake]}")
         except Exception as e:
             self.logger.error(f"Error occurred while updating {t_p_table_name} in method _update_cycle_t_p_table: %s", e)

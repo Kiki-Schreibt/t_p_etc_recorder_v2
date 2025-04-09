@@ -496,7 +496,7 @@ class DataBaseManipulator:
     def update_data(
         self,
         sample_id: Optional[str] = None,
-        table: Optional[TableConfig] = None,
+        table: object = None,
         update_df: Optional[Union[pd.DataFrame, pd.Series]] = None,
         col_to_match: Optional[str] = None,
         update_between_vals: Optional[Union[Tuple, List]] = None

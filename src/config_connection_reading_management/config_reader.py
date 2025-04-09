@@ -2,7 +2,10 @@
 import json
 import sys
 import os
-import logging
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
 
 from src.standard_paths import standard_config_file_path as config_file_path
 from src.standard_paths import standard_log_dir
@@ -201,4 +204,4 @@ class ConfigPrompter:
 if __name__ == "__main__":
     # For testing whether the configuration reader works.
     config = GetConfig()
-    print("LOG_FILE from configuration:", config.LOG_FILE)
+    print("LOG_FILE from configuration:", config.db_conn_params)
