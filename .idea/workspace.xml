@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/simulation/simulator_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/simulator_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +133,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.simulator_gui">
+  <component name="RunManager" selected="Python.main">
     <configuration name="code_length" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -199,7 +200,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="modbus_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="recording_main_v3" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -208,11 +209,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/config_connection_reading_management" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/recording_gui" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -245,11 +246,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.simulator_gui" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.recording_main_v3" />
+        <item itemvalue="Python.simulator_gui" />
         <item itemvalue="Python.code_length" />
         <item itemvalue="Python.config_reader" />
-        <item itemvalue="Python.modbus_handler" />
       </list>
     </recent_temporary>
   </component>
@@ -365,11 +366,6 @@
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
           <line>347</line>
           <option name="timeStamp" value="485" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/simulation/simulator_gui.py</url>
-          <line>588</line>
-          <option name="timeStamp" value="488" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

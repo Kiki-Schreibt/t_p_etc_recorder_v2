@@ -53,7 +53,7 @@ class MetaDataManager:
     def __init__(self, meta_data: MetaData):
         self.meta_data = meta_data
 
-    def update_from_ui(self, ui):
+    def update_from_ui(self, ui, update_meta_button_pushed=True):
         """
         Update the MetaData object from the UI fields.
         """
@@ -69,7 +69,9 @@ class MetaDataManager:
             self.meta_data.max_pressure_cycling = self._to_float(ui.max_pressure_cycling_edit_field.text())
             self.meta_data.min_temperature_cycling = self._to_float(ui.min_temperature_cycling_edit_field.text())
             self.meta_data.average_cycle_duration = self._parse_duration(ui.cycle_duration_edit_field.text())
-            self.meta_data.write()
+            if update_meta_button_pushed:
+                self.meta_data.write()
+                logging.getLogger(__name__).info("MetaData updated")
         except Exception as e:
             logging.getLogger(__name__).exception("Error updating MetaData from UI:")
 
@@ -745,7 +747,7 @@ class MainWindow(QMainWindow):
         Handle updates when any meta data field is changed.
         """
         try:
-            self.meta_manager.update_from_ui(self.ui)
+            self.meta_manager.update_from_ui(self.ui, update_meta_button_pushed=False)
             self.meta_manager.update_ui(self.ui)
             self.controller.update_sample_id(self.meta_data.sample_id)
         except Exception as e:
