@@ -308,9 +308,11 @@ class DataRetriever:
             self.logger.error("Error occurred while fetching xy data: %s", e)
             return pd.DataFrame()
 
-
     def fetch_last_state_and_cycle(self, meta_data) -> Tuple:
-        return meta_data.last_de_hyd_state, meta_data.total_number_cycles
+        if meta_data.last_de_hyd_state and meta_data.total_number_cycles:
+            return meta_data.last_de_hyd_state, meta_data.total_number_cycles
+        else:
+            return "Dehydrogenated", 0
 
     def fetch_data_by_cycle(
         self,

@@ -109,7 +109,7 @@ class ModbusProcessor:
                     if df.empty:
                         self.logger.error("No data to write")
                         continue
-                        
+
                     for index, row in df.iterrows():
                         tp_df = self.mb_data_handler.process_data(index, row)
                         self.mb_db_writer.insert_data_into_table(data=tp_df, cursor=db_conn.cursor)
@@ -483,7 +483,6 @@ class ModbusDataHandler:
             Current temperature value.
         """
 
-
         state_empty_bool = (self.de_hyd_state == 'NaN' or self.de_hyd_state is None)
         thermo_element_connected_bool = temperature < self.temperature_no_thermoelement
         if self.meta_data.min_temperature_cycling:
@@ -643,6 +642,7 @@ class CycleCounter:
         """
         cycle_data = self._retrieve_cycle_data(special_case=True)
         df_one_cycle, df_current_cycle, df_previous_cycle, is_uptake = cycle_data
+
         time_first_hyd = df_one_cycle[self.tp_table.time].iloc[-1]
         self.cycle += 0.5
         self.meta_data.first_hydrogenation = time_first_hyd
@@ -1230,10 +1230,20 @@ def test_mb_reading_writing(sample_id):
             i = i-1
             print(df)
 
+
 if __name__ == "__main__":
 
 
-    sample_id = "test-simulator-01"
-    test_mb_reading_writing(sample_id=sample_id)
+    from src.config_connection_reading_management.config_reader import GetConfig
+    from src.meta_data.meta_data_handler import MetaData
+    sample_id = "test-testers-bester"
+
+    config = GetConfig()
+    meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
+    cycle_counter = CycleCounter(meta_data=meta_data,
+                                     current_cycle=0,
+                                     current_state="Dehydrogenated",
+                                     db_conn_params=config.db_conn_params)
+    cycle_counter.count()
 
 
