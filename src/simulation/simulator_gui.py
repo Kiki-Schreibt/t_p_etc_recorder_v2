@@ -39,7 +39,7 @@ class ModbusServerControlBusiness(QObject):
         self.repeat_count = 0
         self.past_time_csv = 0
         self.iterator_tp_program = 1
-        self.server.point_to_highlight_received.connect(self.emit_point_to_highligt)
+        self.server.point_to_highlight_received.connect(self.emit_point_to_highlight)
         self.df = pd.DataFrame()
 
     def set_mode(self, mode):
@@ -147,7 +147,7 @@ class ModbusServerControlBusiness(QObject):
         except ValueError:
             return 0
 
-    def emit_point_to_highligt(self, row=pd.Series()):
+    def emit_point_to_highlight(self, row=pd.Series()):
 
         if not self.df.empty:
             if self.server.mode == 'csv':
@@ -221,11 +221,17 @@ class ModbusServerControlGUI(QWidget):
         # Plot area
         self.figure = Figure(figsize=(5, 4))
         self.canvas = FigureCanvas(self.figure)
-
         self.toolbar = NavigationToolbar(self.canvas, self)
+
+        self.pressure_figure = Figure(figsize=(5, 4))
+        self.pressure_canvas = FigureCanvas(self.pressure_figure)
+        self.pressure_toolbar = NavigationToolbar(self.pressure_canvas, self)
+
         plot_layout = QVBoxLayout()
         plot_layout.addWidget(self.toolbar)
         plot_layout.addWidget(self.canvas)
+        plot_layout.addWidget(self.pressure_toolbar)
+        plot_layout.addWidget(self.pressure_canvas)
 
         # Layouts
         mode_layout = QHBoxLayout()
@@ -285,8 +291,11 @@ class ModbusServerControlGUI(QWidget):
         self.csv_path_display.setText(path_test_data)
         self.business.set_folder_path(path_test_data)
         self.highlighted_points = []
+        self.highlighted_pressure_points = []
         self.ax = None
+        self.ax_pressure = None
         self.lines = []
+        self.lines_pressure = []
 
         # Connect signals and slots
         self.start_button.clicked.connect(self.start_server)
@@ -555,14 +564,35 @@ class ModbusServerControlGUI(QWidget):
             if "temperature" in column or column == 'setpoint_sample':
                 line, = self.ax.plot(df[x_col], df[column], linestyle='-', label=column)
                 self.lines.append((line, df[x_col], df[column]))  # Store the line and data
-            if "pressure" in column:
-                pass  # Handle pressure data if needed
         self.ax.set_xlabel('Time (seconds)')
         self.ax.set_ylabel('Temperature (°C)')
         self.ax.set_title('Temperature Program Simulation')
         self.ax.grid(True)
         self.ax.legend()
         self.canvas.draw()
+        self.update_pressure_canvas_on_data(df)
+
+    @Slot(object)
+    def update_pressure_canvas_on_data(self, df):
+        # Clear the existing pressure figure
+        self.pressure_figure.clear()
+        self.ax_pressure = self.pressure_figure.add_subplot(111)
+        x_col = 'seconds'
+
+        # Loop through columns of the df and plot those related to pressure
+        self.lines_pressure = []  # Reset the lines list
+        for column in df.columns:
+            if "pressure" in column.lower():
+                line, = self.ax_pressure.plot(df[x_col], df[column], linestyle='-', label=column)
+                self.lines_pressure.append((line, df[x_col], df[column]))  # Store the line and data
+
+        self.ax_pressure.set_xlabel('Time (seconds)')
+        self.ax_pressure.set_ylabel('Pressure (bar)')
+        self.ax_pressure.set_title('Pressure Data')
+        self.ax_pressure.grid(True)
+        self.ax_pressure.legend()
+
+        self.pressure_canvas.draw()
 
     @Slot(pd.Series)
     def highlight_point(self, rows):
@@ -582,6 +612,24 @@ class ModbusServerControlGUI(QWidget):
                     highlighted = self.ax.scatter(x_value, value, s=100, c='red', zorder=5)
                     self.highlighted_points.append(highlighted)
             self.canvas.draw()
+        self.highlight_pressure_points(rows)
+
+    def highlight_pressure_points(self, rows):
+        if self.highlighted_pressure_points:
+            for point in self.highlighted_pressure_points:
+                point.remove()
+            self.highlighted_pressure_points = []
+
+        x_value = rows['seconds']
+        if self.ax_pressure is not None and not rows.empty:
+            #todo: does not enter in tp_program mode because no self.ax there
+            for col, value in rows.items():
+                if "pressure" in col:
+                    # Highlight the new points
+                    highlighted_pressure = self.ax_pressure.scatter(x_value, value, s=100, c='red', zorder=5)
+                    self.highlighted_pressure_points.append(highlighted_pressure)
+            self.pressure_canvas.draw()
+
 
     @Slot(str)
     def on_simulation_error(self, message):
