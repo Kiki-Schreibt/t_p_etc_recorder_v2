@@ -129,6 +129,7 @@ class DataRecorder(QObject):
         Start the T-p recording thread using the ModbusProcessor.
         """
         self.logger.info("Starting T-p recording thread...")
+        self.mb_processor = self._create_mb_processor(meta_data=self.meta_data)
         try:
             if self._mb_thread is None:
                 self._mb_thread = threading.Thread(target=self.mb_processor.run, daemon=True)
