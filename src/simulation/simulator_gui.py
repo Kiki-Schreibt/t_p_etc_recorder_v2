@@ -16,6 +16,8 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from src.simulation.dicon_simulator_v2 import MBServer  # Import your MBServer class
 from src.tp_program_simulator import TemperatureControllerDiconSimulator
 
+
+#todo: implementation of preview of next files
 class ModbusServerControlBusiness(QObject):
     server_started = Signal(str, int)
     server_stopped = Signal()
@@ -98,7 +100,7 @@ class ModbusServerControlBusiness(QObject):
             # Combine legends from both axes
             lines_1, labels_1 = ax.get_legend_handles_labels()
             lines_2, labels_2 = ax2.get_legend_handles_labels()
-            ax.legend(lines_1 + lines_2, labels_1 + labels_2, loc='best')
+            ax.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper right')
             self.plot_updated.emit(figure)
 
     def get_data_for_plot_csv(self, df):
