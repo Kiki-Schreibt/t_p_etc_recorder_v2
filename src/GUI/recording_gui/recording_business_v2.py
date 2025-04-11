@@ -261,6 +261,8 @@ class DataRecorder(QObject):
         return True if self._mb_thread else False
 
 
+#todo: implement min max plot after cycle calculation. Maybe autoload test every few hours or so as well to have an overview
+
 # -------------------------------
 # Presentation Layer / Plotting
 # -------------------------------
