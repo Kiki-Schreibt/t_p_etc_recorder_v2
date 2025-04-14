@@ -15,6 +15,10 @@ import threading
 import os
 import time
 import struct
+import psutil
+
+import gc
+import tracemalloc
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -23,6 +27,7 @@ from pyModbusTCP.server import ModbusServer
 from PySide6.QtCore import Signal, QObject
 from src.table_data import TableConfig
 from src.tp_program_simulator import TemperatureControllerDiconSimulator
+
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
@@ -276,6 +281,7 @@ class MBServer(QObject):
                 counter += 1 * self.sleep_interval
                 with self.sleep_interval_lock:
                     time.sleep(self.sleep_interval)
+            del df, simulator
 
     def run_manual_mode(self):
         self.logger.info("Running in manual mode.")

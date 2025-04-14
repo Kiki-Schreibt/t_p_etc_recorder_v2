@@ -560,6 +560,8 @@ class ModbusServerControlGUI(QWidget):
         #todo: minutes und hours für plots auch
         self.canvas.figure.clear()
         self.ax = self.canvas.figure.add_subplot(111)
+        self.highlighted_points_scatter = None
+        self.highlighted_points_scatter_pressure = None
         x_col = 'seconds'
         self.lines = []  # Reset the lines list
         for column in df.columns:
@@ -597,25 +599,48 @@ class ModbusServerControlGUI(QWidget):
         self.pressure_canvas.draw()
 
     @Slot(pd.Series)
-    def highlight_point(self, rows):
-        # Remove previous highlight
-
-        if self.highlighted_points:
-            for point in self.highlighted_points:
-                point.remove()
-            self.highlighted_points = []
+    def highlight_point(self, rows: pd.Series):
+        if self.ax is None or rows.empty:
+            return
 
         x_value = rows['seconds']
-        if self.ax is not None and not rows.empty:
-            #todo: does not enter in tp_program mode because no self.ax there
-            for col, value in rows.items():
-                if "temperature" in col or col == 'setpoint_sample':
-                    # Highlight the new points
-                    highlighted = self.ax.scatter(x_value, value, s=100, c='red', zorder=5)
-                    self.highlighted_points.append(highlighted)
-            self.canvas.draw()
-        self.highlight_pressure_points(rows)
+        new_offsets = []
+        new_offsets_pressure = []
+        # Assume you're only highlighting one point per axis;
+        # if you want to highlight multiple, build a list of [x,y] pairs.
+        for col, value in rows.items():
+            if "temperature" in col or col == 'setpoint_sample':
+                new_offsets.append([x_value, value])
 
+        for col, value in rows.items():
+            if col == 'pressure':
+                new_offsets_pressure.append([x_value, value])
+
+        # If the scatter object doesn't exist yet, create it;
+        # otherwise, update its data.
+        if self.highlighted_points_scatter is None:
+            # Create a single scatter plot for all highlight points.
+            self.highlighted_points_scatter = self.ax.scatter(
+                [pt[0] for pt in new_offsets],
+                [pt[1] for pt in new_offsets],
+                s=100, c='red', zorder=5
+            )
+        else:
+            self.highlighted_points_scatter.set_offsets(new_offsets)
+
+        if self.highlighted_points_scatter_pressure is None:
+            # Create a single scatter plot for all highlight points.
+            self.highlighted_points_scatter_pressure = self.ax_pressure.scatter(
+                [pt[0] for pt in new_offsets_pressure],
+                [pt[1] for pt in new_offsets_pressure],
+                s=100, c='red', zorder=5
+            )
+        else:
+            self.highlighted_points_scatter_pressure.set_offsets(new_offsets)
+            self.highlighted_points_scatter_pressure.set_offsets(new_offsets_pressure)
+
+        self.canvas.draw()
+        self.pressure_canvas.draw()
     def highlight_pressure_points(self, rows):
         if self.highlighted_pressure_points:
             for point in self.highlighted_pressure_points:
