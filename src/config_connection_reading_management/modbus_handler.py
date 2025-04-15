@@ -28,7 +28,7 @@ STANDARD_MODE = 'recording'
 STATE_HYD = 'Hydrogenated'
 STATE_DEHYD = 'Dehydrogenated'
 
-
+#todo: implement memory usage tracking
 class ModbusProcessor:
     """
     Handles Modbus processing tasks including reading from the Modbus device,

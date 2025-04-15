@@ -1,10 +1,9 @@
 """
-dicon_simulator_v2.py
+dicon_simulator_v2_improved.py
 
 This module implements the following concerns:
-
 1. Helper functions for duration formatting and combining temperature program steps.
-2. CSV simulation support (CSVReaderForProgramSimulation and Simulator).
+2. CSV simulation support (CSVReaderForProgramSimulation and Simulator), with enhanced cleanup.
 3. Temperature Program Simulation (TpProgramSimulator with inner classes TPProgram and TemperatureController).
 4. The MBServer class – a Modbus server that can run in CSV mode, temperature program simulation mode, or manual mode.
 """
@@ -15,6 +14,7 @@ import threading
 import os
 import time
 import struct
+import gc  # Explicit garbage collection
 
 from zoneinfo import ZoneInfo
 
@@ -29,7 +29,6 @@ try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
-
 
 local_tz = ZoneInfo("Europe/Berlin")
 
@@ -57,11 +56,7 @@ def format_duration(duration_td):
 def combine_consecutive_temperatures(data):
     """
     Combine consecutive program steps with the same temperature.
-
-    Returns a pandas DataFrame with columns:
-      - 'temperature'
-      - 'duration'
-      - optionally, 'pressure' or other parameters.
+    Returns a pandas DataFrame with appropriate columns.
     """
     if not data:
         return []
@@ -125,14 +120,12 @@ def combine_consecutive_temperatures(data):
         df_program = pd.DataFrame(result, columns=['temperature', 'duration', 'measurement_power_watt', 'measurement_time'])
         return df_program
 
+
 import psutil
-import gc
-import tracemalloc
 def log_memory(logger, message=""):
     process = psutil.Process(os.getpid())
     mem_info = process.memory_info().rss  # in bytes
     logger.info(f"{message} Memory usage: {mem_info / (1024 ** 2):.2f} MB")
-
 
 
 # =============================================================================
@@ -147,8 +140,10 @@ class CSVReaderForProgramSimulation:
         self.file_name = file_name
 
     def read_and_process_csv(self):
+        df = pd.DataFrame()
         file_path = os.path.join(self.csv_file_path, self.file_name)
-        df = pd.read_csv(file_path)
+        # Using low_memory can reduce memory overhead in some cases.
+        df = pd.read_csv(file_path, low_memory=True)
         df = self._process_csv_sheets(df=df)
         return df
 
@@ -186,14 +181,14 @@ class Simulator:
     def data_simulator(self):
         total_rows = len(self.df)
         for index, row in self.df.iterrows():
-            is_last_row = index != total_rows - 1
+            is_last_row = (index != total_rows - 1)
             yield row, is_last_row
+        # Clear the DataFrame reference after iteration
         self.df = None
 
 
-
 # =============================================================================
-# Modbus Server (MBServer) Implementation
+# Modbus Server (MBServer) Implementation with periodic recycling for CSV mode
 # =============================================================================
 class MBServer(QObject):
     """
@@ -201,7 +196,7 @@ class MBServer(QObject):
     using a temperature program simulation, or from manually supplied values.
     """
     new_csv_file_received = Signal(pd.DataFrame)
-    point_to_highlight_received = Signal(pd.Series)
+    point_to_highlight_received = Signal(object)  # Accepts dict or pd.Series
 
     def __init__(self, host_ip, port, folder_path=None, mode='csv', sleep_interval=1):
         super().__init__()
@@ -232,7 +227,7 @@ class MBServer(QObject):
     def start_server(self):
         if not self.running_event.is_set():
             self.running_event.set()
-            self.server_thread = threading.Thread(target=self.run_server)
+            self.server_thread = threading.Thread(target=self.run_server, daemon=True)
             self.server_thread.start()
             self.logger.info("Server thread started.")
         else:
@@ -257,14 +252,12 @@ class MBServer(QObject):
             self.logger.info("Modbus Server stopped.")
 
     def run_csv_mode(self):
-        try:
-            last_file = ""
-        except FileNotFoundError:
-            self.logger.warning("Configuration file not found. Using defaults.")
-            last_file = ""
+        # Optionally, keep track of the last file processed if desired:
+        last_file = ""  # This might be read from a configuration file, for example.
         skip_to_file = bool(last_file)
-        for file_name in sorted(os.listdir(self.folder_path)):
-
+        # Get the sorted list of CSV files from the specified folder.
+        file_list = sorted([f for f in os.listdir(self.folder_path) if f.endswith(".csv")])
+        for file_name in file_list:
             if not self.running_event.is_set():
                 break
             if skip_to_file:
@@ -272,29 +265,43 @@ class MBServer(QObject):
                     skip_to_file = False
                 else:
                     continue
-            if not file_name.endswith(".csv"):
-                continue
+
             log_memory(self.logger, "Before CSV file loaded into simulator")
-            csv_reader = CSVReaderForProgramSimulation(csv_file_path=self.folder_path, file_name=file_name)
-            df = csv_reader.read_and_process_csv()
-            simulator = Simulator(df=df)
-            self.new_csv_file_received.emit(df)
-            self.logger.info(f"Processing file: {file_name}")
-            counter = 0
-            for row, _ in simulator.data_simulator():
-                if not self.running_event.is_set():
-                    break
-                if counter >= self.update_modbus_intervall:
-                    self._set_register_values(row=row)
-                    self.point_to_highlight_received.emit(row)
-                    counter = 0
-                counter += 1 * self.sleep_interval
-                with self.sleep_interval_lock:
-                    time.sleep(self.sleep_interval)
-            log_memory(self.logger, "After simulating whole CSV file before garbage collection")
-            del df, simulator, csv_reader
-            gc.collect()
-            log_memory(self.logger, "after garbage collection")
+            try:
+                # Process each CSV file in an isolated scope.
+                df = self._simulate_csv_file(file_name)
+            except Exception as e:
+                self.logger.error(f"Error processing {file_name}: {e}")
+            finally:
+                # Make sure to delete local references and run garbage collection.
+                gc.collect()
+            # Check memory after each file processing cycle.
+            log_memory(self.logger, "After processing CSV file and GC")
+
+    def _simulate_csv_file(self, file_name):
+        """Isolated function to process a CSV file and run its simulation."""
+        csv_reader = CSVReaderForProgramSimulation(csv_file_path=self.folder_path, file_name=file_name)
+        df = csv_reader.read_and_process_csv()
+        if df.empty:
+            return
+        simulator = Simulator(df=df)
+        # Emit the newly processed DataFrame to the connected UI.
+        self.new_csv_file_received.emit(df.copy())
+        self.logger.info(f"Processing file: {file_name}")
+        counter = 0
+        # Process the CSV file row by row.
+        for row, _ in simulator.data_simulator():
+            if not self.running_event.is_set():
+                break
+            if counter >= self.update_modbus_intervall:
+                self._set_register_values(row=row)
+                # Emit the row (or highlight info) to GUI. It can be a dict or series.
+                self.point_to_highlight_received.emit(row.copy())
+                counter = 0
+            counter += 1 * self.sleep_interval
+            with self.sleep_interval_lock:
+                time.sleep(self.sleep_interval)
+
 
     def run_manual_mode(self):
         self.logger.info("Running in manual mode.")
@@ -336,7 +343,7 @@ class MBServer(QObject):
             }
             if counter >= self.update_modbus_intervall:
                 self._set_register_values(row=row)
-                self.point_to_highlight_received.emit(row)
+                self.point_to_highlight_received.emit(row.copy())
                 counter = 0
             counter += 1 * self.sleep_interval
             with self.sleep_interval_lock:
@@ -388,11 +395,12 @@ class MBServer(QObject):
         ]
         for col, reg in zip(columns, regs_of_interest):
             try:
-                value = row.get(col, 0)
+                # Support both dictionary-based and pandas row input.
+                value = row.get(col, 0) if isinstance(row, dict) else row[col]
                 reg_values = _convert_float_to_registers(value)
                 self._server.data_bank.set_holding_registers(address=reg, word_list=reg_values)
             except Exception as e:
-                self.logger.error(f"Error in writing regs: {e}")
+                self.logger.error(f"Error writing register for column {col}: {e}")
 
     def set_manual_values(self, values):
         with self.manual_values_lock:
@@ -404,26 +412,10 @@ class MBServer(QObject):
 # =============================================================================
 if __name__ == "__main__":
     # Example usage:
-    # Uncomment and modify the following lines to test CSV or TP simulation modes.
-    #
-    # mbs = MBServer(
-    #     host_ip="localhost",
-    #     port=502,  # Use port 502 for standard Modbus TCP
-    #     folder_path=r"/path/to/csv/files",
-    #     mode='csv'
-    # )
-    # try:
-    #     mbs.start_server()
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     mbs.stop_server()
-
-    # Example for testing temperature program simulation:
     from src.config_connection_reading_management.config_reader import GetConfig
 
-
     path_test_data = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\test_data\wae-wa-040-some-cycles"
+    path_test_data = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\WAE-WA-028-TundP-Verläufe"
 
     server = MBServer(
             host_ip="localhost",
@@ -431,18 +423,15 @@ if __name__ == "__main__":
             folder_path=path_test_data,  # Will be set via GUI
             mode='csv'
         )
-    server.sleep_interval = 0.0001
+    # Optionally set a more moderate sleep interval in production
+    server.sleep_interval = 0.00001
     try:
         server.start_server()
-        # Keep the main thread alive until a KeyboardInterrupt occurs.
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         pass
     finally:
         server.stop_server()
-        # Wait for the server thread to exit properly.
         if server.server_thread is not None:
             server.server_thread.join()
-
-

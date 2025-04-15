@@ -12,6 +12,7 @@ from PySide6.QtGui import QIntValidator
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.ticker import FuncFormatter
 
 from src.simulation.dicon_simulator_v2 import MBServer  # Import your MBServer class
 from src.tp_program_simulator import TemperatureControllerDiconSimulator
@@ -33,6 +34,17 @@ def log_memory(context=""):
     mem_mb = process.memory_info().rss / (1024 ** 2)
     logger.info(f"{context} Memory Usage: {mem_mb:.2f} MB")
 
+def seconds_to_minutes(x, pos):
+    # Convert seconds to minutes:seconds
+    minutes = int(x // 60)
+    seconds = int(x % 60)
+    return f'{minutes}:{seconds:02d}'
+
+def seconds_to_hours(x, pos):
+    # Convert seconds to hours:minutes
+    hours = int(x // 3600)
+    minutes = int((x % 3600) // 60)
+    return f'{hours}:{minutes:02d}'
 
 
 #todo: implementation of preview of next files
@@ -311,6 +323,7 @@ class ModbusServerControlGUI(QWidget):
         self.setLayout(main_layout)
 
         path_test_data = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\test_data\wae-wa-040-some-cycles"
+        path_test_data = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\WAE-WA-028-TundP-Verläufe"
         self.csv_path_display.setText(path_test_data)
         self.business.set_folder_path(path_test_data)
         self.highlighted_points = []
@@ -598,11 +611,14 @@ class ModbusServerControlGUI(QWidget):
             if "temperature" in column or column == 'setpoint_sample':
                 line, = self.ax.plot(df[x_col], df[column], linestyle='-', label=column)
                 self.lines.append((line, df[x_col], df[column]))  # Store the line and data
-        self.ax.set_xlabel('Time (seconds)')
+        self.ax.set_xlabel('Time (HH:MM)')
         self.ax.set_ylabel('Temperature (°C)')
         self.ax.set_title('Temperature Program Simulation')
         self.ax.grid(True)
         self.ax.legend()
+        formatter = FuncFormatter(seconds_to_hours)
+        self.ax.xaxis.set_major_formatter(formatter)
+
         self.canvas.draw()
         self.update_pressure_canvas_on_data(df)
         log_memory("After updating plot")
@@ -623,11 +639,13 @@ class ModbusServerControlGUI(QWidget):
                 line, = self.ax_pressure.plot(df[x_col], df[column], linestyle='-', label=column)
                 self.lines_pressure.append((line, df[x_col], df[column]))  # Store the line and data
 
-        self.ax_pressure.set_xlabel('Time (seconds)')
+        self.ax_pressure.set_xlabel('Time (HH:MM)')
         self.ax_pressure.set_ylabel('Pressure (bar)')
         self.ax_pressure.set_title('Pressure Data')
         self.ax_pressure.grid(True)
         self.ax_pressure.legend()
+        formatter = FuncFormatter(seconds_to_hours)
+        self.ax_pressure.xaxis.set_major_formatter(formatter)
         del df
         self.pressure_canvas.draw()
 
