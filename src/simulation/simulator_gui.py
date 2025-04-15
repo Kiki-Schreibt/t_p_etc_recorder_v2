@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QMessageBox, QComboBox, QFileDialog, QTableWidget, QTableWidgetItem,
     QHeaderView, QSizePolicy, QFormLayout
 )
-from PySide6.QtCore import Qt, Slot, Signal, QObject
+from PySide6.QtCore import Qt, Slot, Signal, QObject, QTimer
 from PySide6.QtGui import QIntValidator
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -15,6 +15,24 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 
 from src.simulation.dicon_simulator_v2 import MBServer  # Import your MBServer class
 from src.tp_program_simulator import TemperatureControllerDiconSimulator
+
+import psutil
+import os
+import gc
+import tracemalloc
+
+try:
+    import src.config_connection_reading_management.logger as logging
+except ImportError:
+    import logging
+
+logger = logging.getLogger(__name__)
+
+def log_memory(context=""):
+    process = psutil.Process(os.getpid())
+    mem_mb = process.memory_info().rss / (1024 ** 2)
+    logger.info(f"{context} Memory Usage: {mem_mb:.2f} MB")
+
 
 
 #todo: implementation of preview of next files
@@ -104,6 +122,8 @@ class ModbusServerControlBusiness(QObject):
             self.plot_updated.emit(figure)
 
     def get_data_for_plot_csv(self, df):
+        log_memory("When receiving df in Business")
+        self.df = None
         try:
             if not df.empty:
                 x_col = 'seconds'
@@ -114,6 +134,7 @@ class ModbusServerControlBusiness(QObject):
                 df[x_col] = time
                 self.df = df
                 self.csv_data_received.emit(df)
+                log_memory("After emiting df for updating canvas on data")
 
             else:
                 print("DataFrame is empty")
@@ -325,6 +346,12 @@ class ModbusServerControlGUI(QWidget):
         self._create_input_widgets_manual_mode()
         # Add the manual input widget to the left layout
         left_layout.addWidget(self.manual_input_widget)
+
+        # Set up QTimer with a 1000 ms (1 second) interval
+        self.highlight_point_timer = QTimer(self)
+        self.highlight_point_timer.setInterval(1000)  # Interval in milliseconds
+        self.highlight_point_timer.timeout.connect(self.update_display)
+        self.highlight_point_timer.start()
 
     def _create_input_widgets_manual_mode(self):
         self.manual_values = {}
@@ -558,6 +585,9 @@ class ModbusServerControlGUI(QWidget):
 
     def update_canvas_on_data(self, df):
         #todo: minutes und hours für plots auch
+        log_memory("Before updating plot")
+
+
         self.canvas.figure.clear()
         self.ax = self.canvas.figure.add_subplot(111)
         self.highlighted_points_scatter = None
@@ -575,6 +605,9 @@ class ModbusServerControlGUI(QWidget):
         self.ax.legend()
         self.canvas.draw()
         self.update_pressure_canvas_on_data(df)
+        log_memory("After updating plot")
+        del df
+        log_memory("After updating plot and deleting df")
 
     @Slot(object)
     def update_pressure_canvas_on_data(self, df):
@@ -595,7 +628,7 @@ class ModbusServerControlGUI(QWidget):
         self.ax_pressure.set_title('Pressure Data')
         self.ax_pressure.grid(True)
         self.ax_pressure.legend()
-
+        del df
         self.pressure_canvas.draw()
 
     @Slot(pd.Series)
@@ -639,24 +672,9 @@ class ModbusServerControlGUI(QWidget):
             self.highlighted_points_scatter_pressure.set_offsets(new_offsets)
             self.highlighted_points_scatter_pressure.set_offsets(new_offsets_pressure)
 
+    def update_display(self):
         self.canvas.draw()
         self.pressure_canvas.draw()
-    def highlight_pressure_points(self, rows):
-        if self.highlighted_pressure_points:
-            for point in self.highlighted_pressure_points:
-                point.remove()
-            self.highlighted_pressure_points = []
-
-        x_value = rows['seconds']
-        if self.ax_pressure is not None and not rows.empty:
-            #todo: does not enter in tp_program mode because no self.ax there
-            for col, value in rows.items():
-                if "pressure" in col:
-                    # Highlight the new points
-                    highlighted_pressure = self.ax_pressure.scatter(x_value, value, s=100, c='red', zorder=5)
-                    self.highlighted_pressure_points.append(highlighted_pressure)
-            self.pressure_canvas.draw()
-
 
     @Slot(str)
     def on_simulation_error(self, message):

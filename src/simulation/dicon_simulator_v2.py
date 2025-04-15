@@ -15,10 +15,7 @@ import threading
 import os
 import time
 import struct
-import psutil
 
-import gc
-import tracemalloc
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -128,6 +125,15 @@ def combine_consecutive_temperatures(data):
         df_program = pd.DataFrame(result, columns=['temperature', 'duration', 'measurement_power_watt', 'measurement_time'])
         return df_program
 
+import psutil
+import gc
+import tracemalloc
+def log_memory(logger, message=""):
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info().rss  # in bytes
+    logger.info(f"{message} Memory usage: {mem_info / (1024 ** 2):.2f} MB")
+
+
 
 # =============================================================================
 # CSV Simulation Support
@@ -182,6 +188,8 @@ class Simulator:
         for index, row in self.df.iterrows():
             is_last_row = index != total_rows - 1
             yield row, is_last_row
+        self.df = None
+
 
 
 # =============================================================================
@@ -256,6 +264,7 @@ class MBServer(QObject):
             last_file = ""
         skip_to_file = bool(last_file)
         for file_name in sorted(os.listdir(self.folder_path)):
+
             if not self.running_event.is_set():
                 break
             if skip_to_file:
@@ -265,6 +274,7 @@ class MBServer(QObject):
                     continue
             if not file_name.endswith(".csv"):
                 continue
+            log_memory(self.logger, "Before CSV file loaded into simulator")
             csv_reader = CSVReaderForProgramSimulation(csv_file_path=self.folder_path, file_name=file_name)
             df = csv_reader.read_and_process_csv()
             simulator = Simulator(df=df)
@@ -281,7 +291,10 @@ class MBServer(QObject):
                 counter += 1 * self.sleep_interval
                 with self.sleep_interval_lock:
                     time.sleep(self.sleep_interval)
-            del df, simulator
+            log_memory(self.logger, "After simulating whole CSV file before garbage collection")
+            del df, simulator, csv_reader
+            gc.collect()
+            log_memory(self.logger, "after garbage collection")
 
     def run_manual_mode(self):
         self.logger.info("Running in manual mode.")
@@ -407,13 +420,29 @@ if __name__ == "__main__":
     #     mbs.stop_server()
 
     # Example for testing temperature program simulation:
-    temperature_program = [
-                    (30, "00:05:00", 20, 10),
-                    (250, "00:05:00", 20, 10),]
-    start = datetime.now()
-    program = TemperatureControllerDiconSimulator(repeat_start=3,
-                                                         repeat_end=6,
-                                                         repeat_count=2, temperature_program=temperature_program)
-    compressed_program, df_total_program = program.get_program_times(start)
-    print(compressed_program)
-    print(df_total_program)
+    from src.config_connection_reading_management.config_reader import GetConfig
+
+
+    path_test_data = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\test_data\wae-wa-040-some-cycles"
+
+    server = MBServer(
+            host_ip="localhost",
+            port=503,  # Use appropriate port
+            folder_path=path_test_data,  # Will be set via GUI
+            mode='csv'
+        )
+    server.sleep_interval = 0.0001
+    try:
+        server.start_server()
+        # Keep the main thread alive until a KeyboardInterrupt occurs.
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.stop_server()
+        # Wait for the server thread to exit properly.
+        if server.server_thread is not None:
+            server.server_thread.join()
+
+

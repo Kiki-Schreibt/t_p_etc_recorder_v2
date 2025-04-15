@@ -135,7 +135,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.dicon_simulator_v2">
     <configuration name="code_length" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -248,9 +248,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.dicon_simulator_v2" />
         <item itemvalue="Python.simulator_gui" />
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.recording_main_v3" />
         <item itemvalue="Python.code_length" />
       </list>
@@ -358,11 +358,6 @@
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
           <line>347</line>
           <option name="timeStamp" value="485" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/simulation/simulator_gui.py</url>
-          <line>558</line>
-          <option name="timeStamp" value="486" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
