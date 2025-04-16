@@ -404,11 +404,12 @@ class MainController:
             self.meta_data.sample_id = sample_id
             self.meta_data.read()
             if self.recorder:
-                self.recorder.stop()
-                self.recorder = self.recorder = DataRecorder(meta_data=self.meta_data,
-                                         config=self.config
-                                         )
-                
+                self.recorder.stop_all_recording()
+
+            self.recorder = self.recorder = DataRecorder(meta_data=self.meta_data,
+                                                         config=self.config
+                                                         )
+
             if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'on_meta_data_changed'):
                 self.plot_manager.top_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'on_meta_data_changed'):
