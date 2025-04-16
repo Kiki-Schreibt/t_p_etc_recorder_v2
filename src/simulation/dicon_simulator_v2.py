@@ -30,6 +30,8 @@ try:
 except ImportError:
     import logging
 
+from src.memory_logger import log_memory
+
 local_tz = ZoneInfo("Europe/Berlin")
 
 
@@ -119,13 +121,6 @@ def combine_consecutive_temperatures(data):
         result.append([current_temp, current_duration, current_meas_power, current_meas_time])
         df_program = pd.DataFrame(result, columns=['temperature', 'duration', 'measurement_power_watt', 'measurement_time'])
         return df_program
-
-
-import psutil
-def log_memory(logger, message=""):
-    process = psutil.Process(os.getpid())
-    mem_info = process.memory_info().rss  # in bytes
-    logger.info(f"{message} Memory usage: {mem_info / (1024 ** 2):.2f} MB")
 
 
 # =============================================================================

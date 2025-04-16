@@ -17,22 +17,16 @@ from matplotlib.ticker import FuncFormatter
 from src.simulation.dicon_simulator_v2 import MBServer  # Import your MBServer class
 from src.tp_program_simulator import TemperatureControllerDiconSimulator
 
-import psutil
-import os
-import gc
-import tracemalloc
 
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
 
+from src.memory_logger import log_memory
+
 logger = logging.getLogger(__name__)
 
-def log_memory(context=""):
-    process = psutil.Process(os.getpid())
-    mem_mb = process.memory_info().rss / (1024 ** 2)
-    logger.info(f"{context} Memory Usage: {mem_mb:.2f} MB")
 
 def seconds_to_minutes(x, pos):
     # Convert seconds to minutes:seconds
@@ -134,7 +128,7 @@ class ModbusServerControlBusiness(QObject):
             self.plot_updated.emit(figure)
 
     def get_data_for_plot_csv(self, df):
-        log_memory("When receiving df in Business")
+        log_memory(logger, "When receiving df in Business")
         self.df = None
         try:
             if not df.empty:
@@ -146,7 +140,7 @@ class ModbusServerControlBusiness(QObject):
                 df[x_col] = time
                 self.df = df
                 self.csv_data_received.emit(df)
-                log_memory("After emiting df for updating canvas on data")
+                log_memory(logger, "After emiting df for updating canvas on data")
 
             else:
                 print("DataFrame is empty")
@@ -598,7 +592,7 @@ class ModbusServerControlGUI(QWidget):
 
     def update_canvas_on_data(self, df):
         #todo: minutes und hours für plots auch
-        log_memory("Before updating plot")
+        log_memory(logger, "Before updating plot")
 
 
         self.canvas.figure.clear()
@@ -615,15 +609,15 @@ class ModbusServerControlGUI(QWidget):
         self.ax.set_ylabel('Temperature (°C)')
         self.ax.set_title('Temperature Program Simulation')
         self.ax.grid(True)
-        self.ax.legend()
+        self.ax.legend(loc='upper right')
         formatter = FuncFormatter(seconds_to_hours)
         self.ax.xaxis.set_major_formatter(formatter)
 
         self.canvas.draw()
         self.update_pressure_canvas_on_data(df)
-        log_memory("After updating plot")
+        log_memory(logger, "After updating plot")
         del df
-        log_memory("After updating plot and deleting df")
+        log_memory(logger, "After updating plot and deleting df")
 
     @Slot(object)
     def update_pressure_canvas_on_data(self, df):
@@ -643,7 +637,7 @@ class ModbusServerControlGUI(QWidget):
         self.ax_pressure.set_ylabel('Pressure (bar)')
         self.ax_pressure.set_title('Pressure Data')
         self.ax_pressure.grid(True)
-        self.ax_pressure.legend()
+        self.ax_pressure.legend(loc='upper right')
         formatter = FuncFormatter(seconds_to_hours)
         self.ax_pressure.xaxis.set_major_formatter(formatter)
         del df

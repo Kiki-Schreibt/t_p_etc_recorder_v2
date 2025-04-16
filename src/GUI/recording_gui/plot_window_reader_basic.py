@@ -49,7 +49,42 @@ colors = [
 colors_scatter = colors.copy()
 READING_MODE_FULL_TEST = 'full_test'
 READING_MODE_BY_TIME = 'by_time'
+def downsample_data(df, sample_rate=2):
+    """
+    Downsamples the DataFrame by taking every 'sample_rate'-th row.
 
+    Parameters:
+        df (pd.DataFrame): The DataFrame to downsample.
+        sample_rate (int): The interval at which to sample rows (e.g., 2 means every 2nd row).
+
+    Returns:
+        pd.DataFrame: The downsampled DataFrame.
+    """
+    # Downsample using iloc; you can change this logic for more sophisticated resampling
+    return df.iloc[::sample_rate].reset_index(drop=True)
+
+def filter_last_day(df, time_column='time'):
+    """
+    Filters the DataFrame to only include data from the last day.
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame with datetime data.
+        time_column (str): The name of the datetime column.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing only the last day's data if initial df contains more data then 7 days.
+    """
+    if (df[time_column].max() - df[time_column].min()).days > 7:
+        # Set the time column as the DataFrame index to use the 'last' method easily
+        df = df.set_index(time_column)
+
+        # Filter to the last day
+        df_last_day = df.last('1D')
+
+        # Reset the index if necessary
+        return df_last_day.reset_index()
+    else:
+        return df
 
 #class DateAxisItem(pg.AxisItem):
   #  def tickStrings(self, values, scale, spacing):
@@ -167,6 +202,7 @@ class ReadData(QThread):
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data)
         self._read_emit_cycles_full_test_thread()
+        del df_t_p
 
     def _separate_and_append_t_p(self, df_t_p):
         table = TableConfig().TPDataTable
@@ -187,8 +223,11 @@ class ReadData(QThread):
             self.p_data = pd.concat([self.p_data, pressure_data], ignore_index=True)
         for data in [self.T_data, self.p_data]:
             if len(data) > self.limit_amount_storage:
-                drop_count = len(data) - self.limit_amount_storage
-                data.drop(data.index[:drop_count], inplace=True)
+                #old downsampling... probably bad
+                #drop_count = len(data) - self.limit_amount_storage
+                #data.drop(data.index[:drop_count], inplace=True)
+                ####new downsampling
+                data = downsample_data(data)
 
     def _remove_outliers(self, df):
         numeric_cols = df.select_dtypes(include=[np.number]).columns.difference(['time', 'state'])
@@ -213,6 +252,7 @@ class ReadData(QThread):
 
     def _read_emit_uptake_last_cycle(self):
         table = TableConfig().CycleDataTable
+        df_one_cycle = pd.DataFrame()
         if self.current_cycle:
             df_one_cycle = self.db_retriever.fetch_data_by_cycle(
                 cycle_numbers=self.current_cycle - 0.5,
@@ -221,6 +261,7 @@ class ReadData(QThread):
             if not df_one_cycle.empty:
                 self.current_uptake = df_one_cycle[TableConfig().CycleDataTable.h2_uptake].iloc[-1]
                 self.current_uptake_sig.emit(self.current_uptake)
+        del df_one_cycle
 
     def update_constraints_etc(self, new_constraints: dict):
         self.constraints_etc = new_constraints
@@ -731,9 +772,11 @@ class PlotBaseWindow(PlotBaseStyle):
     ### handle zooming in plot
     @Slot()
     def _on_x_range_changed(self):
+        """Starts a timer before reloading the visible x_change. timeout will trigger _on_range_change_timeout"""
         self.range_change_timer.start(500)
 
     def _on_range_change_timeout(self):
+        """Checks if significant changes are in x_range. Triggers load_visible_data if so"""
         view_range = self.plotItem.viewRange()
         if view_range[0][0] < -65 or view_range[0][1] < -65:
             return
@@ -789,6 +832,7 @@ class PlotBaseWindow(PlotBaseStyle):
     def update_constraints_t_p(self, new_constraints):
         if hasattr(self, 'reader'):
             self.reader.update_constraints_t_p(new_constraints)
+
     ### handle point clicking
     def _on_point_clicked(self, plot, points):
         if len(points) > 0:
@@ -820,18 +864,10 @@ class PlotBaseWindow(PlotBaseStyle):
         self.point_colors = [default_color for _ in self.point_colors]
         x_data, y_data = self.scatter_plot_item.getData()
         self.scatter_plot_item.setData(x=x_data, y=y_data, brush=self.point_colors)
+
     ###
     def _update_x_range(self, time_range):
         self.plotItem.setXRange(min(time_range), max(time_range))
-
-    ### handle point clicking continues below...
-    def _on_point_clicked(self, plot, points):
-        if len(points) > 0:
-            point = points[0]
-            point_datetime = datetime.fromtimestamp(point.pos().x(), tz=local_tz_reg)
-            print('clicked a point', point_datetime)
-            self._change_point_color(point.pos().x())
-            self.point_clicked_time_received.emit(point_datetime,  self.current_color_scatter)
 
     def closeEvent(self, event):
         self.logger.info("Window is being closed.")

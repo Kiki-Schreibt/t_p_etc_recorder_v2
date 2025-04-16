@@ -5,6 +5,7 @@ import struct
 import time
 from zoneinfo import ZoneInfo
 import threading
+import gc
 
 import pandas as pd
 from pymodbus.exceptions import ModbusException, ConnectionException
@@ -110,10 +111,13 @@ class ModbusProcessor:
                         self.logger.error("No data to write")
                         continue
 
+
                     for index, row in df.iterrows():
                         tp_df = self.mb_data_handler.process_data(index, row)
                         self.mb_db_writer.insert_data_into_table(data=tp_df, cursor=db_conn.cursor)
                     time.sleep(self.mb_reading_params["SLEEP_INTERVAL"])
+                    del df, index, row
+                    gc.collect()
                 except Exception as e:
                     # When an exception (other than IntegrityError) occurs, attempt to reconnect.
                     retry_count += 1
@@ -218,7 +222,7 @@ class ModbusReader:
 
         self.running = True
         retry_count = 0  # Initialize retry count
-        self.logger.info("Starting continuous data recording...")
+        self.logger.info("Starting continuous data reading...")
         while self.running:
             try:
                 converted_dicon_data = self.read_from_dicon(client)

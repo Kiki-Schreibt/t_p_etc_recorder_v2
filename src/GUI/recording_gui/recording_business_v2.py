@@ -16,6 +16,8 @@ import sys
 import threading
 import time
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
 
 import numpy as np
 import pandas as pd
@@ -28,12 +30,14 @@ from src.config_connection_reading_management.modbus_handler import ModbusProces
 from src.table_data import TableConfig
 # Import plot window base classes (assumed to be unchanged)
 from src.GUI.recording_gui.plot_window_reader_basic import (
-    PlotBaseWindow, ReadStatic, ReadContinuous, AxisLabel
+    PlotBaseWindow, ReadStatic, ReadContinuous, AxisLabel, local_tz_reg, READING_MODE_BY_TIME
 )
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
     import logging
+
+
 
 # Global colors for plotting
 COLORS = [
@@ -276,14 +280,83 @@ class ContinuousPlotWindow(PlotBaseWindow):
     def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None):
         try:
             self.reader = ReadContinuous(meta_data=meta_data, db_conn_params=db_conn_params)
+            self.reader_type = None   # can be 'continuous' or 'static'
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
             # Relay key signals to be used by the controller
-            self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
-            self.reader.current_state_sig.connect(self.current_state_sig.emit)
-            self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
-            self.enableAutoRange()
+            self.meta_data = meta_data
+            self.db_conn_params = db_conn_params
+            self._init_continuous_reader()
+            self.zoom_mode_active = False  # Flag to indicate if manual zoom override is active
+            # Connect the x-range changed signal to the existing method
+
+
+
         except Exception as e:
             logging.getLogger(__name__).exception("Error initializing ContinuousPlotWindow:")
+
+    def _init_continuous_reader(self):
+        if self.reader_type != "continuous":
+            if hasattr(self, 'reader') and self.reader.running:
+                self.reader.stop()
+            try:
+                self.reader = ReadContinuous(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
+                self.reader_type = "continuous"
+                self._init_standard_signals()
+                self.enableAutoRange()
+            except Exception as e:
+                self.logger.error("Could not initialize continuous reader %s: ", e)
+
+    def _init_static_reader(self):
+        if self.reader_type != "static":
+            if hasattr(self, 'reader') and self.reader.running:
+                self.reader.stop()
+            try:
+                self.reader = ReadStatic(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
+                self.reader_type = "static"
+                self._init_standard_signals()
+                self.disableAutoRange()
+                self.plotItem.sigXRangeChanged.connect(self._on_x_range_changed)
+            except Exception as e:
+                logging.getLogger(__name__).exception("Could not initialize statis reader %s: ", e)
+
+    def _init_standard_signals(self):
+        self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
+        self.reader.current_state_sig.connect(self.current_state_sig.emit)
+        self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
+
+    def _resume_continuous_mode(self):
+        # This method should be called (e.g., on a double-click event) to disable zoom mode.
+        self.reader = ReadContinuous(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
+        self.zoom_mode_active = False
+        # Reset the time range to let continuous updates resume normal operation
+        if hasattr(self, 'reader'):
+            self.reader.time_range_to_read = None
+            self.reader.start()
+
+    def _toggle_zoom_mode(self):
+        """
+        Toggle between manual zoom mode and continuous update mode.
+        When zoom mode is enabled, the continuous data updates are paused,
+        and auto-range is disabled so that manual zoom operations are respected.
+        When disabled, the continuous reader is reinitialized/resumed and auto-range is enabled.
+        """
+        if not self.zoom_mode_active:
+            # Enable zoom mode: stop continuous updates and disable auto-ranging
+            self.zoom_mode_active = True
+            self.disableAutoRange()
+            # If a continuous reader is active and running, stop it to freeze the plot
+            if hasattr(self, 'reader') and self.reader.running:
+                self.reader.stop()
+            # Optionally, capture and store the current x-range if needed
+            current_range = self.plotItem.viewRange()[0]
+            self.logger.info("Zoom mode enabled. Current X range frozen at: %s", current_range)
+        else:
+            # Disable zoom mode: resume continuous updates and re-enable auto-ranging
+            self.zoom_mode_active = False
+            self.enableAutoRange()
+            self.logger.info("Zoom mode disabled. Resuming continuous updates.")
+            # Reinitialize and start the continuous reader to resume normal operation.
+            self._resume_continuous_mode()
 
 
 class StaticPlotWindow(PlotBaseWindow):
@@ -789,6 +862,7 @@ def test_read_plot_uptake():
     except Exception as e:
         logging.getLogger(__name__).exception("Error in test_read_plot_uptake:")
 
+
 def test_read_plot_tp_dependent():
     """
     Test function for TP-dependent plot.
@@ -805,6 +879,7 @@ def test_read_plot_tp_dependent():
     except Exception as e:
         logging.getLogger(__name__).exception("Error in test_read_plot_tp_dependent:")
 
+
 def test_plots():
     """
     Test function to display uptake and TP-dependent plots.
@@ -819,6 +894,7 @@ def test_plots():
         sys.exit(app.exec())
     except Exception as e:
         logging.getLogger(__name__).exception("Error in test_plots:")
+
 
 def test_reading():
     """
@@ -835,6 +911,7 @@ def test_reading():
     except Exception as e:
         logging.getLogger(__name__).exception("Error in test_reading:")
 
+
 def test_xy_read_plot():
     """
     Test function for XY plot.
@@ -848,6 +925,7 @@ def test_xy_read_plot():
     except Exception as e:
         logging.getLogger(__name__).exception("Error in test_xy_read_plot:")
 
+
 if __name__ == '__main__':
     try:
         from PySide6.QtWidgets import QApplication
@@ -856,9 +934,12 @@ if __name__ == '__main__':
         from src.config_connection_reading_management.config_reader import GetConfig
         from src.meta_data.meta_data_handler import MetaData
         db_conn_params = GetConfig().db_conn_params
-        meta_data = MetaData('WAE-WA-030', db_conn_params=db_conn_params)
-        win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params)
-        win.point_clicked_time_received.connect(print)
+        meta_data = MetaData('test-testers-bester', db_conn_params=db_conn_params)
+        #win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params)
+        win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
+        win.reader.start()
+
+        #win.point_clicked_time_received.connect(print)
         win.reader.meta_data = meta_data
         win.show()
         sys.exit(app.exec())
