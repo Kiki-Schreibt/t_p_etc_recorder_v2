@@ -24,6 +24,8 @@ import pandas as pd
 import pyqtgraph as pg
 
 from PySide6.QtCore import QThread, Signal, QObject
+from PySide6.QtWidgets import QMenu
+from PySide6.QtGui import QAction
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
 from src.config_connection_reading_management.modbus_handler import ModbusProcessor
@@ -279,36 +281,36 @@ class ContinuousPlotWindow(PlotBaseWindow):
     """
     def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None):
         try:
-            self.reader = ReadContinuous(meta_data=meta_data, db_conn_params=db_conn_params)
             self.reader_type = None   # can be 'continuous' or 'static'
-            super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
-            # Relay key signals to be used by the controller
+            self.reader = None
             self.meta_data = meta_data
             self.db_conn_params = db_conn_params
             self._init_continuous_reader()
+            super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
+            # Relay key signals to be used by the controller
+            self._init_standard_signals()
             self.zoom_mode_active = False  # Flag to indicate if manual zoom override is active
             # Connect the x-range changed signal to the existing method
-
-
+            self.enableAutoRange()
 
         except Exception as e:
             logging.getLogger(__name__).exception("Error initializing ContinuousPlotWindow:")
 
     def _init_continuous_reader(self):
+
         if self.reader_type != "continuous":
-            if hasattr(self, 'reader') and self.reader.running:
+            if hasattr(self, 'reader') and self.reader is not None:
                 self.reader.stop()
             try:
                 self.reader = ReadContinuous(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
                 self.reader_type = "continuous"
                 self._init_standard_signals()
-                self.enableAutoRange()
             except Exception as e:
                 self.logger.error("Could not initialize continuous reader %s: ", e)
 
     def _init_static_reader(self):
         if self.reader_type != "static":
-            if hasattr(self, 'reader') and self.reader.running:
+            if hasattr(self, 'reader') and self.reader is not None:
                 self.reader.stop()
             try:
                 self.reader = ReadStatic(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
@@ -333,6 +335,18 @@ class ContinuousPlotWindow(PlotBaseWindow):
             self.reader.time_range_to_read = None
             self.reader.start()
 
+    def contextMenuEvent(self, event):
+        context_menu = QMenu(self)
+
+        toggle_action = QAction("Toggle Zoom Mode", self)
+        toggle_action.triggered.connect(self._toggle_zoom_mode)
+
+        context_menu.addAction(toggle_action)
+
+        # Optionally, add more actions if required.
+        context_menu.exec(event.globalPos())
+        event.accept()
+
     def _toggle_zoom_mode(self):
         """
         Toggle between manual zoom mode and continuous update mode.
@@ -349,6 +363,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
                 self.reader.stop()
             # Optionally, capture and store the current x-range if needed
             current_range = self.plotItem.viewRange()[0]
+
             self.logger.info("Zoom mode enabled. Current X range frozen at: %s", current_range)
         else:
             # Disable zoom mode: resume continuous updates and re-enable auto-ranging
@@ -934,7 +949,7 @@ if __name__ == '__main__':
         from src.config_connection_reading_management.config_reader import GetConfig
         from src.meta_data.meta_data_handler import MetaData
         db_conn_params = GetConfig().db_conn_params
-        meta_data = MetaData('test-testers-bester', db_conn_params=db_conn_params)
+        meta_data = MetaData('test', db_conn_params=db_conn_params)
         #win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params)
         win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
         win.reader.start()

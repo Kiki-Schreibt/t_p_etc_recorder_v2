@@ -142,9 +142,9 @@ class PlotManager:
         init_uptake_plot(): Initialize the hydrogen uptake plot.
         init_tp_dependent_plot(): Initialize the TP-dependent ETC plot.
     """
-    def __init__(self, ui, meta_data: MetaData, logger, db_conn_params=None):
+    def __init__(self, ui, meta_data: MetaData, logger, db_conn_params):
         self.ui = ui
-        self.db_conn_params = db_conn_params or {}
+        self.db_conn_params = db_conn_params
         self.meta_data = meta_data
         self.logger = logger
         self.top_plot = None
@@ -302,12 +302,14 @@ class MainController:
                  logger,
                  config):
         self.meta_data = meta_data
+        self.config = config
         self.plot_manager = plot_manager
         self.logger = logger
 
+
         try:
             self.recorder = DataRecorder(meta_data=self.meta_data,
-                                         config=config
+                                         config=self.config
                                          )
         except Exception as e:
             self.logger.exception("Error initializing DataRecorder in MainController:")
@@ -402,7 +404,11 @@ class MainController:
             self.meta_data.sample_id = sample_id
             self.meta_data.read()
             if self.recorder:
-                self.recorder.update_sample_id(sample_id)
+                self.recorder.stop()
+                self.recorder = self.recorder = DataRecorder(meta_data=self.meta_data,
+                                         config=self.config
+                                         )
+                
             if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'on_meta_data_changed'):
                 self.plot_manager.top_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'on_meta_data_changed'):
