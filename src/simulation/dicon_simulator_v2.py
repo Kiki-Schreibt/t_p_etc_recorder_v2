@@ -224,7 +224,7 @@ class MBServer(QObject):
             self.running_event.set()
             self.server_thread = threading.Thread(target=self.run_server, daemon=True)
             self.server_thread.start()
-            self.logger.info("Server thread started.")
+            self.logger.info(f"Server thread started on host {self.host_ip} and port {self.port}")
         else:
             self.logger.info("Server is already running.")
 

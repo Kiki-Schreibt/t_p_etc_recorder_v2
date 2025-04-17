@@ -8,8 +8,8 @@ except ImportError:
     import logging
 
 class TableCreator:
-    def __init__(self):
-        self.db_connection = DatabaseConnection()
+    def __init__(self, db_conn_params):
+        self.db_conn_params = db_conn_params
         self.logger = logging.getLogger(__name__)
 
     def create_all_tables(self):
@@ -32,7 +32,7 @@ class TableCreator:
         );
         """
 
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             db_conn.cursor.execute(check_table_exists_query)
             table_exists = db_conn.cursor.fetchone()[0]
 
@@ -55,7 +55,7 @@ class TableCreator:
         queries.append(f'CREATE INDEX IF NOT EXISTS idx_time ON {tp_table.table_name}({tp_table.time})')
         queries.append(f'CREATE INDEX IF NOT EXISTS idx_sample_id ON {tp_table.table_name}({tp_table.sample_id})')
 
-        with DatabaseConnection() as db_conn:
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
             for query in queries:
                 try:
                     db_conn.cursor.execute(query)
@@ -225,18 +225,25 @@ class TableCreator:
         return columns_data_types
 
     def _execute(self, query):
-        self.db_connection.open_connection()
-        # Execute the SQL statement to create the table
-        self.db_connection.cursor.execute(query)
-        # Commit the changes and close the connection
-        self.db_connection.conn.commit()
-        self.db_connection.close_connection()
+        with DatabaseConnection(**self.db_conn_params) as db_conn:
+            # Execute the SQL statement to create the table
+            db_conn.cursor.execute(query)
+            # Commit the changes and close the connection
+            db_conn.cursor.connection.commit()
 
     def __delete_table__(self, table_name):
         deletion_query = f"DROP TABLE IF EXISTS {table_name}"
         self._execute(deletion_query)
         self.logger.info(f"Table deleted: {table_name}")
 
+
+def create_database(config):
+
+    query = f"CREATE DATABASE {config.db_conn_params["DB_DATABASE"]} WITH OWNER = {config.db_conn_params["DB_USERNAME"]}"
+    with DatabaseConnection(**config.db_conn_params) as db_conn:
+        db_conn.cursor.execute(query)
+        # Commit the changes and close the connection
+        db_conn.cursor.connection.commit()
 
 def test_create_table_from_class():
     # Example: Generate SQL for TPDataTable class
@@ -249,7 +256,8 @@ def test_create_table_from_class():
 
 
 if __name__ == "__main__":
-    creator=TableCreator()
+    from src.config_connection_reading_management.config_reader import GetConfig
+    creator = TableCreator(db_conn_params=GetConfig().db_conn_params)
     creator.create_all_tables()
         # Accessing class attributes with and without escaped quotes
 

@@ -164,203 +164,73 @@ class ModbusProcessor:
 
 class ModbusReader:
     """
-    A class to read data from a Modbus device and process it.
-
-    Attributes
-    ----------
-    running : bool
-        A flag to indicate if the reading process is running.
-    table : TableConfig.TPDataTable
-        Configuration for table columns related to temperature and pressure data.
-    logger : logging.Logger
-        Logger instance for logging information.
-    max_retries : int
-        Maximum number of retries for Modbus connection.
-    retry_delay : int
-        Delay in seconds between retries.
-    retry_count : int
-        Current count of connection retries.
-    none_T_p : float
-        Threshold value to identify and replace invalid readings.
-
-    Methods
-    -------
-    run(client)
-        Starts the continuous data recording process.
-    stop(client)
-        Stops the continuous data recording process.
-    read_from_dicon(client, start_reg, end_reg, regs_of_interest)
-        Reads and processes data from the Modbus device.
-    _sort_out_false_values(df)
-        Filters out invalid readings based on a threshold value.
+    Reads from a Modbus device, converts to floats, timestamps, and filters invalid values.
     """
-
     def __init__(self, mb_conn_params, mb_reading_params):
-        """
-        Initializes the ModbusReader with default values and configurations.
-        """
-        self.running = False
-        self.mb_conn_params = mb_conn_params or {}
-        self.mb_reading_params = mb_reading_params or {}
+        self.mb_conn_params = mb_conn_params
+        self.mb_reading_params = mb_reading_params
         self.table = TableConfig().TPDataTable
         self.logger = logging.getLogger(__name__)
-        self.max_retries = 10  # Maximum number of retries for Modbus connection
-        self.retry_delay = 5  # Delay in seconds between retries
-        self.retry_count = 0
         self.none_T_p = 1e20
 
-    def run(self, client):
-        """
-        Starts the continuous data recording process.
-
-        Parameters
-        ----------
-        client : Modbus client instance
-            The client instance to communicate with the Modbus device.
-        """
-        SLEEP_INTERVAL = self.mb_reading_params['SLEEP_INTERVAL']
-
-        self.running = True
-        retry_count = 0  # Initialize retry count
-        self.logger.info("Starting continuous data reading...")
-        while self.running:
-            try:
-                converted_dicon_data = self.read_from_dicon(client)
-                time.sleep(SLEEP_INTERVAL)
-
-            except Exception as e:
-                self.logger.error("An error occurred in the main loop: %s", e)
-                self.stop(client)
-                #if self.retry_count <= self.max_retries:
-                #    self.logger.info("Connection failed")
-                #    self.retry_count += 1
-                #    time.sleep(self.retry_delay)
-        self.stop(client)
-
-    def stop(self, client):
-        """
-        Stops the continuous data recording process.
-
-        Parameters
-        ----------
-        client : Modbus client instance
-            The client instance to communicate with the Modbus device.
-        """
-        self.logger.info("Ending temperature and pressure recording")
-        self.running = False
-        if client:
-            client.close()
-        self.logger.info("Temperature and pressure recording stopped")
-
     def read_from_dicon(self, client):
-        """
-        Reads and processes data from the Modbus device.
-
-        Parameters
-        ----------
-        client : Modbus client instance
-            The client instance to communicate with the Modbus device.
-        START_REG : int
-            The starting register to read from.
-        END_REG : int
-            The ending register to read from.
-        REGS_OF_INTEREST : list of int
-            The list of registers of interest to be processed.
-
-        Returns
-        -------
-        pandas.DataFrame
-            A DataFrame containing the processed data, with invalid readings replaced.
-        """
-
-        def _convert_dicon_to_df(numbers_to_convert):
-            values = []
-            df_Tp = pd.DataFrame()
-
-            for i in range(0, len(numbers_to_convert), 2):
-                raw = struct.pack('>HH', numbers_to_convert[i + 1], numbers_to_convert[i])
-                values.append(struct.unpack('>f', raw)[0])
-
-            if values:
-                df_Tp = pd.DataFrame([values], columns=[self.table.pressure, self.table.temperature_sample, self.table.setpoint_sample, self.table.temperature_heater, self.table.setpoint_heater])
-            return df_Tp  # Returning df
-
-        """
-            Converts raw register data to a pandas DataFrame.
-
-            Parameters
-            ----------
-            numbers_to_convert : list of int
-                The list of raw register values to be converted.
-
-            Returns
-            -------
-            pandas.DataFrame
-                A DataFrame containing the converted data.
-        """
-        START_REG = self.mb_reading_params['START_REG']
-        END_REG = self.mb_reading_params['END_REG']
-        REGS_OF_INTEREST = self.mb_reading_params['REGS_OF_INTEREST']
-
-        filtered_regs = []
-        if (END_REG-START_REG) % 2 == 0:
-            final_reg = END_REG - START_REG
-        else:
-            final_reg = END_REG - START_REG + 1
-
-        index_of_interest = [num - START_REG for num in REGS_OF_INTEREST]
-        try:
-            rr = client.read_holding_registers(START_REG, final_reg, 255)
-        except ModbusException as exc:
-            self.logger.error(f"Received ModbusException({exc}) from library")
-            client.close()
-            return
-        if isinstance(rr, ExceptionResponse):
-            self.logger.error(f"Received Modbus library exception ({rr})")
-            client.close()
-            return
-        elif rr.isError():
-            self.logger.error(f"Received Modbus library error({rr})")
-            client.close()
-            return
-        if rr.registers:
-            for i in index_of_interest:
-                filtered_regs.append(rr.registers[i])
-                filtered_regs.append(rr.registers[i+1])
-            if filtered_regs:
-                df_tp = _convert_dicon_to_df(filtered_regs)
-                df_tp[self.table.time] = datetime.now(tz=local_tz)
-                df_tp = self._sort_out_false_values(df_tp)
-                return df_tp
-            else:
-                return pd.DataFrame()
-        else:
-            self.logger.error("No registers received")
-            client.close()
-
-    def _sort_out_false_values(self, df):
-        """
-        Filters out invalid readings based on a threshold value.
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-            The DataFrame to be filtered.
-
-        Returns
-        -------
-        pandas.DataFrame
-            The filtered DataFrame with invalid readings replaced by None.
-        """
-        if not df.empty:
-            df.loc[df[self.table.pressure] >= self.none_T_p, self.table.pressure] = None
-            df.loc[df[self.table.temperature_sample] >= self.none_T_p, self.table.temperature_sample] = None
-            df.loc[df[self.table.temperature_heater] >= self.none_T_p, self.table.temperature_heater] = None
-            df.loc[df[self.table.setpoint_sample] >= self.none_T_p, self.table.setpoint_sample] = None
-            df.loc[df[self.table.setpoint_heater] >= self.none_T_p, self.table.setpoint_heater] = None
-            return df
-        else:
+        regs = self._read_raw_registers(client)
+        if regs is None:
             return pd.DataFrame()
+
+        filtered = self._select_interesting(regs)
+        df = self._unpack_to_df(filtered)
+        if df.empty:
+            return df
+
+        df[self.table.time] = datetime.now(tz=local_tz)
+        return self._filter_invalid(df)
+
+    def _read_raw_registers(self, client):
+        start = self.mb_reading_params['START_REG']
+        end = self.mb_reading_params['END_REG']
+        count = (end - start) + ((end - start) % 2)
+        try:
+            rr = client.read_holding_registers(start, count)
+            if isinstance(rr, ExceptionResponse) or rr.isError():
+                self.logger.error(f"Modbus error: {rr}")
+                client.close()
+                return None
+            return rr.registers
+        except ModbusException as e:
+            self.logger.error(f"ModbusException: {e}")
+            client.close()
+            return None
+
+    def _select_interesting(self, regs):
+        start = self.mb_reading_params['START_REG']
+        regs_of_interest = self.mb_reading_params['REGS_OF_INTEREST']
+        idx = [r - start for r in regs_of_interest]
+        out = []
+        for i in idx:
+            out.append(regs[i]); out.append(regs[i+1])
+        return out
+
+    def _unpack_to_df(self, regs):
+        values = []
+        for i in range(0, len(regs), 2):
+            raw = struct.pack('>HH', regs[i+1], regs[i])
+            values.append(struct.unpack('>f', raw)[0])
+        cols = [self.table.pressure,
+                self.table.temperature_sample,
+                self.table.setpoint_sample,
+                self.table.temperature_heater,
+                self.table.setpoint_heater]
+        return pd.DataFrame([values], columns=cols) if values else pd.DataFrame()
+
+    def _filter_invalid(self, df):
+        for col in [self.table.pressure,
+                    self.table.temperature_sample,
+                    self.table.temperature_heater,
+                    self.table.setpoint_sample,
+                    self.table.setpoint_heater]:
+            df.loc[df[col] >= self.none_T_p, col] = None
+        return df
 
 
 class ModbusDataHandler:
@@ -1218,6 +1088,8 @@ def convert_value(value):
 def test_mb_reading_writing(sample_id):
     from src.config_connection_reading_management.config_reader import GetConfig
     config = GetConfig()
+    config.mb_conn_params["MB_PORT"] = "503"
+    config.mb_conn_params["MB_HOST"] = "localhost"
     meta = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
     mb_reader = ModbusReader(mb_reading_params=config.mb_reading_params, mb_conn_params=config.mb_conn_params)
 
@@ -1227,30 +1099,19 @@ def test_mb_reading_writing(sample_id):
 
     with ModbusConnection(**config.mb_conn_params) as modbus_connection, DatabaseConnection(**config.db_conn_params) as db_conn:
         while i > 0:
-            df = mb_reader.read_from_dicon(modbus_connection.client,
-                                           **config.mb_reading_params)
+            df = mb_reader.read_from_dicon(modbus_connection.client)
             for index, row in df.iterrows():
                 df_tp = mb_processor.process_data(index, row)
 
-            mb_writer.insert_data_into_table(cursor=db_conn.cursor, data=df_tp)
+            #mb_writer.insert_data_into_table(cursor=db_conn.cursor, data=df_tp)
             time.sleep(1)
             i = i-1
-            print(df)
+            print(df_tp)
 
 
 if __name__ == "__main__":
+    test_mb_reading_writing("test")
 
 
-    from src.config_connection_reading_management.config_reader import GetConfig
-    from src.meta_data.meta_data_handler import MetaData
-    sample_id = "test-testers-bester"
-
-    config = GetConfig()
-    meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
-    cycle_counter = CycleCounter(meta_data=meta_data,
-                                     current_cycle=0,
-                                     current_state="Dehydrogenated",
-                                     db_conn_params=config.db_conn_params)
-    cycle_counter.count()
 
 

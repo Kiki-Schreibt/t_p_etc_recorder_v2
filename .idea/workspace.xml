@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,80 +47,81 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Doctest load_ui_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for tests.TestRecordingMain.test_start_modbus_server.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for unittest_plotting.TestPlotMainWindow.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in unittest_plotting.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.PlotWidget.executor&quot;: &quot;Run&quot;,
-    &quot;Python.PlotWindows.executor&quot;: &quot;Run&quot;,
-    &quot;Python.adsfasdf.executor&quot;: &quot;Run&quot;,
-    &quot;Python.asdf.executor&quot;: &quot;Run&quot;,
-    &quot;Python.asdfasdf.executor&quot;: &quot;Run&quot;,
-    &quot;Python.code_length.executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_creator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_creator_ui_main (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_creator_ui_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_reader.executor&quot;: &quot;Run&quot;,
-    &quot;Python.connections.executor&quot;: &quot;Run&quot;,
-    &quot;Python.connections_and_logger.executor&quot;: &quot;Run&quot;,
-    &quot;Python.csv_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.data_fitter_gui_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.data_fitter_ui_business.executor&quot;: &quot;Run&quot;,
-    &quot;Python.data_loader.executor&quot;: &quot;Run&quot;,
-    &quot;Python.database_reading_writing.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.database_reading_writing_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.dicon_simulater.executor&quot;: &quot;Run&quot;,
-    &quot;Python.dicon_simulator_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.eq_p_calculation.executor&quot;: &quot;Run&quot;,
-    &quot;Python.export_methods.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hot_disk_controller.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hydride_worker.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main_fitter_backend.executor&quot;: &quot;Run&quot;,
-    &quot;Python.manual_csv_xlsx_inserter.executor&quot;: &quot;Run&quot;,
-    &quot;Python.material_properties.executor&quot;: &quot;Run&quot;,
-    &quot;Python.meta_data_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.modbus_handler.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.optimization.executor&quot;: &quot;Run&quot;,
-    &quot;Python.path_utils.executor&quot;: &quot;Run&quot;,
-    &quot;Python.planner_business.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.plot_window_reader_basic (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_window_reader_basic.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_windows (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.project_plot_graphviz.executor&quot;: &quot;Run&quot;,
-    &quot;Python.qt_plots.executor&quot;: &quot;Run&quot;,
-    &quot;Python.query_builder.executor&quot;: &quot;Run&quot;,
-    &quot;Python.query_builder_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_business_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_business_v3.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_main_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_main_v3.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sequenzer.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sequenzer_temp (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.sequenzer_temp.executor&quot;: &quot;Run&quot;,
-    &quot;Python.server.executor&quot;: &quot;Run&quot;,
-    &quot;Python.simulatioor_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.simulator_gui (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.simulator_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.standard_paths.executor&quot;: &quot;Run&quot;,
-    &quot;Python.suggestionsgpt.executor&quot;: &quot;Run&quot;,
-    &quot;Python.suquenzer_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.t_p_simulator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.table_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_planner.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tests.executor&quot;: &quot;Run&quot;,
-    &quot;Python.unittest_plotting.executor&quot;: &quot;Run&quot;,
-    &quot;Python.visualize_color_maps.executor&quot;: &quot;Run&quot;,
-    &quot;Python.write_sql_results_to_txt.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Daten/Kiki/ProgrammingStuff/Log&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Doctest load_ui_file.executor": "Run",
+    "Python tests.Python tests for tests.TestRecordingMain.test_start_modbus_server.executor": "Run",
+    "Python tests.Python tests for unittest_plotting.TestPlotMainWindow.executor": "Run",
+    "Python tests.Python tests in unittest_plotting.py.executor": "Run",
+    "Python.PlotWidget.executor": "Run",
+    "Python.PlotWindows.executor": "Run",
+    "Python.adsfasdf.executor": "Run",
+    "Python.asdf.executor": "Run",
+    "Python.asdfasdf.executor": "Run",
+    "Python.code_length.executor": "Run",
+    "Python.config_creator.executor": "Run",
+    "Python.config_creator_ui_main (1).executor": "Run",
+    "Python.config_creator_ui_main.executor": "Run",
+    "Python.config_reader.executor": "Run",
+    "Python.connections.executor": "Run",
+    "Python.connections_and_logger.executor": "Run",
+    "Python.csv_handler.executor": "Run",
+    "Python.data_fitter_gui_main.executor": "Run",
+    "Python.data_fitter_ui_business.executor": "Run",
+    "Python.data_loader.executor": "Run",
+    "Python.database_reading_writing.executor": "Debug",
+    "Python.database_reading_writing_v2.executor": "Run",
+    "Python.dicon_simulater.executor": "Run",
+    "Python.dicon_simulator_v2.executor": "Run",
+    "Python.eq_p_calculation.executor": "Run",
+    "Python.export_methods.executor": "Run",
+    "Python.hot_disk_controller.executor": "Run",
+    "Python.hydride_worker.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.main_fitter_backend.executor": "Run",
+    "Python.manual_csv_xlsx_inserter.executor": "Run",
+    "Python.material_properties.executor": "Run",
+    "Python.meta_data_handler.executor": "Run",
+    "Python.modbus_handler.executor": "Run",
+    "Python.optimization.executor": "Run",
+    "Python.path_utils.executor": "Run",
+    "Python.planner_business.executor": "Debug",
+    "Python.plot_window_reader_basic (1).executor": "Run",
+    "Python.plot_window_reader_basic.executor": "Run",
+    "Python.plot_windows (1).executor": "Run",
+    "Python.project_plot_graphviz.executor": "Run",
+    "Python.qt_plots.executor": "Run",
+    "Python.query_builder.executor": "Run",
+    "Python.query_builder_v2.executor": "Run",
+    "Python.recording_business_v2.executor": "Run",
+    "Python.recording_business_v3.executor": "Run",
+    "Python.recording_main.executor": "Run",
+    "Python.recording_main_v2.executor": "Run",
+    "Python.recording_main_v3.executor": "Run",
+    "Python.sequenzer.executor": "Run",
+    "Python.sequenzer_temp (1).executor": "Run",
+    "Python.sequenzer_temp.executor": "Run",
+    "Python.server.executor": "Run",
+    "Python.simulatioor_gui.executor": "Run",
+    "Python.simulator_gui (1).executor": "Run",
+    "Python.simulator_gui.executor": "Run",
+    "Python.standard_paths.executor": "Run",
+    "Python.suggestionsgpt.executor": "Run",
+    "Python.suquenzer_gui.executor": "Run",
+    "Python.t_p_simulator.executor": "Run",
+    "Python.table_creator.executor": "Run",
+    "Python.table_data.executor": "Run",
+    "Python.test_planner.executor": "Run",
+    "Python.tests.executor": "Run",
+    "Python.unittest_plotting.executor": "Run",
+    "Python.visualize_color_maps.executor": "Run",
+    "Python.write_sql_results_to_txt.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Daten/Kiki/ProgrammingStuff/Log",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\old_snippets" />
@@ -136,7 +138,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.table_creator">
     <configuration name="csv_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -151,28 +153,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="dicon_simulator_v2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="t_p_etc_recorder_v2" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/simulation" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -203,7 +183,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="recording_business_v2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="modbus_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -212,11 +192,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/recording_gui" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/config_connection_reading_management" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -247,13 +227,35 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="table_creator" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/table_creator.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.table_creator" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.csv_handler" />
-        <item itemvalue="Python.recording_business_v2" />
+        <item itemvalue="Python.modbus_handler" />
         <item itemvalue="Python.simulator_gui" />
-        <item itemvalue="Python.dicon_simulator_v2" />
+        <item itemvalue="Python.csv_handler" />
       </list>
     </recent_temporary>
   </component>
@@ -307,7 +309,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py</url>
-          <line>1103</line>
+          <line>973</line>
           <option name="timeStamp" value="318" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -359,6 +361,11 @@
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
           <line>348</line>
           <option name="timeStamp" value="485" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Scripts/main.py</url>
+          <line>18</line>
+          <option name="timeStamp" value="493" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
