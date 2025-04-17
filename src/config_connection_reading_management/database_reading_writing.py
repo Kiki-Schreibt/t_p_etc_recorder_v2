@@ -136,6 +136,7 @@ class DataRetriever:
             desc_limit=desc_limit,
             sample_id=sample_id
         )
+        #print(query)
         df = self.execute_continuous_fetching(
             query=query,
             cursor=cursor,

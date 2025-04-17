@@ -158,11 +158,13 @@ class ReadData(QThread):
                     self.db_retriever.limit_datapoints = desc_limit
                     df = self.db_retriever.fetch_data_by_time_2(
                         time_range=time_range,
-                        table_name=table_name)
+                        table_name=table_name,
+                        sample_id=self.meta_data.sample_id)
                     self.db_retriever.limit_datapoints = previous_limit
                     return df
                 else:
                     return pd.DataFrame()
+
             df = self.db_retriever.fetch_latest_records(
                 table_name=table_name,
                 cursor=cursor,
@@ -712,6 +714,7 @@ class PlotBaseWindow(PlotBaseStyle):
         else:
             self._create_plot_items_left(df=df, x=x)
         self._customize_legend(self.plotItem.legend)
+
 
     def update_plot_right(self, df):
         if df.empty:

@@ -811,7 +811,7 @@ def check_nan_values(df, fun_str=""):
 
 def import_all():
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    #sample_ids = ('WAE-WA-030',)
+    #sample_ids = ('WAE-WA-040',)
     logger = logging.getLogger(__name__)
     from src.config_connection_reading_management.config_reader import GetConfig
     config = GetConfig()
