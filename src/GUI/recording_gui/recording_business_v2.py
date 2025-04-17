@@ -18,7 +18,6 @@ import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
@@ -389,7 +388,7 @@ class StaticPlotWindow(PlotBaseWindow):
         try:
             self.reader = ReadStatic(meta_data=meta_data, db_conn_params=db_conn_params)
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
-            self.enableAutoRange(axis=pg.ViewBox.XYAxes)
+            self.enableAutoRange()
             self.reader.start()
             self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
         except Exception as e:
@@ -402,6 +401,7 @@ class StaticPlotWindow(PlotBaseWindow):
         try:
             self.disableAutoRange()
             self.plotItem.sigXRangeChanged.connect(self._on_x_range_changed)
+
         except Exception as e:
             logging.getLogger(__name__).exception("Error in _init_on_x_range_changed:")
 

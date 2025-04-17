@@ -29,6 +29,7 @@ STANDARD_MODE = 'recording'
 STATE_HYD = 'Hydrogenated'
 STATE_DEHYD = 'Dehydrogenated'
 
+
 #todo: implement memory usage tracking
 class ModbusProcessor:
     """
@@ -755,8 +756,8 @@ class CycleCounter:
             mb_writer = ModbusDBWriter(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
             mb_writer.write_cycle_to_table(
                 new_line_cycle=self.cycle_line,
-                time_start=self.time_start_whole_cycle,
-                time_end=self.time_end_whole_cycle,
+                time_start_whole_cycle=self.time_start_whole_cycle,
+                time_end_whole_cycle=self.time_end_whole_cycle,
                 time_start_half_cycle=self.time_start_whole_cycle,
                 time_end_half_cycle=self.time_end_whole_cycle
             )
@@ -974,29 +975,32 @@ class ModbusDBWriter:
                 self.logger.error("Error occurred while deleting data: %s", e)
                 db_conn.cursor.connection.rollback()
 
-    def write_cycle_to_table(self, new_line_cycle, time_start, time_end, time_start_half_cycle, time_end_half_cycle):
+    def write_cycle_to_table(self, new_line_cycle, time_start_whole_cycle, time_end_whole_cycle,
+                             time_start_half_cycle, time_end_half_cycle):
         cycle_table = TableConfig().CycleDataTable
         t_p_table = TableConfig().TPDataTable
 
         with DatabaseConnection(**self.db_conn_params) as db_conn:
             data_written = self._write_new_line_cycle(new_line_cycle=new_line_cycle,
                                                        cycle_table=cycle_table,
-                                                       time_start=time_start,
-                                                       time_end=time_end,
+                                                       time_start_whole_cycle=time_start_whole_cycle,
+                                                       time_end_whole_cycle=time_end_whole_cycle,
                                                        cursor=db_conn.cursor)
 
         if data_written:
             with DatabaseConnection(**self.db_conn_params) as db_conn:
                 self._update_cycle_t_p_table(new_line_cycle=new_line_cycle,
                                              t_p_table=t_p_table,
-                                             time_start=time_start_half_cycle,
-                                             time_end=time_end_half_cycle,
+                                             time_start_half_cycle=time_start_half_cycle,
+                                             time_end_half_cycle=time_end_half_cycle,
                                              cycle_table=cycle_table,
-                                             cursor=db_conn.cursor)
+                                             cursor=db_conn.cursor,
+                                             time_start_full_cycle=time_start_whole_cycle,
+                                             time_end_full_cycle=time_end_whole_cycle)
         self._update_end_time_meta_data(time_end=time_end_half_cycle)
 
     def _write_new_line_cycle(self, new_line_cycle: pd.Series, cycle_table: TableConfig(),
-                              time_start, time_end, cursor: DatabaseConnection().cursor):
+                              time_start_whole_cycle, time_end_whole_cycle, cursor: DatabaseConnection().cursor):
 
 
         cycle_table_name = cycle_table.table_name
@@ -1019,7 +1023,8 @@ class ModbusDBWriter:
                                         table_name=cycle_table_name)
                 self._write_new_line_cycle(new_line_cycle=new_line_cycle,
                                            cycle_table=cycle_table,
-                                           time_start=time_start, time_end=time_end,
+                                           time_start_whole_cycle=time_start_whole_cycle,
+                                           time_end_whole_cycle=time_end_whole_cycle,
                                            cursor=db_conn.cursor)
 
         except Exception as e:
@@ -1027,7 +1032,8 @@ class ModbusDBWriter:
             return False
 
     def _update_cycle_t_p_table(self, new_line_cycle: pd.Series, t_p_table: TableConfig(),
-                                time_start, time_end, cycle_table: TableConfig(), cursor: DatabaseConnection().cursor):
+                                time_start_half_cycle, time_end_half_cycle,
+                                cycle_table: TableConfig(), cursor: DatabaseConnection().cursor, time_start_full_cycle, time_end_full_cycle):
 
         t_p_table_name = t_p_table.table_name
 
@@ -1038,7 +1044,8 @@ class ModbusDBWriter:
         value = convert_value(new_line_cycle[cycle_table.h2_uptake])
 
         try:
-            cursor.execute(update_tp_query, (value, self.meta_data.sample_id, new_line_cycle[cycle_table.cycle_number], time_start, time_end))
+            #was cycle_number-1 before... messes with import now
+            cursor.execute(update_tp_query, (value, self.meta_data.sample_id, new_line_cycle[cycle_table.cycle_number], time_start_full_cycle, time_end_full_cycle))
             cursor.connection.commit()
             self.logger.info(f"{t_p_table_name} updated for cycle #{new_line_cycle[cycle_table.cycle_number]}: "
                              f"{t_p_table.h2_uptake} = {new_line_cycle[cycle_table.h2_uptake]}")

@@ -6,10 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,7 +140,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.table_creator">
+  <component name="RunManager" selected="Python.csv_handler">
     <configuration name="csv_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -251,11 +253,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.table_creator" />
+        <item itemvalue="Python.csv_handler" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.table_creator" />
         <item itemvalue="Python.modbus_handler" />
         <item itemvalue="Python.simulator_gui" />
-        <item itemvalue="Python.csv_handler" />
       </list>
     </recent_temporary>
   </component>
@@ -309,7 +311,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py</url>
-          <line>973</line>
+          <line>974</line>
           <option name="timeStamp" value="318" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

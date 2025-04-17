@@ -435,7 +435,7 @@ class MainController:
                 self.plot_manager.top_plot.reader.reading_mode = "full_test"
                 self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot.update_plot_left)
                 self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.update_plot_right)
-                self.plot_manager.top_plot.reader.cycles_full_test_sig.connect(self.plot_manager.bottom_plot.update_min_max_plot)
+                self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot.update_min_max_plot)
                 self.plot_manager.top_plot.reader.start()
         except Exception as e:
             self.logger.exception("Error plotting full test in MainController:")

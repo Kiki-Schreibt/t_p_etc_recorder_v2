@@ -49,7 +49,9 @@ colors = [
 colors_scatter = colors.copy()
 READING_MODE_FULL_TEST = 'full_test'
 READING_MODE_BY_TIME = 'by_time'
-def downsample_data(df, sample_rate=2):
+
+
+def down_sample_data(df, sample_rate=2):
     """
     Downsamples the DataFrame by taking every 'sample_rate'-th row.
 
@@ -62,6 +64,7 @@ def downsample_data(df, sample_rate=2):
     """
     # Downsample using iloc; you can change this logic for more sophisticated resampling
     return df.iloc[::sample_rate].reset_index(drop=True)
+
 
 def filter_last_day(df, time_column='time'):
     """
@@ -86,6 +89,7 @@ def filter_last_day(df, time_column='time'):
     else:
         return df
 
+
 #class DateAxisItem(pg.AxisItem):
   #  def tickStrings(self, values, scale, spacing):
   #      global time_format_str
@@ -105,7 +109,7 @@ class ReadData(QThread):
     current_cycle_sig = Signal(float)
     current_state_sig = Signal(str)
     current_uptake_sig = Signal(float)
-    cycles_full_test_sig = Signal(pd.DataFrame)
+    cycle_data_sig = Signal(pd.DataFrame)
     auto_update_x_range_sig = Signal()
 
     def __init__(self, meta_data, db_conn_params):
@@ -203,7 +207,7 @@ class ReadData(QThread):
             self.p_data_sig.emit(self.p_data)
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data)
-        self._read_emit_cycles_full_test_thread()
+        self._read_emit_cycle_data_thread()
         del df_t_p
 
     def _separate_and_append_t_p(self, df_t_p):
@@ -229,7 +233,7 @@ class ReadData(QThread):
                 #drop_count = len(data) - self.limit_amount_storage
                 #data.drop(data.index[:drop_count], inplace=True)
                 ####new downsampling
-                data = downsample_data(data)
+                data = down_sample_data(data)
 
     def _remove_outliers(self, df):
         numeric_cols = df.select_dtypes(include=[np.number]).columns.difference(['time', 'state'])
@@ -273,7 +277,7 @@ class ReadData(QThread):
         self.constraints_t_p = new_constraints
         self.logger.info("Updated T-p constraints: %s", self.constraints_t_p)
 
-    def _read_emit_cycles_full_test_thread(self):
+    def _read_emit_cycle_data_thread(self):
         self.logger.info("Reading cycles data for full test...")
         cycle_table = TableConfig().CycleDataTable
         column_names = (cycle_table.time_min, cycle_table.pressure_min, cycle_table.temperature_min,
@@ -292,7 +296,7 @@ class ReadData(QThread):
                         column_names=column_names,
                         sample_id=self.meta_data.sample_id)
                 if not df_cycles.empty:
-                    self.cycles_full_test_sig.emit(df_cycles)
+                    self.cycle_data_sig.emit(df_cycles)
                     self.logger.info("Emitted cycle data with shape: %s", df_cycles.shape)
                 else:
                     self.logger.info("No cycle data found.")
@@ -496,10 +500,10 @@ class ReadStatic(ReadData):
             self.logger.info("Emitted p_data signal, shape: %s", self.p_data.shape)
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data)
-            self.whole_test_emited_sig.emit()
             self.auto_update_x_range_sig.emit()
             self.logger.info("Emitted ETC and full test signals, ETC shape: %s", self.etc_data.shape)
-        self._read_emit_cycles_full_test_thread()
+        self.whole_test_emited_sig.emit()
+        self._read_emit_cycle_data_thread()
         self.logger.info("Full test data read completed.")
 
     def _change_reading_mode(self, new_reading_mode: str):
@@ -690,7 +694,7 @@ class PlotBaseWindow(PlotBaseStyle):
     def _init_connections(self, y_axis):
         self.range_change_timer.timeout.connect(self._on_range_change_timeout)
         if hasattr(self, 'reader'):
-            self.reader.cycles_full_test_sig.connect(self.update_min_max_plot)
+            self.reader.cycle_data_sig.connect(self.update_min_max_plot)
             self.reader.etc_data_sig.connect(self.update_plot_right)
             self.reader.auto_update_x_range_sig.connect(self.plotItem.autoRange)
             if y_axis == 'pressure':
@@ -714,7 +718,6 @@ class PlotBaseWindow(PlotBaseStyle):
         else:
             self._create_plot_items_left(df=df, x=x)
         self._customize_legend(self.plotItem.legend)
-
 
     def update_plot_right(self, df):
         if df.empty:
@@ -868,7 +871,6 @@ class PlotBaseWindow(PlotBaseStyle):
         x_data, y_data = self.scatter_plot_item.getData()
         self.scatter_plot_item.setData(x=x_data, y=y_data, brush=self.point_colors)
 
-    ###
     def _update_x_range(self, time_range):
         self.plotItem.setXRange(min(time_range), max(time_range))
 

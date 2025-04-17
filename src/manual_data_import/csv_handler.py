@@ -811,14 +811,15 @@ def check_nan_values(df, fun_str=""):
 
 def import_all():
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    #sample_ids = ('WAE-WA-040',)
+    sample_ids = ('WAE-WA-040',)
     logger = logging.getLogger(__name__)
     from src.config_connection_reading_management.config_reader import GetConfig
     config = GetConfig()
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
         csv_processor = CSVProcessor(sample_id=sample_id, config=config)
-        csv_processor.process()
+        #csv_processor.process()
+        csv_processor.count_cycles(sample_id=sample_id)
         write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
         print(f"{sample_id} processed")
 
