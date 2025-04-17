@@ -822,6 +822,7 @@ def import_all():
         write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
         print(f"{sample_id} processed")
 
+
 def _import_one_example():
     logger = logging.getLogger(__name__)
     from src.config_connection_reading_management.config_reader import GetConfig

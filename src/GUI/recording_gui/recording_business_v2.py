@@ -279,6 +279,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
     Signals:
         current_cycle_sig, current_state_sig, current_uptake_sig: Relayed signals from the reader.
     """
+
     def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None):
         try:
             self.reader_type = None   # can be 'continuous' or 'static'
@@ -336,15 +337,21 @@ class ContinuousPlotWindow(PlotBaseWindow):
             self.reader.start()
 
     def contextMenuEvent(self, event):
-        context_menu = QMenu(self)
 
-        toggle_action = QAction("Toggle Zoom Mode", self)
-        toggle_action.triggered.connect(self._toggle_zoom_mode)
 
-        context_menu.addAction(toggle_action)
+        # 1) grab the menu Qt would have shown for me
+        menu = self.getPlotItem().ctrlMenu
 
-        # Optionally, add more actions if required.
-        context_menu.exec(event.globalPos())
+        # 2) add a separator so it’s clear this is a custom item
+        menu.addSeparator()
+
+        # 3) add our toggle
+        toggle = QAction("Toggle Zoom Mode", self)
+        toggle.triggered.connect(self._toggle_zoom_mode)
+        menu.addAction(toggle)
+
+        # 4) pop it up
+        menu.exec(event.globalPos())
         event.accept()
 
     def _toggle_zoom_mode(self):
