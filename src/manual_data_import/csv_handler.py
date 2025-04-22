@@ -620,6 +620,7 @@ class CSVCounter:
         #df_all_cycles.to_csv('df_preallocated_cycles.csv')
         self._count_cycles_calc_uptake(df=df_all_cycles, sample_id=sample_id)
 
+
     def _preallocate_cycles_by_sample_id(self, sample_id: str) -> pd.DataFrame:
         """
         Pre-determines cycles based on state changes and returns a DataFrame of cycles.
@@ -751,9 +752,17 @@ class CSVCounter:
 
             cycle_number_checker = cycles_counted
             self.logger.info(f"Cycle# {cycles_counted - 0.5} calculated")
-
+        self._update_meta_data_in_database(meta_data=cycle_counter.meta_data)
         self.logger.info(f"Precise cycle count and uptake calculation for {sample_id} finished")
 
+    def _update_meta_data_in_database(self, meta_data):
+        pass
+        data_retriever = DataRetriever(db_conn_params=self.db_conn_params)
+        table = self.cycle_table
+        df_cycle = data_retriever.fetch_data_by_sample_id_2(sample_id=meta_data.sample_id, table_name=table.table_name)
+        number_last_cycle = df_cycle[table.cycle_number].max()
+        meta_data.total_number_cycles = float(number_last_cycle)
+        meta_data.write()
 
 
 #Global methods
@@ -953,5 +962,11 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 
 #Methods for usage
 if __name__ == '__main__':
-    import_all()
+    #import_all()
+    from src.config_connection_reading_management.config_reader import GetConfig
+    config = GetConfig()
+    from src.meta_data.meta_data_handler import MetaData
+    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
+    cycle_counter = CSVCounter(config=config)
+    cycle_counter._update_meta_data_in_database(meta_data=meta_data)
 
