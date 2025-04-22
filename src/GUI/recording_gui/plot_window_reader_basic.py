@@ -694,6 +694,16 @@ class PlotBaseWindow(PlotBaseStyle):
 
     def __init__(self, parent=None, y_axis='', db_conn_params=None):
         super().__init__(parent=parent, y_axis=y_axis)
+
+        self._tp_data = None
+        self._etc_data = None
+        self._min_max_data = None
+
+        self._draw_timer = QTimer(self)
+        self._draw_timer.setInterval(500)        # redraw at most 5×/s
+        self._draw_timer.timeout.connect(self._do_draw)
+        self._draw_timer.start()
+
         self.range_change_timer = QTimer(self)
         self.current_time_range = [datetime.now(tz=local_tz_reg),
                                    (datetime.now(tz=local_tz_reg)+timedelta(days=2))]
@@ -705,19 +715,28 @@ class PlotBaseWindow(PlotBaseStyle):
         self._init_connections(y_axis=y_axis)
         self.db_conn_params = db_conn_params or {}
 
+    def on_tp_data(self, df):
+        self._tp_data = df
+
+    def on_etc_data(self, df):
+        self._etc_data = df
+
+    def on_min_max_data(self, df):
+        self._min_max_data = df
+
     def _init_connections(self, y_axis):
         self.range_change_timer.timeout.connect(self._on_range_change_timeout)
         if hasattr(self, 'reader'):
-            self.reader.cycle_data_sig.connect(self.update_min_max_plot)
-            self.reader.etc_data_sig.connect(self.update_plot_right)
+            self.reader.cycle_data_sig.connect(self.on_min_max_data)
+            self.reader.etc_data_sig.connect(self.on_etc_data)
             self.reader.auto_update_x_range_sig.connect(self.plotItem.autoRange)
             if y_axis == 'pressure':
-                self.reader.p_data_sig.connect(self.update_plot_left)
+                self.reader.p_data_sig.connect(self.on_tp_data)
             elif y_axis == 'temperature':
-                self.reader.T_data_sig.connect(self.update_plot_left)
+                self.reader.T_data_sig.connect(self.on_tp_data)
 
     ###updating plot items
-    def update_plot_left(self, df):
+    def _update_plot_left(self, df):
         if df.empty:
             return
         x = [t.timestamp() for t in df[self.t_p_table.time]]
@@ -733,7 +752,7 @@ class PlotBaseWindow(PlotBaseStyle):
             self._create_plot_items_left(df=df, x=x)
         self._customize_legend(self.plotItem.legend)
 
-    def update_plot_right(self, df):
+    def _update_plot_right(self, df):
         if df.empty:
             return
         x = [t.timestamp() for t in df[self.etc_table.get_clean("time")]]
@@ -761,7 +780,7 @@ class PlotBaseWindow(PlotBaseStyle):
                 self._create_plot_item_right(col, x, y)
         self._customize_legend(self.plotItem.legend)
 
-    def update_min_max_plot(self, df_cycles=pd.DataFrame()):
+    def _update_min_max_plot(self, df_cycles=pd.DataFrame()):
         if df_cycles.empty:
             return
         cycle_table = TableConfig().CycleDataTable
@@ -887,6 +906,18 @@ class PlotBaseWindow(PlotBaseStyle):
 
     def _update_x_range(self, time_range):
         self.plotItem.setXRange(min(time_range), max(time_range))
+
+    @Slot()
+    def _do_draw(self):
+        if self._tp_data is not None:
+            self._update_plot_left(self._tp_data)
+            self._tp_data = None
+        if self._etc_data is not None:
+            self._update_plot_right(self._etc_data)
+            self._etc_data = None
+        if self._min_max_data is not None:
+            self._update_min_max_plot(self._min_max_data)
+            self._min_max_data = None
 
     def closeEvent(self, event):
         self.logger.info("Window is being closed.")

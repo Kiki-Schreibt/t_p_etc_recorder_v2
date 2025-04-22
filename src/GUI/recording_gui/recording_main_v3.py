@@ -71,6 +71,7 @@ class MetaDataManager:
             self.meta_data.average_cycle_duration = self._parse_duration(ui.cycle_duration_edit_field.text())
             if update_meta_button_pushed:
                 self.meta_data.write()
+                self.update_ui(ui=ui)
                 logging.getLogger(__name__).info("MetaData updated")
         except Exception as e:
             logging.getLogger(__name__).exception("Error updating MetaData from UI:")
@@ -345,8 +346,8 @@ class MainController:
             if bottom and hasattr(bottom.reader, 'start'):
                 bottom.reader.start()
             if self.recorder:
-                self.recorder.newEtcDataWritten.connect(top.update_plot_right)
-                self.recorder.newEtcDataWritten.connect(bottom.update_plot_right)
+                self.recorder.newEtcDataWritten.connect(top.on_etc_data)
+                self.recorder.newEtcDataWritten.connect(bottom.on_etc_data)
             return top, bottom
         except Exception as e:
             self.logger.exception("Error starting T-p recording in MainController:")
@@ -442,13 +443,13 @@ class MainController:
                 self.plot_manager.top_plot.reader.reading_mode = "full_test"
 
                 if not self.plot_manager.top_plot.reader.p_data_sig_connected:
-                    self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot.update_plot_left)
+                    self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot._update_plot_left)
                     self.plot_manager.top_plot.reader.p_data_sig_connected = True
                 if not self.plot_manager.top_plot.reader.etc_data_sig_connected:
-                    self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.update_plot_right)
+                    self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.on_etc_data)
                     self.plot_manager.top_plot.reader.etc_data_sig_connected = True
                 if not self.plot_manager.top_plot.reader.cycle_data_sig_connected:
-                    self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot.update_min_max_plot)
+                    self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot._update_min_max_plot)
                     self.plot_manager.top_plot.reader.cycle_data_sig_connected = True
 
                 self.plot_manager.top_plot.reader.start()
@@ -486,6 +487,7 @@ class MainController:
 
     def is_log_file_tracker_running(self):
         return self.recorder.is_log_thread_running()
+
 
 # -------------------------------
 # Main Window
@@ -660,16 +662,41 @@ class MainWindow(QMainWindow):
             if is_on:
                 self.controller.start_tp_recording()
                 if self.plot_manager.top_plot:
-                    self.plot_manager.top_plot.current_cycle_sig.connect(
-                        lambda n: self._set_current_state("number", n))
-                    self.plot_manager.top_plot.current_state_sig.connect(
-                        lambda s: self._set_current_state("state", s))
-                    self.plot_manager.top_plot.current_uptake_sig.connect(
-                        lambda u: self._set_current_state("uptake", u))
+                    self._init_continuous_plotting_connections()
             else:
+                self._disconnect_continuous_plotting_signals()
                 self.controller.stop_tp_recording()
         except Exception as e:
             self.logger.exception("Error toggling T-p recording in MainWindow:")
+
+    def _init_continuous_plotting_connections(self):
+        if not self.plot_manager.top_plot.reader.current_cycle_sig_connected:
+            self.plot_manager.top_plot.current_cycle_sig.connect(
+                lambda n: self._set_current_state("number", n))
+            self.plot_manager.top_plot.reader.current_cycle_sig_connected = True
+
+        if not self.plot_manager.top_plot.reader.current_state_sig_connected:
+            self.plot_manager.top_plot.current_state_sig.connect(
+                lambda s: self._set_current_state("state", s))
+            self.plot_manager.top_plot.reader.current_state_sig_connected = True
+
+        if not self.plot_manager.top_plot.reader.current_uptake_sig_connected:
+            self.plot_manager.top_plot.current_uptake_sig.connect(
+                lambda u: self._set_current_state("uptake", u))
+            self.plot_manager.top_plot.reader.current_uptake_sig_connected = True
+
+    def _disconnect_continuous_plotting_signals(self):
+        if self.plot_manager.top_plot.reader.current_cycle_sig_connected:
+            self.plot_manager.top_plot.current_cycle_sig.disconnect()
+            self.plot_manager.top_plot.reader.current_cycle_sig_connected = False
+
+        if self.plot_manager.top_plot.reader.current_state_sig_connected:
+            self.plot_manager.top_plot.current_state_sig.disconnect()
+            self.plot_manager.top_plot.reader.current_state_sig_connected = False
+
+        if self.plot_manager.top_plot.reader.current_uptake_sig_connected:
+            self.plot_manager.top_plot.current_uptake_sig.disconnect()
+            self.plot_manager.top_plot.reader.current_uptake_sig_connected = False
 
     def _toggle_log_tracking(self):
         """
@@ -722,9 +749,10 @@ class MainWindow(QMainWindow):
                 if top and hasattr(top.reader, 'meta_data_sig'):
                     if not top.reader.meta_data_sig_connected:
                         top.reader.meta_data_sig.connect(self._meta_data_received)
+
                 if (self.meta_data.sample_id
-                    and not self.controller.is_log_file_tracker_running
-                    and not self.controller.is_tp_recording_running):
+                            and not self.controller.is_log_file_tracker_running
+                            and not self.controller.is_tp_recording_running):
 
                     self.controller.plot_full_test()
             else:
