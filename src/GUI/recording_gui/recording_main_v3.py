@@ -159,6 +159,9 @@ class PlotManager:
         try:
             for widget in [self.top_plot, self.bottom_plot, self.right_plot]:
                 if widget:
+                    reader = getattr(widget, 'reader', None)
+                    if reader and hasattr(reader, 'stop'):
+                        reader.stop()
                     widget.setParent(None)
                     widget.deleteLater()
             self.top_plot = self.bottom_plot = self.right_plot = None
@@ -421,8 +424,12 @@ class MainController:
         """
         Plot the full test data by stopping continuous recording and configuring full test mode.
         """
+        is_recorder_running = False
+        is_log_tracker_running = False
         try:
             if self.recorder:
+                is_recorder_running = self.is_tp_recording_running()
+                is_log_tracker_running = self.is_log_file_tracker_running()
                 self.recorder.stop_all_recording()
             if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
                 self.plot_manager.top_plot.reader.stop()
@@ -433,14 +440,28 @@ class MainController:
                 self.plot_manager.top_plot.update_on_record = False
                 self.plot_manager.top_plot.read_on_change = True
                 self.plot_manager.top_plot.reader.reading_mode = "full_test"
-                self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot.update_plot_left)
-                self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.update_plot_right)
-                self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot.update_min_max_plot)
-                self.plot_manager.top_plot.reader.start()
-        except Exception as e:
-            self.logger.exception("Error plotting full test in MainController:")
 
-    def toggle_h2_uptake(self, enabled):
+                if not self.plot_manager.top_plot.reader.p_data_sig_connected:
+                    self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot.update_plot_left)
+                    self.plot_manager.top_plot.reader.p_data_sig_connected = True
+                if not self.plot_manager.top_plot.reader.etc_data_sig_connected:
+                    self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.update_plot_right)
+                    self.plot_manager.top_plot.reader.etc_data_sig_connected = True
+                if not self.plot_manager.top_plot.reader.cycle_data_sig_connected:
+                    self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot.update_min_max_plot)
+                    self.plot_manager.top_plot.reader.cycle_data_sig_connected = True
+
+                self.plot_manager.top_plot.reader.start()
+
+            if is_recorder_running:
+                self.recorder.start_tp_recording()
+            if is_log_tracker_running:
+                self.recorder.start_etc_recording()
+
+        except Exception as e:
+            self.logger.exception("Error plotting full test in MainController: %s", e)
+
+    def toggle_h2_uptake_flag(self, enabled):
         """
         Enable or disable hydrogen uptake measurements.
         """
@@ -450,9 +471,9 @@ class MainController:
         except Exception as e:
             self.logger.exception("Error toggling H2 uptake in MainController:")
 
-    def toggle_cycling(self, enabled):
+    def toggle_cycling_flag(self, enabled):
         """
-        Enable or disable cycling operations.
+        Enable or disable cycling flag. Cycles will only be counted if set to True
         """
         try:
             if self.recorder:
@@ -461,8 +482,10 @@ class MainController:
             self.logger.exception("Error toggling cycling in MainController:")
 
     def is_tp_recording_running(self):
-        return self.recorder.is_running()
+        return self.recorder.is_tp_thread_running()
 
+    def is_log_file_tracker_running(self):
+        return self.recorder.is_log_thread_running()
 
 # -------------------------------
 # Main Window
@@ -555,9 +578,9 @@ class MainWindow(QMainWindow):
             self.ui.plot_uptake_button.clicked.connect(self._init_uptake_plot)
             self.ui.XyDataSelectDropDown.activated.connect(self._init_right_plot_xy)
             self.ui.T_p_dependent_drop_down.currentIndexChanged.connect(self._init_tp_dependent_plot)
-            self.ui.h2_uptake_check_box.clicked.connect(lambda: self.controller.toggle_h2_uptake(
+            self.ui.h2_uptake_check_box.clicked.connect(lambda: self.controller.toggle_h2_uptake_flag(
                 self.ui.h2_uptake_check_box.isChecked()))
-            self.ui.cycle_test_check_box.clicked.connect(lambda: self.controller.toggle_cycling(
+            self.ui.cycle_test_check_box.clicked.connect(lambda: self.controller.toggle_cycling_flag(
                 self.ui.cycle_test_check_box.isChecked()))
             self.ui.sample_id_edit_field.editingFinished.connect(self._on_sample_id_changed)
             self.ui.sample_mass_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
@@ -665,23 +688,54 @@ class MainWindow(QMainWindow):
 
     def _toggle_plotting_mode(self):
         """
-        Toggle between static and continuous plotting modes.
+        Toggle the UI between static (full‑test) and continuous plotting modes.
+
+        This method is bound to a checkable “Start Static Plot” button. When the button
+        is checked, it:
+
+        1. Changes the button’s label and style to “Stop Static Plot.”
+        2. Calls `PlotManager.init_static_plots()` to replace the left‑hand plots
+           with static/full‑test versions.
+        3. Connects the static reader’s `meta_data_sig` to `_meta_data_received()`
+           so that any sample‑ID changes emitted by the static reader get fed back
+           into the UI.
+        4. If a sample ID is already set, invokes `MainController.plot_full_test()`
+           to immediately fetch & draw the entire test dataset.
+
+        When the button is unchecked, it:
+
+        1. Stops the current static‑plot reader (if running).
+        2. Clears all plots from the UI.
+        3. Calls `PlotManager.init_continuous_plots()` to restore the original
+           continuous‑update plots (temperature & pressure).
+
+        Raises:
+            Any exception during toggling is caught and logged via `self.logger.exception`.
         """
         try:
             is_on = self.ui.start_stop_static_plot_button.isChecked()
             self._toggle_button(self.ui.start_stop_static_plot_button,
-                                "Start Static Plot", "Stop Static Plot", is_on)
+                                "Start Static Plot",
+                                "Stop Static Plot", is_on)
             if is_on:
                 top, bottom = self.plot_manager.init_static_plots()
                 if top and hasattr(top.reader, 'meta_data_sig'):
-                    top.reader.meta_data_sig.connect(self._meta_data_received)
-                if self.meta_data.sample_id:
+                    if not top.reader.meta_data_sig_connected:
+                        top.reader.meta_data_sig.connect(self._meta_data_received)
+                if (self.meta_data.sample_id
+                    and not self.controller.is_log_file_tracker_running
+                    and not self.controller.is_tp_recording_running):
+
                     self.controller.plot_full_test()
             else:
                 if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
                     self.plot_manager.top_plot.reader.stop()
                 self.plot_manager.clear_plots()
-                self.plot_manager.init_continuous_plots()
+                top, bottom = self.plot_manager.init_continuous_plots()
+                if top and bottom and hasattr(top, "reader") and hasattr(bottom, "reader"):
+                    top.reader.start()
+                    bottom.reader.start()
+
         except Exception as e:
             self.logger.exception("Error toggling plotting mode in MainWindow:")
 
@@ -847,6 +901,7 @@ class MainWindow(QMainWindow):
         """
         try:
             self.controller.stop_tp_recording()
+            self.controller.stop_log_tracking()
             super().closeEvent(event)
         except Exception as e:
             self.logger.exception("Error in closeEvent of MainWindow:")

@@ -11,8 +11,8 @@ from src.standard_paths import standard_config_file_path as config_file_path
 from src.standard_paths import standard_log_dir
 
 current_dir = os.path.dirname(__file__)
-#test_database_config_file_path = r'C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\config_logging_modbus_database _testing.json'
-#config_file_path = test_database_config_file_path
+test_database_config_file_path = r'C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\config_logging_modbus_database _testing.json'
+config_file_path = test_database_config_file_path
 
 class GetConfig:
     """
@@ -58,6 +58,7 @@ class GetConfig:
                             "MB_HOST": config['MODBUS_HOST'],
                             "MB_PORT": config['MODBUS_PORT']
                         }
+
         self.mb_reading_params = {
                             "START_REG": int(config['START_REG']),
                             "END_REG": int(config['END_REG']),
@@ -73,7 +74,6 @@ class GetConfig:
         self.hd_log_file_tracker_params = {"HOT_DISK_LOG_FILE_PATH": config['HOT_DISK_LOG_FILE_PATH']}
 
         self.HOT_DISK_LOG_FILE_PATH = config['HOT_DISK_LOG_FILE_PATH']
-
 
     @staticmethod
     def _has_uppercase(string):

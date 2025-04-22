@@ -118,6 +118,11 @@ class ReadData(QThread):
         from src.config_connection_reading_management.database_reading_writing import DataRetriever
         self.db_conn_params = db_conn_params
         self.db_retriever = DataRetriever(db_conn_params=self.db_conn_params)
+        self._init_standard_params()
+        self._init_connection_check_flags()
+        self.meta_data = meta_data
+
+    def _init_standard_params(self):
         self.limit_amount_storage = self.db_retriever.limit_datapoints
         self.running = False
         self.T_max = 1000
@@ -128,10 +133,19 @@ class ReadData(QThread):
         self.current_cycle = None
         self.current_state = None
         self.current_uptake = None
-        self.meta_data = meta_data
         self.constraints_t_p = None
         self.constraints_etc = self.standard_constraints("etc")
         self.time_range_to_read = None
+
+    def _init_connection_check_flags(self):
+        self.T_data_sig_connected = False
+        self.p_data_sig_connected = False
+        self.etc_data_sig_connected = False
+        self.meta_data_sig_connected = False
+        self.current_cycle_sig_connected = False
+        self.current_uptake_sig_connected = False
+        self.current_state_sig_connected = False
+        self.cycle_data_sig_connected = False
 
     def run(self):
         # run() is meant to be implemented in subclasses.
