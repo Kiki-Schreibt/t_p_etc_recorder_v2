@@ -966,7 +966,9 @@ if __name__ == '__main__':
     from src.config_connection_reading_management.config_reader import GetConfig
     config = GetConfig()
     from src.meta_data.meta_data_handler import MetaData
-    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
-    cycle_counter = CSVCounter(config=config)
-    cycle_counter._update_meta_data_in_database(meta_data=meta_data)
+    sample_ids = ['WAE-WA-040', 'WAE-WA-028', 'WAE-WA-030']
+    for sample_id in sample_ids:
+        meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
+        cycle_counter = CSVCounter(config=config)
+        cycle_counter._update_meta_data_in_database(meta_data=meta_data)
 
