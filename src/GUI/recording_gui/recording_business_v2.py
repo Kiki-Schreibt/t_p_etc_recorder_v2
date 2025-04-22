@@ -324,13 +324,20 @@ class StaticPlotWindow(PlotBaseWindow):
     """
     A PlotBaseWindow subclass for static plotting.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None):
+    def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None, read_on_init=True):
         try:
             self.reader = ReadStatic(meta_data=meta_data, db_conn_params=db_conn_params)
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
+            self.read_on_init = read_on_init
             self.enableAutoRange()
-            self.reader.start()
-            self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
+            if read_on_init:
+                self.reader.start()
+                self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
+            else:
+                self.reader.reading_mode = "by_time"
+                self._init_on_x_range_changed()
+
+
         except Exception as e:
             logging.getLogger(__name__).exception("Error initializing StaticPlotWindow:")
 
@@ -339,7 +346,8 @@ class StaticPlotWindow(PlotBaseWindow):
         Initialize x-axis range change behavior after static data is loaded.
         """
         try:
-            self.disableAutoRange()
+            if self.read_on_init:
+                self.disableAutoRange()
             self.plotItem.sigXRangeChanged.connect(self._on_x_range_changed)
 
         except Exception as e:

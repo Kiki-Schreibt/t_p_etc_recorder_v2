@@ -135,7 +135,7 @@ class ReadData(QThread):
         self.current_uptake = None
         self.constraints_t_p = None
         self.constraints_etc = self.standard_constraints("etc")
-        self.time_range_to_read = None
+        self.time_range_to_read = None  # list []
 
     def _init_connection_check_flags(self):
         self.T_data_sig_connected = False
