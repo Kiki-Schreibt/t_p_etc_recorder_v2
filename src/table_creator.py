@@ -7,10 +7,20 @@ try:
 except ImportError:
     import logging
 
+
 class TableCreator:
+    PRIMARY_KEYS = {
+                        't_p_data':                     'time',
+                        'cycle_data':                   'time_start',
+                        'meta_data':                    'sample_id',
+                        'thermal_conductivity_data':    "\"Time\""
+
+                    }
+
     def __init__(self, db_conn_params):
         self.db_conn_params = db_conn_params
         self.logger = logging.getLogger(__name__)
+
 
     def create_all_tables(self):
         for attr_name, attr_value in vars(TableConfig).items():
@@ -39,13 +49,26 @@ class TableCreator:
         if not table_exists:
             columns_data_types = self._extract_columns_and_assign_data_types(table_class)
 
-            # Start building the SQL statement
-            create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
-            columns_sql = [f"    {col_name} {col_type}" for col_name, col_type in columns_data_types.items()]
-            create_table_sql += ",\n".join(columns_sql)
-            create_table_sql += "\n);"
+           # Build the column definitions list
+            columns_sql = [f"    {col} {dtype}" for col, dtype in columns_data_types.items()]
+
+            # If the table_class has a primary_key attribute, use it
+            pk = self.PRIMARY_KEYS.get(table_name)
+            if pk:
+                if isinstance(pk, (list, tuple)):
+                    pk_cols = ", ".join(pk)
+                else:
+                    pk_cols = pk
+                columns_sql.append(f"    PRIMARY KEY ({pk_cols})")
+
+            create_table_sql = (
+                f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
+                + ",\n".join(columns_sql)
+                + "\n);"
+            )
             self._execute(create_table_sql)
             self.logger.info(f"New Table Created: {table_name}")
+
         else:
             self.logger.info(f"{table_name} table exists in database. All good")
 

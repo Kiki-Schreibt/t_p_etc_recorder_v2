@@ -109,6 +109,8 @@ class TableConfig:
         temperature_drift = 'temperature_drift'
         sample_id = "sample_id"
 
+        primary_key = None
+
     class MetaDataTable:
         table_name = "meta_data"
         sample_id = "sample_id"
@@ -144,6 +146,7 @@ class TableConfig:
         h2_uptake = 'h2_uptake'
         time_min = 'time_min'
         time_max = 'time_max'
+
 
     def get_table_column_names(self, table_class=None, table_name=None):
         """
