@@ -1,4 +1,7 @@
 #table_data.py
+import pandas as pd
+
+
 class TableConfig:
 
     class TPDataTable:
@@ -227,3 +230,4 @@ if __name__ == '__main__':
     table = TableConfig().TPDataTable
     names = tablemaster.get_table_column_names(table)
     print(names)
+

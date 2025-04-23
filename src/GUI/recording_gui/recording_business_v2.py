@@ -904,9 +904,9 @@ if __name__ == '__main__':
         from src.config_connection_reading_management.config_reader import GetConfig
         from src.meta_data.meta_data_handler import MetaData
         db_conn_params = GetConfig().db_conn_params
-        meta_data = MetaData('test', db_conn_params=db_conn_params)
-        #win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params)
-        win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
+        meta_data = MetaData('WAE-WA-028', db_conn_params=db_conn_params)
+        win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params, meta_data=meta_data)
+        #win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
         win.reader.start()
 
         #win.point_clicked_time_received.connect(print)

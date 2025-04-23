@@ -47,8 +47,6 @@ class UptakeCorrectionUi(QMainWindow):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(10)
 
-
-
         main_layout.addWidget(self.top_plot)
         main_layout.addWidget(self.bottom_plot)
         self.top_plot.reader.start()
@@ -75,6 +73,10 @@ class UptakeCorrectionUi(QMainWindow):
         self.update_button.setFixedWidth(150)
         btn_layout.addWidget(self.update_button)
 
+        self.linear_region_button = QPushButton("Update Region")
+        self.linear_region_button.setFixedWidth(150)
+        btn_layout.addWidget(self.linear_region_button)
+
         btn_layout.addStretch()
         main_layout.addLayout(btn_layout)
 
@@ -82,6 +84,8 @@ class UptakeCorrectionUi(QMainWindow):
         t0_dt, t1_dt = self.top_plot.reader.time_range_to_read
         t0 = t0_dt.timestamp()
         t1 = t1_dt.timestamp()
+
+
         # 1) make two separate regions
         self.region_top    = LinearRegionItem([t0, t1], brush=(0, 0, 255, 50))
         self.region_bottom = LinearRegionItem([t0, t1], brush=(0, 0, 255, 50))
@@ -116,10 +120,6 @@ class UptakeCorrectionUi(QMainWindow):
         dt0 = datetime.fromtimestamp(t0, tz=local_tz)
         dt1 = datetime.fromtimestamp(t1, tz=local_tz)
         self.current_time_range = [dt0, dt1]
-        # display to the user
-        self.info_text_edit.append(
-            f"Selected time range: {dt0:%Y-%m-%d %H:%M:%S} → {dt1:%Y-%m-%d %H:%M:%S}"
-        )
 
 
 class UptakeCorrectionWindow(UptakeCorrectionUi):
@@ -128,7 +128,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         # Connect signals
         self.calc_button.clicked.connect(self._on_calculate_uptake)
         self.update_button.clicked.connect(self._on_update_data)
-
+        self.linear_region_button.clicked.connect(self._on_update_linear_region)
 
     def _on_calculate_uptake(self):
         """
@@ -139,6 +139,11 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         try:
             self.backend.load_min_max_data()
             self.backend.calculate_uptake()
+
+            # display to the user
+            self.info_text_edit.append(
+                f"Selected time range: {self.current_time_range[0]:%Y-%m-%d %H:%M:%S} → {self.current_time_range[1]:%Y-%m-%d %H:%M:%S}"
+            )
 
             # Placeholder computation
             result = f"Calculated uptake: {self.backend.h2_uptake} wt-%"
@@ -157,6 +162,16 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Update failed: {e}")
 
+    def _on_update_linear_region(self):
+        # get the current visible X-range from the top plot:
+        new_range = self.top_plot.viewRange()[0]  # (t0, t1)
+
+        # simply move your existing region items:
+        self.region_top.setRegion(new_range)
+        self.region_bottom.setRegion(new_range)
+
+        # and of course update your stored time range if you need it immediately
+        self._on_region_changed()
 
 
 class UptakeCorrectionBackend:
@@ -165,12 +180,18 @@ class UptakeCorrectionBackend:
         from src.table_data import TableConfig
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
+        self.cycle_table = TableConfig().CycleDataTable
+        self.etc_table = TableConfig().ETCDataTable
         self.meta_data = meta_data
         self.time_range_to_load = time_range_to_load
         self.db_conn_params = config.db_conn_params
         self.data_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self.row_min = self.row_max = pd.Series()
         self.h2_uptake = None
+        self.cycle_to_update = None  # latest cycle number
+        self.params_uptake = None
+        self.time_min_cycle = None
+        self.time_max_cycle = None
 
     def load_min_max_data(self):
         try:
@@ -189,6 +210,17 @@ class UptakeCorrectionBackend:
         max_idx = df[self.tp_table.pressure].idxmax()
         row_min = df.loc[min_idx]
         row_max = df.loc[max_idx]
+        self.time_min_cycle = min(
+                                self.row_min[self.tp_table.time],
+                                self.row_max[self.tp_table.time]
+                            )
+        self.time_max_cycle = max(
+                                self.row_min[self.tp_table.time],
+                                self.row_max[self.tp_table.time]
+                            )
+
+        self.cycle_to_update = df[self.tp_table.cycle_number].max()
+
         return row_min, row_max
 
     def calculate_uptake(self):
@@ -198,7 +230,7 @@ class UptakeCorrectionBackend:
             self.logger.info("No data for uptake calculation provided")
             return
 
-        params = {
+        self.params_uptake = {
                     'p_hyd':    self.row_min[self.tp_table.pressure],
                     'p_dehyd':  self.row_max[self.tp_table.pressure],
                     'T_hyd':    self.row_min[self.tp_table.temperature_sample],
@@ -209,10 +241,50 @@ class UptakeCorrectionBackend:
                     }
 
         eq_calculator = VantHoffCalcEq(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
-        self.h2_uptake = eq_calculator.calc_h2_uptake(**params)
+        self.h2_uptake = eq_calculator.calc_h2_uptake(**self.params_uptake)
 
+    def update_database(self):
+        if not self.cycle_to_update:
+            self.logger.error("No cycle to update provided")
+            return
+        from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
+        series_to_update_tp_etc, series_to_update_cycle = self._create_series_to_update()
 
+        db_manipulator = DataBaseManipulator(db_conn_params=self.db_conn_params)
+        #update tp_data table
+        db_manipulator.update_data(sample_id=self.meta_data.sample_id,
+                                   table=self.tp_table,
+                                   update_df=series_to_update_tp_etc,
+                                   col_to_match=self.tp_table.cycle_number,
+                                   update_between_vals=self.cycle_to_update)
+        #update etc data table
+        db_manipulator.update_data(sample_id=self.meta_data.sample_id,
+                                   table=self.etc_table,
+                                   update_df=series_to_update_tp_etc,
+                                   col_to_match=self.tp_table.cycle_number,
+                                   update_between_vals=self.cycle_to_update)
+        #update cycle data table
+        db_manipulator.update_data(sample_id=self.meta_data.sample_id,
+                                   table=self.cycle_table,
+                                   update_df=series_to_update_cycle,
+                                   col_to_match=self.tp_table.cycle_number,
+                                   update_between_vals=self.cycle_to_update)
 
+    def _create_series_to_update(self):
+        tp_etc_data = {self.tp_table.h2_uptake: self.h2_uptake}
+        series_tp_etc = pd.Series(tp_etc_data)
+
+        cycle_data = {self.cycle_table.h2_uptake: self.h2_uptake,
+                      self.cycle_table.pressure_min: self.params_uptake['p_hyd'],
+                      self.cycle_table.pressure_max: self.params_uptake['p_dehyd'],
+                      self.cycle_table.temperature_min: self.params_uptake['T_hyd'],
+                      self.cycle_table.temperature_max: self.params_uptake['T_dehyd'],
+                      self.cycle_table.time_min: self.time_min_cycle,
+                      self.cycle_table.time_max: self.time_max_cycle,
+                      }
+
+        series_cycle = pd.Series(cycle_data)
+        return series_tp_etc, series_cycle
 
 
 def main():

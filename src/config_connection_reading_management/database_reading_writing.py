@@ -500,8 +500,47 @@ class DataBaseManipulator:
         table: object = None,
         update_df: Optional[Union[pd.DataFrame, pd.Series]] = None,
         col_to_match: Optional[str] = None,
-        update_between_vals: Optional[Union[Tuple, List]] = None
+        update_between_vals: Optional[Union[Tuple, List]] = None,
     ) -> bool:
+        """
+        Update one or more columns in a database table for rows matching a sample ID
+        and a value range on another column.
+
+        :param sample_id: The sample identifier to match in `table.sample_id` column.
+        :type sample_id: Optional[str]
+        :param table:      A table‐metadata object exposing `table_name` and `sample_id`
+                           attributes. e.g. `TableConfig().TPDataTable`.
+        :type table:       object
+        :param update_df:  A single‐row pandas DataFrame or pandas Series. Its columns
+                           (or index) name the columns to update; its values are the new
+                           values to write.
+        :type update_df:   Optional[Union[pd.DataFrame, pd.Series]]
+        :param col_to_match: Name of a second column in the WHERE clause. Only rows where
+                             this column is BETWEEN the two values in `update_between_vals`
+                             will be updated.
+        :type col_to_match: Optional[str]
+        :param update_between_vals: A 2‐element tuple or list giving the inclusive lower
+                                    and upper bounds for `col_to_match`. e.g. (`start_ts`, `end_ts`).
+        :type update_between_vals: Optional[Union[Tuple, List]]
+
+        :returns: True if the UPDATE executed and committed successfully; False otherwise.
+        :rtype: bool
+
+        :example:
+        >>> df = pd.DataFrame([{'pressure': 1.23, 'temperature': 300.0}])
+        >>> success = updater.update_data(
+        ...     sample_id="WAE-WA-028",
+        ...     table=TableConfig().TPDataTable,
+        ...     update_df=df,
+        ...     col_to_match='timestamp',
+        ...     update_between_vals=(1600000000, 1600003600)
+        ... )
+        >>> if success:
+        ...     print("Rows updated")
+        ... else:
+        ...     print("Update failed")
+        """
+
         if table is None or update_df is None or col_to_match is None or update_between_vals is None:
             self.logger.error("Missing parameters for update_data")
             return False
@@ -522,8 +561,19 @@ class DataBaseManipulator:
             update_between_vals = tuple(update_between_vals) if isinstance(update_between_vals, list) else (update_between_vals,)
 
         query_part = ', '.join(cols_to_update)
-        query = (f"UPDATE {table_name} SET {query_part} WHERE {sample_id_col} = %s "
-                 f"AND {col_to_match} BETWEEN %s and %s")
+
+
+
+        if len(update_between_vals) == 1:
+            query = (f"UPDATE {table_name} SET {query_part} WHERE {sample_id_col} = %s "
+                     f"AND {col_to_match} = %s")
+        elif len(update_between_vals) == 2:
+            query = (f"UPDATE {table_name} SET {query_part} WHERE {sample_id_col} = %s "
+                     f"AND {col_to_match} BETWEEN %s and %s")
+        else:
+            self.logger.error("update_between_vals must be length 1 or 2")
+            return False
+
         values = tuple_values + (sample_id,) + update_between_vals
 
         with DatabaseConnection(**self.db_conn_params) as db_conn:

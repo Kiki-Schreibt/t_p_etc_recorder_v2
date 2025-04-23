@@ -30,7 +30,7 @@ SUPPORTED_FILE_EXTENSIONS = ['.csv', '.txt']
 STATE_HYD = 'Hydrogenated'
 STATE_DEHYD = 'Dehydrogenated'
 CYCLE_COUNTER_MODE = 'CSV_Recorder'
-COMPRESSION_FACTOR = 30
+COMPRESSION_FACTOR = 5
 
 
 class CSVProcessor:
@@ -66,6 +66,12 @@ class CSVProcessor:
         self.meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         self.folder_path = folder_path
         self.full_file_path = full_file_path
+
+
+        self.csv_importer = CSVImporter(compress_data=compress_data)
+        self.csv_handler = CSVDataHandler(meta_data=self.meta_data, config=self.config)
+        self.csv_writer = CSVWriter(meta_data=self.meta_data, config=self.config)
+
         if mode == 'auto':
             dir_t_p, dir_etc, reservoir_volume = get_folders_for_id(sample_id=sample_id)
             if not self.meta_data.reservoir_volume:
@@ -73,9 +79,6 @@ class CSVProcessor:
                 self.reset_meta_data(meta_data=self.meta_data)
             self.folder_path = dir_t_p
 
-        self.csv_importer = CSVImporter()
-        self.csv_handler = CSVDataHandler(meta_data=self.meta_data, config=self.config)
-        self.csv_writer = CSVWriter(meta_data=self.meta_data, compress_data=compress_data, config=self.config)
 
     def process(self, init_state: str = STATE_DEHYD) -> None:
         """
@@ -192,12 +195,13 @@ class CSVImporter:
     Imports CSV files and translates them into the required DataFrame format.
     """
 
-    def __init__(self):
+    def __init__(self, compress_data=False):
         """
         Initializes the CSVImporter with a logger and table configuration.
         """
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
+        self.compress_data = compress_data
 
     def import_csv(self, file_name: Optional[str] = None, file_path: Optional[str] = None,
         full_file_path: Optional[str] = None, jumo_version: str = 'standard') -> pd.DataFrame():
@@ -302,6 +306,11 @@ class CSVImporter:
             self.tp_table.temperature_heater,
             self.tp_table.setpoint_heater
         ]]
+        if self.compress_data:
+            df_copy = new_df.iloc[::COMPRESSION_FACTOR]
+            del new_df
+            new_df = df_copy
+            del df_copy
 
         return new_df
 
@@ -518,7 +527,7 @@ class CSVWriter:
     Writes processed CSV data to the database.
     """
 
-    def __init__(self, meta_data: MetaData, compress_data=False, config=None):
+    def __init__(self, meta_data: MetaData, config=None):
         """
         Initializes the CSVWriter with metadata.
 
@@ -536,7 +545,7 @@ class CSVWriter:
             raise
         self.writer = ModbusDBWriter(meta_data=meta_data, db_conn_params=self.db_conn_params)
         self.tp_table = TableConfig().TPDataTable
-        self.compress_data = compress_data
+
 
     def write_to_database(self, df: pd.DataFrame, file_name: str = '', after_deletion: str = '') -> None:
         """
@@ -549,10 +558,7 @@ class CSVWriter:
         """
         if df.empty:
             return
-        if self.compress_data:
-            df_copy = df.iloc[::COMPRESSION_FACTOR]
-            del df
-            df = df_copy
+
 
         with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
@@ -751,7 +757,7 @@ class CSVCounter:
                 self.logger.info(f"Total number cycles decreased to {total_number_cycles} because too short cycle were detected.")
 
             cycle_number_checker = cycles_counted
-            self.logger.info(f"Cycle# {cycles_counted - 0.5} calculated")
+            self.logger.info(f"Cycle# {cycles_counted} calculated")
         self._update_meta_data_in_database(meta_data=cycle_counter.meta_data)
         self.logger.info(f"Precise cycle count and uptake calculation for {sample_id} finished")
 
@@ -818,17 +824,17 @@ def check_nan_values(df, fun_str=""):
                         print(f"NaN value found during {fun_str}in df at row {idx}, column '{col}': {val}")
 
 
-def import_all():
+def import_all(compress_data=False):
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    sample_ids = ('WAE-WA-040',)
+    sample_ids = ('WAE-WA-028',)
     logger = logging.getLogger(__name__)
     from src.config_connection_reading_management.config_reader import GetConfig
     config = GetConfig()
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
-        csv_processor = CSVProcessor(sample_id=sample_id, config=config)
-        #csv_processor.process()
-        csv_processor.count_cycles(sample_id=sample_id)
+        csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)
+        csv_processor.process()
+        #csv_processor.count_cycles(sample_id=sample_id)
         write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
         print(f"{sample_id} processed")
 
@@ -962,13 +968,13 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 
 #Methods for usage
 if __name__ == '__main__':
-    #import_all()
-    from src.config_connection_reading_management.config_reader import GetConfig
-    config = GetConfig()
-    from src.meta_data.meta_data_handler import MetaData
-    sample_ids = ['WAE-WA-040', 'WAE-WA-028', 'WAE-WA-030']
-    for sample_id in sample_ids:
-        meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
-        cycle_counter = CSVCounter(config=config)
-        cycle_counter._update_meta_data_in_database(meta_data=meta_data)
+    import_all(compress_data=True)
+    #from src.config_connection_reading_management.config_reader import GetConfig
+    #config = GetConfig()
+    #from src.meta_data.meta_data_handler import MetaData
+    #sample_ids = ['WAE-WA-040', 'WAE-WA-028', 'WAE-WA-030']
+    #for sample_id in sample_ids:
+    #    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
+    #    cycle_counter = CSVCounter(config=config)
+    #    cycle_counter._update_meta_data_in_database(meta_data=meta_data)
 
