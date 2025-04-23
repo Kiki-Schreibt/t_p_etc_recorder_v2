@@ -575,12 +575,41 @@ class DataBaseManipulator:
             return False
 
         values = tuple_values + (sample_id,) + update_between_vals
+        values = tuple(_to_native(v) for v in values)
 
         with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
                 db_conn.cursor.execute(query, values)
                 db_conn.cursor.connection.commit()
-                self.logger.info("Updated columns %s in %s", cols_to_update, table_name)
+                # Extract just the column names (drop the " = %s")
+                col_names = [col_clause.split(" =")[0] for col_clause in cols_to_update]
+
+                #tuple_values hold the new values in the same order:
+                #    (pressure, temperature, …)
+                #    so zip them together
+                assignments = [
+                    f"{name} = {val!r}"
+                    for name, val in zip(col_names, tuple_values)
+                ]
+                if len(update_between_vals) == 1:
+                    # 3) Log the joined assignments
+                    self.logger.info(
+                        "Updated %s in %s where %s = %s",
+                        ", ".join(assignments),
+                        table_name,
+                        col_to_match,
+                        update_between_vals[0]
+                    )
+                elif len(update_between_vals) == 2:
+                    # 3) Log the joined assignments
+                    self.logger.info(
+                        "Updated %s in %s where %s between %s and %s",
+                        ", ".join(assignments),
+                        table_name,
+                        col_to_match,
+                        update_between_vals[0],
+                        update_between_vals[1]
+                    )
                 return True
             except Exception as e:
                 db_conn.cursor.connection.rollback()
@@ -938,6 +967,17 @@ class ExcelDataProcessor:
         except Exception as e:
             self.logger.error("Error saving combined data: %s", e)
 
+def _to_native(val):
+    # unwrap numpy scalars
+    try:
+        # numpy scalar, or pandas NA-scalar, etc.
+        return val.item()
+    except AttributeError:
+        pass
+    # pandas Timestamp → datetime.datetime
+    if hasattr(val, 'to_pydatetime'):
+        return val.to_pydatetime()
+    return val
 
 def test_data_retriever() -> None:
     from src.config_connection_reading_management.config_reader import GetConfig
@@ -983,7 +1023,7 @@ def write_ETC_in_parallel(dir_etc_folder: str, sample_id: str, logger_inst, conf
         pool.map(process_ETC_file, args)
     logger_inst.info("Import took %.2f hours", (time.time() - start_time) / 3600)
 
-def write_ETC_foler(dir_etc_folder: str, sample_id: str, logger_inst, config) -> None:
+def write_ETC_folder(dir_etc_folder: str, sample_id: str, logger_inst, config) -> None:
     start_time = time.time()
     file_paths = [
         os.path.join(dir_etc_folder, filename)

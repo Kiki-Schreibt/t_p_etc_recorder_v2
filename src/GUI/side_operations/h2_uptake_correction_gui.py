@@ -47,9 +47,24 @@ class UptakeCorrectionUi(QMainWindow):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(10)
 
+        # Top Buttons layout
+        btn_layout_top = QHBoxLayout()
+        btn_layout_top.setSpacing(20)
+
+        btn_layout_top.addStretch()
+        self.linear_region_button = QPushButton("Update Region")
+        self.linear_region_button.setFixedWidth(150)
+        btn_layout_top.addWidget(self.linear_region_button)
+
+        self.find_uncounted_cycles_button = QPushButton("Find Uncounted Cycles")
+        self.find_uncounted_cycles_button.setFixedWidth(150)
+        btn_layout_top.addWidget(self.find_uncounted_cycles_button)
+        btn_layout_top.addStretch()
+
+        main_layout.addLayout(btn_layout_top)
+
         main_layout.addWidget(self.top_plot)
         main_layout.addWidget(self.bottom_plot)
-
 
         # Text edit for information display
         self.info_text_edit = QTextEdit()
@@ -71,10 +86,6 @@ class UptakeCorrectionUi(QMainWindow):
         self.update_button = QPushButton("Update Data")
         self.update_button.setFixedWidth(150)
         btn_layout.addWidget(self.update_button)
-
-        self.linear_region_button = QPushButton("Update Region")
-        self.linear_region_button.setFixedWidth(150)
-        btn_layout.addWidget(self.linear_region_button)
 
         btn_layout.addStretch()
         main_layout.addLayout(btn_layout)
@@ -128,6 +139,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         self.calc_button.clicked.connect(self._on_calculate_uptake)
         self.update_button.clicked.connect(self._on_update_data)
         self.linear_region_button.clicked.connect(self._on_update_linear_region)
+        self.find_uncounted_cycles_button.clicked.connect(self._on_find_uncounted_cycles)
 
     def _on_calculate_uptake(self):
         """
@@ -156,7 +168,10 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         Replace with your update logic.
         """
         try:
-            # Placeholder update
+            self.info_text_edit.append(f"Updating t_p and cycle table for time range: "
+                                       f"{self.current_time_range[0]:%Y-%m-%d %H:%M:%S} → "
+                                       f"{self.current_time_range[1]:%Y-%m-%d %H:%M:%S}")
+            self.backend.update_database()
             self.info_text_edit.append("Data updated successfully.")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Update failed: {e}")
@@ -171,6 +186,11 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
 
         # and of course update your stored time range if you need it immediately
         self._on_region_changed()
+
+    def _on_find_uncounted_cycles(self):
+        if not self.backend:
+            self.backend = UptakeCorrectionBackend(self.meta_data, self.current_time_range, self.config)
+        self.backend.load_uncounted_cycles()
 
 
 class UptakeCorrectionBackend:
@@ -197,6 +217,7 @@ class UptakeCorrectionBackend:
             df_min_max = self.data_retriever.fetch_data_by_time_2(time_range=self.time_range_to_load,
                                                                   sample_id=self.meta_data.sample_id,
                                                                   table_name=self.tp_table.table_name)
+
             self.row_min, self.row_max = self._filter_min_max_vals(df_min_max)
 
         except Exception as e:
@@ -209,16 +230,21 @@ class UptakeCorrectionBackend:
         max_idx = df[self.tp_table.pressure].idxmax()
         row_min = df.loc[min_idx]
         row_max = df.loc[max_idx]
-        self.time_min_cycle = min(
-                                self.row_min[self.tp_table.time],
-                                self.row_max[self.tp_table.time]
-                            )
-        self.time_max_cycle = max(
-                                self.row_min[self.tp_table.time],
-                                self.row_max[self.tp_table.time]
-                            )
 
-        self.cycle_to_update = df[self.tp_table.cycle_number].max()
+        try:
+            self.time_min_cycle = min(
+                                    row_min[self.tp_table.time],
+                                    row_max[self.tp_table.time]
+                                )
+
+            self.time_max_cycle = max(
+                                    row_min[self.tp_table.time],
+                                    row_max[self.tp_table.time]
+                                )
+        except Exception as e:
+            self.logger.error("Couldnt determine time min and max: %s". e)
+
+        self.cycle_to_update = float(df[self.tp_table.cycle_number].max())
 
         return row_min, row_max
 
@@ -247,21 +273,16 @@ class UptakeCorrectionBackend:
             self.logger.error("No cycle to update provided")
             return
         from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
-        series_to_update_tp_etc, series_to_update_cycle = self._create_series_to_update()
+        series_to_update_tp, series_to_update_cycle = self._create_series_to_update()
 
         db_manipulator = DataBaseManipulator(db_conn_params=self.db_conn_params)
         #update tp_data table
         db_manipulator.update_data(sample_id=self.meta_data.sample_id,
                                    table=self.tp_table,
-                                   update_df=series_to_update_tp_etc,
+                                   update_df=series_to_update_tp,
                                    col_to_match=self.tp_table.cycle_number,
                                    update_between_vals=self.cycle_to_update)
-        #update etc data table
-        db_manipulator.update_data(sample_id=self.meta_data.sample_id,
-                                   table=self.etc_table,
-                                   update_df=series_to_update_tp_etc,
-                                   col_to_match=self.tp_table.cycle_number,
-                                   update_between_vals=self.cycle_to_update)
+
         #update cycle data table
         db_manipulator.update_data(sample_id=self.meta_data.sample_id,
                                    table=self.cycle_table,
@@ -270,20 +291,30 @@ class UptakeCorrectionBackend:
                                    update_between_vals=self.cycle_to_update)
 
     def _create_series_to_update(self):
-        tp_etc_data = {self.tp_table.h2_uptake: self.h2_uptake}
+        tp_etc_data = {self.tp_table.h2_uptake: float(self.h2_uptake)}
         series_tp_etc = pd.Series(tp_etc_data)
 
-        cycle_data = {self.cycle_table.h2_uptake: self.h2_uptake,
-                      self.cycle_table.pressure_min: self.params_uptake['p_hyd'],
-                      self.cycle_table.pressure_max: self.params_uptake['p_dehyd'],
-                      self.cycle_table.temperature_min: self.params_uptake['T_hyd'],
-                      self.cycle_table.temperature_max: self.params_uptake['T_dehyd'],
+        cycle_data = {self.cycle_table.h2_uptake: float(self.h2_uptake),
+                      self.cycle_table.pressure_min: float(self.params_uptake['p_hyd']),
+                      self.cycle_table.pressure_max: float(self.params_uptake['p_dehyd']),
+                      self.cycle_table.temperature_min: float(self.params_uptake['T_hyd']),
+                      self.cycle_table.temperature_max: float(self.params_uptake['T_dehyd']),
                       self.cycle_table.time_min: self.time_min_cycle,
                       self.cycle_table.time_max: self.time_max_cycle,
                       }
 
         series_cycle = pd.Series(cycle_data)
         return series_tp_etc, series_cycle
+
+    def load_uncounted_cycles(self):
+        query = (f"Select * from {self.cycle_table.table_name} WHERE "
+                 f"{self.cycle_table.sample_id} = %s"
+                 f"AND {self.cycle_table.h2_uptake} IS NULL")
+
+        df = self.data_retriever.execute_fetching(table_name=self.cycle_table.table_name,
+                                                  query=query,
+                                                  values=(self.meta_data.sample_id,))
+        print(df)
 
 
 def main():

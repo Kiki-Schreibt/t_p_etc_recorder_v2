@@ -15,7 +15,7 @@ from src.calculations.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.meta_data.meta_data_handler import MetaData
 from src.config_connection_reading_management.modbus_handler import ModbusDBWriter, CycleCounter
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
-from src.config_connection_reading_management.database_reading_writing import DataRetriever, write_ETC_in_parallel, write_ETC_foler
+from src.config_connection_reading_management.database_reading_writing import DataRetriever, write_ETC_in_parallel, write_ETC_folder
 from src.config_connection_reading_management.connections import DatabaseConnection
 try:
     import src.config_connection_reading_management.logger as logging
@@ -78,7 +78,6 @@ class CSVProcessor:
                 self.meta_data.reservoir_volume = reservoir_volume
                 self.reset_meta_data(meta_data=self.meta_data)
             self.folder_path = dir_t_p
-
 
     def process(self, init_state: str = STATE_DEHYD) -> None:
         """
@@ -835,7 +834,7 @@ def import_all(compress_data=False):
         csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)
         csv_processor.process()
         #csv_processor.count_cycles(sample_id=sample_id)
-        write_ETC_in_parallel(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
+        write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
         print(f"{sample_id} processed")
 
 
@@ -848,7 +847,7 @@ def _import_one_example():
     dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
     #csv_processor = CSVProcessor(sample_id=sample_id, config=config, full_file_path=file_path, mode="")
     #csv_processor.process()
-    write_ETC_foler(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
+    write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
 
     print(f"{sample_id} processed")
 
