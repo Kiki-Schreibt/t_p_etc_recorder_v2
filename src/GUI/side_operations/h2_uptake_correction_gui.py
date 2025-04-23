@@ -49,8 +49,7 @@ class UptakeCorrectionUi(QMainWindow):
 
         main_layout.addWidget(self.top_plot)
         main_layout.addWidget(self.bottom_plot)
-        self.top_plot.reader.start()
-        self.bottom_plot.reader.start()
+
 
         # Text edit for information display
         self.info_text_edit = QTextEdit()
@@ -296,6 +295,8 @@ def main():
     meta_data = MetaData(sample_id="WAE-WA-028", db_conn_params=config.db_conn_params)
     top_plot = StaticPlotWindow(meta_data=meta_data, db_conn_params=config.db_conn_params, y_axis="temperature", read_on_init=False)
     bottom_plot = StaticPlotWindow(meta_data=meta_data, db_conn_params=config.db_conn_params, y_axis="pressure", read_on_init=False)
+    top_plot.reader.start()
+    bottom_plot.reader.start()
     from datetime import datetime
     time_range = [datetime(2021, 9, 18), datetime(2021, 9, 21)]
     top_plot.reader.time_range_to_read = time_range

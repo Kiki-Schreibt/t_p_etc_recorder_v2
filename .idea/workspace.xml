@@ -141,7 +141,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.csv_handler">
+  <component name="RunManager" selected="Python.h2_uptake_correction_gui">
     <configuration name="csv_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -254,10 +254,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.h2_uptake_correction_gui" />
         <item itemvalue="Python.csv_handler" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.table_data" />
-        <item itemvalue="Python.h2_uptake_correction_gui" />
         <item itemvalue="Python.recording_business_v2" />
       </list>
     </recent_temporary>
