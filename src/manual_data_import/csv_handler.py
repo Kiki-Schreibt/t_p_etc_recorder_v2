@@ -99,7 +99,7 @@ class CSVProcessor:
                 if any(file_name.endswith(ext) for ext in SUPPORTED_FILE_EXTENSIONS)
             ]
 
-            files_processed = self._read_process_write_threading(file_names=file_names)
+            files_processed = self._read_process_write_folder(file_names=file_names)
 
         self.logger.info(f"Temperature and pressure data for {self.meta_data.sample_id} imported. {files_processed} files processed in total")
 
@@ -116,6 +116,8 @@ class CSVProcessor:
             int: The number of files successfully processed.
         """
         # Use ThreadPoolExecutor to process files in parallel
+        #todo: causes problems because ofs self.current_de_hyd_state (unrelated when parallel execution). not
+        # solvable without removing conditioning to preallocation...
         files_processed = 0
         files_processed_lock = Lock()
         with ThreadPoolExecutor() as executor:
@@ -141,6 +143,14 @@ class CSVProcessor:
 
         return files_processed
 
+    def _read_process_write_folder(self, file_names):
+        files_processed = 1
+        for file_name in file_names:
+            self._read_process_write(file_name=file_name, file_path=self.folder_path)
+            self.logger.info(f"Temperature and pressure data for {self.meta_data.sample_id} imported. {files_processed} files processed")
+            files_processed += 1
+        return files_processed
+
     def _read_process_write(self, file_name: Optional[str] = None,
                             full_file_path: Optional[str] = None,
                             file_path: Optional[str] = None) -> None:
@@ -152,6 +162,7 @@ class CSVProcessor:
             full_file_path (Optional[str]): The full path to the CSV file.
             file_path (Optional[str]): The path to the directory containing the CSV file.
         """
+
         try:
             df = self.csv_importer.import_csv(file_name=file_name, file_path=file_path, full_file_path=full_file_path)
             df_processed = self.csv_handler.process(df=df)
@@ -391,7 +402,6 @@ class CSVDataHandler:
         df.loc[condition_uptake, self.tp_table.h2_uptake_flag] = True
         df.loc[condition_is_cycle, self.tp_table.cycle_number_flag] = True
         self._set_hydrogenation_states(df)
-
         if pd.isna(df.loc[0, self.tp_table.de_hyd_state]) or df.loc[0, self.tp_table.de_hyd_state] in ["nan", "NaN"]:
             df.loc[0, self.tp_table.de_hyd_state] = self.current_de_hyd_state
 
@@ -620,11 +630,10 @@ class CSVCounter:
         """
         df_all_cycles = self._preallocate_cycles_by_sample_id(sample_id=sample_id)
         # Initial counting
-        self._initial_counting(df=df_all_cycles, init_state=init_state)
+        self._initial_counting(df=df_all_cycles, init_state=init_state) #comment to check preallocation
         self._update_tp_table_with_cycle_data(df_all_cycles, sample_id=sample_id)
-        #df_all_cycles.to_csv('df_preallocated_cycles.csv')
-        self._count_cycles_calc_uptake(df=df_all_cycles, sample_id=sample_id)
-
+        # Final counting
+        self._count_cycles_calc_uptake(df=df_all_cycles, sample_id=sample_id) #comment to check initial counting
 
     def _preallocate_cycles_by_sample_id(self, sample_id: str) -> pd.DataFrame:
         """
@@ -825,7 +834,7 @@ def check_nan_values(df, fun_str=""):
 
 def import_all(compress_data=False):
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    sample_ids = ('WAE-WA-028',)
+    #sample_ids = ('WAE-WA-028',)
     logger = logging.getLogger(__name__)
     from src.config_connection_reading_management.config_reader import GetConfig
     config = GetConfig()
@@ -967,7 +976,7 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 
 #Methods for usage
 if __name__ == '__main__':
-    import_all(compress_data=True)
+    import_all()
     #from src.config_connection_reading_management.config_reader import GetConfig
     #config = GetConfig()
     #from src.meta_data.meta_data_handler import MetaData

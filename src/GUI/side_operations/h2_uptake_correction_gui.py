@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QTextEdit, QPushButton, QMessageBox, QApplication
 )
 from PySide6.QtGui import QFont
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, QObject, Slot, QThread
 from pyqtgraph import LinearRegionItem
 from datetime import datetime
 
@@ -47,6 +47,11 @@ class UptakeCorrectionUi(QMainWindow):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(10)
 
+        self._setup_top_buttons(main_layout=main_layout)
+        self._setup_text_edit(main_layout=main_layout)
+        self._setup_bottom_buttons(main_layout=main_layout)
+
+    def _setup_top_buttons(self, main_layout):
         # Top Buttons layout
         btn_layout_top = QHBoxLayout()
         btn_layout_top.setSpacing(20)
@@ -59,13 +64,21 @@ class UptakeCorrectionUi(QMainWindow):
         self.find_uncounted_cycles_button = QPushButton("Find Uncounted Cycles")
         self.find_uncounted_cycles_button.setFixedWidth(150)
         btn_layout_top.addWidget(self.find_uncounted_cycles_button)
-        btn_layout_top.addStretch()
 
+        self.prev_cycle_button = QPushButton("Prev Cycle")
+        self.prev_cycle_button.setFixedWidth(120)
+        btn_layout_top.addWidget(self.prev_cycle_button)
+
+        self.next_cycle_button = QPushButton("Next Cycle")
+        self.next_cycle_button.setFixedWidth(120)
+        btn_layout_top.addWidget(self.next_cycle_button)
+        btn_layout_top.addStretch()
         main_layout.addLayout(btn_layout_top)
 
         main_layout.addWidget(self.top_plot)
         main_layout.addWidget(self.bottom_plot)
 
+    def _setup_text_edit(self, main_layout):
         # Text edit for information display
         self.info_text_edit = QTextEdit()
         self.info_text_edit.setReadOnly(True)
@@ -74,10 +87,16 @@ class UptakeCorrectionUi(QMainWindow):
         self.info_text_edit.setFixedHeight(150)
         main_layout.addWidget(self.info_text_edit)
 
+    def _setup_bottom_buttons(self, main_layout):
         # Buttons layout
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(20)
         btn_layout.addStretch()
+
+        self.show_info_button = QPushButton("Show Cycle Info")
+        self.show_info_button.setFixedWidth(150)
+        btn_layout.addWidget(self.show_info_button)
+
 
         self.calc_button = QPushButton("Calculate Uptake")
         self.calc_button.setFixedWidth(150)
@@ -140,6 +159,11 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         self.update_button.clicked.connect(self._on_update_data)
         self.linear_region_button.clicked.connect(self._on_update_linear_region)
         self.find_uncounted_cycles_button.clicked.connect(self._on_find_uncounted_cycles)
+        self.prev_cycle_button.clicked.connect(self._on_prev_cycle)
+        self.next_cycle_button.clicked.connect(self._on_next_cycle)
+        self.show_info_button.clicked.connect(self._on_show_cycle_info)
+        self.df_uncounted_cycles = pd.DataFrame()
+        self._uncounted_idx      = 0
 
     def _on_calculate_uptake(self):
         """
@@ -147,6 +171,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         Replace with your calculation logic.
         """
         self.backend = UptakeCorrectionBackend(self.meta_data, self.current_time_range, self.config)
+        self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
         try:
             self.backend.load_min_max_data()
             self.backend.calculate_uptake()
@@ -171,10 +196,41 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
             self.info_text_edit.append(f"Updating t_p and cycle table for time range: "
                                        f"{self.current_time_range[0]:%Y-%m-%d %H:%M:%S} → "
                                        f"{self.current_time_range[1]:%Y-%m-%d %H:%M:%S}")
-            self.backend.update_database()
-            self.info_text_edit.append("Data updated successfully.")
+
+            """Slot called when user clicks “Update Data”."""
+            # disable the button so they can’t re-click
+            self.update_button.setEnabled(False)
+
+            # create the worker + thread
+            self._update_thread = QThread(self)
+            self._update_worker = UpdateWorker(self.backend)
+
+            # move worker into its thread
+            self._update_worker.moveToThread(self._update_thread)
+
+            # wire up signals
+            self._update_thread.started.connect(self._update_worker.run)
+            self._update_worker.finished.connect(self._on_update_finished)
+            self._update_worker.error.connect(self._on_update_error)
+            self._update_worker.progress.connect(self.info_text_edit.append)
+
+            # clean up when done
+            self._update_worker.finished.connect(self._update_thread.quit)
+            self._update_worker.finished.connect(self._update_worker.deleteLater)
+            self._update_thread.finished.connect(self._update_thread.deleteLater)
+
+            # start the background work
+            self._update_thread.start()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Update failed: {e}")
+
+    def _on_update_finished(self):
+        self.info_text_edit.append("Update complete.")
+        self.update_button.setEnabled(True)
+
+    def _on_update_error(self, errmsg):
+        QMessageBox.critical(self, "Update Error", errmsg)
+        self.update_button.setEnabled(True)
 
     def _on_update_linear_region(self):
         # get the current visible X-range from the top plot:
@@ -190,16 +246,96 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
     def _on_find_uncounted_cycles(self):
         if not self.backend:
             self.backend = UptakeCorrectionBackend(self.meta_data, self.current_time_range, self.config)
+            self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
         self.backend.load_uncounted_cycles()
 
+        self._uncounted_idx = 0
+        if not self.df_uncounted_cycles.empty:
+            self.info_text_edit.append(
+                f"Found {len(self.df_uncounted_cycles)} un-counted cycles."
+            )
+        else:
+            self.info_text_edit.append("No un-counted cycles found.")
 
-class UptakeCorrectionBackend:
+    @Slot()
+    def _receive_uncounted_cycles(self, df):
+        self.df_uncounted_cycles = df
+
+    def _show_uncounted_cycle(self):
+
+        if self.df_uncounted_cycles.empty:
+            return
+        # clamp index
+        n = len(self.df_uncounted_cycles)
+        self._uncounted_idx %= n
+
+        row = self.df_uncounted_cycles.iloc[self._uncounted_idx]
+        cycle = row[self.backend.cycle_table.cycle_number]
+        t0    = row[self.backend.cycle_table.time_start].timestamp()
+        t1    = row[self.backend.cycle_table.time_end].timestamp()
+        self.top_plot.setXRange(t0, t1)
+        # move the regions to this cycle’s time window
+        self.region_top.setRegion((t0, t1))
+        self.region_bottom.setRegion((t0, t1))
+        # update your internal current_time_range
+        self._on_region_changed()
+
+        # display info
+        self.info_text_edit.append(
+            f"Cycle #{cycle} of {n}: "
+            f"{row[self.backend.cycle_table.time_start]} → "
+            f"{row[self.backend.cycle_table.time_end]}"
+        )
+
+    def _on_next_cycle(self):
+        if self.df_uncounted_cycles.empty:
+            return
+        self._uncounted_idx += 1
+        self._show_uncounted_cycle()
+
+    def _on_prev_cycle(self):
+        if self.df_uncounted_cycles.empty:
+            return
+        self._uncounted_idx -= 1
+        self._show_uncounted_cycle()
+
+    def _on_show_cycle_info(self):
+        if not self.current_time_range:
+            self._on_region_changed()
+
+        self.backend = UptakeCorrectionBackend(self.meta_data, self.current_time_range, self.config)
+        self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
+        self.backend.load_min_max_data()
+
+        current_cycle = self.backend.df_all_loaded.iloc[-1][self.backend.tp_table.cycle_number]
+        current_de_hyd_state = self.backend.df_all_loaded.iloc[-1][self.backend.tp_table.de_hyd_state]
+
+
+
+        self.info_text_edit.append(f"Info abot loaded cycle: "
+                                   f"{self.current_time_range[0]:%Y-%m-%d %H:%M:%S} → "
+                                   f"{self.current_time_range[1]:%Y-%m-%d %H:%M:%S}"
+                                   f"\n"
+                                   f"Cycle Number: {current_cycle}, {current_de_hyd_state}")
+
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        if self.backend:
+            self.backend.stop()
+
+
+class UptakeCorrectionBackend(QObject):
+
+    df_uncounted_cycles_sig = Signal(pd.DataFrame)
+
     def __init__(self, meta_data, time_range_to_load, config):
-
+        super().__init__()
         from src.table_data import TableConfig
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
         self.cycle_table = TableConfig().CycleDataTable
+        cycle_table_column_names = TableConfig().get_table_column_names(table_class=self.cycle_table)
+        self.cycle_table_column_names_str = ", ".join(cycle_table_column_names)
         self.etc_table = TableConfig().ETCDataTable
         self.meta_data = meta_data
         self.time_range_to_load = time_range_to_load
@@ -211,6 +347,7 @@ class UptakeCorrectionBackend:
         self.params_uptake = None
         self.time_min_cycle = None
         self.time_max_cycle = None
+        self.df_all_loaded = None
 
     def load_min_max_data(self):
         try:
@@ -226,21 +363,19 @@ class UptakeCorrectionBackend:
 
     def _filter_min_max_vals(self, df):
 
+        self.df_all_loaded = df
         min_idx = df[self.tp_table.pressure].idxmin()
         max_idx = df[self.tp_table.pressure].idxmax()
         row_min = df.loc[min_idx]
         row_max = df.loc[max_idx]
 
         try:
-            self.time_min_cycle = min(
-                                    row_min[self.tp_table.time],
-                                    row_max[self.tp_table.time]
-                                )
+            self.time_min_cycle = row_min[self.tp_table.time]
+                                   # row_max[self.tp_table.time]
 
-            self.time_max_cycle = max(
-                                    row_min[self.tp_table.time],
-                                    row_max[self.tp_table.time]
-                                )
+            self.time_max_cycle = row_max[self.tp_table.time]
+
+
         except Exception as e:
             self.logger.error("Couldnt determine time min and max: %s". e)
 
@@ -307,14 +442,38 @@ class UptakeCorrectionBackend:
         return series_tp_etc, series_cycle
 
     def load_uncounted_cycles(self):
-        query = (f"Select * from {self.cycle_table.table_name} WHERE "
+        query = (f"Select {self.cycle_table_column_names_str} from {self.cycle_table.table_name} WHERE "
                  f"{self.cycle_table.sample_id} = %s"
                  f"AND {self.cycle_table.h2_uptake} IS NULL")
 
-        df = self.data_retriever.execute_fetching(table_name=self.cycle_table.table_name,
+        df_uncounted_cycles = self.data_retriever.execute_fetching(table_name=self.cycle_table.table_name,
                                                   query=query,
                                                   values=(self.meta_data.sample_id,))
-        print(df)
+        df_uncounted_cycles = df_uncounted_cycles.sort_values(by=self.cycle_table.time_start)
+        self.df_uncounted_cycles_sig.emit(df_uncounted_cycles)
+
+    def stop(self):
+        self.data_retriever = None
+
+
+class UpdateWorker(QObject):
+    finished = Signal()
+    error    = Signal(str)
+    progress = Signal(str)
+
+    def __init__(self, backend):
+        super().__init__()
+        self.backend = backend
+
+    @Slot()
+    def run(self):
+        try:
+            self.progress.emit("Starting update…")
+            self.backend.update_database()
+            self.progress.emit("Done.")
+            self.finished.emit()
+        except Exception as e:
+            self.error.emit(str(e))
 
 
 def main():

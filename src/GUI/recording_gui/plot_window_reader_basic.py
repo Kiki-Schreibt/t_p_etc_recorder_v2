@@ -558,7 +558,8 @@ class PlotBaseStyle(pg.PlotWidget):
         elif "pressure" in y_axis.lower():
             self.column_names_left = (self.t_p_table.time,
                                       self.t_p_table.pressure,
-                                      self.t_p_table.eq_pressure)
+                                      self.t_p_table.eq_pressure,
+                                      self.t_p_table.eq_pressure_real)
 
     def _init_left_axis(self, y_axis):
         x_axis = DateAxisItem(orientation='bottom')
