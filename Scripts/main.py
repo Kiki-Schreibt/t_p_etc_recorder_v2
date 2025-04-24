@@ -59,7 +59,28 @@ def load_ui_file(ui_file_path):
 
 
 class MainProgram(RecordingMainWindow):
+    """
+    The main application window for data recording and related tools.
+
+    Extends RecordingMainWindow to add menu actions for:
+      - Test Planner
+      - Configuration Settings
+      - Quick Export
+      - DICON Simulator
+      - Schedule Creator
+      - Uptake Correction
+
+    Args:
+        config (ConfigReader): Loaded configuration object providing DB and other params.
+    """
+
     def __init__(self, config):
+        """
+        Initialize the main program and connect all menu actions.
+
+        Args:
+            config (ConfigReader): The application configuration.
+        """
         super().__init__(config=config)
 
         self.ui.actionTest_Planner.triggered.connect(self.open_test_planner)
@@ -69,17 +90,24 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionSchedule_Creator.triggered.connect(self._open_schedule_creator)
         self.ui.actionUptake_Correction.triggered.connect(self._open_uptake_correction)
 
-
-
     def open_test_planner(self):
+        """
+        Launch the Test Planner module in its own window.
+        """
         self.planner = TestPlannerMain()
         self.planner.show()
 
     def open_config_settings(self):
+        """
+        Open the configuration settings dialog for editing and saving.
+        """
         self.config_settings = ConfigWindow()
         self.config_settings.show()
 
     def _quick_export(self):
+        """
+        Perform a quick export using the current constraints, in a background thread.
+        """
         from src.export_methods import QuickExport
         exporter = QuickExport(meta_data=self.meta_data, db_conn_params=self.config.db_conn_params)
         constraints = self.controller.constraints_dict
@@ -87,6 +115,9 @@ class MainProgram(RecordingMainWindow):
         export_thread.start()
 
     def _open_dicon_simulator(self):
+        """
+        Open the DICON Modbus simulator GUI and update host/port when started or stopped.
+        """
         self.prev_mb_conn_params = None
         self.dicon_simulator = ModbusServerControlGUI()
         self.dicon_simulator.show()
@@ -94,10 +125,16 @@ class MainProgram(RecordingMainWindow):
         self.dicon_simulator.server_stopped.connect(self.change_modbus_host_ip)
 
     def _open_schedule_creator(self):
+        """
+        Launch the Schedule Creator module in its own window.
+        """
         self.schedule_creator = ScheduleGeneratorMain()
         self.schedule_creator.show()
 
     def _open_uptake_correction(self):
+        """
+        Launch the Uptake Correction window, seeded with the current plot time range.
+        """
         from datetime import datetime
         view_range = self.plot_manager.top_plot.viewRange()[0]
         dt0 = datetime.fromtimestamp(view_range[0], tz=local_tz)
@@ -110,6 +147,13 @@ class MainProgram(RecordingMainWindow):
         self.uptake_corrector.show()
 
     def change_modbus_host_ip(self, host_ip=None, port=None):
+        """
+        Callback for DICON simulator start/stop; reconfigures the Modbus host/port.
+
+        Args:
+            host_ip (str, optional): New Modbus server host.
+            port (int or str, optional): New Modbus server port.
+        """
         recorder_was_running = self.controller.is_tp_recording_running()
         if recorder_was_running:
             self.controller.stop_tp_recording()
@@ -126,12 +170,23 @@ class MainProgram(RecordingMainWindow):
             self.controller.start_tp_recording()
 
     def closeEvent(self, event):
+        """
+        Clean up any running simulators before the main window closes.
+
+        Overrides the base closeEvent to stop the DICON simulator.
+        """
         super().closeEvent(event)
         if hasattr(self, "dicon_simulator"):
             self.dicon_simulator.business.stop_server()
 
 
 def main():
+    """
+    Application entry point.
+    If no config file exists, open the ConfigWindow first; otherwise launch MainProgram.
+
+    This function starts the Qt event loop.
+    """
     app = QApplication(sys.argv)
 
     #standard_config_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'config', 'config.json')
@@ -149,6 +204,12 @@ def main():
     sys.exit(app.exec())
 
 def launch_main_program(app):
+    """
+    Instantiate and show the MainProgram window.
+
+    Args:
+        app (QApplication): The running QApplication instance.
+    """
     try:
         from src.config_connection_reading_management.config_reader import GetConfig
         config = GetConfig()
