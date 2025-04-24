@@ -247,7 +247,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
                 f"{self.current_time_range[0]:%Y-%m-%d %H:%M:%S}"
                 f" → {self.current_time_range[1]:%Y-%m-%d %H:%M:%S}"
             )
-            result = f"Calculated uptake: {self.backend.h2_uptake} wt-%"
+            result = f"Calculated uptake: {self.backend.h2_uptake:.4f} wt-%"
             self.info_text_edit.append(result)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Calculation failed: {e}")
@@ -326,6 +326,8 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         Slot to receive the DataFrame of un-counted cycles from backend.
         """
         self.df_uncounted_cycles = df
+        if self.backend:
+            self.backend.uncounted_cycles_emitted.connect(self._delete_cycle_from_uncounted_df)
 
     def _show_uncounted_cycle(self):
         """
@@ -353,11 +355,16 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         )
 
     def _on_next_cycle(self):
-        """Advance to the next un-counted cycle and display it."""
         if self.df_uncounted_cycles.empty:
             return
+        old_idx = self._uncounted_idx
         self._uncounted_idx += 1
+        n = len(self.df_uncounted_cycles)
+        self._uncounted_idx %= n
         self._show_uncounted_cycle()
+        # if we wrapped from last back to zero, we’ve seen them all once
+        if self._uncounted_idx == 0 and old_idx == n - 1:
+            self.info_text_edit.append("🔁 You’ve now browsed through all cycles once.")
 
     def _on_prev_cycle(self):
         """Go back to the previous un-counted cycle and display it."""
@@ -384,13 +391,24 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         last = self.backend.df_all_loaded.iloc[-1]
         current_cycle = last[self.backend.tp_table.cycle_number]
         current_de_hyd_state = last[self.backend.tp_table.de_hyd_state]
+        current_uptake = last[self.backend.tp_table.h2_uptake]
 
         self.info_text_edit.append(
             f"Info about loaded data:\n"
             f"{self.current_time_range[0]:%Y-%m-%d %H:%M:%S} → "
             f"{self.current_time_range[1]:%Y-%m-%d %H:%M:%S}\n"
-            f"Cycle Number: {current_cycle}, State: {current_de_hyd_state}"
+            f"Cycle Number: {current_cycle}, State: {current_de_hyd_state}, H2 Uptake = {current_uptake:.2f} wt-%"
         )
+
+    def _delete_cycle_from_uncounted_df(self, cycle_number):
+        """
+        Remove uncounted cycle after manual uptake calculation.
+        """
+        self.df_uncounted_cycles = self.df_uncounted_cycles[self.df_uncounted_cycles['cycle_number'] != cycle_number]
+        self.info_text_edit.append(
+                f"Cycle #{cycle_number} removed from uncounted cycles"
+            )
+        self._uncounted_idx -= 1
 
     def closeEvent(self, event):
         """
@@ -410,6 +428,7 @@ class UptakeCorrectionBackend(QObject):
         df_uncounted_cycles_sig (pd.DataFrame): Emitted with cycles missing uptake.
     """
     df_uncounted_cycles_sig = Signal(pd.DataFrame)
+    cycle_updated_sig = Signal(float)
 
     def __init__(self, meta_data, time_range_to_load, config):
         """
@@ -441,6 +460,7 @@ class UptakeCorrectionBackend(QObject):
         self.time_min_cycle = None
         self.time_max_cycle = None
         self.df_all_loaded = None
+        self.uncounted_cycles_emitted = False
 
     def load_min_max_data(self):
         """
@@ -533,6 +553,8 @@ class UptakeCorrectionBackend(QObject):
             col_to_match=self.tp_table.cycle_number,
             update_between_vals=self.cycle_to_update
         )
+        if self.uncounted_cycles_emitted:
+            self.cycle_updated_sig.emti(self.cycle_to_update)
 
     def _create_series_to_update(self):
         """
@@ -571,8 +593,10 @@ class UptakeCorrectionBackend(QObject):
             query=query,
             values=(self.meta_data.sample_id,)
         )
-        df = df.sort_values(by=self.cycle_table.time_start)
+        if not df.empty:
+            df = df.sort_values(by=self.cycle_table.time_start)
         self.df_uncounted_cycles_sig.emit(df)
+        self.uncounted_cycles_emitted = True
 
     def stop(self):
         """

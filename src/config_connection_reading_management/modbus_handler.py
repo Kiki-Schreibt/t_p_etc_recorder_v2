@@ -1047,7 +1047,7 @@ class ModbusDBWriter:
             #was cycle_number-1 before... messes with import now
             cursor.execute(update_tp_query, (value, self.meta_data.sample_id, new_line_cycle[cycle_table.cycle_number], time_start_full_cycle, time_end_full_cycle))
             cursor.connection.commit()
-            self.logger.info(f"{t_p_table_name} updated for cycle #{new_line_cycle[cycle_table.cycle_number]}: "
+            self.logger.info(f"{t_p_table_name} updated for cycle #{new_line_cycle[cycle_table.cycle_number]:.2f}: "
                              f"{t_p_table.h2_uptake} = {new_line_cycle[cycle_table.h2_uptake]}")
         except Exception as e:
             self.logger.error(f"Error occurred while updating {t_p_table_name} in method _update_cycle_t_p_table: %s", e)
