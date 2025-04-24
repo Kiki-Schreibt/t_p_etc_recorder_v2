@@ -655,6 +655,7 @@
     <addaction name="actionQuick_Export"/>
     <addaction name="actionDicon_Simulator"/>
     <addaction name="actionSchedule_Creator"/>
+    <addaction name="actionUptake_Correction"/>
    </widget>
    <addaction name="menuView"/>
   </widget>
@@ -682,6 +683,11 @@
   <action name="actionSchedule_Creator">
    <property name="text">
     <string>Schedule Creator</string>
+   </property>
+  </action>
+  <action name="actionUptake_Correction">
+   <property name="text">
+    <string>Uptake Correction</string>
    </property>
   </action>
  </widget>

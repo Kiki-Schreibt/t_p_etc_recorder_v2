@@ -21,20 +21,33 @@ class UptakeCorrectionUi(QMainWindow):
     A window to display a plot, information text, and buttons
     for calculating uptake and updating data.
     """
-    def __init__(self, meta_data, config, top_plot, bottom_plot):
+    def __init__(self, meta_data, config, time_range_to_read):
         super().__init__()
+        self._init_plots(meta_data=meta_data,
+                         config=config,
+                         time_range_to_read=time_range_to_read)
         self.logger = logging.getLogger(__name__)
         self.setWindowTitle("Uptake Correction")
         self.config = config
         self.meta_data = meta_data
         self.current_time_range = []
-        self.top_plot = top_plot
-        self.bottom_plot = bottom_plot
         self.bottom_plot.setXLink(self.top_plot)
         self.backend = None
 
         self._setup_ui()
         self._setup_linear_region()
+
+    def _init_plots(self, meta_data, config, time_range_to_read):
+        from src.GUI.recording_gui.recording_business_v2 import StaticPlotWindow
+        self.top_plot = StaticPlotWindow(meta_data=meta_data, db_conn_params=config.db_conn_params, y_axis="temperature", read_on_init=False)
+        self.bottom_plot = StaticPlotWindow(meta_data=meta_data, db_conn_params=config.db_conn_params, y_axis="pressure", read_on_init=False)
+        self.top_plot.reader.time_range_to_read = time_range_to_read
+        self.bottom_plot.reader.time_range_to_read = time_range_to_read
+        self.top_plot.reader.p_data_sig.connect(self.bottom_plot.on_tp_data)
+        self.top_plot.reader.etc_data_sig.connect(self.bottom_plot.on_etc_data)
+        self.top_plot.reader.start()
+        self.bottom_plot.reader.start()
+
 
     def _setup_ui(self):
         """
@@ -110,10 +123,11 @@ class UptakeCorrectionUi(QMainWindow):
         main_layout.addLayout(btn_layout)
 
     def _setup_linear_region(self):
+        if not self.top_plot.reader.time_range_to_read:
+            return
         t0_dt, t1_dt = self.top_plot.reader.time_range_to_read
         t0 = t0_dt.timestamp()
         t1 = t1_dt.timestamp()
-
 
         # 1) make two separate regions
         self.region_top    = LinearRegionItem([t0, t1], brush=(0, 0, 255, 50))
@@ -152,8 +166,9 @@ class UptakeCorrectionUi(QMainWindow):
 
 
 class UptakeCorrectionWindow(UptakeCorrectionUi):
-    def __init__(self, meta_data, config, top_plot, bottom_plot):
-        super().__init__(meta_data, config, top_plot, bottom_plot)
+    def __init__(self, meta_data, config, time_range_to_read):
+        super().__init__(meta_data, config, time_range_to_read)
+
         # Connect signals
         self.calc_button.clicked.connect(self._on_calculate_uptake)
         self.update_button.clicked.connect(self._on_update_data)
@@ -319,9 +334,12 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
                                    f"Cycle Number: {current_cycle}, {current_de_hyd_state}")
 
     def closeEvent(self, event):
-        super().closeEvent(event)
+
         if self.backend:
-            self.backend.stop()
+            self.backend.stop()   # your own cleanup
+
+        # 4) Now call the base implementation to really close
+        super().closeEvent(event)
 
 
 class UptakeCorrectionBackend(QObject):
@@ -477,23 +495,18 @@ class UpdateWorker(QObject):
 
 
 def main():
-    from src.GUI.recording_gui.recording_business_v2 import StaticPlotWindow
+
     from src.config_connection_reading_management.config_reader import GetConfig
     from src.meta_data.meta_data_handler import MetaData
     app = QApplication([])
     config = GetConfig()
     meta_data = MetaData(sample_id="WAE-WA-028", db_conn_params=config.db_conn_params)
-    top_plot = StaticPlotWindow(meta_data=meta_data, db_conn_params=config.db_conn_params, y_axis="temperature", read_on_init=False)
-    bottom_plot = StaticPlotWindow(meta_data=meta_data, db_conn_params=config.db_conn_params, y_axis="pressure", read_on_init=False)
-    top_plot.reader.start()
-    bottom_plot.reader.start()
     from datetime import datetime
     time_range = [datetime(2021, 9, 18), datetime(2021, 9, 21)]
-    top_plot.reader.time_range_to_read = time_range
     win = UptakeCorrectionWindow(meta_data=meta_data,
                                  config=config,
-                                 top_plot=top_plot,
-                                 bottom_plot=bottom_plot)
+                                 time_range_to_read=time_range
+                                 )
     win.show()
     app.exec()
 

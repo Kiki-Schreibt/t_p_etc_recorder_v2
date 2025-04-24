@@ -10,9 +10,10 @@ from PySide6.QtCore import QFile
 
 from src.GUI.config_creation.config_creator_ui_main import ConfigWindow
 from src.standard_paths import standard_config_file_path
-from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow
+from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
 from src.simulation.simulator_gui import ModbusServerControlGUI
 from test_planner import TestPlannerMain
+from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import ScheduleGeneratorMain
 try:
     import src.config_connection_reading_management.logger as logging
@@ -66,6 +67,9 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionQuick_Export.triggered.connect(self._quick_export)
         self.ui.actionDicon_Simulator.triggered.connect(self._open_dicon_simulator)
         self.ui.actionSchedule_Creator.triggered.connect(self._open_schedule_creator)
+        self.ui.actionUptake_Correction.triggered.connect(self._open_uptake_correction)
+
+
 
     def open_test_planner(self):
         self.planner = TestPlannerMain()
@@ -92,6 +96,18 @@ class MainProgram(RecordingMainWindow):
     def _open_schedule_creator(self):
         self.schedule_creator = ScheduleGeneratorMain()
         self.schedule_creator.show()
+
+    def _open_uptake_correction(self):
+        from datetime import datetime
+        view_range = self.plot_manager.top_plot.viewRange()[0]
+        dt0 = datetime.fromtimestamp(view_range[0], tz=local_tz)
+        dt1 = datetime.fromtimestamp(view_range[1], tz=local_tz)
+        time_range = [dt0, dt1]
+
+        self.uptake_corrector = UptakeCorrectionWindow(meta_data=self.meta_data,
+                                                       time_range_to_read=time_range,
+                                                       config=self.config)
+        self.uptake_corrector.show()
 
     def change_modbus_host_ip(self, host_ip=None, port=None):
         recorder_was_running = self.controller.is_tp_recording_running()

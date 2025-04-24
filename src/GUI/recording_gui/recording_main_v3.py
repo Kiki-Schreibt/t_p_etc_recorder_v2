@@ -437,19 +437,16 @@ class MainController:
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'stop'):
                 self.plot_manager.bottom_plot.reader.stop()
             if self.plot_manager.top_plot:
-                self.plot_manager.top_plot.update_on_data = True
-                self.plot_manager.top_plot.update_on_record = False
-                self.plot_manager.top_plot.read_on_change = True
                 self.plot_manager.top_plot.reader.reading_mode = "full_test"
 
                 if not self.plot_manager.top_plot.reader.p_data_sig_connected:
-                    self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot._update_plot_left)
+                    self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot.on_tp_data)
                     self.plot_manager.top_plot.reader.p_data_sig_connected = True
                 if not self.plot_manager.top_plot.reader.etc_data_sig_connected:
                     self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.on_etc_data)
                     self.plot_manager.top_plot.reader.etc_data_sig_connected = True
                 if not self.plot_manager.top_plot.reader.cycle_data_sig_connected:
-                    self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot._update_min_max_plot)
+                    self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot.on_min_max_data)
                     self.plot_manager.top_plot.reader.cycle_data_sig_connected = True
 
                 self.plot_manager.top_plot.reader.start()

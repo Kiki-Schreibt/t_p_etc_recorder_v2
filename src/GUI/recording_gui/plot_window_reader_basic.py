@@ -699,6 +699,7 @@ class PlotBaseWindow(PlotBaseStyle):
         self._tp_data = None
         self._etc_data = None
         self._min_max_data = None
+        self._mode = None
 
         self._draw_timer = QTimer(self)
         self._draw_timer.setInterval(500)        # redraw at most 5×/s
@@ -751,6 +752,9 @@ class PlotBaseWindow(PlotBaseStyle):
                 plot_item.setData(x=x, y=y)
         else:
             self._create_plot_items_left(df=df, x=x)
+        if self._mode == 'static':
+            self._update_view_if_not_covered(df=df, x=x)
+
         self._customize_legend(self.plotItem.legend)
 
     def _update_plot_right(self, df):
@@ -817,6 +821,7 @@ class PlotBaseWindow(PlotBaseStyle):
 
     def _on_range_change_timeout(self):
         """Checks if significant changes are in x_range. Triggers load_visible_data if so"""
+
         view_range = self.plotItem.viewRange()
         if view_range[0][0] < -65 or view_range[0][1] < -65:
             return
@@ -905,8 +910,39 @@ class PlotBaseWindow(PlotBaseStyle):
         x_data, y_data = self.scatter_plot_item.getData()
         self.scatter_plot_item.setData(x=x_data, y=y_data, brush=self.point_colors)
 
-    def _update_x_range(self, time_range):
-        self.plotItem.setXRange(min(time_range), max(time_range))
+    def _update_view_if_not_covered(self, df, x):
+        from itertools import chain
+        vb = self.plotItem.getViewBox()
+        (vx0, vx1), (vy0, vy1) = vb.viewRange()
+
+        # 1) see if any plotted point is already inside the current view
+        any_visible = False
+        for col, plot_item in self.plot_items.items():
+            # only consider columns you actually plotted
+            if col not in df:
+                continue
+            xi, yi = plot_item.getData()
+            if xi is None or yi is None:
+                continue
+            # boolean mask of points inside both x- and y-bounds
+            mask = (xi >= vx0) & (xi <= vx1) & (yi >= vy0) & (yi <= vy1)
+            if mask.any():
+                any_visible = True
+                break
+
+        if any_visible:
+            # user can already see some data—don't auto‐zoom
+            return
+
+        # 2) otherwise, none of the data is visible: fit to full extents
+        dx0, dx1 = min(x), max(x)
+        all_y = list(chain.from_iterable(
+            df[col].dropna().values for col in self.plot_items.keys() if col in df
+        ))
+        dy0, dy1 = min(all_y), max(all_y)
+
+        vb.setXRange(dx0, dx1, padding=0.02)
+        vb.setYRange(dy0, dy1, padding=0.02)
 
     @Slot()
     def _do_draw(self):
