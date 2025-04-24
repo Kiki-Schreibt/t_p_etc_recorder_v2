@@ -1,4 +1,4 @@
-#suquenzer_gui.py
+# suquenzer_gui.py
 
 """
  - Uses QThread and a dedicated worker (HotDiskControllerWorker) to run the controller.
@@ -29,33 +29,73 @@ standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_rec
 
 
 class SignaledHotDiskController(QObject, HotDiskController):
+    """
+    A HotDiskController that emits a Qt signal on each step change.
+
+    Inherits from both QObject (to allow signals) and HotDiskController (core logic).
+    """
     latest_program_step_sig = Signal(datetime.datetime)
 
-    def __init__(self, template_folder_path=standard_hot_disk_schedule_folder, sensor_insulation="Mica", sensor_type="5465", standard_number_of_measurements=3, parent=None):
+    def __init__(self,
+                 template_folder_path: str = standard_hot_disk_schedule_folder,
+                 sensor_insulation: str = "Mica",
+                 sensor_type: str = "5465",
+                 standard_number_of_measurements: int = 3,
+                 parent: QObject = None):
+        """
+        :param template_folder_path: Directory containing schedule templates.
+        :param sensor_insulation:    Type of sensor insulation.
+        :param sensor_type:          Sensor model identifier.
+        :param standard_number_of_measurements: Default measurements per step.
+        :param parent:               Optional Qt parent.
+        """
         QObject.__init__(self, parent)
-        HotDiskController.__init__(self, template_folder_path=template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type, standard_number_of_measurements=standard_number_of_measurements)
+        HotDiskController.__init__(
+            self,
+            template_folder_path=template_folder_path,
+            sensor_insulation=sensor_insulation,
+            sensor_type=sensor_type,
+            standard_number_of_measurements=standard_number_of_measurements
+        )
 
-    def wait_until(self, target_time):
+    def wait_until(self, target_time: datetime.datetime):
+        """
+        Overrides HotDiskController.wait_until to emit a Qt signal before blocking
+        until the given time.
+
+        :param target_time: The datetime to wait for.
+        """
         self.latest_program_step_sig.emit(target_time)
         super().wait_until(target_time=target_time)
 
- 
-# =============================================================================
-# Worker for HotDiskController – runs inside a QThread
-# =============================================================================
+
 class HotDiskControllerWorker(QObject):
+    """
+    Worker that runs a HotDiskController schedule in its own QThread.
+
+    - Listens to controller signals and re-emits them to the UI.
+    - Emits `finished` when done.
+    """
     latest_program_step = Signal(datetime.datetime)
     finished = Signal()
 
     def __init__(self, controller: HotDiskController, schedule: list):
+        """
+        :param controller: Instance of SignaledHotDiskController.
+        :param schedule:   List of dicts with heating and measurement steps.
+        """
         super().__init__()
         self.controller = controller
         self.schedule = schedule
 
     def run(self):
+        """
+        Main entry point for QThread. Hooks up the controller's
+        latest_program_step_sig to this worker's signal, then
+        invokes controller.run(). Always emits `finished`.
+        """
         try:
-            # Relay the controller signal to the UI thread.
-            #self.controller.latest_program_step_sig.connect(self.latest_program_step.emit)
+            self.controller.latest_program_step_sig.connect(self.latest_program_step.emit)
             self.controller.run(self.schedule)
         except Exception as e:
             print(f"Error in HotDiskControllerWorker: {e}")
@@ -63,22 +103,28 @@ class HotDiskControllerWorker(QObject):
             self.finished.emit()
 
 
-# =============================================================================
-# UI Classes
-# =============================================================================
 class ScheduleGeneratorBase(QWidget):
+    """
+    Base UI for building a HotDisk measurement schedule.
+
+    - Contains controls for program rows, sensor settings, and repetition.
+    - Emits `complete_program_sig` and `meas_times_sig` with DataFrames.
+    """
     complete_program_sig = Signal(pd.DataFrame)
-    meas_times_sig = Signal(pd.DataFrame)
+    meas_times_sig      = Signal(pd.DataFrame)
 
     def __init__(self):
+        """
+        Constructs the entire UI layout (left controls + right plot).
+        """
         super().__init__()
         self.init_ui()
 
     def init_ui(self):
-        # Main horizontal layout
+        """
+        Set up top‐level layouts and populate with sub‐widgets.
+        """
         self.main_layout = QHBoxLayout()
-
-        # Left side (controls)
         self.left_layout = QVBoxLayout()
         self._init_buttons()
         self._init_measurement_settings()
@@ -87,7 +133,6 @@ class ScheduleGeneratorBase(QWidget):
         self._init_repetition_buttons()
         self.main_layout.addLayout(self.left_layout, stretch=1)
 
-        # Right side (plot)
         self.right_layout = QVBoxLayout()
         self._init_plot_widget()
         self.main_layout.addLayout(self.right_layout, stretch=2)
@@ -95,6 +140,9 @@ class ScheduleGeneratorBase(QWidget):
         self.setLayout(self.main_layout)
 
     def _init_buttons(self):
+        """
+        Add the “Add Program Row” and “Start Schedule” buttons.
+        """
         self.add_measurement_button = QPushButton('Add Program Row')
         self.add_measurement_button.clicked.connect(self.add_program_row)
         self.left_layout.addWidget(self.add_measurement_button)
@@ -103,54 +151,87 @@ class ScheduleGeneratorBase(QWidget):
         self.left_layout.addWidget(self.start_schedule_button)
 
     def _init_measurement_settings(self):
+        """
+        Add inputs for start time, measurement delay, and template folder.
+        """
         measurement_group = QGroupBox("Measurement Settings")
         measurement_layout = QFormLayout()
 
         self.start_measurements_label = QLabel("Start time temperature program:")
-        # Default to current time (formatted)
-        self.start_measurements_input = QLineEdit(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        self.start_measurements_input = QLineEdit(
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
         self.start_measurements_input.setFixedWidth(200)
-        measurement_layout.addRow(self.start_measurements_label, self.start_measurements_input)
+        measurement_layout.addRow(
+            self.start_measurements_label,
+            self.start_measurements_input
+        )
 
-        self.measurement_delay_label = QLabel("Start measurement xx min before next temperature is reached:")
+        self.measurement_delay_label = QLabel(
+            "Start measurement xx min before next temperature is reached:"
+        )
         self.measurement_delay_input = QLineEdit("30")
         self.measurement_delay_input.setFixedWidth(50)
-        measurement_layout.addRow(self.measurement_delay_label, self.measurement_delay_input)
+        measurement_layout.addRow(
+            self.measurement_delay_label,
+            self.measurement_delay_input
+        )
 
         self.template_folder_label = QLabel("Template Folder:")
-        self.template_folder_path = QLineEdit(standard_hot_disk_schedule_folder)
+        self.template_folder_path  = QLineEdit(standard_hot_disk_schedule_folder)
         self.template_folder_path.setFixedWidth(200)
         self.template_folder_browse_button = QPushButton("Browse")
         self.template_folder_browse_button.clicked.connect(self.browse_template_folder)
         template_folder_layout = QHBoxLayout()
         template_folder_layout.addWidget(self.template_folder_path)
         template_folder_layout.addWidget(self.template_folder_browse_button)
-        measurement_layout.addRow(self.template_folder_label, template_folder_layout)
+        measurement_layout.addRow(
+            self.template_folder_label,
+            template_folder_layout
+        )
 
         measurement_group.setLayout(measurement_layout)
         self.left_layout.addWidget(measurement_group)
 
     def browse_template_folder(self):
+        """
+        Open a directory picker to choose the schedule‐template folder.
+        """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Template Folder", "", options=options)
+        folder_path = QFileDialog.getExistingDirectory(
+            self,
+            "Select Template Folder",
+            "",
+            options=options
+        )
         if folder_path:
             self.template_folder_path.setText(folder_path)
 
     def _init_schedule_table(self):
+        """
+        Initialize the QTableWidget for program rows (temp, duration, power, time).
+        """
         self.program_table = QTableWidget()
         self.program_table.setColumnCount(4)
-        self.program_table.setHorizontalHeaderLabels(
-            ['Temperature [°C]', 'Time [hh:mm:ss]', 'Measurement Power [W]', 'Measurement Time [s]']
-        )
+        self.program_table.setHorizontalHeaderLabels([
+            'Temperature [°C]',
+            'Time [hh:mm:ss]',
+            'Measurement Power [W]',
+            'Measurement Time [s]'
+        ])
         header = self.program_table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeToContents)
         self.left_layout.addWidget(self.program_table)
+
         # Add a few default rows
         for _ in range(4):
             self.add_program_row()
 
     def _init_repetition_buttons(self):
+        """
+        Add inputs for repeating a subset of rows multiple times.
+        """
         self.repeat_start_label = QLabel("Repeat Start Index:")
         self.repeat_start_input = QLineEdit("0")
         self.repeat_start_input.setFixedWidth(50)
@@ -177,10 +258,14 @@ class ScheduleGeneratorBase(QWidget):
         self.left_layout.addLayout(repetition_layout)
 
     def _init_sensor_settings(self):
+        """
+        Add controls to choose sensor insulation and type, with auto-complete.
+        """
         sensor_type_suggestions = ["5465", "asdf"]
         sensor_insulation_suggestions = ["Mica", "Kapton", "Teflon"]
         insulation_completer = QCompleter(sensor_insulation_suggestions)
-        type_completer = QCompleter(sensor_type_suggestions)
+        type_completer       = QCompleter(sensor_type_suggestions)
+
         sensor_setting_group = QGroupBox("Sensor Settings")
         sensor_setting_layout = QFormLayout()
 
@@ -188,23 +273,38 @@ class ScheduleGeneratorBase(QWidget):
         self.sensor_insulation_input = QLineEdit("Mica")
         self.sensor_insulation_input.setCompleter(insulation_completer)
         self.sensor_insulation_input.setFixedWidth(100)
-        sensor_setting_layout.addRow(self.sensor_insulation_label, self.sensor_insulation_input)
+        sensor_setting_layout.addRow(
+            self.sensor_insulation_label,
+            self.sensor_insulation_input
+        )
 
         self.sensor_type_label = QLabel("Sensor type:")
         self.sensor_type_input = QLineEdit("5465")
         self.sensor_type_input.setCompleter(type_completer)
         self.sensor_type_input.setFixedWidth(100)
-        sensor_setting_layout.addRow(self.sensor_type_label, self.sensor_type_input)
+        sensor_setting_layout.addRow(
+            self.sensor_type_label,
+            self.sensor_type_input
+        )
 
         sensor_setting_group.setLayout(sensor_setting_layout)
         self.left_layout.addWidget(sensor_setting_group)
 
     def _init_plot_widget(self):
+        """
+        Embed the pyqtgraph-based ProgramPlotWidget on the right side.
+        """
         self.plot_widget = ProgramPlotWidget()
-        self.plot_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.plot_widget.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding
+        )
         self.right_layout.addWidget(self.plot_widget)
 
     def add_program_row(self):
+        """
+        Insert a new default row into the schedule table.
+        """
         row_position = self.program_table.rowCount()
         self.program_table.insertRow(row_position)
         self.program_table.setItem(row_position, 0, QTableWidgetItem('100'))
@@ -213,25 +313,45 @@ class ScheduleGeneratorBase(QWidget):
         self.program_table.setItem(row_position, 3, QTableWidgetItem('3'))
 
     @staticmethod
-    def validate_duration(duration_str):
+    def validate_duration(duration_str: str) -> bool:
+        """
+        Check that a duration is in HH:MM:SS integer format.
+
+        :param duration_str: string to validate
+        :returns: True if valid, False otherwise
+        """
         try:
             h, m, s = map(int, duration_str.split(':'))
             return True
         except ValueError:
             return False
 
-    def plot_program(self, program):
+    def plot_program(self, program: pd.DataFrame):
+        """
+        Slot: draw the temperature vs. time line.
+
+        :param program: DataFrame with 'end_time' and 'temperature' columns.
+        """
         self.plot_widget.update_plot(program)
 
-    def plot_meas_times(self, program):
+    def plot_meas_times(self, program: pd.DataFrame):
+        """
+        Slot: overlay measurement‐time scatter dots.
+
+        :param program: DataFrame with 'measurement_time' and 'temperature' cols.
+        """
         self.plot_widget.update_scatter_plot(program)
 
 
-# -----------------------------------------------------------------------------
-# Main GUI class with schedule generation and controller threading
-# -----------------------------------------------------------------------------
 class ScheduleGeneratorMain(ScheduleGeneratorBase):
+    """
+    Extends the base UI to wire up schedule parsing, controller thread,
+    and countdown display.
+    """
     def __init__(self):
+        """
+        Connect all signals/slots for schedule creation and start button.
+        """
         super().__init__()
         self.start_schedule_button.clicked.connect(self.start_schedule)
         self.complete_program_sig.connect(self.plot_program)
@@ -240,43 +360,58 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         self.repeat_start_input.editingFinished.connect(self.try_parse_program)
         self.repeat_count_input.editingFinished.connect(self.try_parse_program)
         self.program_table.cellChanged.connect(self.try_parse_program)
+
+        # countdown support
         self.target_time = None
         self.countdown_timer = QTimer(self)
         self.countdown_timer.timeout.connect(self.update_countdown)
-        self.hot_disk_thread = None  # QThread instance
+
+        # controller threading
+        self.hot_disk_thread = None
         self.hot_disk_worker = None
 
     def start_schedule(self):
-        # Ensure the current status UI is available
+        """
+        Handler for "Start Schedule" click:
+        - validate inputs,
+        - build schedule list,
+        - instantiate controller and worker thread,
+        - begin countdown.
+        """
         if not hasattr(self, 'countdown_label'):
             self._init_countdown_labels()
 
-        sensor_type = self.sensor_type_input.text().strip()
+        sensor_type       = self.sensor_type_input.text().strip()
         sensor_insulation = self.sensor_insulation_input.text().strip()
-        folder_path = self.template_folder_path.text().strip()
+        folder_path       = self.template_folder_path.text().strip()
         if not sensor_type or not sensor_insulation or not folder_path:
-            QMessageBox.warning(self, "Input Error", "Sensor settings or template folder cannot be empty.")
+            QMessageBox.warning(self, "Input Error",
+                                "Sensor settings or template folder cannot be empty.")
             return
 
         scheduled_dict_list = self._generate_schedule()
         if not scheduled_dict_list:
-            QMessageBox.warning(self, "Schedule Error", "Could not generate a valid schedule.")
+            QMessageBox.warning(self, "Schedule Error",
+                                "Could not generate a valid schedule.")
             return
 
-        # Initialize the HotDiskController
         try:
-            self.hot_disk_controller = HotDiskController(
+            self.hot_disk_controller = SignaledHotDiskController(
                 template_folder_path=folder_path,
                 sensor_insulation=sensor_insulation,
                 sensor_type=sensor_type
             )
         except Exception as e:
-            QMessageBox.critical(self, "Controller Error", f"Failed to initialize HotDiskController: {e}")
+            QMessageBox.critical(self, "Controller Error",
+                                 f"Failed to initialize HotDiskController: {e}")
             return
 
-        # Set up the worker and move it to a QThread
+        # thread + worker
         self.hot_disk_thread = QThread()
-        self.hot_disk_worker = HotDiskControllerWorker(self.hot_disk_controller, scheduled_dict_list)
+        self.hot_disk_worker = HotDiskControllerWorker(
+            controller=self.hot_disk_controller,
+            schedule=scheduled_dict_list
+        )
         self.hot_disk_worker.moveToThread(self.hot_disk_thread)
         self.hot_disk_thread.started.connect(self.hot_disk_worker.run)
         self.hot_disk_worker.finished.connect(self.hot_disk_thread.quit)
@@ -284,81 +419,110 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         self.hot_disk_thread.finished.connect(self.hot_disk_thread.deleteLater)
         self.hot_disk_worker.latest_program_step.connect(self.set_target_time)
         self.hot_disk_thread.start()
+
         self.status_label.setText("Status: Running")
 
-    def _generate_schedule(self):
+    def _generate_schedule(self) -> list:
+        """
+        Parse the table into a DataFrame of program steps, adjust units,
+        then return as a list of dicts for the controller.
+
+        :returns: list of dicts or empty list on failure
+        """
         program_with_meas_times = self.try_parse_program()
         if program_with_meas_times is None or program_with_meas_times.empty:
             return []
-        # Rename columns as expected by the controller and adjust power units.
-        scheduled_program = program_with_meas_times.rename(columns={
-            'measurement_power_watt': 'heating_power'
-        })
-        scheduled_program['heating_power'] = scheduled_program['heating_power'] * 1e3
-        scheduled_dict_list = scheduled_program.to_dict(orient='records')
-        return scheduled_dict_list
+        scheduled_program = program_with_meas_times.rename(
+            columns={'measurement_power_watt': 'heating_power'}
+        )
+        scheduled_program['heating_power'] *= 1e3
+        return scheduled_program.to_dict(orient='records')
 
-    def get_temperature_program(self):
+    def get_temperature_program(self) -> list:
+        """
+        Read each row in the QTableWidget and build a list of
+        (temp: float, duration: str, meas_power: float, meas_time: float).
+
+        Skips any incomplete rows and shows warnings for invalid formats.
+        """
         temperature_program = []
         for row in range(self.program_table.rowCount()):
             try:
-                temp_item = self.program_table.item(row, 0)
-                duration_item = self.program_table.item(row, 1)
+                temp_item       = self.program_table.item(row, 0)
+                duration_item   = self.program_table.item(row, 1)
                 meas_power_item = self.program_table.item(row, 2)
-                meas_time_item = self.program_table.item(row, 3)
+                meas_time_item  = self.program_table.item(row, 3)
 
-                # Skip incomplete rows
                 if None in (temp_item, duration_item, meas_power_item, meas_time_item):
                     continue
 
-                temp = float(temp_item.text())
-                duration = duration_item.text()
+                temp       = float(temp_item.text())
+                duration   = duration_item.text()
                 meas_power = float(meas_power_item.text())
-                meas_time = float(meas_time_item.text())
+                meas_time  = float(meas_time_item.text())
 
                 if not self.validate_duration(duration):
-                    raise ValueError(f"Invalid duration format in row {row+1} (expected HH:MM:SS).")
+                    raise ValueError(
+                        f"Invalid duration format in row {row+1} (expected HH:MM:SS)."
+                    )
                 temperature_program.append((temp, duration, meas_power, meas_time))
             except ValueError as ve:
                 QMessageBox.warning(self, "Input Error", str(ve))
                 return None
             except Exception as e:
-                QMessageBox.warning(self, "Input Error", f"Error in row {row+1}: {e}")
+                QMessageBox.warning(self, "Input Error",
+                                    f"Error in row {row+1}: {e}")
                 return None
         return temperature_program
 
     def get_repetition_parameters(self):
+        """
+        Read and validate the repeat‐start, end, and count inputs.
+        Returns (start, end, count) or three Nones on failure.
+        """
         try:
             repeat_start = int(self.repeat_start_input.text())
-            repeat_end = int(self.repeat_end_input.text())
+            repeat_end   = int(self.repeat_end_input.text())
             repeat_count = int(self.repeat_count_input.text())
-            if repeat_start < 0 or repeat_end < 0 or repeat_count < 0 or (repeat_start > repeat_end and repeat_end != 0):
-                raise ValueError("Repetition parameters must be non-negative and start <= end.")
-            repeat_start = repeat_start if repeat_start > 0 else None
-            repeat_end = repeat_end if repeat_end > 0 else None
+            if (repeat_start < 0 or repeat_end < 0 or repeat_count < 0 or
+               (repeat_start > repeat_end and repeat_end != 0)):
+                raise ValueError("Repetition parameters must be non-negative and start ≤ end.")
+            repeat_start = repeat_start or None
+            repeat_end   = repeat_end   or None
             return repeat_start, repeat_end, repeat_count
         except ValueError as ve:
             QMessageBox.warning(self, "Input Error", f"Invalid repetition parameters: {ve}")
             return None, None, None
 
     def _init_countdown_labels(self):
-        measurement_group = QGroupBox("Current status")
+        """
+        Create the countdown/time-left display at the bottom of the controls.
+        """
+        measurement_group  = QGroupBox("Current status")
         measurement_layout = QFormLayout()
         self.countdown_label = QLabel("Time left: N/A", self)
-        self.status_label = QLabel("Status: Idle")
+        self.status_label    = QLabel("Status: Idle")
         measurement_layout.addRow(self.countdown_label)
         measurement_layout.addRow(self.status_label)
         measurement_group.setLayout(measurement_layout)
         self.left_layout.addWidget(measurement_group)
 
-    def set_target_time(self, target_time):
+    def set_target_time(self, target_time: datetime.datetime):
+        """
+        Slot: called when the controller emits a new program step time.
+        Starts the 1s timer to update the countdown display.
+        """
         self.target_time = target_time
         self.countdown_timer.start(1000)
 
     def update_countdown(self):
-        if self.target_time is None:
+        """
+        Called every 1s once a target_time is set.
+        Updates the label with time remaining until next measurement.
+        """
+        if not self.target_time:
             return
-        now = datetime.datetime.now(local_tz)
+        now   = datetime.datetime.now(local_tz)
         delta = self.target_time - now
         if delta.total_seconds() <= 0:
             self.countdown_label.setText("Time left: 0s")
@@ -366,19 +530,30 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         else:
             hours, remainder = divmod(int(delta.total_seconds()), 3600)
             minutes, seconds = divmod(remainder, 60)
-            formatted = f"{hours:02d}:{minutes:02d}:{seconds:02d} until next measurement at {self.target_time.strftime('%H:%M:%S')}"
+            formatted = (
+                f"{hours:02d}:{minutes:02d}:{seconds:02d} "
+                f"until next measurement at {self.target_time.strftime('%H:%M:%S')}"
+            )
             self.countdown_label.setText(f"Time left: {formatted}")
 
-    def try_parse_program(self):
+    def try_parse_program(self) -> pd.DataFrame:
+        """
+        Build the full measurement‐time DataFrame via the simulator,
+        handling any parse or logic errors with a dialog.
+        Emits `complete_program_sig` and `meas_times_sig` on success.
+        """
         try:
             time_delay_minutes = float(self.measurement_delay_input.text())
         except ValueError:
-            QMessageBox.warning(self, "Input Error", "Invalid measurement delay. Please enter a number.")
+            QMessageBox.warning(self, "Input Error",
+                                "Invalid measurement delay. Please enter a number.")
             return None
         time_delay = datetime.timedelta(minutes=time_delay_minutes)
+
         program = self.get_temperature_program()
-        if program is None or not program:
+        if not program:
             return pd.DataFrame()
+
         repeat_start, repeat_end, repeat_count = self.get_repetition_parameters()
         try:
             temperature_controller = TemperatureControllerHotDiskSequenzer(
@@ -387,21 +562,35 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
                 repeat_end=repeat_end,
                 repeat_count=repeat_count
             )
-            start_time = datetime.datetime.strptime(self.start_measurements_input.text(), "%Y-%m-%d %H:%M:%S")
-            start_time = start_time.replace(tzinfo=local_tz)
-            program_with_meas_times, complete_program = temperature_controller.get_program_times(start_time=start_time)
-            program_with_meas_times['measurement_time'] = program_with_meas_times['end_time'] - time_delay
+            start_time = datetime.datetime.strptime(
+                self.start_measurements_input.text(), "%Y-%m-%d %H:%M:%S"
+            ).replace(tzinfo=local_tz)
+
+            program_with_meas_times, complete_program = (
+                temperature_controller.get_program_times(start_time=start_time)
+            )
+            program_with_meas_times['measurement_time'] = (
+                program_with_meas_times['end_time'] - time_delay
+            )
+
             self.complete_program_sig.emit(complete_program)
-            self.meas_times_sig.emit(program_with_meas_times[['measurement_time', 'temperature']].copy())
+            self.meas_times_sig.emit(
+                program_with_meas_times[['measurement_time', 'temperature']].copy()
+            )
             return program_with_meas_times
+
         except Exception as e:
-            QMessageBox.critical(self, "Schedule Generation Error", f"Failed to parse program: {e}")
+            QMessageBox.critical(self, "Schedule Generation Error",
+                                 f"Failed to parse program: {e}")
             return pd.DataFrame()
 
     def closeEvent(self, event):
-        # Cleanly stop the worker thread if it is running.
+        """
+        Ensure any running worker thread is stopped cleanly on window close.
+        """
         if self.hot_disk_worker:
-            self.hot_disk_controller.end()
+            if hasattr(self, 'hot_disk_controller'):
+                self.hot_disk_controller.end()
             if self.hot_disk_thread and self.hot_disk_thread.isRunning():
                 self.hot_disk_thread.quit()
                 self.hot_disk_thread.wait(2000)
@@ -409,50 +598,63 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
         super().closeEvent(event)
 
 
-# =============================================================================
-# Plotting widgets (using pyqtgraph)
-# =============================================================================
 class ProgramPlotWidget(pg.PlotWidget):
+    """
+    A pyqtgraph PlotWidget specialized for showing:
+     - a line of temperature vs. end_time
+     - a scatter of measurement times.
+    """
     def __init__(self, parent=None):
+        """
+        Initialize axes, legend, and placeholders for plots.
+        """
         super().__init__(parent=parent)
         self.setWindowTitle("Temperature Program")
         self.scatter_plot = None
-        self.line_plot = None
+        self.line_plot    = None
         self._init_left_axis("Temperature")
 
-    def _init_left_axis(self, y_axis):
+    def _init_left_axis(self, y_axis: str):
+        """
+        Replace bottom axis with DateAxisItem and label axes.
+        """
         x_axis = DateAxisItem(orientation='bottom')
         self.plotItem.setAxisItems({'bottom': x_axis})
         self.plotItem.getAxis('bottom').setLabel("Time")
         self.plotItem.addLegend(offset=(0, 1))
         self.plotItem.getAxis('left').setLabel(y_axis)
 
-    def update_plot(self, df):
+    def update_plot(self, df: pd.DataFrame):
+        """
+        Draw or update the line plot of temperature vs. end_time.
+
+        :param df: must contain 'end_time' (datetime) and 'temperature' (float).
+        """
         if df.empty:
             return
         x = [t.timestamp() for t in df['end_time']]
         y = df['temperature']
         if self.line_plot is None:
             self.line_plot = self.plotItem.plot(
-                x=x,
-                y=y,
-                name="Temperature",
+                x=x, y=y, name="Temperature",
                 pen=pg.mkPen(color="#FF0000", width=2)
             )
         else:
             self.line_plot.setData(x=x, y=y)
 
-    def update_scatter_plot(self, df):
+    def update_scatter_plot(self, df: pd.DataFrame):
+        """
+        Draw or update blue circles at each measurement_time.
+
+        :param df: must contain 'measurement_time' and 'temperature'.
+        """
         if df.empty:
             return
         x = [t.timestamp() for t in df['measurement_time']]
         y = df['temperature']
         if self.scatter_plot is None:
             self.scatter_plot = pg.ScatterPlotItem(
-                x=x,
-                y=y,
-                symbol='o',
-                size=8,
+                x=x, y=y, symbol='o', size=8,
                 pen=pg.mkPen(color='b'),
                 brush=pg.mkBrush(color='b'),
                 name="Measurements"
@@ -463,7 +665,13 @@ class ProgramPlotWidget(pg.PlotWidget):
 
 
 class DateAxisItem(pg.AxisItem):
+    """
+    A custom AxisItem that formats UNIX‐timestamp ticks as human dates.
+    """
     def tickStrings(self, values, scale, spacing):
+        """
+        Choose a date format based on span and convert each tick value.
+        """
         if not values:
             return []
         span = max(values) - min(values)

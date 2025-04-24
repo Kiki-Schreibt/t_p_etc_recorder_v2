@@ -39,7 +39,6 @@ except ImportError:
     import logging
 
 
-
 # Global colors for plotting
 COLORS = [
     "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF", "#FF00FF",
