@@ -26,6 +26,7 @@ from src.config_connection_reading_management.hot_disk_controller import HotDisk
 
 local_tz = ZoneInfo("Europe/Berlin")
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"
+#todo: structure that garbage and find useful names.....
 
 
 class SignaledHotDiskController(QObject, HotDiskController):
@@ -69,7 +70,7 @@ class SignaledHotDiskController(QObject, HotDiskController):
         super().wait_until(target_time=target_time)
 
 
-class HotDiskControllerWorker(QObject):
+class SignaledHotDiskControllerThreader(QObject):
     """
     Worker that runs a HotDiskController schedule in its own QThread.
 
@@ -79,7 +80,7 @@ class HotDiskControllerWorker(QObject):
     latest_program_step = Signal(datetime.datetime)
     finished = Signal()
 
-    def __init__(self, controller: HotDiskController, schedule: list):
+    def __init__(self, controller: SignaledHotDiskController, schedule: list):
         """
         :param controller: Instance of SignaledHotDiskController.
         :param schedule:   List of dicts with heating and measurement steps.
@@ -343,7 +344,7 @@ class ScheduleGeneratorBase(QWidget):
         self.plot_widget.update_scatter_plot(program)
 
 
-class ScheduleGeneratorMain(ScheduleGeneratorBase):
+class SequenzerMainWindow(ScheduleGeneratorBase):
     """
     Extends the base UI to wire up schedule parsing, controller thread,
     and countdown display.
@@ -408,7 +409,7 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
 
         # thread + worker
         self.hot_disk_thread = QThread()
-        self.hot_disk_worker = HotDiskControllerWorker(
+        self.hot_disk_worker = SignaledHotDiskControllerThreader(
             controller=self.hot_disk_controller,
             schedule=scheduled_dict_list
         )
@@ -458,8 +459,10 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
 
                 temp       = float(temp_item.text())
                 duration   = duration_item.text()
-                meas_power = float(meas_power_item.text())
-                meas_time  = float(meas_time_item.text())
+
+
+                meas_power = float(meas_power_item.text()) if meas_power_item.text() else None
+                meas_time = float(meas_time_item.text()) if meas_time_item.text() else None
 
                 if not self.validate_duration(duration):
                     raise ValueError(
@@ -572,9 +575,8 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
             program_with_meas_times['measurement_time'] = (
                 program_with_meas_times['end_time'] - time_delay
             )
-            complete_program_with_start_times_df = self._add_start_times(complete_program.copy(),
-                                                                        start_time)
-            self.complete_program_sig.emit(complete_program_with_start_times_df)
+            program_for_plot = self._add_start_times(complete_program.copy())
+            self.complete_program_sig.emit(program_for_plot)
             self.meas_times_sig.emit(
                 program_with_meas_times[['measurement_time', 'temperature']].copy()
             )
@@ -585,12 +587,10 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
                                  f"Failed to parse program: {e}")
             return pd.DataFrame()
 
-    def _add_start_times(self, df, start_time):
+    def _add_start_times(self, df):
         # convert your duration strings into real timedeltas
         durations = pd.to_timedelta(df['duration'])
 
-        # compute start_time = end_time - duration
-        df = df.copy()   # avoid mutating the original
         df['start_time'] = df['end_time'] - durations
 
         # now build the 2-point series per step
@@ -714,7 +714,7 @@ class DateAxisItem(pg.AxisItem):
 # =============================================================================
 if __name__ == '__main__':
     app = QApplication([])
-    window = ScheduleGeneratorMain()
+    window = SequenzerMainWindow()
     window.setWindowTitle("HotDisk Temperature Schedule Generator")
     window.show()
     app.exec()

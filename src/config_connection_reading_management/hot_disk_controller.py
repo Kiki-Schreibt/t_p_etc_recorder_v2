@@ -18,8 +18,10 @@ except ImportError:
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"
 local_tz = ZoneInfo("Europe/Berlin")
 
+
 class HotDiskScheduleGrabber:
     def __init__(self, template_folder_path=standard_hot_disk_schedule_folder, sensor_insulation="Mica", sensor_type="5465"):
+        self.logger = logging.getLogger(__name__)
         self.template_folder_path = template_folder_path
         self.sensor_type = sensor_type
         self.sensor_insulation = sensor_insulation

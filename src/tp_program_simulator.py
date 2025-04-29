@@ -250,7 +250,7 @@ class TemperatureControllerDiconSimulator(BaseTemperatureController):
 
     def combine_consecutive(self, data):
         # Custom combining logic for sequencer (4 columns)
-        return combine_consecutive_temperatures(data, col_names=len(data[0]))
+        return combine_consecutive_temperatures(data, col_names=None)
 
 
 # ---------------------------------------------------------------------------
@@ -293,3 +293,4 @@ class TemperatureControllerHotDiskSequenzer(BaseTemperatureController):
     def combine_consecutive(self, data):
         # Custom combining logic for sequencer (4 columns)
         return combine_consecutive_temperatures(data, col_names=['temperature', 'duration', 'measurement_power_watt', 'heat_pulse_duration'])
+

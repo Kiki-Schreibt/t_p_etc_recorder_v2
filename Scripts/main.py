@@ -14,7 +14,7 @@ from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainW
 from src.simulation.simulator_gui import ModbusServerControlGUI
 from test_planner import TestPlannerMain
 from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
-from src.GUI.hot_disk_sequenzer.suquenzer_gui import ScheduleGeneratorMain
+from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
 try:
     import src.config_connection_reading_management.logger as logging
 except ImportError:
@@ -128,7 +128,7 @@ class MainProgram(RecordingMainWindow):
         """
         Launch the Schedule Creator module in its own window.
         """
-        self.schedule_creator = ScheduleGeneratorMain()
+        self.schedule_creator = SequenzerMainWindow()
         self.schedule_creator.show()
 
     def _open_uptake_correction(self):

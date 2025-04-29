@@ -10,7 +10,6 @@ from src.config_connection_reading_management.database_reading_writing import Da
 from src.standard_paths import standard_export_path
 
 
-
 class QuickExport:
 
     def __init__(self, db_conn_params, meta_data):
