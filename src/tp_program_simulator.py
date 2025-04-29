@@ -27,65 +27,61 @@ def format_duration(duration_td):
     return f'{hours:02}:{minutes:02}:{seconds:02}'
 
 
-def combine_consecutive_temperatures(data, expected_columns=None):
+def combine_consecutive_temperatures(data, col_names=None):
     """
-    Combine consecutive program steps.
-    If expected_columns is provided, use that to determine the combining logic.
+    Combine consecutive program steps that have identical temperature.
+    - data: List of rows, each row a sequence like [temp, duration_str, ...].
+    - col_names: Optional list of column names matching len(data[0]).
+                 If None, defaults will be used for 2,3,4‐column cases.
+    Returns a DataFrame where durations (parsed via parse_duration)
+    have been summed across runs of the same temp.
     """
     if not data:
-        return pd.DataFrame()
+        # empty
+        return pd.DataFrame(columns=col_names or [])
 
-    if expected_columns is None:
-        expected_columns = len(data[0])
+    n_cols = len(data[0])
+
+    # default names if caller didn’t supply any
+    if col_names is None:
+        default_map = {
+            2: ['temperature', 'duration'],
+            3: ['temperature', 'duration', 'pressure'],
+            4: ['temperature', 'duration', 'measurement_power_watt', 'heat_pulse_duration']
+        }
+        col_names = default_map.get(
+            n_cols,
+            [f'col{i}' for i in range(n_cols)]
+        )
 
     result = []
-    if expected_columns == 2:
-        # Process two-column data
-        current_temp = data[0][0]
-        current_duration = parse_duration(data[0][1])
-        for values in data[1:]:
-            temp, duration_str = values[0], values[1]
-            if temp == current_temp:
-                current_duration += parse_duration(duration_str)
-            else:
-                result.append([current_temp, current_duration])
-                current_temp = temp
-                current_duration = parse_duration(duration_str)
-        result.append([current_temp, current_duration])
-        return pd.DataFrame(result, columns=['temperature', 'duration'])
+    # initialize accumulator from first row
+    current = [None] * n_cols
+    current[0] = data[0][0]
+    current[1] = parse_duration(data[0][1])
+    for c in range(2, n_cols):
+        current[c] = data[0][c]
 
-    elif expected_columns == 3:
-        # Process three-column data
-        current_temp, current_param = data[0][0], data[0][2]
-        current_duration = parse_duration(data[0][1])
-        for values in data[1:]:
-            temp, duration_str, param = values[0], values[1], values[2]
-            if temp == current_temp:
-                current_duration += parse_duration(duration_str)
-            else:
-                result.append([current_temp, current_duration, current_param])
-                current_temp = temp
-                current_duration = parse_duration(duration_str)
-                current_param = param
-        result.append([current_temp, current_duration, current_param])
-        return pd.DataFrame(result, columns=['temperature', 'duration', 'pressure'])
+    # walk the rest
+    for row in data[1:]:
+        temp = row[0]
+        dur  = parse_duration(row[1])
+        if temp == current[0]:
+            # same temperature → accumulate duration
+            current[1] += dur
+        else:
+            # different → push old, and start a new accumulator
+            result.append(current.copy())
+            current = [None] * n_cols
+            current[0] = temp
+            current[1] = dur
+            for c in range(2, n_cols):
+                current[c] = row[c]
 
-    elif expected_columns >= 4:
-        # Process four-column data (for sequencer)
-        current_temp, current_meas_power, current_meas_time = data[0][0], data[0][2], data[0][3]
-        current_duration = parse_duration(data[0][1])
-        for values in data[1:]:
-            temp, duration_str, meas_power, meas_time = values[0], values[1], values[2], values[3]
-            if temp == current_temp:
-                current_duration += parse_duration(duration_str)
-            else:
-                result.append([current_temp, current_duration, current_meas_power, current_meas_time])
-                current_temp = temp
-                current_duration = parse_duration(duration_str)
-                current_meas_power = meas_power
-                current_meas_time = meas_time
-        result.append([current_temp, current_duration, current_meas_power, current_meas_time])
-        return pd.DataFrame(result, columns=['temperature', 'duration', 'measurement_power_watt', 'heat_pulse_duration'])
+    # don’t forget the last group
+    result.append(current)
+
+    return pd.DataFrame(result, columns=col_names)
 
 
 # ---------------------------------------------------------------------------
@@ -254,7 +250,7 @@ class TemperatureControllerDiconSimulator(BaseTemperatureController):
 
     def combine_consecutive(self, data):
         # Custom combining logic for sequencer (4 columns)
-        return combine_consecutive_temperatures(data, expected_columns=len(data[0]))
+        return combine_consecutive_temperatures(data, col_names=len(data[0]))
 
 
 # ---------------------------------------------------------------------------
@@ -296,4 +292,4 @@ class TemperatureControllerHotDiskSequenzer(BaseTemperatureController):
 
     def combine_consecutive(self, data):
         # Custom combining logic for sequencer (4 columns)
-        return combine_consecutive_temperatures(data, expected_columns=4)
+        return combine_consecutive_temperatures(data, col_names=['temperature', 'duration', 'measurement_power_watt', 'heat_pulse_duration'])

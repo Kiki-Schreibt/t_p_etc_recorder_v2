@@ -23,7 +23,7 @@ class DataLoader:
     """
     Loads experimental data either from a CSV file or a database query.
     """
-    def __init__(self, file_path=None, sample_id=None, cycle_number=None, temperature=None, db_conn_params=None):
+    def __init__(self, sample_id, cycle_number, temperature, db_conn_params, file_path=None):
         self.logger = logging.getLogger(__name__)
         self.file_path = file_path
         self.db_conn_params = db_conn_params or {}
@@ -40,15 +40,22 @@ class DataLoader:
             return pd.read_csv(self.file_path, delimiter=',')
         return None
 
-    def get_isotherm(self, sample_id=None, cycle_number=None, temperature=None):
+    def get_isotherm(self, sample_id=None, cycle_number=None, temperature=None, time_window: list=None):
         """
         Retrieve the isotherm data along with the mean temperature and de-hydrogenation state.
         """
-        isotherm = self._read_isotherm(sample_id, cycle_number, temperature)
+        if cycle_number:
+            isotherm = self._read_isotherm_by_cycle_number(sample_id, cycle_number, temperature)
+        elif time_window:
+            isotherm = self._read_isotherm_by_time(sample_id, time_window)
+        else:
+            self.logger.error("Please provide either cycle_number and temperature or a time window to read isother")
+            raise
+
         mean_temperature, de_hyd_state = self._process_isotherm(isotherm)
         return isotherm, mean_temperature, de_hyd_state
 
-    def _read_isotherm(self, sample_id=None, cycle_number=None, temperature=None):
+    def _read_isotherm_by_cycle_number(self, sample_id=None, cycle_number=None, temperature=None):
         sample_id = sample_id or self.sample_id
         cycle_number = cycle_number or self.cycle_number
         temperature = temperature or self.temperature
@@ -67,6 +74,26 @@ class DataLoader:
         query += f" ORDER by {self.table_config.pressure}"
         values += (sample_id, cycle_number, temperature)
         return self.data_retriever.execute_fetching(query=query, column_names=cols, values=values)
+
+    def _read_isotherm_by_time(self, sample_id=None, time_window=None):
+        sample_id = sample_id or self.sample_id
+        time_window = time_window or self.cycle_number
+
+
+        cols = (self.table_config.temperature_sample, self.table_config.pressure,
+                self.table_config.th_conductivity, self.table_config.de_hyd_state)
+        query, values = self.data_retriever.qb.create_reading_query(
+            table_name=self.table_config.table_name,
+            column_names=cols,
+            constraints=self.constraints
+        )
+        query = remove_order_term(query)
+        query += f" AND {self.table_config.sample_id_small} = %s "
+        query += f" AND {self.table_config.time} BETWEEN %s  and %s "
+        query += f" ORDER by {self.table_config.pressure}"
+        values += (sample_id, time_window[0], time_window[1])
+        return self.data_retriever.execute_fetching(query=query, column_names=cols, values=values)
+
 
     def _process_isotherm(self, df_isotherm):
         if df_isotherm.empty:

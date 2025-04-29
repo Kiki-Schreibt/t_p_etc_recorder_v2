@@ -572,8 +572,9 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
             program_with_meas_times['measurement_time'] = (
                 program_with_meas_times['end_time'] - time_delay
             )
-
-            self.complete_program_sig.emit(complete_program)
+            complete_program_with_start_times_df = self._add_start_times(complete_program.copy(),
+                                                                        start_time)
+            self.complete_program_sig.emit(complete_program_with_start_times_df)
             self.meas_times_sig.emit(
                 program_with_meas_times[['measurement_time', 'temperature']].copy()
             )
@@ -583,6 +584,26 @@ class ScheduleGeneratorMain(ScheduleGeneratorBase):
             QMessageBox.critical(self, "Schedule Generation Error",
                                  f"Failed to parse program: {e}")
             return pd.DataFrame()
+
+    def _add_start_times(self, df, start_time):
+        # convert your duration strings into real timedeltas
+        durations = pd.to_timedelta(df['duration'])
+
+        # compute start_time = end_time - duration
+        df = df.copy()   # avoid mutating the original
+        df['start_time'] = df['end_time'] - durations
+
+        # now build the 2-point series per step
+        rows = []
+        for _, row in df.iterrows():
+            # flat hold: start → end at same temperature
+            rows.append({'time': row['start_time'], 'temperature': row['temperature']})
+            rows.append({'time': row['end_time'],   'temperature': row['temperature']})
+        full_df = pd.DataFrame(rows).sort_values('time')
+
+        # rename the column so update_plot still finds 'end_time'
+        full_df = full_df.rename(columns={'time': 'end_time'})
+        return full_df
 
     def closeEvent(self, event):
         """
