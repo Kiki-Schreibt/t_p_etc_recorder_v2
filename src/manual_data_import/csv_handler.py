@@ -976,7 +976,7 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 
 #Methods for usage
 if __name__ == '__main__':
-    import_all()
+    import_all(compress_data=True)
     #from src.config_connection_reading_management.config_reader import GetConfig
     #config = GetConfig()
     #from src.meta_data.meta_data_handler import MetaData
