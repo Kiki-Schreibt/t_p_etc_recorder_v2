@@ -1028,16 +1028,6 @@ class ExcelDataProcessor:
         df = pd.DataFrame(rows)
         return df
 
-    def _replace_nan_with_none(self, record_list: list[dict]) -> list[dict]:
-        cleaned = []
-        for rec in record_list:
-            clean_rec = {
-                k: (None if isinstance(v, float) and math.isnan(v) else v)
-                for k, v in rec.items()
-            }
-            cleaned.append(clean_rec)
-        return cleaned
-
 
 def _to_native(val):
     # unwrap numpy scalars
@@ -1095,6 +1085,7 @@ def write_ETC_in_parallel(dir_etc_folder: str, sample_id: str, logger_inst, conf
     with Pool(processes=4) as pool:
         pool.map(process_ETC_file, args)
     logger_inst.info("Import took %.2f hours", (time.time() - start_time) / 3600)
+
 
 def write_ETC_folder(dir_etc_folder: str, sample_id: str, logger_inst, config) -> None:
     start_time = time.time()
