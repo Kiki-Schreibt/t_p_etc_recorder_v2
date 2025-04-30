@@ -1,7 +1,7 @@
 #material_properties.py
 import numpy as np
 import logging
-from src.calculations.hydride_worker import MetalHydrideDatabase
+from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 
 class MaterialProperties:
     """

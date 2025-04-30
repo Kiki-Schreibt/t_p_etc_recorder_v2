@@ -22,7 +22,7 @@ import pyqtgraph as pg
 
 # Local project imports (assumed available in your project structure)
 from src.tp_program_simulator import TemperatureControllerHotDiskSequenzer
-from src.config_connection_reading_management.hot_disk_controller import HotDiskController
+from src.infrastructure.handler.hot_disk_handler import HotDiskController
 
 local_tz = ZoneInfo("Europe/Berlin")
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"

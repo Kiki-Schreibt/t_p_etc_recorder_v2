@@ -3,9 +3,8 @@
 import sys
 from PySide6.QtWidgets import (
     QApplication, QWidget, QMainWindow, QLabel, QLineEdit, QPushButton,
-    QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox
+    QGridLayout, QMessageBox
 )
-from PySide6.QtCore import Qt
 import pyqtgraph as pg
 
 from data_fitter_ui_business import DataLoader
@@ -78,7 +77,7 @@ class DataFitterMain(DataFitterGuiWindow):
             sample_id = self.sample_id_input.text()
             cycle_number = float(self.cycle_number_input.text())
             temperature = float(self.temperature_input.text())
-            from src.config_connection_reading_management.config_reader import GetConfig
+            from src.infrastructure.core.config_reader import GetConfig
             self.data_loader = DataLoader(
                 sample_id=sample_id,
                 cycle_number=cycle_number,

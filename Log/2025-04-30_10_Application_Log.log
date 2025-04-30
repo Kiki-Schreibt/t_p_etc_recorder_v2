@@ -1,0 +1,32 @@
+2025-04-30 10:14:48,430 - src.GUI.recording_gui.recording_main_v3 - ERROR - UI file C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\infrastructure\..\src\GUI\recording_gui\ui\recording_ui_design.ui does not exist.
+2025-04-30 10:14:48,476 - src.GUI.recording_gui.recording_main_v3 - ERROR - Error initializing UI in MainWindow:
+Traceback (most recent call last):
+  File "C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\recording_gui\recording_main_v3.py", line 556, in _init_ui
+    self.ui.xy_plot_window.setLayout(QVBoxLayout())
+    ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'xy_plot_window'
+2025-04-30 10:14:48,480 - src.GUI.recording_gui.recording_main_v3 - ERROR - Error initializing connections in MainWindow:
+Traceback (most recent call last):
+  File "C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\recording_gui\recording_main_v3.py", line 568, in _init_connections
+    self.ui.update_meta_data_button.clicked.connect(self._update_meta_data)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'update_meta_data_button'
+2025-04-30 10:14:48,481 - src.GUI.recording_gui.recording_main_v3 - ERROR - Error setting up validators in MainWindow:
+Traceback (most recent call last):
+  File "C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\recording_gui\recording_main_v3.py", line 608, in _setup_validators
+    self.ui.sample_mass_edit_field.setValidator(validator)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sample_mass_edit_field'
+2025-04-30 10:14:48,481 - src.GUI.recording_gui.recording_main_v3 - ERROR - Error syncing constraints to UI in MainWindow:
+Traceback (most recent call last):
+  File "C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\recording_gui\recording_main_v3.py", line 631, in _sync_constraints_to_ui
+    self.ui.MinCharTimeEditField.setText(str(cons["min_TotalCharTime"]))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'MinCharTimeEditField'
+2025-04-30 10:14:48,567 - src.GUI.recording_gui.recording_main_v3 - ERROR - Error initializing continuous plots:
+Traceback (most recent call last):
+  File "C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\recording_gui\recording_main_v3.py", line 179, in init_continuous_plots
+    self._ensure_layout(self.ui.ExpMetaPlotLeft)
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'ExpMetaPlotLeft'
+2025-04-30 10:14:48,568 - root - ERROR - Uhpsi daisy: 'NoneType' object has no attribute 'actionTest_Planner'

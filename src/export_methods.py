@@ -2,12 +2,12 @@ import pandas as pd
 import os
 import numpy as np
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
-from src.table_data import TableConfig
+from src.infrastructure.core.table_config import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
-from src.standard_paths import standard_export_path
+from src.infrastructure.utils.standard_paths import standard_export_path
 
 
 class QuickExport:
@@ -222,8 +222,8 @@ if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
     sample_ids = 'WAE-WA-030'
 
-    from src.meta_data.meta_data_handler import MetaData
-    from src.config_connection_reading_management.config_reader import GetConfig
+    from src.infrastructure.meta_data import MetaData
+    from src.infrastructure.core.config_reader import GetConfig
 
     meta_data = MetaData(sample_id=sample_id, db_conn_params=GetConfig().db_conn_params)
     exporter = QuickExport(meta_data=meta_data, db_conn_params=GetConfig().db_conn_params)

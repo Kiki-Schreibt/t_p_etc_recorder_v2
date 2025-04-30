@@ -2,12 +2,11 @@ import sys
 import numpy as np
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Qt
 import pyqtgraph as pg
 from PySide6.QtCore import Signal
 
-from src.calculations.eq_p_calculation import VantHoffCalcEq
-from src.calculations.hydride_worker import MetalHydrideDatabase
+from src.infrastructure.utils.eq_p_calculation import VantHoffCalcEq
+from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 
 class VantHoffPlot(pg.PlotWidget):
     p_calc_sig = Signal(float, float) #p_hyd, p_dehyd

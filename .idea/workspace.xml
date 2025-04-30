@@ -5,8 +5,54 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/infrastructure/core/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/infrastructure/handler/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/infrastructure/meta_data/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/infrastructure/utils/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/test_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/test_planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/config_creation/config_creator_ui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/config_creation/config_creator_ui_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_gui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_gui_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/data_fitter/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/data_fitter/data_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/data_fitter/main_fitter_backend.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/data_fitter/main_fitter_backend.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/data_fitter/material_properties.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/data_fitter/material_properties.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/main_gui/main_ui.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/main_gui/ui/main_ui.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/planner_gui/planner_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/planner_gui/planner_business.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/planner_gui/planner_ui.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/planner_gui/ui/planner_ui.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_ui_design.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/ui/recording_ui_design.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_ui_design_widget.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/ui/recording_ui_design_widget.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_ui_design_works.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/ui/recording_ui_design_works.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/calculations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/calculations/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/calculations/hydride_worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/config_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/config_reader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/connections/connections.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hot_disk_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/hot_disk_log_file_tracker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hot_disk_log_file_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/export_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/export_methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/manual_data_import/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/manual_data_import/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory_logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/utils/memory_logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/meta_data/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/connections/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/meta_data/meta_data_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/meta_data/meta_data_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/simulation/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/simulation/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/simulation/dicon_simulator_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/simulation/simulator_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/simulation/simulator_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/standard_paths.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/utils/standard_paths.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/table_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/visualize_color_maps.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +86,9 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2iMRmPYjrJnSIgRdvSS35DQTFXE" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -130,58 +179,14 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\data_fitter" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\old_snippets\sequenzer" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\old_snippets" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\main_gui\ui" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\tests" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\test_data" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\infrastructure\utils" />
     </key>
   </component>
   <component name="RunManager" selected="Python.main">
-    <configuration name="code_length" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="t_p_etc_recorder_v2" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Desktop" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$USER_HOME$/Desktop/code_length.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="data_fitter_gui_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="t_p_etc_recorder_v2" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/data_fitter" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_gui_main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -226,6 +231,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="standard_paths" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/infrastructure/utils" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/infrastructure/utils/standard_paths.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="suquenzer_gui" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -248,13 +275,35 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="test_planner" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/test_planner.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.standard_paths" />
+        <item itemvalue="Python.test_planner" />
         <item itemvalue="Python.simulator_gui" />
         <item itemvalue="Python.suquenzer_gui" />
-        <item itemvalue="Python.code_length" />
-        <item itemvalue="Python.data_fitter_gui_main" />
       </list>
     </recent_temporary>
   </component>
@@ -298,16 +347,16 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py</url>
-          <line>471</line>
+          <line>470</line>
           <option name="timeStamp" value="157" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/planner_gui/planner_business.py</url>
-          <line>124</line>
+          <line>123</line>
           <option name="timeStamp" value="231" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/modbus_handler.py</url>
+          <url>file://$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py</url>
           <line>974</line>
           <option name="timeStamp" value="318" />
         </line-breakpoint>
@@ -327,17 +376,17 @@
           <option name="timeStamp" value="419" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/calculations/hydride_worker.py</url>
-          <line>49</line>
+          <url>file://$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py</url>
+          <line>48</line>
           <option name="timeStamp" value="432" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/GUI/data_fitter/main_fitter_backend.py</url>
-          <line>126</line>
+          <line>125</line>
           <option name="timeStamp" value="481" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/calculations/eq_p_calculation.py</url>
+          <url>file://$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py</url>
           <line>230</line>
           <option name="timeStamp" value="482" />
         </line-breakpoint>

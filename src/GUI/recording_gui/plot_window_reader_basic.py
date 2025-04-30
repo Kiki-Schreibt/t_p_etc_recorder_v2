@@ -1,24 +1,20 @@
 #plot_window_reader_basic.py
-import sys
-import threading
-import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
-from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, QObject,
-                            Signal, Slot, QRunnable, QThreadPool)
+from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, Signal, Slot)
 from PySide6.QtWidgets import QApplication
 
-from src.config_connection_reading_management.connections import DatabaseConnection
+from src.infrastructure.connections.connections import DatabaseConnection
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from src.table_data import TableConfig
+from src.infrastructure.core.table_config import TableConfig
 
 
 time_format_str = "yyyy-MM-dd HH:mm:ss"
@@ -192,7 +188,7 @@ class ReadData(QThread):
             if not df.empty:
                 df = df.sort_values(by=table.time, ascending=True)
             if not df[table.sample_id].iloc[-1] == self.meta_data.sample_id:
-                from src.meta_data.meta_data_handler import MetaData
+                from src.infrastructure.meta_data import MetaData
                 self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1], db_conn_params=self.db_conn_params)
                 self.meta_data_sig.emit(self.meta_data)
                 self.logger.info("Sample ID changed to %s", self.meta_data.sample_id)

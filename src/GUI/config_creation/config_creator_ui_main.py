@@ -1,15 +1,14 @@
 import sys
-import os
 import json
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout,
     QLabel, QLineEdit, QPushButton,
-    QFormLayout, QMessageBox, QGroupBox,
+    QMessageBox, QGroupBox,
     QGridLayout, QHBoxLayout
 )
 from PySide6.QtCore import Signal
 
-from src.standard_paths import standard_config_file_path
+from src.infrastructure.utils.standard_paths import standard_config_file_path
 
 
 class ConfigWindow(QWidget):
@@ -261,6 +260,7 @@ class ConfigWindow(QWidget):
     def _create_tables():
         from src.table_creator import TableCreator
         TableCreator().create_all_tables()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -12,14 +12,14 @@ from typing import Optional, Tuple, Union, List
 import pandas as pd
 from psycopg2 import IntegrityError
 
-from src.config_connection_reading_management.connections import DatabaseConnection
+from src.infrastructure.connections.connections import DatabaseConnection
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 from src.config_connection_reading_management.query_builder import QueryBuilder
-from src.meta_data.meta_data_handler import MetaData
-from src.table_data import TableConfig
+from src.infrastructure.meta_data.meta_data_handler import MetaData
+from src.infrastructure.core.table_config import TableConfig
 
 
 local_tz = ZoneInfo("Europe/Berlin")
@@ -980,7 +980,7 @@ def _to_native(val):
     return val
 
 def test_data_retriever() -> None:
-    from src.config_connection_reading_management.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import GetConfig
 
     data_retriever = DataRetriever(db_conn_params=GetConfig().db_conn_params)
     sample_id = 'WAE-WA-030'
@@ -994,7 +994,7 @@ def test_data_retriever() -> None:
 
 
 def test_excel_data_processor(etc_dir: str, sample_id: str) -> None:
-    from src.config_connection_reading_management.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import GetConfig
     config = GetConfig()
     etc_processor = ExcelDataProcessor(sample_id=sample_id, file_path=etc_dir, db_conn_params=config.db_conn_params)
     etc_processor.execute()

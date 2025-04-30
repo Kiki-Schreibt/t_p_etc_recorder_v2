@@ -5,14 +5,14 @@ from PySide6.QtWidgets import (
     QTextEdit, QPushButton, QMessageBox, QApplication
 )
 from PySide6.QtGui import QFont
-from PySide6.QtCore import Qt, Signal, QObject, Slot, QThread
+from PySide6.QtCore import Signal, QObject, Slot, QThread
 from pyqtgraph import LinearRegionItem
 from datetime import datetime
 
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, local_tz
 
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -440,7 +440,7 @@ class UptakeCorrectionBackend(QObject):
             config (ConfigReader): Application configuration.
         """
         super().__init__()
-        from src.table_data import TableConfig
+        from src.infrastructure.core.table_config import TableConfig
 
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
@@ -506,7 +506,7 @@ class UptakeCorrectionBackend(QObject):
         """
         Perform the Vant Hoff uptake calculation using the min/max rows.
         """
-        from src.calculations.eq_p_calculation import VantHoffCalcEq
+        from src.infrastructure.utils.eq_p_calculation import VantHoffCalcEq
 
         if self.row_min.empty or self.row_max.empty:
             self.logger.info("No data for uptake calculation provided")
@@ -646,8 +646,8 @@ def main():
 
     Opens the window for sample 'WAE-WA-028' over a fixed time range.
     """
-    from src.config_connection_reading_management.config_reader import GetConfig
-    from src.meta_data.meta_data_handler import MetaData
+    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.meta_data import MetaData
 
     app = QApplication([])
     config = GetConfig()

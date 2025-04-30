@@ -15,26 +15,22 @@ This module contains:
 import sys
 import threading
 import time
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import pyqtgraph as pg
 
 from PySide6.QtCore import QThread, Signal, QObject
-from PySide6.QtWidgets import QMenu
-from PySide6.QtGui import QAction
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
-from src.config_connection_reading_management.hot_disk_log_file_tracker import LogFileTracker
-from src.config_connection_reading_management.modbus_handler import ModbusProcessor
-from src.table_data import TableConfig
+from src.infrastructure.handler.hot_disk_log_file_handler import LogFileTracker
+from src.infrastructure.handler.modbus_handler import ModbusProcessor
+from src.infrastructure.core.table_config import TableConfig
 # Import plot window base classes (assumed to be unchanged)
 from src.GUI.recording_gui.plot_window_reader_basic import (
-    PlotBaseWindow, ReadStatic, ReadContinuous, AxisLabel, local_tz_reg, READING_MODE_BY_TIME
+    PlotBaseWindow, ReadStatic, ReadContinuous, AxisLabel
 )
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -824,8 +820,8 @@ def test_read_plot_uptake():
     Test function for UptakePlot.
     """
     try:
-        from src.config_connection_reading_management.config_reader import GetConfig
-        from src.meta_data.meta_data_handler import MetaData
+        from src.infrastructure.core.config_reader import GetConfig
+        from src.infrastructure.meta_data import MetaData
         meta_data = MetaData(sample_id='WAE-WA-040', db_conn_params=GetConfig().db_conn_params)
         uptake_win = UptakePlot()
         uptake_win.load_data(meta_data=meta_data)
@@ -902,8 +898,8 @@ if __name__ == '__main__':
         from PySide6.QtWidgets import QApplication
         app = QApplication([])
 
-        from src.config_connection_reading_management.config_reader import GetConfig
-        from src.meta_data.meta_data_handler import MetaData
+        from src.infrastructure.core.config_reader import GetConfig
+        from src.infrastructure.meta_data import MetaData
         db_conn_params = GetConfig().db_conn_params
         meta_data = MetaData('WAE-WA-028', db_conn_params=db_conn_params)
         win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params, meta_data=meta_data)

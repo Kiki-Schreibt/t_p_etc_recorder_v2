@@ -1,10 +1,10 @@
-from PySide6.QtWidgets import QApplication, QVBoxLayout
+from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 from PySide6.QtWidgets import QMainWindow
 
 from src.GUI.planner_gui.planner_business import VantHoffPlot
-from src.standard_paths import planner_ui_file_path
+from src.infrastructure.utils.standard_paths import planner_ui_file_path
 
 class TestPlannerMain(QMainWindow):
 

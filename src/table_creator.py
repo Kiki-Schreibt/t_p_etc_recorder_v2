@@ -1,9 +1,7 @@
-import logging
-
-from src.table_data import TableConfig
-from src.config_connection_reading_management.connections import DatabaseConnection
+from src.infrastructure.core.table_config import TableConfig
+from src.infrastructure.connections.connections import DatabaseConnection
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -279,7 +277,7 @@ def test_create_table_from_class():
 
 
 if __name__ == "__main__":
-    from src.config_connection_reading_management.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import GetConfig
     creator = TableCreator(db_conn_params=GetConfig().db_conn_params)
     creator.create_all_tables()
         # Accessing class attributes with and without escaped quotes

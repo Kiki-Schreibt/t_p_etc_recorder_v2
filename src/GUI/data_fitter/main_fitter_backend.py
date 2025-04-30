@@ -1,14 +1,13 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
-import pandas as pd
 
 from data_loader import DataLoader
 from material_properties import MaterialProperties
 from models import KaganerModel, ZehnerBauerSchluenderModel  # Use appropriate model here
 from src.GUI.data_fitter.model_fitter import ModelFitter
 from plotter import Plotter
-from src.config_connection_reading_management.config_reader import GetConfig
+from src.infrastructure.core.config_reader import GetConfig
 from scipy.optimize import curve_fit
 
 

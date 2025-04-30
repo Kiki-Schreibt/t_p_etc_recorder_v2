@@ -19,15 +19,13 @@ from zoneinfo import ZoneInfo
 import warnings
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
-from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, Qt
 from PySide6.QtGui import QDoubleValidator, QFont
 
-from src.meta_data.meta_data_handler import MetaData
+from src.infrastructure.meta_data.meta_data_handler import MetaData
 from src.GUI.recording_gui.recording_business_v2 import DataRecorder
-from src.standard_paths import recording_ui_file_path
+from src.infrastructure.utils.standard_paths import recording_ui_file_path
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -952,7 +950,7 @@ def main():
     Entry point for the application.
     """
     try:
-        from src.config_connection_reading_management.config_reader import GetConfig
+        from src.infrastructure.core.config_reader import GetConfig
         app = QApplication([])
         main_window = MainWindow(config=GetConfig())
         main_window.show()

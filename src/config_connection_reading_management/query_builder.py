@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import logging
 
-from src.config_connection_reading_management.connections import DatabaseConnection
-from src.table_data import TableConfig
+from src.infrastructure.connections.connections import DatabaseConnection
+from src.infrastructure.core.table_config import TableConfig
 
 local_tz = ZoneInfo("Europe/Berlin")
 
@@ -246,7 +246,7 @@ class TPQueryBuilder(BaseQueryBuilder):
         return query_part, values
 
     def _get_times_by_meta_data(self, sample_id):
-        from src.meta_data.meta_data_handler import MetaData
+        from src.infrastructure.meta_data import MetaData
 
         meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         if not meta_data.start_time or not meta_data.end_time:
@@ -411,7 +411,7 @@ class QueryBuilder:
 
 # --- Test function for quick verification ---
 def test_query_builder():
-    from src.config_connection_reading_management.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import GetConfig
     config = GetConfig()
     qb = QueryBuilder(db_conn_params=config.db_conn_params)
     sample_id = "WAE-WA-040"

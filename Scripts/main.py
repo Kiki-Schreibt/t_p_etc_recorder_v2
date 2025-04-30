@@ -9,14 +9,14 @@ from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 
 from src.GUI.config_creation.config_creator_ui_main import ConfigWindow
-from src.standard_paths import standard_config_file_path
+from src.infrastructure.utils.standard_paths import standard_config_file_path
 from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
-from src.simulation.simulator_gui import ModbusServerControlGUI
+from src.GUI.simulation.simulator_gui import ModbusServerControlGUI
 from test_planner import TestPlannerMain
 from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
 try:
-    import src.config_connection_reading_management.logger as logging
+    import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -203,6 +203,7 @@ def main():
 
     sys.exit(app.exec())
 
+
 def launch_main_program(app):
     """
     Instantiate and show the MainProgram window.
@@ -211,7 +212,7 @@ def launch_main_program(app):
         app (QApplication): The running QApplication instance.
     """
     try:
-        from src.config_connection_reading_management.config_reader import GetConfig
+        from src.infrastructure.core.config_reader import GetConfig
         config = GetConfig()
         main_program = MainProgram(config=config)
         main_program.show()

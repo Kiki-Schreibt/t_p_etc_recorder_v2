@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import logging
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
-from src.table_data import TableConfig
+from src.infrastructure.core.table_config import TableConfig
 
 # Define standard constraints as a constant
 STANDARD_CONSTRAINTS = {
