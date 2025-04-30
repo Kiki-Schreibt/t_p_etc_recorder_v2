@@ -99,19 +99,6 @@ class DataRetriever:
         etc_table.de_hyd_state: 'de_hyd_state'
     }
 
-    etc_xy_column_attribute_mapping =  {
-                                        xy_table.sample_id:        'sample_id',
-                                        xy_table.time:             'time',
-                                        xy_table.transient_x:      'time_temperature_increase',
-                                        xy_table.transient_y:      'temperature_increase',
-                                        xy_table.drift_x:          'time_drift',
-                                        xy_table.drift_y:          'temperature_drif',
-                                        xy_table.calculated_x:     't_f_tau',
-                                        xy_table.calculated_y:     'temperature',
-                                        xy_table.residual_x:       'sqrt_time',
-                                        xy_table.residual_y:       'diff_temperature',
-                                    }
-
     def __init__(self, db_conn_params=None):
         self.running = False
         self.db_conn_params = db_conn_params or {}
@@ -630,7 +617,6 @@ class ExcelDataProcessor:
     xy_table = TableConfig().ThermalConductivityXyDataTable
 
     etc_column_attribute_mapping = DataRetriever.etc_column_attribute_mapping
-    etc_xy_column_attribute_mapping = DataRetriever.etc_xy_column_attribute_mapping
 
     def __init__(
         self,
@@ -914,6 +900,7 @@ class ExcelDataProcessor:
         thermal_conductivity_xy_df[self.xy_table.sample_id] = self.meta_data.sample_id
         combined_df = combined_df.dropna(subset=[table.get_clean("time")])
         thermal_conductivity_xy_df = thermal_conductivity_xy_df.dropna(subset=[self.xy_table.time])
+        thermal_conductivity_xy_df.drop_duplicates(subset=self.xy_table.time, keep='last')
         df_t_p = self._find_corresponding_t_p(combined_df)
         if not combined_df.empty and not df_t_p.empty:
             combined_df = pd.merge(combined_df, df_t_p, on=table.get_clean('time'), how='inner')
@@ -1102,18 +1089,11 @@ def write_ETC_folder(dir_etc_folder: str, sample_id: str, logger_inst, config) -
 
 
 def main():
-    sample_id = 'WAE-WA-028'
+    sample_id = 'WAE-WA-040'
     dir_etc = r"C:\Daten\Kiki\WAE-WA-030-Mg2NiH4\WAE-WA-030-All\WAE-WA-030-045-400C-ParameterTest.xlsx"
-    dir_etc = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\WAE-WA-028-006-300C\WAE-WA-028-006-300C.xlsx"
+    dir_etc = r"C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-038-350-420C-Cyc\WAE-WA-040-038-02.xlsx"
 
     test_excel_data_processor(etc_dir=dir_etc, sample_id=sample_id)
 
 if __name__ == "__main__":
-    from src.infrastructure.core.config_reader import GetConfig
-    from src.infrastructure.meta_data.meta_data_handler import MetaData
-    config = GetConfig()
-    meta_data = MetaData(sample_id='WAE-WA-028', db_conn_params=config.db_conn_params)
-    data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
-    time = '2021-09-09 11:39:12+02'
-    df = data_retriever.fetch_xy_data(time_value=time)
-    print(df)
+    main()
