@@ -222,7 +222,7 @@ if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
     sample_ids = 'WAE-WA-030'
 
-    from src.infrastructure.meta_data import MetaData
+    from src.infrastructure.meta_data.meta_data_handler import MetaData
     from src.infrastructure.core.config_reader import GetConfig
 
     meta_data = MetaData(sample_id=sample_id, db_conn_params=GetConfig().db_conn_params)

@@ -43,6 +43,8 @@ class BaseQueryBuilder:
             table_name = self.tp_table.table_name
         elif "x_y" in table_name.lower():
             table_name = self.etc_xy_table.table_name
+            if not column_names:
+                column_names = TableConfig().get_xy_array_column_names()
         elif "etc" in table_name.lower() or "conductivity" in table_name.lower():
             table_name = self.etc_table.table_name
         elif "meta" in table_name.lower():
@@ -246,7 +248,7 @@ class TPQueryBuilder(BaseQueryBuilder):
         return query_part, values
 
     def _get_times_by_meta_data(self, sample_id):
-        from src.infrastructure.meta_data import MetaData
+        from src.infrastructure.meta_data.meta_data_handler import MetaData
 
         meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         if not meta_data.start_time or not meta_data.end_time:

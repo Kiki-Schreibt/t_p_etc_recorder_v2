@@ -8,6 +8,8 @@ from zoneinfo import ZoneInfo
 from multiprocessing import Pool
 from datetime import datetime
 from typing import Optional, Tuple, Union, List
+import math
+
 
 import pandas as pd
 from psycopg2 import IntegrityError
@@ -17,6 +19,7 @@ try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
+
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.infrastructure.meta_data.meta_data_handler import MetaData
 from src.infrastructure.core.table_config import TableConfig
@@ -96,18 +99,18 @@ class DataRetriever:
         etc_table.de_hyd_state: 'de_hyd_state'
     }
 
-    etc_xy_column_attribute_mapping = {
-        xy_table.point_number: 'point_nr',
-        xy_table.time: 'time',
-        xy_table.t_f_tau: 't_f_tau',
-        xy_table.temperature: 'temperature',
-        xy_table._time_temperature_increase: 'time_temperature_increase',
-        xy_table.temperature_increase: 'temperature_increase',
-        xy_table.sqrt_time: 'sqrt_time',
-        xy_table.temp_diff: 'diff_temperature',
-        xy_table.drift_time: 'time_drift',
-        xy_table.temperature_drift: 'temperature_drift'
-    }
+    etc_xy_column_attribute_mapping =  {
+                                        xy_table.sample_id:        'sample_id',
+                                        xy_table.time:             'time',
+                                        xy_table.transient_x:      'time_temperature_increase',
+                                        xy_table.transient_y:      'temperature_increase',
+                                        xy_table.drift_x:          'time_drift',
+                                        xy_table.drift_y:          'temperature_drif',
+                                        xy_table.calculated_x:     't_f_tau',
+                                        xy_table.calculated_y:     'temperature',
+                                        xy_table.residual_x:       'sqrt_time',
+                                        xy_table.residual_y:       'diff_temperature',
+                                    }
 
     def __init__(self, db_conn_params=None):
         self.running = False
@@ -280,13 +283,13 @@ class DataRetriever:
         # Use match-case (Python 3.10+) for clarity
         match row_package_name.lower():
             case 'transient':
-                column_names = (table._time_temperature_increase, table.temperature_increase, time_column)
+                column_names = (table.transient_x, table.transient_y, time_column)
             case 'drift':
-                column_names = (table.drift_time, table.temperature_drift, time_column)
+                column_names = (table.drift_x, table.drift_y, time_column)
             case 'calculated':
-                column_names = (table.t_f_tau, table.temperature, time_column)
+                column_names = (table.calculated_x, table.calculated_y, time_column)
             case 'residual':
-                column_names = (table.sqrt_time, table.temp_diff, time_column)
+                column_names = (table.residual_x, table.residual_y, time_column)
             case _:
                 self.logger.error("Invalid row package name provided: %s", row_package_name)
                 return pd.DataFrame()
@@ -302,6 +305,8 @@ class DataRetriever:
                 col_names_clean = tuple(s.replace("\"", "") for s in column_names)
                 df = pd.DataFrame.from_records(records, columns=col_names_clean)
             if not df.empty:
+                df = df.explode([column_names[0], column_names[1]]).reset_index(drop=True)
+                df = df.dropna()
                 df = df.sort_values(by=col_names_clean[0], ascending=True)
                 return df
             return pd.DataFrame()
@@ -903,12 +908,12 @@ class ExcelDataProcessor:
         combined_df = self._read_and_process_sheets()
         if combined_df is None or combined_df.empty:
             return None
-        thermal_conductivity_xy_data = self._get_measurement_xy_data(combined_df)
+        thermal_conductivity_xy_df = self._get_measurement_xy_data_as_lists(combined_df)
         combined_df = combined_df.drop_duplicates(subset=table.get_clean("time"), keep='last')
         combined_df[self.etc_table.sample_id] = self.meta_data.sample_id
-        thermal_conductivity_xy_data[self.xy_table.sample_id] = self.meta_data.sample_id
+        thermal_conductivity_xy_df[self.xy_table.sample_id] = self.meta_data.sample_id
         combined_df = combined_df.dropna(subset=[table.get_clean("time")])
-        thermal_conductivity_xy_data = thermal_conductivity_xy_data.dropna(subset=[self.xy_table.time])
+        thermal_conductivity_xy_df = thermal_conductivity_xy_df.dropna(subset=[self.xy_table.time])
         df_t_p = self._find_corresponding_t_p(combined_df)
         if not combined_df.empty and not df_t_p.empty:
             combined_df = pd.merge(combined_df, df_t_p, on=table.get_clean('time'), how='inner')
@@ -919,16 +924,21 @@ class ExcelDataProcessor:
             combined_df[self.etc_table.cycle_number_flag] = None
         pd.set_option('future.no_silent_downcasting', True)
         combined_df.replace('(no corr.)', 0, inplace=True)
+
+        #create insert query and prepare data for insert
         ETC_insert_query, ETC_values = TableConfig().writing_query_from_df(
             df=combined_df,
             map=self.etc_column_attribute_mapping,
             table_name=self.etc_table.table_name
         )
+
         xy_insert_query, xy_values = TableConfig().writing_query_from_df(
-            df=thermal_conductivity_xy_data,
-            map=self.etc_xy_column_attribute_mapping,
-            table_name=self.xy_table.table_name
+            df=thermal_conductivity_xy_df,
+            map=None,
+            table_name=TableConfig().ThermalConductivityXyDataTable.table_name
         )
+
+        #start insertion
         error_checker = self._write_to_database(
             insert_query=ETC_insert_query,
             values=ETC_values,
@@ -965,6 +975,68 @@ class ExcelDataProcessor:
             self.logger.info("Data saved to %s", output_file_path)
         except Exception as e:
             self.logger.error("Error saving combined data: %s", e)
+
+    def _get_measurement_xy_data_as_lists(self, combined_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Returns a DataFrame with one row per measurement in combined_df,
+        columns:
+          ['measurement_time',
+           'transient_x','transient_y',
+           'drift_x','drift_y',
+           'calculated_x','calculated_y',
+           'residual_x','residual_y']
+        where each _x/_y is a list of floats (or None for NaNs).
+        """
+        # mapping of mode → (sheet name, x‐col, y‐col)
+        sheets = {
+            'calculated': ('T-f(Tau)', 't_f_tau', 'temperature'),
+            'transient':  ('T-t',       'time_temperature_increase', 'temperature_increase'),
+            'residual':   ('Diff',      'sqrt_time',                 'diff_temperature'),
+            'drift':      ('T(drift)',  'time_drift',                'temperature_drift'),
+        }
+
+        # 1) read each sheet once, drop entirely empty columns
+        raw = {}
+        for mode, (sheet, xcol, ycol) in sheets.items():
+            df = pd.read_excel(self.file_path, sheet_name=sheet, header=3)
+            df = df.dropna(axis=1, how='all')
+            raw[mode] = df
+
+        # 2) build one record per row of combined_df
+        times = combined_df['Time'].tolist()
+        rows = []
+        for j, meas_time in enumerate(times):
+            rec = {'time': meas_time}
+            for mode, df_mode in raw.items():
+                # X columns start at index 1, then alternate: 1,2 → run 0; 3,4 → run 1; etc.
+                idx_x = 1 + 2*j
+                idx_y = 2 + 2*j
+                if idx_x < df_mode.shape[1] and idx_y < df_mode.shape[1]:
+                    col_x = df_mode.columns[idx_x]
+                    col_y = df_mode.columns[idx_y]
+                    xs = df_mode[col_x].astype(float).tolist()
+                    ys = df_mode[col_y].astype(float).tolist()
+                    # replace NaN with None
+                    xs = [None if math.isnan(v) else v for v in xs]
+                    ys = [None if math.isnan(v) else v for v in ys]
+                else:
+                    xs, ys = [], []
+                rec[f'{mode}_x'] = xs
+                rec[f'{mode}_y'] = ys
+            rows.append(rec)
+
+        df = pd.DataFrame(rows)
+        return df
+
+    def _replace_nan_with_none(self, record_list: list[dict]) -> list[dict]:
+        cleaned = []
+        for rec in record_list:
+            clean_rec = {
+                k: (None if isinstance(v, float) and math.isnan(v) else v)
+                for k, v in rec.items()
+            }
+            cleaned.append(clean_rec)
+        return cleaned
 
 
 def _to_native(val):
@@ -1038,8 +1110,19 @@ def write_ETC_folder(dir_etc_folder: str, sample_id: str, logger_inst, config) -
     logger_inst.info("Import took %.2f hours", (time.time() - start_time) / 3600)
 
 
-if __name__ == "__main__":
-    sample_id = 'WAE-WA-030'
+def main():
+    sample_id = 'WAE-WA-028'
     dir_etc = r"C:\Daten\Kiki\WAE-WA-030-Mg2NiH4\WAE-WA-030-All\WAE-WA-030-045-400C-ParameterTest.xlsx"
+    dir_etc = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\WAE-WA-028-006-300C\WAE-WA-028-006-300C.xlsx"
+
     test_excel_data_processor(etc_dir=dir_etc, sample_id=sample_id)
-    test_data_retriever()
+
+if __name__ == "__main__":
+    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.meta_data.meta_data_handler import MetaData
+    config = GetConfig()
+    meta_data = MetaData(sample_id='WAE-WA-028', db_conn_params=config.db_conn_params)
+    data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
+    time = '2021-09-09 11:39:12+02'
+    df = data_retriever.fetch_xy_data(time_value=time)
+    print(df)

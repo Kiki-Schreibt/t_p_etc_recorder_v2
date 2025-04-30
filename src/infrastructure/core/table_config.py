@@ -97,19 +97,17 @@ class TableConfig:
 
     class ThermalConductivityXyDataTable:
         table_name = 'thermal_conductivity_xy_data'
-        point_number =  'point_nr'
+        sample_id        = 'sample_id'
         time = 'time'
-        t_f_tau =  't_f_tau'
-        temperature =  'temperature'
-        _time_temperature_increase = 'time_temperature_increase'
-        temperature_increase =  'temperature_increase'
-        sqrt_time =  'sqrt_time'
-        temp_diff = 'diff_temperature'
-        drift_time =  'time_drift'
-        temperature_drift = 'temperature_drift'
-        sample_id = "sample_id"
-
-        primary_key = None
+        # parallel numeric arrays for XY pairs
+        transient_x      = 'transient_x'
+        transient_y      = 'transient_y'
+        drift_x          = 'drift_x'
+        drift_y          = 'drift_y'
+        calculated_x     = 'calculated_x'
+        calculated_y     = 'calculated_y'
+        residual_x       = 'residual_x'
+        residual_y       = 'residual_y'
 
     class MetaDataTable:
         table_name = "meta_data"
@@ -177,13 +175,23 @@ class TableConfig:
             print(f'Could not find table class {table_class}')
             return None
 
-    def writing_query_from_df(self, df, table_name: str, map: dict):
-        db_columns, df_columns = self._map_attr_col_to_list(df_cols_all=df.columns,
+
+    def writing_query_from_df(self, df, table_name: str, map: dict = None):
+        if map:
+            db_columns, df_columns = self._map_attr_col_to_list(df_cols_all=df.columns,
                                                             column_attribute_mapping=map)
-        insert_query, data_values = self._writing_query(df=df,
-                                                        db_columns=db_columns,
-                                                        df_columns=df_columns,
-                                                        table_name=table_name)
+
+            insert_query, data_values = self._writing_query(df=df,
+                                                            db_columns=db_columns,
+                                                            df_columns=df_columns,
+                                                            table_name=table_name)
+        else:
+            insert_query, data_values = self._writing_query(df=df,
+                                                            db_columns=df.columns.to_list(),
+                                                            df_columns=df.columns.to_list(),
+                                                            table_name=table_name)
+
+
         return insert_query, data_values
 
     @staticmethod
@@ -227,6 +235,23 @@ class TableConfig:
         data_values = df[df_columns].values.tolist()
         return insert_query, data_values
 
+    def get_xy_array_column_names(self):
+        """
+        Return the ordered list of column names for the xy-array schema.
+        """
+        tbl = self.ThermalConductivityXyDataTable
+        return [
+            tbl.sample_id,
+            tbl.time,
+            tbl.transient_x,
+            tbl.transient_y,
+            tbl.drift_x,
+            tbl.drift_y,
+            tbl.calculated_x,
+            tbl.calculated_y,
+            tbl.residual_x,
+            tbl.residual_y,
+        ]
 
 if __name__ == '__main__':
     tablemaster = TableConfig()

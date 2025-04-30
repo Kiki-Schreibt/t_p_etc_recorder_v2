@@ -8,11 +8,11 @@ except ImportError:
 
 class TableCreator:
     PRIMARY_KEYS = {
-                        't_p_data':                     'time',
-                        'cycle_data':                   'time_start',
-                        'meta_data':                    'sample_id',
-                        'thermal_conductivity_data':    "\"Time\""
-
+                        't_p_data':                      'time',
+                        'cycle_data':                    'time_start',
+                        'meta_data':                     'sample_id',
+                        'thermal_conductivity_data':     '"Time"',
+                        'thermal_conductivity_xy_data':  'time',
                     }
 
     def __init__(self, db_conn_params):
@@ -64,7 +64,7 @@ class TableCreator:
                 + "\n);"
             )
             self._execute(create_table_sql)
-            self.logger.info(f"New Table Created: {table_name}")
+            self.logger.info(f"New Table Created: {table_name} with primary key {pk_cols}")
 
         else:
             self.logger.info(f"{table_name} table exists in database. All good")
@@ -174,18 +174,18 @@ class TableCreator:
                              }
 
             if "xy" in table_name:
-                data_map = {'diff_temperature': 'double precision',
-                                  'point_nr': 'integer',
-                                  'sample_id': 'text',
-                                  'sqrt_time': 'double precision',
-                                  't_f_tau': 'double precision',
-                                  'temperature': 'double precision',
-                                  'temperature_drift': 'double precision',
-                                  'temperature_increase': 'double precision',
-                                  'time': 'timestamp with time zone',
-                                  'time_drift': 'double precision',
-                                  'time_temperature_increase': 'double precision',
-                                  '_default': 'TEXT'  # Default data type
+                data_map = {
+                                'sample_id':        'TEXT',
+                                'time':             'TIMESTAMPTZ',
+                                'transient_x':      'DOUBLE PRECISION[]',
+                                'transient_y':      'DOUBLE PRECISION[]',
+                                'drift_x':          'DOUBLE PRECISION[]',
+                                'drift_y':          'DOUBLE PRECISION[]',
+                                'calculated_x':     'DOUBLE PRECISION[]',
+                                'calculated_y':     'DOUBLE PRECISION[]',
+                                'residual_x':       'DOUBLE PRECISION[]',
+                                'residual_y':       'DOUBLE PRECISION[]',
+                                '_default':         'TEXT[]'
                             }
 
             if "meta" in table_name:
@@ -279,6 +279,8 @@ def test_create_table_from_class():
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import GetConfig
     creator = TableCreator(db_conn_params=GetConfig().db_conn_params)
+    creator.__delete_table__(table_name="thermal_conductivity_xy_data")
+    creator.__delete_table__(table_name="thermal_conductivity_data")
     creator.create_all_tables()
         # Accessing class attributes with and without escaped quotes
 
