@@ -142,9 +142,10 @@ class DataRecorder(QObject):
         """
         Stop the T-p recording thread and wait for it to finish.
         """
-        self.logger.info("Stopping T-p recording thread...")
+
         try:
             if self._mb_thread is not None:
+                self.logger.info("Stopping T-p recording thread...")
                 self.mb_processor.stop()
                 self._mb_thread.join()
                 self._mb_thread = None
@@ -170,8 +171,9 @@ class DataRecorder(QObject):
         """
         Stop the ETC recording thread.
         """
-        self.logger.info("Stopping ETC recording thread...")
+
         try:
+            self.logger.info("Stopping ETC recording thread...")
             if self._log_tracker_thread is not None:
                 self._log_tracker_thread.join()
                 self._log_tracker_thread = None
