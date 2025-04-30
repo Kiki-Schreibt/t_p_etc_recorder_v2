@@ -30,5 +30,5 @@ def add_source_folders(folder_names=None):
 
 if __name__ == '__main__':
 
-    name = ("calculations",  "config_connection_reading_management", "GUI", "manual_data_import",  "meta_data")
+    name = ("GUI",  "infrastructre", "side_operations")
     add_source_folders()

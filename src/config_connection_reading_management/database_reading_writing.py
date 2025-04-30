@@ -644,7 +644,6 @@ class ExcelDataProcessor:
         self.meta_data = MetaData(sample_id=sample_id, db_conn_params=db_conn_params) if (sample_id and db_conn_params) else (meta_data or MetaData(db_conn_params=db_conn_params))
         self._test_mode = False
 
-
     def _update_xlsx_file(self) -> None:
         max_retries = 30
         delay = 0.1  # start with 100 ms delay
@@ -967,6 +966,7 @@ class ExcelDataProcessor:
         except Exception as e:
             self.logger.error("Error saving combined data: %s", e)
 
+
 def _to_native(val):
     # unwrap numpy scalars
     try:
@@ -978,6 +978,7 @@ def _to_native(val):
     if hasattr(val, 'to_pydatetime'):
         return val.to_pydatetime()
     return val
+
 
 def test_data_retriever() -> None:
     from src.infrastructure.core.config_reader import GetConfig

@@ -19,7 +19,6 @@ class TableCreator:
         self.db_conn_params = db_conn_params
         self.logger = logging.getLogger(__name__)
 
-
     def create_all_tables(self):
         for attr_name, attr_value in vars(TableConfig).items():
             # Exclude any special or private attributes (those starting with '__')
@@ -265,6 +264,7 @@ def create_database(config):
         db_conn.cursor.execute(query)
         # Commit the changes and close the connection
         db_conn.cursor.connection.commit()
+
 
 def test_create_table_from_class():
     # Example: Generate SQL for TPDataTable class
