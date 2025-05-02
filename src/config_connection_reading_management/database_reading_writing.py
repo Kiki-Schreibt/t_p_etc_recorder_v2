@@ -727,87 +727,6 @@ class ExcelDataProcessor:
             self.logger.error("The DataFrames have different lengths and cannot be concatenated directly.")
             return None
 
-    def _t_f_tau_t_t_diff_reader(self, param_res_combined_df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
-        df = pd.read_excel(self.file_path, sheet_name=sheet_name, header=3)
-        if sheet_name == 'T-f(Tau)':
-            x_col_name, y_col_name, point_nr_name, time_name = 't_f_tau', 'temperature', 'point_nr', 'time'
-        elif sheet_name == 'T-t':
-            x_col_name, y_col_name, point_nr_name, time_name = 'time_temperature_increase', 'temperature_increase', 'point_nr_t_t', 'time_t_t'
-        elif sheet_name == 'Diff':
-            x_col_name, y_col_name, point_nr_name, time_name = 'sqrt_time', 'diff_temperature', 'point_nr_diff', 'time_diff'
-        elif sheet_name == 'T(drift)':
-            x_col_name, y_col_name, point_nr_name, time_name = 'time_drift', 'temperature_drift', 'point_nr_drift', 'time_total_drift'
-        else:
-            self.logger.error("Invalid sheet name: %s", sheet_name)
-            return pd.DataFrame()
-
-        if sheet_name == 'T(drift)':
-            current_length = df['Point nr.'].shape[0]
-            if current_length < 200:
-                additional_points = range(current_length + 1, 201)
-                df = df._append([{'Point nr.': i} for i in additional_points], ignore_index=True)
-            df.loc[100, 'Point nr.'] = 101
-            df['Point nr.'] = df['Point nr.'].sort_values().values
-
-        df = df.dropna(axis=1, how='all')
-        if x_col_name not in df.columns:
-            df[x_col_name] = np.nan
-        if y_col_name not in df.columns:
-            df[y_col_name] = np.nan
-
-        if len(df['Point nr.']) > 200:
-            df = self._adjust_and_trim_df(df, original_length=len(df['Point nr.']), target_length=200)
-
-        time_column = param_res_combined_df.iloc[:, 0]
-        point_nr_column = df.iloc[:, 0]
-        num_pairs = min((len(df.columns) - 1) // 2, len(time_column))
-        xy_time_data = {}
-        for i in range(num_pairs):
-            xy_time_data[f'{point_nr_name}_{i}'] = point_nr_column
-            x_index = i * 2 + 1
-            y_index = x_index + 1
-            xy_time_data[f'{time_name}_{i}'] = time_column[i]
-            xy_time_data[f'{x_col_name}_{i}'] = df.iloc[:, x_index]
-            xy_time_data[f'{y_col_name}_{i}'] = df.iloc[:, y_index]
-        xy_time_df = pd.DataFrame(xy_time_data)
-        xy_time_df.columns = [re.sub(r'[\s\.\(\)]', '_', col) for col in xy_time_df.columns]
-        xy_time_df = self._delete_duplicates_from_hot_disk_export(param_res_combined_df, xy_time_df)
-        if xy_time_df.empty:
-            df_filler = pd.DataFrame({x_col_name: [1, 2, 3]})
-            return df_filler
-        df_for_table = self._vertically_concatenate(xy_time_df, 4)
-        return df_for_table
-
-    @staticmethod
-    def _adjust_and_trim_df(df: pd.DataFrame, original_length: int = 201, target_length: int = 200) -> pd.DataFrame:
-        n = original_length - target_length
-        df.iloc[:, 1:] = df.iloc[:, 1:].shift(-n)
-        return df.head(target_length)
-
-    @staticmethod
-    def _vertically_concatenate(df: pd.DataFrame, row_number: int = 4) -> pd.DataFrame:
-        dfs_to_concatenate = []
-        num_sets = len(df.columns) // row_number
-        for i in range(num_sets):
-            start_index = i * row_number
-            end_index = start_index + row_number
-            subset_df = df.iloc[:, start_index:end_index]
-            subset_df = subset_df.rename(columns=lambda x: re.sub(r'_(\d+)$', '', x))
-            dfs_to_concatenate.append(subset_df)
-        concatenated_df = pd.concat(dfs_to_concatenate, ignore_index=True)
-        concatenated_df = concatenated_df.drop(columns='point_nr_drift', errors='ignore')
-        return concatenated_df
-
-    #old xy reader
-    def _get_measurement_xy_data(self, combined_df: pd.DataFrame) -> pd.DataFrame:
-        t_f_tau = self._t_f_tau_t_t_diff_reader(combined_df, 'T-f(Tau)')
-        t_t = self._t_f_tau_t_t_diff_reader(combined_df, 'T-t')
-        diff = self._t_f_tau_t_t_diff_reader(combined_df, 'Diff')
-        drift = self._t_f_tau_t_t_diff_reader(combined_df, 'T(drift)')
-        measurement_xy_data = pd.concat([t_f_tau, t_t, diff, drift], axis=1)
-        measurement_xy_data = measurement_xy_data.T.drop_duplicates().T
-        return measurement_xy_data
-
     #new xy reader
     def _get_measurement_xy_data_as_lists(self, combined_df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -892,23 +811,6 @@ class ExcelDataProcessor:
             except Exception as e:
                 self.logger.error("Error occurred while deleting data: %s", e)
                 db_conn.cursor.connection.rollback()
-
-    #old duplicate remover
-    @staticmethod
-    def _delete_duplicates_from_hot_disk_export(df: pd.DataFrame, xy_df: pd.DataFrame) -> pd.DataFrame:
-        original_indices = set(df.index)
-        deduped_df = df.drop_duplicates(subset='Time', keep='last')
-        deduped_indices = set(deduped_df.index)
-        removed_indices = original_indices - deduped_indices
-        multiplied_indices = set(map(lambda x: x * 4, removed_indices))
-        indices_to_remove = set()
-        for index in sorted(multiplied_indices):
-            new_indices = set(range(index, min(index + 4, len(xy_df.columns))))
-            indices_to_remove = indices_to_remove.union(new_indices)
-        valid_indices = sorted(index for index in indices_to_remove if index < len(xy_df.columns))
-        columns_to_remove = xy_df.columns[valid_indices]
-        xy_df = xy_df.drop(columns=columns_to_remove)
-        return xy_df
 
     #new duplicate remover
     @staticmethod
