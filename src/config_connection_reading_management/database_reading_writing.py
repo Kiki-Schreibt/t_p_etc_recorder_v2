@@ -798,6 +798,7 @@ class ExcelDataProcessor:
         concatenated_df = concatenated_df.drop(columns='point_nr_drift', errors='ignore')
         return concatenated_df
 
+    #old xy reader
     def _get_measurement_xy_data(self, combined_df: pd.DataFrame) -> pd.DataFrame:
         t_f_tau = self._t_f_tau_t_t_diff_reader(combined_df, 'T-f(Tau)')
         t_t = self._t_f_tau_t_t_diff_reader(combined_df, 'T-t')
@@ -806,6 +807,59 @@ class ExcelDataProcessor:
         measurement_xy_data = pd.concat([t_f_tau, t_t, diff, drift], axis=1)
         measurement_xy_data = measurement_xy_data.T.drop_duplicates().T
         return measurement_xy_data
+
+    #new xy reader
+    def _get_measurement_xy_data_as_lists(self, combined_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Returns a DataFrame with one row per measurement in combined_df,
+        columns:
+          ['measurement_time',
+           'transient_x','transient_y',
+           'drift_x','drift_y',
+           'calculated_x','calculated_y',
+           'residual_x','residual_y']
+        where each _x/_y is a list of floats (or None for NaNs).
+        """
+        # mapping of mode → (sheet name, x‐col, y‐col)
+        sheets = {
+            'calculated': ('T-f(Tau)', 't_f_tau', 'temperature'),
+            'transient':  ('T-t',       'time_temperature_increase', 'temperature_increase'),
+            'residual':   ('Diff',      'sqrt_time',                 'diff_temperature'),
+            'drift':      ('T(drift)',  'time_drift',                'temperature_drift'),
+        }
+
+        # 1) read each sheet once, drop entirely empty columns
+        raw = {}
+        for mode, (sheet, xcol, ycol) in sheets.items():
+            df = pd.read_excel(self.file_path, sheet_name=sheet, header=3)
+            df = df.dropna(axis=1, how='all')
+            raw[mode] = df
+
+        # 2) build one record per row of combined_df
+        times = combined_df['Time'].tolist()
+        rows = []
+        for j, meas_time in enumerate(times):
+            rec = {'time': meas_time}
+            for mode, df_mode in raw.items():
+                # X columns start at index 1, then alternate: 1,2 → run 0; 3,4 → run 1; etc.
+                idx_x = 1 + 2*j
+                idx_y = 2 + 2*j
+                if idx_x < df_mode.shape[1] and idx_y < df_mode.shape[1]:
+                    col_x = df_mode.columns[idx_x]
+                    col_y = df_mode.columns[idx_y]
+                    xs = df_mode[col_x].astype(float).tolist()
+                    ys = df_mode[col_y].astype(float).tolist()
+                    # replace NaN with None
+                    xs = [None if math.isnan(v) else v for v in xs]
+                    ys = [None if math.isnan(v) else v for v in ys]
+                else:
+                    xs, ys = [], []
+                rec[f'{mode}_x'] = xs
+                rec[f'{mode}_y'] = ys
+            rows.append(rec)
+
+        df = pd.DataFrame(rows)
+        return df
 
     def _write_to_database(self, insert_query: str, values: list, table_name: str = "") -> bool:
         with DatabaseConnection(**self.db_conn_params) as db_conn:
@@ -839,6 +893,7 @@ class ExcelDataProcessor:
                 self.logger.error("Error occurred while deleting data: %s", e)
                 db_conn.cursor.connection.rollback()
 
+    #old duplicate remover
     @staticmethod
     def _delete_duplicates_from_hot_disk_export(df: pd.DataFrame, xy_df: pd.DataFrame) -> pd.DataFrame:
         original_indices = set(df.index)
@@ -854,6 +909,13 @@ class ExcelDataProcessor:
         columns_to_remove = xy_df.columns[valid_indices]
         xy_df = xy_df.drop(columns=columns_to_remove)
         return xy_df
+
+    #new duplicate remover
+    @staticmethod
+    def _delete_duplicates(df, xy_df):
+        deduped_df = df.drop_duplicates(subset='Time', keep='last').reset_index(drop=True)
+        deduped_xy_df = xy_df.drop_duplicates(subset='time', keep='last').reset_index(drop=True)
+        return deduped_df, deduped_xy_df
 
     def _find_corresponding_t_p(self, df_etc: pd.DataFrame) -> pd.DataFrame:
         t_p_table = TableConfig().TPDataTable
@@ -895,13 +957,14 @@ class ExcelDataProcessor:
         if combined_df is None or combined_df.empty:
             return None
         thermal_conductivity_xy_df = self._get_measurement_xy_data_as_lists(combined_df)
-        combined_df = combined_df.drop_duplicates(subset=table.get_clean("time"), keep='last')
+        #combined_df = combined_df.drop_duplicates(subset=table.get_clean("time"), keep='last')
         combined_df[self.etc_table.sample_id] = self.meta_data.sample_id
         thermal_conductivity_xy_df[self.xy_table.sample_id] = self.meta_data.sample_id
         combined_df = combined_df.dropna(subset=[table.get_clean("time")])
         thermal_conductivity_xy_df = thermal_conductivity_xy_df.dropna(subset=[self.xy_table.time])
-        thermal_conductivity_xy_df.drop_duplicates(subset=self.xy_table.time, keep='last')
-        df_t_p = self._find_corresponding_t_p(combined_df)
+        #thermal_conductivity_xy_df.drop_duplicates(subset=self.xy_table.time, keep='last')
+        combined_df, thermal_conductivity_xy_df = self._delete_duplicates(df=combined_df, xy_df=thermal_conductivity_xy_df)
+        df_t_p = self._find_corresponding_t_p(combined_df) # df containing corresponding tp values
         if not combined_df.empty and not df_t_p.empty:
             combined_df = pd.merge(combined_df, df_t_p, on=table.get_clean('time'), how='inner')
         else:
@@ -963,57 +1026,6 @@ class ExcelDataProcessor:
         except Exception as e:
             self.logger.error("Error saving combined data: %s", e)
 
-    def _get_measurement_xy_data_as_lists(self, combined_df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Returns a DataFrame with one row per measurement in combined_df,
-        columns:
-          ['measurement_time',
-           'transient_x','transient_y',
-           'drift_x','drift_y',
-           'calculated_x','calculated_y',
-           'residual_x','residual_y']
-        where each _x/_y is a list of floats (or None for NaNs).
-        """
-        # mapping of mode → (sheet name, x‐col, y‐col)
-        sheets = {
-            'calculated': ('T-f(Tau)', 't_f_tau', 'temperature'),
-            'transient':  ('T-t',       'time_temperature_increase', 'temperature_increase'),
-            'residual':   ('Diff',      'sqrt_time',                 'diff_temperature'),
-            'drift':      ('T(drift)',  'time_drift',                'temperature_drift'),
-        }
-
-        # 1) read each sheet once, drop entirely empty columns
-        raw = {}
-        for mode, (sheet, xcol, ycol) in sheets.items():
-            df = pd.read_excel(self.file_path, sheet_name=sheet, header=3)
-            df = df.dropna(axis=1, how='all')
-            raw[mode] = df
-
-        # 2) build one record per row of combined_df
-        times = combined_df['Time'].tolist()
-        rows = []
-        for j, meas_time in enumerate(times):
-            rec = {'time': meas_time}
-            for mode, df_mode in raw.items():
-                # X columns start at index 1, then alternate: 1,2 → run 0; 3,4 → run 1; etc.
-                idx_x = 1 + 2*j
-                idx_y = 2 + 2*j
-                if idx_x < df_mode.shape[1] and idx_y < df_mode.shape[1]:
-                    col_x = df_mode.columns[idx_x]
-                    col_y = df_mode.columns[idx_y]
-                    xs = df_mode[col_x].astype(float).tolist()
-                    ys = df_mode[col_y].astype(float).tolist()
-                    # replace NaN with None
-                    xs = [None if math.isnan(v) else v for v in xs]
-                    ys = [None if math.isnan(v) else v for v in ys]
-                else:
-                    xs, ys = [], []
-                rec[f'{mode}_x'] = xs
-                rec[f'{mode}_y'] = ys
-            rows.append(rec)
-
-        df = pd.DataFrame(rows)
-        return df
 
 
 def _to_native(val):

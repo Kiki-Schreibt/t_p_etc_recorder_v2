@@ -7,6 +7,7 @@
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +69,7 @@
     "Python.config_reader.executor": "Run",
     "Python.connections.executor": "Run",
     "Python.connections_and_logger.executor": "Run",
-    "Python.csv_handler.executor": "Run",
+    "Python.csv_handler.executor": "Debug",
     "Python.data_fitter_gui_main.executor": "Run",
     "Python.data_fitter_ui_business.executor": "Run",
     "Python.data_loader.executor": "Run",
@@ -143,7 +144,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\infrastructure\utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.database_reading_writing">
+  <component name="RunManager" selected="Python.csv_handler">
     <configuration name="csv_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -253,10 +254,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.csv_handler" />
         <item itemvalue="Python.database_reading_writing" />
         <item itemvalue="Python tests.Doctests in database_reading_writing (1)" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.csv_handler" />
         <item itemvalue="Python.table_creator" />
       </list>
     </recent_temporary>
@@ -353,6 +354,11 @@
           <url>file://$PROJECT_DIR$/src/tp_program_simulator.py</url>
           <line>218</line>
           <option name="timeStamp" value="525" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
+          <line>917</line>
+          <option name="timeStamp" value="561" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
