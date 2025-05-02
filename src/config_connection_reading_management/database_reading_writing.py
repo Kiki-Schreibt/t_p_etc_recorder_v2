@@ -953,37 +953,35 @@ class ExcelDataProcessor:
     def execute(self) -> Optional[Tuple[datetime, datetime]]:
         table = TableConfig().ETCDataTable
         self._update_xlsx_file()
-        combined_df = self._read_and_process_sheets()
-        if combined_df is None or combined_df.empty:
+        df_etc = self._read_and_process_sheets()
+        if df_etc is None or df_etc.empty:
             return None
-        thermal_conductivity_xy_df = self._get_measurement_xy_data_as_lists(combined_df)
-        #combined_df = combined_df.drop_duplicates(subset=table.get_clean("time"), keep='last')
-        combined_df[self.etc_table.sample_id] = self.meta_data.sample_id
-        thermal_conductivity_xy_df[self.xy_table.sample_id] = self.meta_data.sample_id
-        combined_df = combined_df.dropna(subset=[table.get_clean("time")])
-        thermal_conductivity_xy_df = thermal_conductivity_xy_df.dropna(subset=[self.xy_table.time])
-        #thermal_conductivity_xy_df.drop_duplicates(subset=self.xy_table.time, keep='last')
-        combined_df, thermal_conductivity_xy_df = self._delete_duplicates(df=combined_df, xy_df=thermal_conductivity_xy_df)
-        df_t_p = self._find_corresponding_t_p(combined_df) # df containing corresponding tp values
-        if not combined_df.empty and not df_t_p.empty:
-            combined_df = pd.merge(combined_df, df_t_p, on=table.get_clean('time'), how='inner')
+        df_etc_xy = self._get_measurement_xy_data_as_lists(df_etc)
+        df_etc[self.etc_table.sample_id] = self.meta_data.sample_id
+        df_etc_xy[self.xy_table.sample_id] = self.meta_data.sample_id
+        df_etc = df_etc.dropna(subset=[table.get_clean("time")])
+        df_etc_xy = df_etc_xy.dropna(subset=[self.xy_table.time])
+        df_etc, df_etc_xy = self._delete_duplicates(df=df_etc, xy_df=df_etc_xy)
+        df_t_p = self._find_corresponding_t_p(df_etc) # df containing corresponding tp values
+        if not df_etc.empty and not df_t_p.empty:
+            df_etc = pd.merge(df_etc, df_t_p, on=table.get_clean('time'), how='inner')
         else:
-            combined_df[self.etc_table.pressure] = None
-            combined_df[self.etc_table.temperature_sample] = None
-            combined_df[self.etc_table.cycle_number] = None
-            combined_df[self.etc_table.cycle_number_flag] = None
+            df_etc[self.etc_table.pressure] = None
+            df_etc[self.etc_table.temperature_sample] = None
+            df_etc[self.etc_table.cycle_number] = None
+            df_etc[self.etc_table.cycle_number_flag] = None
         pd.set_option('future.no_silent_downcasting', True)
-        combined_df.replace('(no corr.)', 0, inplace=True)
+        df_etc.replace('(no corr.)', 0, inplace=True)
 
         #create insert query and prepare data for insert
         ETC_insert_query, ETC_values = TableConfig().writing_query_from_df(
-            df=combined_df,
+            df=df_etc,
             map=self.etc_column_attribute_mapping,
             table_name=self.etc_table.table_name
         )
 
         xy_insert_query, xy_values = TableConfig().writing_query_from_df(
-            df=thermal_conductivity_xy_df,
+            df=df_etc_xy,
             map=None,
             table_name=TableConfig().ThermalConductivityXyDataTable.table_name
         )
@@ -995,7 +993,7 @@ class ExcelDataProcessor:
             table_name=self.etc_table.table_name
         )
         if error_checker:
-            self._delete_data_from_table(combined_df)
+            self._delete_data_from_table(df_etc)
             self._write_to_database(
                 insert_query=ETC_insert_query,
                 values=ETC_values,
@@ -1012,7 +1010,7 @@ class ExcelDataProcessor:
                 values=xy_values,
                 table_name=self.xy_table.table_name
             )
-        time_range = (min(combined_df[table.get_clean("time")]), max(combined_df[table.get_clean("time")]))
+        time_range = (min(df_etc[table.get_clean("time")]), max(df_etc[table.get_clean("time")]))
         return time_range
 
     def save_combined_data(self, combined_df: pd.DataFrame, output_file_path: str) -> None:

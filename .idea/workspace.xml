@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" afterDir="false" />
-    </list>
+    <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -69,7 +65,7 @@
     "Python.config_reader.executor": "Run",
     "Python.connections.executor": "Run",
     "Python.connections_and_logger.executor": "Run",
-    "Python.csv_handler.executor": "Debug",
+    "Python.csv_handler.executor": "Run",
     "Python.data_fitter_gui_main.executor": "Run",
     "Python.data_fitter_ui_business.executor": "Run",
     "Python.data_loader.executor": "Run",
