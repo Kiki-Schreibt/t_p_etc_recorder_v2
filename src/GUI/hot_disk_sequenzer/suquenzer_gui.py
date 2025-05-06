@@ -433,6 +433,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
         program_with_meas_times = self.try_parse_program()
         if program_with_meas_times is None or program_with_meas_times.empty:
             return []
+        program_with_meas_times = program_with_meas_times.dropna(subset=["measurement_time"])
         scheduled_program = program_with_meas_times.rename(
             columns={'measurement_power_watt': 'heating_power'}
         )
@@ -569,17 +570,15 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                 self.start_measurements_input.text(), "%Y-%m-%d %H:%M:%S"
             ).replace(tzinfo=local_tz)
 
-            program_with_meas_times, complete_program = (
-                temperature_controller.get_program_times(start_time=start_time)
+            program_with_meas_times, _ = (
+                temperature_controller.get_program_times(start_time=start_time, time_delay=time_delay)
             )
-            program_with_meas_times['measurement_time'] = (
-                program_with_meas_times['end_time'] - time_delay
-            )
-            program_for_plot = self._add_start_times(complete_program.copy())
-            self.complete_program_sig.emit(program_for_plot)
+
+            self.complete_program_sig.emit(program_with_meas_times)
             self.meas_times_sig.emit(
-                program_with_meas_times[['measurement_time', 'temperature']].copy()
+                program_with_meas_times[['measurement_time', 'temperature']].copy().dropna(subset=['measurement_time'])
             )
+
             return program_with_meas_times
 
         except Exception as e:

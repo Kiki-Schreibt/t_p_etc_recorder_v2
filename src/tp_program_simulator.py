@@ -261,25 +261,44 @@ class TemperatureControllerHotDiskSequenzer(BaseTemperatureController):
     For scheduling/sequencing the temperature program (e.g. to create measurement schedules).
     Adds a method to compute end times and compressed program steps.
     """
-    def get_program_times(self, start_time: datetime):
+    def get_program_times(self, start_time: datetime, time_delay: timedelta):
         """
         Returns two DataFrames:
          - A "compressed" program (with combined steps).
          - A total program with computed end times.
         """
         total_program = self.expanded_program
-        compressed_program = self.combine_consecutive(total_program)
+        #compressed_program = self.combine_consecutive(total_program)
+        expected_cols = ['temperature', 'duration', 'measurement_power_watt', 'heat_pulse_duration']
+
+        compressed_program = pd.DataFrame(total_program, columns=expected_cols)
+        print(compressed_program)
         start_time_copy = start_time
         end_times = []
+        start_times = []
         for index, row in compressed_program.iterrows():
-            end_time = start_time + row["duration"]
+            end_time = start_time + pd.to_timedelta(row["duration"])
             end_times.append(end_time)
+            start_times.append(start_time)
             start_time = end_time
         compressed_program['end_time'] = end_times
+        compressed_program['start_time'] = start_times
+        compressed_program['measurement_time'] = (compressed_program['end_time'] - time_delay)
 
-        expected_cols = ['temperature', 'duration', 'measurement_power_watt', 'heat_pulsé_duration']
+
+        mask = (
+            compressed_program['measurement_power_watt'].isna() |
+            compressed_program['heat_pulse_duration'].isna()
+        )
+
+        # Get the corresponding index labels
+        compressed_program.loc[mask, 'measurement_time'] = pd.NaT
+
+
+
 
         df_total_program = pd.DataFrame(total_program, columns=expected_cols)
+
         end_times = []
         start_time = start_time_copy
         for index, row in df_total_program.iterrows():
