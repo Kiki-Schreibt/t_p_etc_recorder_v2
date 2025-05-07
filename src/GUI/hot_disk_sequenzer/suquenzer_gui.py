@@ -8,6 +8,7 @@
 """
 
 import datetime
+import logging
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -15,6 +16,7 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel,
     QLineEdit, QMessageBox, QFileDialog, QTableWidget, QTableWidgetItem,
     QHeaderView, QSizePolicy, QFormLayout, QGroupBox, QCompleter
+
 )
 from PySide6.QtGui import QIntValidator
 from PySide6.QtCore import Signal, QDateTime, QObject, QTimer, QThread
@@ -23,6 +25,11 @@ import pyqtgraph as pg
 # Local project imports (assumed available in your project structure)
 from src.tp_program_simulator import TemperatureControllerHotDiskSequenzer
 from src.infrastructure.handler.hot_disk_handler import HotDiskController
+
+try:
+    import src.infrastructure.core.logger as logging
+except ImportError:
+    import logging
 
 local_tz = ZoneInfo("Europe/Berlin")
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"
@@ -150,6 +157,9 @@ class ScheduleGeneratorBase(QWidget):
 
         self.start_schedule_button = QPushButton('Start Schedule')
         self.left_layout.addWidget(self.start_schedule_button)
+
+        self.continue_schedule_button = QPushButton('Continue Schedule from File')
+        self.left_layout.addWidget(self.continue_schedule_button)
 
     def _init_measurement_settings(self):
         """
@@ -343,7 +353,8 @@ class ScheduleGeneratorBase(QWidget):
         """
         self.plot_widget.update_scatter_plot(program)
 
-    def safe_schedule(self, schedule: pd.DataFrame):
+    @staticmethod
+    def safe_schedule(schedule: pd.DataFrame):
         from src.infrastructure.utils.standard_paths import standard_schedule_files_path
         import os
         os.makedirs(standard_schedule_files_path, exist_ok=True)
@@ -354,9 +365,12 @@ class ScheduleGeneratorBase(QWidget):
         full_file_path = os.path.join(standard_schedule_files_path, file_name)
         schedule.to_csv(full_file_path, index=False)
 
-    def load_schedule_from_csv(self, file_path):
+    @staticmethod
+    def load_schedule_from_csv(file_path):
         schedule = pd.read_csv(file_path)
+        schedule['measurement_time'] = pd.to_datetime(schedule['measurement_time'])
         return schedule
+
 
 class SequenzerMainWindow(ScheduleGeneratorBase):
     """
@@ -368,13 +382,16 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
         Connect all signals/slots for schedule creation and start button.
         """
         super().__init__()
-        self.start_schedule_button.clicked.connect(self.start_schedule)
+        self.logger = logging.getLogger(__name__)
+        self.start_schedule_button.clicked.connect(self.create_and_start_schedule)
         self.complete_program_sig.connect(self.plot_program)
         self.meas_times_sig.connect(self.plot_meas_times)
         self.repeat_end_input.editingFinished.connect(self.try_parse_program)
         self.repeat_start_input.editingFinished.connect(self.try_parse_program)
         self.repeat_count_input.editingFinished.connect(self.try_parse_program)
         self.program_table.cellChanged.connect(self.try_parse_program)
+
+        self.continue_schedule_button.clicked.connect(self.on_continue_schedule_clicked)
 
         # countdown support
         self.target_time = None
@@ -385,7 +402,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
         self.hot_disk_thread = None
         self.hot_disk_worker = None
 
-    def start_schedule(self):
+    def create_and_start_schedule(self):
         """
         Handler for "Start Schedule" click:
         - validate inputs,
@@ -393,6 +410,43 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
         - instantiate controller and worker thread,
         - begin countdown.
         """
+
+        schedule = self._generate_schedule()
+        self.safe_schedule(schedule=schedule)
+        self.start_schedule(schedule=schedule)
+
+    def on_continue_schedule_clicked(self):
+        """
+        Open a file dialog to select a previously saved schedule CSV
+        and start continuing the schedule from that file.
+        """
+        from src.infrastructure.utils.standard_paths import standard_schedule_files_path
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Schedule File",
+            standard_schedule_files_path,
+            "CSV Files (*.csv);;All Files (*)",
+            options=options
+        )
+        if file_path:
+            try:
+                self.continue_schedule_from_file(file_path)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to continue schedule from file: {e}")
+
+    def start_schedule(self, schedule):
+        if schedule.empty:
+            self.logger.error("Error starting schedule. No schedule provided")
+            raise
+
+        scheduled_dict_list = schedule.to_dict(orient='records')
+        if not scheduled_dict_list:
+            QMessageBox.warning(self, "Schedule Error",
+                                "Could not generate a valid schedule.")
+            return
+
         if not hasattr(self, 'countdown_label'):
             self._init_countdown_labels()
 
@@ -403,14 +457,6 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             QMessageBox.warning(self, "Input Error",
                                 "Sensor settings or template folder cannot be empty.")
             return
-        schedule = self._generate_schedule()
-        self.safe_schedule(schedule=schedule)
-        scheduled_dict_list = schedule.to_dict(orient='records')
-        if not scheduled_dict_list:
-            QMessageBox.warning(self, "Schedule Error",
-                                "Could not generate a valid schedule.")
-            return
-
         try:
             self.hot_disk_controller = SignaledHotDiskController(
                 template_folder_path=folder_path,
@@ -601,6 +647,21 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             QMessageBox.critical(self, "Schedule Generation Error",
                                  f"Failed to parse program: {e}")
             return pd.DataFrame()
+
+    def continue_schedule_from_file(self, file_path):
+        """
+        Loads old schedule file (.csv) and continues measurements from current time on
+        :param file_path: file path of the saved schedule
+        :return:
+        """
+        schedule = self.load_schedule_from_csv(file_path=file_path)
+        mask = schedule['measurement_time'] <= datetime.datetime.now(tz=local_tz)
+        schedule = schedule.loc[~mask]
+        if not schedule.empty:
+            self.meas_times_sig.emit(schedule[['measurement_time', 'temperature']].copy().dropna(subset=['measurement_time']))
+            self.start_schedule(schedule)
+        else:
+            self.logger.error("All measurement times are in past already")
 
     def _add_start_times(self, df):
         # convert your duration strings into real timedeltas

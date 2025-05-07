@@ -32,7 +32,6 @@ class HotDiskScheduleGrabber:
         :param temp_schedule_dict_list: = list of dictionaries = {datetime_of_measurement, temperature, heating_time, heating_power}
         :return:
         """
-        print(temp_schedule_dict_list)
         if not temp_schedule_dict_list:
             self.logger.error("No schedule arrived")
         for measurement in temp_schedule_dict_list:
