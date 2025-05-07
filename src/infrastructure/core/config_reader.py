@@ -13,8 +13,8 @@ from src.infrastructure.utils.standard_paths import standard_log_dir
 current_dir = os.path.dirname(__file__)
 
 ###uncomment to use test database
-#test_database_config_file_path = r'C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\config_logging_modbus_database _testing.json'
-#config_file_path = test_database_config_file_path
+test_database_config_file_path = r'C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\config_logging_modbus_database _testing.json'
+config_file_path = test_database_config_file_path
 
 class GetConfig:
     """

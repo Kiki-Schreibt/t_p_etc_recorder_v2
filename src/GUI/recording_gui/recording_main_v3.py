@@ -405,8 +405,16 @@ class MainController:
         try:
             self.meta_data.sample_id = sample_id
             self.meta_data.read()
+            was_log_tracker_running = False
+            was_tp_recording_running = False
+            #todo: start recorder if was running afterwards. implement stop_tp_recording maybe for that
             if self.recorder:
-                self.recorder.stop_all_recording()
+                if self.is_tp_recording_running:
+                    was_tp_recording_running = True
+                    self.stop_tp_recording()
+                if self.is_log_file_tracker_running:
+                    was_log_tracker_running = True
+                    self.stop_log_tracking()
 
             self.recorder = self.recorder = DataRecorder(meta_data=self.meta_data,
                                                          config=self.config
@@ -416,6 +424,9 @@ class MainController:
                 self.plot_manager.top_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'on_meta_data_changed'):
                 self.plot_manager.bottom_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
+
+            self.start_log_tracking() if was_log_tracker_running
+            self.start_tp_recording() if was_tp_recording_running
         except Exception as e:
             self.logger.exception("Error updating sample ID in MainController:")
 
