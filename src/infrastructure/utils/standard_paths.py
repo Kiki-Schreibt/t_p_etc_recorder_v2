@@ -46,6 +46,8 @@ standard_export_path = get_user_home_path(os.path.join("T_p_ETC_recorder", "Expo
 
 standard_hot_disk_file_path = r"C:\HotDiskTPS_7\data\Log"
 
+standard_schedule_files_path = get_user_home_path(os.path.join("T_p_ETC_recorder", "Schedules"))
+
 # Ensure the export path exists
 os.makedirs(standard_export_path, exist_ok=True)
 

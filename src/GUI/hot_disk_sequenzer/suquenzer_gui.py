@@ -343,6 +343,20 @@ class ScheduleGeneratorBase(QWidget):
         """
         self.plot_widget.update_scatter_plot(program)
 
+    def safe_schedule(self, schedule: pd.DataFrame):
+        from src.infrastructure.utils.standard_paths import standard_schedule_files_path
+        import os
+        os.makedirs(standard_schedule_files_path, exist_ok=True)
+        current_day = datetime.datetime.now()
+        current_day_str = current_day.strftime('%Y-%m-%d')
+        file_name = 'Schedule_' + current_day_str + '.csv'
+
+        full_file_path = os.path.join(standard_schedule_files_path, file_name)
+        schedule.to_csv(full_file_path, index=False)
+
+    def load_schedule_from_csv(self, file_path):
+        schedule = pd.read_csv(file_path)
+        return schedule
 
 class SequenzerMainWindow(ScheduleGeneratorBase):
     """
@@ -389,8 +403,9 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             QMessageBox.warning(self, "Input Error",
                                 "Sensor settings or template folder cannot be empty.")
             return
-
-        scheduled_dict_list = self._generate_schedule()
+        schedule = self._generate_schedule()
+        self.safe_schedule(schedule=schedule)
+        scheduled_dict_list = schedule.to_dict(orient='records')
         if not scheduled_dict_list:
             QMessageBox.warning(self, "Schedule Error",
                                 "Could not generate a valid schedule.")
@@ -402,6 +417,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                 sensor_insulation=sensor_insulation,
                 sensor_type=sensor_type
             )
+
         except Exception as e:
             QMessageBox.critical(self, "Controller Error",
                                  f"Failed to initialize HotDiskController: {e}")
@@ -423,7 +439,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
 
         self.status_label.setText("Status: Running")
 
-    def _generate_schedule(self) -> list:
+    def _generate_schedule(self) -> pd.DataFrame:
         """
         Parse the table into a DataFrame of program steps, adjust units,
         then return as a list of dicts for the controller.
@@ -438,7 +454,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             columns={'measurement_power_watt': 'heating_power'}
         )
         scheduled_program['heating_power'] *= 1e3
-        return scheduled_program.to_dict(orient='records')
+        return scheduled_program
 
     def get_temperature_program(self) -> list:
         """
