@@ -409,13 +409,13 @@ class MainController:
             was_tp_recording_running = False
             #todo: start recorder if was running afterwards. implement stop_tp_recording maybe for that
             if self.recorder:
-                if self.is_tp_recording_running:
+                if self.is_tp_recording_running():
                     was_tp_recording_running = True
                     self.stop_tp_recording()
-                if self.is_log_file_tracker_running:
+                if self.is_log_file_tracker_running():
                     was_log_tracker_running = True
                     self.stop_log_tracking()
-
+            print(was_tp_recording_running)
             self.recorder = self.recorder = DataRecorder(meta_data=self.meta_data,
                                                          config=self.config
                                                          )
