@@ -490,6 +490,26 @@ class MainController:
         except Exception as e:
             self.logger.exception("Error toggling cycling in MainController:")
 
+    def toggle_is_isotherm_flag(self, enabled):
+        """
+        Enable or disable hydrogen uptake measurements.
+        """
+        try:
+            if self.recorder:
+                self.recorder.update_is_isotherm_flag(enabled)
+        except Exception as e:
+            self.logger.exception("Error toggling Is Isotherm Flag in MainController:")
+
+    def toggle_is_isotherm_flag(self, enabled):
+        """
+        Enable or disable isotherm measurements.
+        """
+        try:
+            if self.recorder:
+                self.recorder.update_is_isotherm_flag(enabled)
+        except Exception as e:
+            self.logger.exception("Error toggling is isotherm flag in MainController:")
+
     def is_tp_recording_running(self):
         return self.recorder.is_tp_thread_running()
 
@@ -588,10 +608,15 @@ class MainWindow(QMainWindow):
             self.ui.plot_uptake_button.clicked.connect(self._init_uptake_plot)
             self.ui.XyDataSelectDropDown.activated.connect(self._init_right_plot_xy)
             self.ui.T_p_dependent_drop_down.currentIndexChanged.connect(self._init_tp_dependent_plot)
+
+            #
             self.ui.h2_uptake_check_box.clicked.connect(lambda: self.controller.toggle_h2_uptake_flag(
                 self.ui.h2_uptake_check_box.isChecked()))
             self.ui.cycle_test_check_box.clicked.connect(lambda: self.controller.toggle_cycling_flag(
                 self.ui.cycle_test_check_box.isChecked()))
+            self.ui.isotherm_check_box.clicked.connect(lambda: self.controller.toggle_is_isotherm_flag(
+                self.ui.isotherm_check_box.isChecked()))
+
             self.ui.sample_id_edit_field.editingFinished.connect(self._on_sample_id_changed)
             self.ui.sample_mass_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
             self.ui.material_composition_edit_field.editingFinished.connect(self._on_meta_data_field_changed)

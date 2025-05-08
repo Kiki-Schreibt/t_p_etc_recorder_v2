@@ -181,30 +181,6 @@ class DataRecorder(QObject):
         except Exception as e:
             self.logger.exception("Error stopping ETC recording thread:")
 
-    def update_sample_id(self, new_sample_id: str):
-        """
-        Update the sample ID in both the ModbusProcessor and LogFileTracker.
-        """
-        try:
-            with self._update_lock:
-                self.mb_processor.on_sample_id_change(new_val=new_sample_id)
-                self.log_tracker.update_sample_id(new_val=new_sample_id)
-            self.logger.info(f"Updated sample ID to: {new_sample_id}")
-        except Exception as e:
-            self.logger.exception("Error updating sample ID:")
-
-    def update_meta_data(self, new_meta_data: object):
-        """
-        Update metadata information.
-        """
-        try:
-            with self._update_lock:
-                self.mb_processor.on_sample_id_change(new_val=new_meta_data, mode="meta")
-                self.log_tracker.update_sample_id(new_val=new_meta_data, mode="meta")
-            self.logger.info(f"Meta data updated: {new_meta_data.sample_id}")
-        except Exception as e:
-            self.logger.exception("Error updating meta data:")
-
     def update_reservoir_volume(self, new_volume: float):
         """
         Update the reservoir volume used in T-p processing.
@@ -222,7 +198,6 @@ class DataRecorder(QObject):
         """
         try:
             with self._update_lock:
-                self.mb_processor.cycling_flag = flag
                 self.mb_processor.mb_data_handler.cycling_flag = flag
             self.logger.info(f"Cycling flag set to: {flag}")
         except Exception as e:
@@ -234,11 +209,21 @@ class DataRecorder(QObject):
         """
         try:
             with self._update_lock:
-                self.mb_processor.h2_uptake_flag = flag
                 self.mb_processor.mb_data_handler.h2_uptake_flag = flag
             self.logger.info(f"H2 uptake flag set to: {flag}")
         except Exception as e:
             self.logger.exception("Error updating H2 uptake flag:")
+
+    def update_is_isotherm_flag(self, flag):
+        """
+        Update the is isotherm flag in the processors.
+        """
+        try:
+            with self._update_lock:
+                self.mb_processor.mb_data_handler.is_isotherm_flag = flag
+            self.logger.info(f"Is isothermal measurement set to: {flag}")
+        except Exception as e:
+            self.logger.exception("Error updating is isotherm flag:")
 
     def _emit_etc_data(self, time_range):
         """
@@ -264,6 +249,31 @@ class DataRecorder(QObject):
 
     def is_log_thread_running(self):
         return True if self._log_tracker_thread else False
+
+    def update_sample_id(self, new_sample_id: str):
+        """
+        Update the sample ID in both the ModbusProcessor and LogFileTracker.
+        """
+        try:
+            with self._update_lock:
+                self.mb_processor.on_sample_id_change(new_val=new_sample_id)
+                self.log_tracker.update_sample_id(new_val=new_sample_id)
+            self.logger.info(f"Updated sample ID to: {new_sample_id}")
+        except Exception as e:
+            self.logger.exception("Error updating sample ID:")
+
+    def update_meta_data(self, new_meta_data: object):
+        """
+        Update metadata information.
+        """
+        try:
+            with self._update_lock:
+                self.mb_processor.on_sample_id_change(new_val=new_meta_data, mode="meta")
+                self.log_tracker.update_sample_id(new_val=new_meta_data, mode="meta")
+            self.logger.info(f"Meta data updated: {new_meta_data.sample_id}")
+        except Exception as e:
+            self.logger.exception("Error updating meta data:")
+
 
 
 #todo: implement min max plot after cycle calculation. Maybe autoload test every few hours or so as well to have an overview

@@ -107,9 +107,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QProgressBar" name="progress_bar">
-       <property name="value">
-        <number>24</number>
+      <widget class="QCheckBox" name="isotherm_check_box">
+       <property name="text">
+        <string>Is Isotherm</string>
        </property>
       </widget>
      </item>

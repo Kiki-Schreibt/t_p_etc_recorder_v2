@@ -297,6 +297,7 @@ class ModbusDataHandler:
         # Fetch last state and cycle number
         self.cycling_flag = False
         self.h2_uptake_flag = False
+        self.is_isotherm_flag = False
 
         self.eq_calculator = EqCalculator(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
         self.de_hyd_state, self.cycle = self.data_retriever.fetch_last_state_and_cycle(meta_data=self.meta_data)
@@ -340,6 +341,7 @@ class ModbusDataHandler:
         row[self.tp_table.sample_id] = self.meta_data.sample_id
         row[self.tp_table.cycle_number_flag] = self.cycling_flag
         row[self.tp_table.h2_uptake_flag] = self.h2_uptake_flag
+        row[self.tp_table.is_isotherm_flag] = self.is_isotherm_flag
         df_Tp = pd.DataFrame([row])
         return df_Tp
 

@@ -22,6 +22,7 @@ class TableConfig:
         h2_uptake_flag = 'h2_uptake_flag'
         cycle_length_flag = 'cycle_length_flag'
         eq_pressure_real = 'eq_pressure_real'
+        is_isotherm_flag = 'is_isotherm_flag'
 
     class ETCDataTable:
         table_name = 'thermal_conductivity_data'
