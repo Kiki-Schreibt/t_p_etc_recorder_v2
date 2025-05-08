@@ -191,9 +191,8 @@ class ModbusReader:
         start = self.mb_reading_params['START_REG']
         end = self.mb_reading_params['END_REG']
         count = (end - start) + ((end - start) % 2)
-        print(count)
         try:
-            rr = client.read_holding_registers(start, count, 255)
+            rr = client.read_holding_registers(start, count, 255)  # dont forget slave address (here 255)
             if isinstance(rr, ExceptionResponse) or rr.isError():
                 self.logger.error(f"Modbus error: {rr}")
                 client.close()

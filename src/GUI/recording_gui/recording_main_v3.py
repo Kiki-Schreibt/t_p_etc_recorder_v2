@@ -415,7 +415,6 @@ class MainController:
                 if self.is_log_file_tracker_running():
                     was_log_tracker_running = True
                     self.stop_log_tracking()
-            print(was_tp_recording_running)
             self.recorder = self.recorder = DataRecorder(meta_data=self.meta_data,
                                                          config=self.config
                                                          )
