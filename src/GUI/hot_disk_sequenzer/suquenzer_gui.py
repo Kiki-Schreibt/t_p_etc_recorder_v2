@@ -8,7 +8,6 @@
 """
 
 import datetime
-import logging
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -33,7 +32,7 @@ except ImportError:
 
 local_tz = ZoneInfo("Europe/Berlin")
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"
-#todo: structure that garbage and find useful names.....
+
 
 
 class SignaledHotDiskController(QObject, HotDiskController):
@@ -438,6 +437,10 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                 QMessageBox.critical(self, "Error", f"Failed to continue schedule from file: {e}")
 
     def start_schedule(self, schedule):
+        if self.hot_disk_thread and self.hot_disk_worker:
+            #todo: proper thread termination here... stupid stuff :D
+            pass
+
         if schedule.empty:
             self.logger.error("Error starting schedule. No schedule provided")
             raise
@@ -471,13 +474,13 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             return
 
         # thread + worker
-
         self.hot_disk_thread = QThread()
         self.hot_disk_worker = SignaledHotDiskControllerThreader(
             controller=self.hot_disk_controller,
             schedule=scheduled_dict_list,
             logger = self.logger
         )
+
         self.hot_disk_worker.moveToThread(self.hot_disk_thread)
         self.hot_disk_thread.started.connect(self.hot_disk_worker.run)
         self.hot_disk_worker.finished.connect(self.hot_disk_thread.quit)
