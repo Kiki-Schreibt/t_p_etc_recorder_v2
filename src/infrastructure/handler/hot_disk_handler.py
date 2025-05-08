@@ -75,9 +75,9 @@ class HotDiskScheduleGrabber:
 
 
         if not matching_files:
-            print(f"No files found for measurement at {temperature} °C, {heat_pulse_duration} s, {heating_power} mW")
+            self.logger.error(f"No files found for measurement at {temperature} °C, {heat_pulse_duration} s, {heating_power} mW")
         else:
-            print(f"Found files for measurement at {temperature} °C, {heat_pulse_duration} s, {heating_power} mW: {matching_files}")
+            self.logger.info(f"Found files for measurement at {temperature} °C, {heat_pulse_duration} s, {heating_power} mW: {matching_files}")
 
         return matching_files
 
@@ -119,8 +119,8 @@ class HotDiskController:
                 self.wait_until(datetime_of_measurement)
                 if self.stop_event.is_set():
                     break  # Exit if the stop event has been set
-                #self.start_schedule_file(full_file_path=full_file_path)
-                self.print_schedule_file(full_file_path=full_file_path, measurement_time=str(datetime_of_measurement))
+                self.start_schedule_file(full_file_path=full_file_path)
+                #self.print_schedule_file(full_file_path=full_file_path, measurement_time=str(datetime_of_measurement))
             self.running_event.clear()  # Stop after one iteration
 
     def start_schedule_file(self, full_file_path):

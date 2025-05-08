@@ -525,16 +525,32 @@ class MainWindow(QMainWindow):
     The main application window. Sets up the UI, connects signals and slots,
     and handles user interactions.
     """
-    def __init__(self, config=None):
+    def __init__(self, config):
         try:
             super().__init__()
-            self.config = config
 
+            self.config = config
             self.setWindowTitle("T-p ETC Recorder")
             from src.GUI.qt_styles import aqua as style
             self.setStyleSheet(style)
             self.setFont(FONT)
             self.logger = logging.getLogger(__name__)
+
+            ##QTimer for memory logging. Can be deleted
+            from src.infrastructure.utils.memory_logger import log_memory
+            from PySide6.QtCore import QTimer
+            self.memory_timer = QTimer()
+            self.memory_timer.setInterval(10*1e3*60)  # 1 second in milliseconds
+            self.memory_timer.timeout.connect(lambda: log_memory(logger=self.logger,
+                                                                 message="Memory after QTimer timeout"))
+            self.memory_timer.start()
+            log_memory(logger=self.logger,
+                       message="Memory after QTimer timeout")
+
+            ## End of QTimer implementation
+
+
+
             try:
                 self.db_conn_params = config.db_conn_params
                 self.mb_conn_params = config.mb_conn_params

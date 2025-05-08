@@ -87,7 +87,7 @@ class SignaledHotDiskControllerThreader(QObject):
     latest_program_step = Signal(datetime.datetime)
     finished = Signal()
 
-    def __init__(self, controller: SignaledHotDiskController, schedule: list):
+    def __init__(self, controller: SignaledHotDiskController, schedule: list, logger: logging.getLogger()):
         """
         :param controller: Instance of SignaledHotDiskController.
         :param schedule:   List of dicts with heating and measurement steps.
@@ -95,6 +95,7 @@ class SignaledHotDiskControllerThreader(QObject):
         super().__init__()
         self.controller = controller
         self.schedule = schedule
+        self.logger = logger
 
     def run(self):
         """
@@ -106,7 +107,7 @@ class SignaledHotDiskControllerThreader(QObject):
             self.controller.latest_program_step_sig.connect(self.latest_program_step.emit)
             self.controller.run(self.schedule)
         except Exception as e:
-            print(f"Error in HotDiskControllerWorker: {e}")
+            self.logger.error(f"Error in HotDiskControllerWorker: {e}")
         finally:
             self.finished.emit()
 
@@ -470,10 +471,12 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             return
 
         # thread + worker
+
         self.hot_disk_thread = QThread()
         self.hot_disk_worker = SignaledHotDiskControllerThreader(
             controller=self.hot_disk_controller,
-            schedule=scheduled_dict_list
+            schedule=scheduled_dict_list,
+            logger = self.logger
         )
         self.hot_disk_worker.moveToThread(self.hot_disk_thread)
         self.hot_disk_thread.started.connect(self.hot_disk_worker.run)

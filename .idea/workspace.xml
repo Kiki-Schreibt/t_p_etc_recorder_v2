@@ -6,11 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/ui/recording_ui_design.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/ui/recording_ui_design.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/hot_disk_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hot_disk_handler.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +145,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\infrastructure\utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.suquenzer_gui">
     <configuration name="connections" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -260,11 +258,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.suquenzer_gui" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.modbus_handler" />
         <item itemvalue="Python.connections" />
         <item itemvalue="Python.recording_main_v3" />
-        <item itemvalue="Python.suquenzer_gui" />
       </list>
     </recent_temporary>
   </component>
@@ -365,11 +363,6 @@
           <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
           <line>819</line>
           <option name="timeStamp" value="561" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py</url>
-          <line>614</line>
-          <option name="timeStamp" value="571" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

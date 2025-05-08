@@ -272,7 +272,6 @@ class TemperatureControllerHotDiskSequenzer(BaseTemperatureController):
         expected_cols = ['temperature', 'duration', 'measurement_power_watt', 'heat_pulse_duration']
 
         compressed_program = pd.DataFrame(total_program, columns=expected_cols)
-        print(compressed_program)
         start_time_copy = start_time
         end_times = []
         start_times = []
