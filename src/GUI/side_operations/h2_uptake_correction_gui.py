@@ -595,7 +595,7 @@ class UptakeCorrectionBackend(QObject):
         )
         if not df.empty:
             df = df.sort_values(by=self.cycle_table.time_start)
-        self.df_uncounted_cycles_sig.emit(df)
+        self.df_uncounted_cycles_sig.emit(df.copy())
         self.uncounted_cycles_emitted = True
 
     def stop(self):

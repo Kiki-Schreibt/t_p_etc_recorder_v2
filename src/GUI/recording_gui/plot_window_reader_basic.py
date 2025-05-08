@@ -212,11 +212,11 @@ class ReadData(QThread):
         self.logger.info("Reading ETC data for time range: %s", self.time_range_to_read)
         self.etc_data = self._read_etc(time_range=self.time_range_to_read)
         if not self.T_data.empty:
-            self.T_data_sig.emit(self.T_data)
+            self.T_data_sig.emit(self.T_data.copy())
         if not self.p_data.empty:
-            self.p_data_sig.emit(self.p_data)
+            self.p_data_sig.emit(self.p_data.copy())
         if not self.etc_data.empty:
-            self.etc_data_sig.emit(self.etc_data)
+            self.etc_data_sig.emit(self.etc_data.copy())
         self._read_emit_cycle_data_thread()
         del df_t_p
 
@@ -237,13 +237,10 @@ class ReadData(QThread):
             self.T_data = pd.concat([self.T_data, temperature_data], ignore_index=True)
         if not pressure_data.empty:
             self.p_data = pd.concat([self.p_data, pressure_data], ignore_index=True)
-        for data in [self.T_data, self.p_data]:
-            if len(data) > self.limit_amount_storage:
-                #old downsampling... probably bad
-                #drop_count = len(data) - self.limit_amount_storage
-                #data.drop(data.index[:drop_count], inplace=True)
-                ####new downsampling
-                data = down_sample_data(data)
+        if len(self.T_data) > self.limit_amount_storage:
+            self.T_data = down_sample_data(self.T_data)
+        if len(self.p_data) > self.limit_amount_storage:
+            self.p_data = down_sample_data(self.p_data)
 
     def _remove_outliers(self, df):
         numeric_cols = df.select_dtypes(include=[np.number]).columns.difference(['time', 'state'])
@@ -306,7 +303,7 @@ class ReadData(QThread):
                         column_names=column_names,
                         sample_id=self.meta_data.sample_id)
                 if not df_cycles.empty:
-                    self.cycle_data_sig.emit(df_cycles)
+                    self.cycle_data_sig.emit(df_cycles.copy())
                     self.logger.info("Emitted cycle data with shape: %s", df_cycles.shape)
                 else:
                     self.logger.info("No cycle data found.")
@@ -383,9 +380,9 @@ class ReadContinuous(ReadData):
                 self._read_emit_uptake_last_cycle()
 
             if not self.T_data.empty:
-                self.T_data_sig.emit(self.T_data)
+                self.T_data_sig.emit(self.T_data.copy())
             if not self.p_data.empty:
-                self.p_data_sig.emit(self.p_data)
+                self.p_data_sig.emit(self.p_data.copy())
         except Exception as e:
             self.logger.error(f"Error in _read_emit_tp_data: {e}")
             # Attempt to reconnect
@@ -404,7 +401,7 @@ class ReadContinuous(ReadData):
             time_range = (time_min, time_max)
             self.etc_data = self._read_etc(time_range)
             if not self.etc_data.empty:
-                self.etc_data_sig.emit(self.etc_data)
+                self.etc_data_sig.emit(self.etc_data.copy())
         except Exception as e:
             self.logger.error(f"Error in _read_emit_etc_data: {e}")
             # Attempt to reconnect
@@ -503,13 +500,13 @@ class ReadStatic(ReadData):
         self.db_retriever.limit_datapoints = previous_limit
 
         if not self.T_data.empty:
-            self.T_data_sig.emit(self.T_data)
+            self.T_data_sig.emit(self.T_data.copy())
             self.logger.info("Emitted T_data signal, shape: %s", self.T_data.shape)
         if not self.p_data.empty:
-            self.p_data_sig.emit(self.p_data)
+            self.p_data_sig.emit(self.p_data.copy())
             self.logger.info("Emitted p_data signal, shape: %s", self.p_data.shape)
         if not self.etc_data.empty:
-            self.etc_data_sig.emit(self.etc_data)
+            self.etc_data_sig.emit(self.etc_data.copy())
             self.auto_update_x_range_sig.emit()
             self.logger.info("Emitted ETC and full test signals, ETC shape: %s", self.etc_data.shape)
         self.whole_test_emited_sig.emit()
@@ -698,11 +695,10 @@ class PlotBaseWindow(PlotBaseStyle):
         self._mode = None
 
         self._draw_timer = QTimer(self)
-        self._draw_timer.setInterval(500)        # redraw at most 5×/s
+        self._draw_timer.setInterval(1000)        # redraw at most 5×/s
         self._draw_timer.timeout.connect(self._do_draw)
         self._draw_timer.start()
 
-        self.range_change_timer = QTimer(self)
         self.current_time_range = [datetime.now(tz=local_tz_reg),
                                    (datetime.now(tz=local_tz_reg)+timedelta(days=2))]
         self.plotItem.setXRange(min(self.current_time_range).timestamp(),

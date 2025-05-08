@@ -139,7 +139,7 @@ class ModbusServerControlBusiness(QObject):
                 time += self.past_time_csv
                 df[x_col] = time
                 self.df = df
-                self.csv_data_received.emit(df)
+                self.csv_data_received.emit(df.copy())
                 log_memory(logger, "After emiting df for updating canvas on data")
 
             else:
@@ -181,12 +181,12 @@ class ModbusServerControlBusiness(QObject):
         if not self.df.empty:
             if self.server.mode == 'csv':
                 row['seconds'] = self.df.loc[self.df['time'] == row['time'], 'seconds'].values[0]
-                self.point_to_highlight_received.emit(row)
+                self.point_to_highlight_received.emit(row.copy())
         if self.server.mode == 'tp_program':
 
             row['seconds'] = self.iterator_tp_program * self.server.sleep_interval
             self.iterator_tp_program = self.iterator_tp_program + 1 * self.server.sleep_interval
-            self.point_to_highlight_received.emit(row)
+            self.point_to_highlight_received.emit(row.copy())
 
     def update_manual_values(self, values):
         if self.server:

@@ -255,7 +255,7 @@ class DataRecorder(QObject):
                 column_names=columns
             )
             if not df_etc.empty:
-                self.newEtcDataWritten.emit(df_etc)
+                self.newEtcDataWritten.emit(df_etc.copy())
         except Exception as e:
             self.logger.exception("Error emitting ETC data:")
 
@@ -408,7 +408,7 @@ class UptakePlot(pg.PlotWidget):
                 df = db_reader.fetch_data_by_sample_id_2(sample_id=meta_data.sample_id,
                                                          table_name=self.cycle_table.table_name)
             if not df.empty:
-                self.uptakeDataReceived.emit(df)
+                self.uptakeDataReceived.emit(df.copy())
         except Exception as e:
             self.logger.exception("Error loading data in UptakePlot:")
 
@@ -492,7 +492,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
                     df_for_plot, x_axis_label, y_axis_label = self._sort_data(df_tp_etc=df_tp_etc, x_col=self.x_col)
 
                 if not df_for_plot.empty:
-                    self.tp_etc_data.emit(df_for_plot, x_axis_label, y_axis_label)
+                    self.tp_etc_data.emit(df_for_plot.copy(), x_axis_label, y_axis_label)
             except Exception as e:
                 self.logger.exception("Exception in loading tp-dependent data:")
 

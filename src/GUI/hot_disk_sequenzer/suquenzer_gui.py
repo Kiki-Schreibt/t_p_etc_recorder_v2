@@ -636,7 +636,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                 temperature_controller.get_program_times(start_time=start_time, time_delay=time_delay)
             )
 
-            self.complete_program_sig.emit(program_with_meas_times)
+            self.complete_program_sig.emit(program_with_meas_times.copy())
             self.meas_times_sig.emit(
                 program_with_meas_times[['measurement_time', 'temperature']].copy().dropna(subset=['measurement_time'])
             )

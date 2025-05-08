@@ -425,8 +425,11 @@ class MainController:
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'on_meta_data_changed'):
                 self.plot_manager.bottom_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
 
-            self.start_log_tracking() if was_log_tracker_running
-            self.start_tp_recording() if was_tp_recording_running
+            #restart recording if it was running
+            if was_log_tracker_running:
+                self.start_log_tracking()
+            if was_tp_recording_running:
+                self.start_tp_recording()
         except Exception as e:
             self.logger.exception("Error updating sample ID in MainController:")
 
