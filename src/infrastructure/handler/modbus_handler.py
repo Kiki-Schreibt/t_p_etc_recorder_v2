@@ -191,8 +191,9 @@ class ModbusReader:
         start = self.mb_reading_params['START_REG']
         end = self.mb_reading_params['END_REG']
         count = (end - start) + ((end - start) % 2)
+        print(count)
         try:
-            rr = client.read_holding_registers(start, count)
+            rr = client.read_holding_registers(start, count, 255)
             if isinstance(rr, ExceptionResponse) or rr.isError():
                 self.logger.error(f"Modbus error: {rr}")
                 client.close()
@@ -1095,8 +1096,8 @@ def convert_value(value):
 def test_mb_reading_writing(sample_id):
     from src.infrastructure.core.config_reader import GetConfig
     config = GetConfig()
-    config.mb_conn_params["MB_PORT"] = "503"
-    config.mb_conn_params["MB_HOST"] = "localhost"
+   # config.mb_conn_params["MB_PORT"] = "503"
+   # config.mb_conn_params["MB_HOST"] = "localhost"
     meta = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
     mb_reader = ModbusReader(mb_reading_params=config.mb_reading_params, mb_conn_params=config.mb_conn_params)
 
