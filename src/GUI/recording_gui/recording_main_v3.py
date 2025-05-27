@@ -501,16 +501,6 @@ class MainController:
         except Exception as e:
             self.logger.exception("Error toggling Is Isotherm Flag in MainController:")
 
-    def toggle_is_isotherm_flag(self, enabled):
-        """
-        Enable or disable isotherm measurements.
-        """
-        try:
-            if self.recorder:
-                self.recorder.update_is_isotherm_flag(enabled)
-        except Exception as e:
-            self.logger.exception("Error toggling is isotherm flag in MainController:")
-
     def is_tp_recording_running(self):
         return self.recorder.is_tp_thread_running()
 
