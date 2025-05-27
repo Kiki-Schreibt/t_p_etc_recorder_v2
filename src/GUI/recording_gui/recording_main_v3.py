@@ -290,8 +290,8 @@ class MainController:
     Coordinates business logic (DataRecorder) and UI plot management.
 
     Methods:
-        start_tp_recording(): Start T-p recording and continuous plots.
-        stop_tp_recording(): Stop T-p recording.
+        start_t_p_recording(): Start T-p recording and continuous plots.
+        stop_t_p_recording(): Stop T-p recording.
         start_log_tracking(): Start ETC log tracking.
         stop_log_tracking(): Stop ETC log tracking.
         set_constraints(): Update measurement constraints.
@@ -304,11 +304,12 @@ class MainController:
                  plot_manager: PlotManager,
                  logger,
                  config):
+
+        self.newETCDataWritten_connected = False
         self.meta_data = meta_data
         self.config = config
         self.plot_manager = plot_manager
         self.logger = logger
-
 
         try:
             self.recorder = DataRecorder(meta_data=self.meta_data,
@@ -333,39 +334,44 @@ class MainController:
         except Exception as e:
             self.logger.exception("Error setting reservoir volume in MainController:")
 
-    def start_tp_recording(self):
+    def start_t_p_recording(self):
         """
         Start T-p recording and connect the data signals to the continuous plots.
         """
         try:
-            top, bottom = self.plot_manager.init_continuous_plots()
+            #init the plot windows
+            self.plot_manager.init_continuous_plots()
+            #start tp recorder
             if self.recorder:
                 self.recorder.start_tp_recording()
-            if top and hasattr(top.reader, 'start'):
-                top.reader.start()
-            if bottom and hasattr(bottom.reader, 'start'):
-                bottom.reader.start()
+            #start the live plotting
+            if self.plot_manager.top_plot:
+                self.plot_manager.top_plot.reader.start()
+            if self.plot_manager.bottom_plot:
+                self.plot_manager.bottom_plot.reader.start()
             if self.recorder:
-                self.recorder.newEtcDataWritten.connect(top.on_etc_data)
-                self.recorder.newEtcDataWritten.connect(bottom.on_etc_data)
-            return top, bottom
+                self.recorder.newEtcDataWritten.connect(self.plot_manager.top_plot.on_etc_data)
+                self.recorder.newEtcDataWritten.connect(self.plot_manager.bottom_plot.on_etc_data)
+                self.newETCDataWritten_connected = True
+            return self.plot_manager.top_plot, self.plot_manager.bottom_plot
         except Exception as e:
             self.logger.exception("Error starting T-p recording in MainController:")
             return None, None
 
-    def stop_tp_recording(self):
+    def stop_t_p_recording(self):
         """
         Stop T-p recording and halt data updates.
         """
         try:
             if self.recorder:
+                if self.newETCDataWritten_connected:
+                    self.recorder.newEtcDataWritten.disconnect()
+                    self.newETCDataWritten_connected = False
                 self.recorder.stop_all_recording()
-            if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
-                self.plot_manager.top_plot.reader.stop()
-                self.plot_manager.top_plot.reader.wait(1000)
-            if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'stop'):
-                self.plot_manager.bottom_plot.reader.stop()
-                self.plot_manager.bottom_plot.reader.wait(1000)
+            if self.plot_manager.top_plot:
+                self.plot_manager.top_plot.stop_reader()
+            if self.plot_manager.bottom_plot:
+                self.plot_manager.bottom_plot.stop_reader()
         except Exception as e:
             self.logger.exception("Error stopping T-p recording in MainController:")
 
@@ -415,7 +421,7 @@ class MainController:
             if self.recorder:
                 if self.is_tp_recording_running():
                     was_tp_recording_running = True
-                    self.stop_tp_recording()
+                    self.stop_t_p_recording()
                 if self.is_log_file_tracker_running():
                     was_log_tracker_running = True
                     self.stop_log_tracking()
@@ -432,7 +438,7 @@ class MainController:
             if was_log_tracker_running:
                 self.start_log_tracking()
             if was_tp_recording_running:
-                self.start_tp_recording()
+                self.start_t_p_recording()
         except Exception as e:
             self.logger.exception("Error updating sample ID in MainController:")
 
@@ -448,11 +454,9 @@ class MainController:
                 is_log_tracker_running = self.is_log_file_tracker_running()
                 self.recorder.stop_all_recording()
             if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
-                self.plot_manager.top_plot.reader.stop()
-                self.plot_manager.top_plot.reader.wait(1000)
+                self.plot_manager.top_plot.stop_reader()
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'stop'):
-                self.plot_manager.bottom_plot.reader.stop()
-                self.plot_manager.bottom_plot.reader.wait(1000)
+                self.plot_manager.bottom_plot.stop_reader()
             if self.plot_manager.top_plot:
                 self.plot_manager.top_plot.reader.reading_mode = "full_test"
 
@@ -553,7 +557,7 @@ class MainWindow(QMainWindow):
                 self.mb_reading_params = config.mb_reading_params
                 self.hd_log_file_tracker_params = config.hd_log_file_tracker_params
             except Exception as e:
-                self.logger.error(f"No config provided: {e}")
+                self.logger.error(f"No proper config provided: {e}")
             self.ui = self._load_ui(recording_ui_file_path)
             self.setCentralWidget(self.ui)
             self.meta_data = MetaData(db_conn_params=self.db_conn_params)
@@ -706,12 +710,12 @@ class MainWindow(QMainWindow):
                                 "Start T-p Recording", "Stop T-p Recording", is_on)
             if is_on:
                 self._set_flags()
-                self.controller.start_tp_recording()
+                self.controller.start_t_p_recording()
                 if self.plot_manager.top_plot:
                     self._init_continuous_plotting_connections()
             else:
                 self._disconnect_continuous_plotting_signals()
-                self.controller.stop_tp_recording()
+                self.controller.stop_t_p_recording()
         except Exception as e:
             self.logger.exception("Error toggling T-p recording in MainWindow:")
 
@@ -786,35 +790,45 @@ class MainWindow(QMainWindow):
             Any exception during toggling is caught and logged via `self.logger.exception`.
         """
         try:
+
             is_on = self.ui.start_stop_static_plot_button.isChecked()
             self._toggle_button(self.ui.start_stop_static_plot_button,
                                 "Start Static Plot",
                                 "Stop Static Plot", is_on)
+
             if is_on:
-                top, bottom = self.plot_manager.init_static_plots()
-                if top and hasattr(top.reader, 'meta_data_sig'):
-                    if not top.reader.meta_data_sig_connected:
-                        top.reader.meta_data_sig.connect(self._meta_data_received)
+                self.logger.info("Switching to static plot mode...")
+                self._disconnect_continuous_plotting_signals()
+                self.plot_manager.init_static_plots()
+                if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'meta_data_sig'):
+                    if not self.plot_manager.top_plot.reader.meta_data_sig_connected:
+                        self.plot_manager.top_plot.reader.meta_data_sig.connect(self._meta_data_received)
+                        self.plot_manager.top_plot.reader.meta_data_sig_connected = True
 
                 if (self.meta_data.sample_id
-                            and not self.controller.is_log_file_tracker_running
-                            and not self.controller.is_tp_recording_running):
+                    and not self.controller.is_log_file_tracker_running()
+                    and not self.controller.is_tp_recording_running()):
 
                     self.controller.plot_full_test()
+                self.logger.info("Static plot mode activated")
+
             else:
-                if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
-                    self.plot_manager.top_plot.reader.stop()
-                    self.plot_manager.top_plot.reader.wait(1000)
+                self.logger.info("Switching to live plot mode..")
+                if self.plot_manager.top_plot.reader.meta_data_sig_connected:
+                    self.plot_manager.top_plot.reader.meta_data_sig.disconnect()
+                    self.plot_manager.top_plot.reader.meta_data_sig_connected = False
 
-                if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot, 'stop'):
-                    self.plot_manager.bottom_plot.reader.stop()
-                    self.plot_manager.bottom_plot.reader.wait(1000)
-                self.plot_manager.clear_plots()
-                top, bottom = self.plot_manager.init_continuous_plots()
+                self.plot_manager.init_continuous_plots()
+                self._init_continuous_plotting_connections()
 
-                if top and bottom and hasattr(top, "reader") and hasattr(bottom, "reader"):
-                    top.reader.start()
-                    bottom.reader.start()
+                if (self.plot_manager.top_plot and self.plot_manager.bottom_plot
+                    and hasattr(self.plot_manager.top_plot, "reader")
+                    and hasattr(self.plot_manager.bottom_plot, "reader")):
+
+                    self.plot_manager.top_plot.reader.start()
+                    self.plot_manager.bottom_plot.reader.start()
+                    self.logger.info("Live plot activated")
+
 
         except Exception as e:
             self.logger.exception("Error toggling plotting mode in MainWindow:")
@@ -980,14 +994,12 @@ class MainWindow(QMainWindow):
         self.controller.toggle_is_isotherm_flag(self.ui.isotherm_check_box.isChecked())
         self.controller.toggle_h2_uptake_flag(self.ui.h2_uptake_check_box.isChecked())
 
-
-
     def closeEvent(self, event):
         """
         Ensure that recording is stopped when the window is closed.
         """
         try:
-            self.controller.stop_tp_recording()
+            self.controller.stop_t_p_recording()
             self.controller.stop_log_tracking()
             super().closeEvent(event)
         except Exception as e:

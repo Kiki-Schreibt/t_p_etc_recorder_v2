@@ -275,7 +275,6 @@ class DataRecorder(QObject):
             self.logger.exception("Error updating meta data:")
 
 
-
 #todo: implement min max plot after cycle calculation. Maybe autoload test every few hours or so as well to have an overview
 
 # -------------------------------
@@ -299,7 +298,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
             self.db_conn_params = db_conn_params
             self.zoom_mode_active = False
             self._mode = "continuous"
-
+            self. _init_continuous_plot_win_connection_check_flags()
             self._init_continuous_reader()
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
 
@@ -316,6 +315,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
             if hasattr(self, 'reader') and self.reader is not None:
                 self.reader.stop()
                 self.reader.wait(1000)
+                self.reader = None
             try:
                 self.reader = ReadContinuous(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
                 self.reader_type = "continuous"
@@ -324,9 +324,20 @@ class ContinuousPlotWindow(PlotBaseWindow):
                 self.logger.error("Could not initialize continuous reader %s: ", e)
 
     def _init_standard_signals(self):
-        self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
-        self.reader.current_state_sig.connect(self.current_state_sig.emit)
-        self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
+        if not self.current_cycle_sig_connected:
+            self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
+            self.current_cycle_sig_connected = True
+        if not self.current_state_sig_connected:
+            self.reader.current_state_sig.connect(self.current_state_sig.emit)
+            self.current_state_sig_connected = True
+        if not self.current_uptake_sig_connected:
+            self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
+            self.current_uptake_sig_connected = True
+
+    def _init_continuous_plot_win_connection_check_flags(self):
+        self.current_cycle_sig_connected = False
+        self.current_state_sig_connected = False
+        self.current_uptake_sig_connected = False
 
 
 class StaticPlotWindow(PlotBaseWindow):
@@ -341,12 +352,12 @@ class StaticPlotWindow(PlotBaseWindow):
             self.enableAutoRange()
             self._mode = "static"
             if read_on_init:
-                self.reader.start()
-                self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
+                if not self.reader.isRunning():
+                    self.reader.start()
+                    self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
             else:
                 self.reader.reading_mode = "by_time"
                 self._init_on_x_range_changed()
-
 
         except Exception as e:
             logging.getLogger(__name__).exception("Error initializing StaticPlotWindow:")

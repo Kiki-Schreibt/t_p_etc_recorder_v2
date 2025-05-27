@@ -115,7 +115,7 @@ class ReadData(QThread):
         self.db_conn_params = db_conn_params
         self.db_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self._init_standard_params()
-        self._init_connection_check_flags()
+        self._init_reader_connection_check_flags()
         self.meta_data = meta_data
 
     def _init_standard_params(self):
@@ -133,7 +133,7 @@ class ReadData(QThread):
         self.constraints_etc = self.standard_constraints("etc")
         self.time_range_to_read = None  # list []
 
-    def _init_connection_check_flags(self):
+    def _init_reader_connection_check_flags(self):
         self.T_data_sig_connected = False
         self.p_data_sig_connected = False
         self.etc_data_sig_connected = False
@@ -152,10 +152,12 @@ class ReadData(QThread):
         # Stop the timers
         if hasattr(self, 'tp_timer'):
             self.tp_timer.stop()
+            self.tp_timer.deleteLater()
         if hasattr(self, 'etc_timer'):
             self.etc_timer.stop()
+            self.etc_timer.deleteLater()
         # Close the database connection
-        if hasattr(self, 'db_connection'):
+        if getattr(self, 'db_connection', None):
             if self.db_connection:
                 self.db_connection.close_connection()
                 self.db_connection = None
@@ -218,8 +220,12 @@ class ReadData(QThread):
             table_name=tp_table.table_name,
             sample_id=self.meta_data.sample_id)
         self._separate_and_append_t_p(df_t_p=df_t_p)
+        self.logger.info("Finished reading T-p data for time range: %s", self.time_range_to_read)
+
         self.logger.info("Reading ETC data for time range: %s", self.time_range_to_read)
         self.etc_data = self._read_etc(time_range=self.time_range_to_read)
+        self.logger.info("Finished reading ETC data for time range: %s", self.time_range_to_read)
+
         if not self.T_data.empty:
             self.T_data_sig.emit(self.T_data.copy())
         if not self.p_data.empty:
@@ -432,8 +438,6 @@ class ReadContinuous(ReadData):
             self.stop()
 
 
-
-
 class ReadStatic(ReadData):
     """
     Thread class for static data reading (e.g., for full-test plots).
@@ -445,6 +449,7 @@ class ReadStatic(ReadData):
         self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
 
     def start(self, reading_mode: str = None):
+
         if reading_mode is not None:
             self._previous_reading_mode = self.reading_mode
             self.reading_mode = reading_mode
@@ -946,11 +951,14 @@ class PlotBaseWindow(PlotBaseStyle):
             self._update_min_max_plot(self._min_max_data)
             self._min_max_data = None
 
-    def closeEvent(self, event):
-        self.logger.info("Window is being closed.")
+    def stop_reader(self):
         if hasattr(self, 'reader'):
             self.reader.stop()
             self.reader.wait(1000)
+
+    def closeEvent(self, event):
+        self.logger.info("Window is being closed.")
+        self.stop_reader()
         super().closeEvent(event)
 
 
