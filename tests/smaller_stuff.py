@@ -46,6 +46,6 @@ def plot_memory(df):
 
 if __name__ == '__main__':
 
-    log_file_path = r'C:\Daten\Kiki\ProgrammingStuff\Log\2025-05-08_12_Application_Log.log'
+    log_file_path = r'C:\Daten\Kiki\ProgrammingStuff\Log\2025-05-27_09_Application_Log.log'
     df = parse_log(log_file_path)
     plot_memory(df)
