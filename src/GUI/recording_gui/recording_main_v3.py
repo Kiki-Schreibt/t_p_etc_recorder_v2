@@ -313,10 +313,6 @@ class MainController:
             self.recorder = DataRecorder(meta_data=self.meta_data,
                                          config=self.config
                                          )
-            self.recorder.update_cycling_flag(self.ui.cycle_test_check_box.isChecked())
-            self.recorder.update_is_isotherm_flag(self.ui.isotherm_check_box.isChecked())
-            self.recorder.update_h2_uptake_flag(self.ui.h2_uptake_check_box.isChecked())
-
 
         except Exception as e:
             self.logger.exception("Error initializing DataRecorder in MainController:")
@@ -714,6 +710,7 @@ class MainWindow(QMainWindow):
             self._toggle_button(self.ui.start_stop_tp_recording_button,
                                 "Start T-p Recording", "Stop T-p Recording", is_on)
             if is_on:
+                self._set_flags()
                 self.controller.start_tp_recording()
                 if self.plot_manager.top_plot:
                     self._init_continuous_plotting_connections()
@@ -976,6 +973,13 @@ class MainWindow(QMainWindow):
                 self.ui.current_uptake_edit_field.setText(str(value))
         except Exception as e:
             self.logger.exception("Error in _set_current_state:")
+
+    def _set_flags(self):
+        self.controller.toggle_cycling_flag(self.ui.cycle_test_check_box.isChecked())
+        self.controller.toggle_is_isotherm_flag(self.ui.isotherm_check_box.isChecked())
+        self.controller.toggle_h2_uptake_flag(self.ui.h2_uptake_check_box.isChecked())
+
+
 
     def closeEvent(self, event):
         """
