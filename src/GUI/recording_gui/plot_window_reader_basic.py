@@ -149,8 +149,17 @@ class ReadData(QThread):
 
     def stop(self):
         self.running = False
+        # Stop the timers
+        if hasattr(self, 'tp_timer'):
+            self.tp_timer.stop()
+        if hasattr(self, 'etc_timer'):
+            self.etc_timer.stop()
+        # Close the database connection
+        if hasattr(self, 'db_connection'):
+            if self.db_connection:
+                self.db_connection.close_connection()
+                self.db_connection = None
         self.quit()
-        self.wait()
 
     def standard_constraints(self, mode="etc"):
         if mode == "etc":
@@ -422,19 +431,7 @@ class ReadContinuous(ReadData):
             self.logger.error(f"Failed to reconnect to the database: {e}")
             self.stop()
 
-    def stop(self):
-        self.running = False
-        # Stop the timers
-        if hasattr(self, 'tp_timer'):
-            self.tp_timer.stop()
-        if hasattr(self, 'etc_timer'):
-            self.etc_timer.stop()
-        # Close the database connection
-        if self.db_connection:
-            self.db_connection.close_connection()
-            self.db_connection = None
-        self.quit()
-        self.wait()
+
 
 
 class ReadStatic(ReadData):
@@ -671,6 +668,7 @@ class PlotBaseStyle(pg.PlotWidget):
         self.logger.info("Window is being closed.")
         if hasattr(self, 'reader'):
             self.reader.stop()
+            self.reader.wait(1000)
         super().closeEvent(event)
 
 
@@ -952,6 +950,7 @@ class PlotBaseWindow(PlotBaseStyle):
         self.logger.info("Window is being closed.")
         if hasattr(self, 'reader'):
             self.reader.stop()
+            self.reader.wait(1000)
         super().closeEvent(event)
 
 

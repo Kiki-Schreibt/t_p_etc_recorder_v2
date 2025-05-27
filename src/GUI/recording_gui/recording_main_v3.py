@@ -161,6 +161,7 @@ class PlotManager:
                     reader = getattr(widget, 'reader', None)
                     if reader and hasattr(reader, 'stop'):
                         reader.stop()
+                        reader.wait(1000)
                     widget.setParent(None)
                     widget.deleteLater()
             self.top_plot = self.bottom_plot = self.right_plot = None
@@ -361,8 +362,10 @@ class MainController:
                 self.recorder.stop_all_recording()
             if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
                 self.plot_manager.top_plot.reader.stop()
+                self.plot_manager.top_plot.reader.wait(1000)
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'stop'):
                 self.plot_manager.bottom_plot.reader.stop()
+                self.plot_manager.bottom_plot.reader.wait(1000)
         except Exception as e:
             self.logger.exception("Error stopping T-p recording in MainController:")
 
@@ -446,8 +449,10 @@ class MainController:
                 self.recorder.stop_all_recording()
             if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
                 self.plot_manager.top_plot.reader.stop()
+                self.plot_manager.top_plot.reader.wait(1000)
             if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'stop'):
                 self.plot_manager.bottom_plot.reader.stop()
+                self.plot_manager.bottom_plot.reader.wait(1000)
             if self.plot_manager.top_plot:
                 self.plot_manager.top_plot.reader.reading_mode = "full_test"
 
@@ -799,8 +804,14 @@ class MainWindow(QMainWindow):
             else:
                 if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
                     self.plot_manager.top_plot.reader.stop()
+                    self.plot_manager.top_plot.reader.wait(1000)
+
+                if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot, 'stop'):
+                    self.plot_manager.bottom_plot.reader.stop()
+                    self.plot_manager.bottom_plot.reader.wait(1000)
                 self.plot_manager.clear_plots()
                 top, bottom = self.plot_manager.init_continuous_plots()
+
                 if top and bottom and hasattr(top, "reader") and hasattr(bottom, "reader"):
                     top.reader.start()
                     bottom.reader.start()

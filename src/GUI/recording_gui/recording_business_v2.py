@@ -315,6 +315,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
         if self.reader_type != "continuous":
             if hasattr(self, 'reader') and self.reader is not None:
                 self.reader.stop()
+                self.reader.wait(1000)
             try:
                 self.reader = ReadContinuous(meta_data=self.meta_data, db_conn_params=self.db_conn_params)
                 self.reader_type = "continuous"
