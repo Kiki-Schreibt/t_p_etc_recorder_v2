@@ -313,6 +313,11 @@ class MainController:
             self.recorder = DataRecorder(meta_data=self.meta_data,
                                          config=self.config
                                          )
+            self.recorder.update_cycling_flag(self.ui.cycle_test_check_box.isChecked())
+            self.recorder.update_is_isotherm_flag(self.ui.isotherm_check_box.isChecked())
+            self.recorder.update_h2_uptake_flag(self.ui.h2_uptake_check_box.isChecked())
+
+
         except Exception as e:
             self.logger.exception("Error initializing DataRecorder in MainController:")
             self.recorder = None
@@ -415,9 +420,9 @@ class MainController:
                 if self.is_log_file_tracker_running():
                     was_log_tracker_running = True
                     self.stop_log_tracking()
-            self.recorder = self.recorder = DataRecorder(meta_data=self.meta_data,
-                                                         config=self.config
-                                                         )
+            self.recorder = DataRecorder(meta_data=self.meta_data,
+                                         config=self.config
+                                         )
 
             if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'on_meta_data_changed'):
                 self.plot_manager.top_plot.reader.on_meta_data_changed(new_meta_data=self.meta_data)
