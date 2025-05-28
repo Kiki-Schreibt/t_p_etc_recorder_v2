@@ -149,18 +149,27 @@ class ReadData(QThread):
 
     def stop(self):
         self.running = False
-        # Stop the timers
-        if hasattr(self, 'tp_timer'):
-            self.tp_timer.stop()
-            self.tp_timer.deleteLater()
-        if hasattr(self, 'etc_timer'):
-            self.etc_timer.stop()
-            self.etc_timer.deleteLater()
-        # Close the database connection
-        if getattr(self, 'db_connection', None):
-            if self.db_connection:
-                self.db_connection.close_connection()
-                self.db_connection = None
+
+        # only tear down each timer a single time
+        for name in ("tp_timer", "etc_timer"):
+            timer = getattr(self, name, None)
+            if isinstance(timer, QTimer):
+                try:
+                    if timer.isActive():
+                        timer.stop()
+                except RuntimeError:
+                    # already deleted by Qt
+                    pass
+                # you can deleteLater() if *you* created it and parent–child won’t auto-delete
+                timer.deleteLater()
+                setattr(self, name, None)
+
+        # close DB
+        if getattr(self, "db_connection", None):
+            self.db_connection.close_connection()
+            self.db_connection = None
+
+        # exit the thread’s event loop
         self.quit()
 
     def standard_constraints(self, mode="etc"):
@@ -209,22 +218,29 @@ class ReadData(QThread):
             return pd.DataFrame()
 
     def _read_data_by_time(self):
+        start_str = end_str = ""
+        if self.time_range_to_read:
+            start, end = self.time_range_to_read
+            # format however you like; here ISO‐style without microseconds:
+            start_str = start.strftime("%Y-%m-%d %H:%M:%S")
+            end_str   = end.strftime("%Y-%m-%d %H:%M:%S")
+
         self.T_data = pd.DataFrame()
         self.p_data = pd.DataFrame()
         self.etc_data = pd.DataFrame()
         tp_table = TableConfig().TPDataTable
 
-        self.logger.info("Reading T-p data for time range: %s", self.time_range_to_read)
+        self.logger.info("Reading T-p data for time range: %s -> %s", start_str, end_str)
         df_t_p = self.db_retriever.fetch_data_by_time_2(
             time_range=self.time_range_to_read,
             table_name=tp_table.table_name,
             sample_id=self.meta_data.sample_id)
         self._separate_and_append_t_p(df_t_p=df_t_p)
-        self.logger.info("Finished reading T-p data for time range: %s", self.time_range_to_read)
+        self.logger.info("Finished reading T-p data for time range: %s -> %s", start_str, end_str)
 
-        self.logger.info("Reading ETC data for time range: %s", self.time_range_to_read)
+        self.logger.info("Reading ETC data for time range: %s -> %s", start_str, end_str)
         self.etc_data = self._read_etc(time_range=self.time_range_to_read)
-        self.logger.info("Finished reading ETC data for time range: %s", self.time_range_to_read)
+        self.logger.info("Finished reading ETC data for time range: %s -> %s", start_str, end_str)
 
         if not self.T_data.empty:
             self.T_data_sig.emit(self.T_data.copy())
@@ -466,6 +482,8 @@ class ReadStatic(ReadData):
     @Slot()
     def _do_read(self):
         """Performed in the thread context, but via the event loop."""
+        if not self.running:
+            return
         try:
             if self.reading_mode.lower() == "full_test":
                 self._read_full_test()
@@ -703,6 +721,8 @@ class PlotBaseWindow(PlotBaseStyle):
         self._min_max_data = None
         self._mode = None
 
+        self.sigXRangeChanged_connected = False
+
         self._draw_timer = QTimer(self)
         self._draw_timer.setInterval(1000)        # redraw at most 5×/s
         self._draw_timer.timeout.connect(self._do_draw)
@@ -717,6 +737,7 @@ class PlotBaseWindow(PlotBaseStyle):
         self.range_change_timer.setSingleShot(True)
         self._init_connections(y_axis=y_axis)
         self.db_conn_params = db_conn_params or {}
+
 
     def on_tp_data(self, df):
         self._tp_data = df
@@ -959,12 +980,24 @@ class PlotBaseWindow(PlotBaseStyle):
 
     def stop_reader(self):
         if hasattr(self, 'reader'):
-            self.reader.stop()
-            self.reader.wait(1000)
+            self.reader.stop()    # your own method to set self.running = False
+            self.reader.quit()    # ask its event loop to exit
+            self.reader.wait(2000)# block up to 2s for it to actually finish
 
     def closeEvent(self, event):
         self.logger.info("Window is being closed.")
-        self.stop_reader()
+        # stop your own timers
+        if hasattr(self, "_draw_timer"):
+            self._draw_timer.stop()
+        if hasattr(self, "range_change_timer"):
+            self.range_change_timer.stop()
+
+        # tell the reader to stop its work, tear down its timers, then quit its loop
+        if hasattr(self, "reader") and isinstance(self.reader, QThread):
+            self.reader.stop()            # your method: sets running=False, stops QTimers
+            self.reader.quit()            # ask its event loop to exit
+            self.reader.wait(2000)
+
         super().closeEvent(event)
 
 
@@ -1011,6 +1044,7 @@ class AxisLabel:
             variable_name = ""
             unit_str = " "
         return f"{variable_name} ({unit_str})"
+
 
 if __name__ == '__main__':
     app = QApplication()

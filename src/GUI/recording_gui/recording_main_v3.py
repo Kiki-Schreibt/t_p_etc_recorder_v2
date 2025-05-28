@@ -155,15 +155,15 @@ class PlotManager:
         """
         Remove and clean up any existing plot widgets.
         """
+        self.disconnect_emits_top_to_bottom_plot()
         try:
             for widget in [self.top_plot, self.bottom_plot, self.right_plot]:
-                if widget:
-                    reader = getattr(widget, 'reader', None)
-                    if reader and hasattr(reader, 'stop'):
-                        reader.stop()
-                        reader.wait(1000)
-                    widget.setParent(None)
-                    widget.deleteLater()
+                if not widget:
+                    continue
+
+                widget.close()
+                widget.setParent(None)
+                widget.deleteLater()
             self.top_plot = self.bottom_plot = self.right_plot = None
         except Exception as e:
             self.logger.exception("Error clearing plots in PlotManager:")
@@ -182,6 +182,7 @@ class PlotManager:
             self.ui.ExpMetaPlotLeft.layout().addWidget(self.top_plot)
             self.ui.ExpMetaPlotLeftLower.layout().addWidget(self.bottom_plot)
             self.bottom_plot.setXLink(self.top_plot)
+            self.connect_emits_top_to_bottom_plot()
             return self.top_plot, self.bottom_plot
         except Exception as e:
             self.logger.exception("Error initializing continuous plots:")
@@ -195,12 +196,13 @@ class PlotManager:
             from src.GUI.recording_gui.recording_business_v2 import StaticPlotWindow
             self.clear_plots()
             self.top_plot = StaticPlotWindow(y_axis="temperature", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
-            self.bottom_plot = StaticPlotWindow(y_axis="pressure", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
+            self.bottom_plot = StaticPlotWindow(y_axis="pressure", meta_data=self.meta_data, db_conn_params=self.db_conn_params, passive_window=True)
             self._ensure_layout(self.ui.ExpMetaPlotLeft)
             self._ensure_layout(self.ui.ExpMetaPlotLeftLower)
             self.ui.ExpMetaPlotLeft.layout().addWidget(self.top_plot)
             self.ui.ExpMetaPlotLeftLower.layout().addWidget(self.bottom_plot)
             self.bottom_plot.setXLink(self.top_plot)
+            self.connect_emits_top_to_bottom_plot()
             return self.top_plot, self.bottom_plot
         except Exception as e:
             self.logger.exception("Error initializing static plots:")
@@ -284,6 +286,30 @@ class PlotManager:
         except Exception as e:
             self.logger.exception("Error ensuring layout in PlotManager:")
 
+    def connect_emits_top_to_bottom_plot(self):
+        if not self.top_plot.reader.p_data_sig_connected:
+            self.top_plot.reader.p_data_sig.connect(self.bottom_plot.on_tp_data)
+            self.top_plot.reader.p_data_sig_connected = True
+        if not self.top_plot.reader.etc_data_sig_connected:
+            self.top_plot.reader.etc_data_sig.connect(self.bottom_plot.on_etc_data)
+            self.top_plot.reader.etc_data_sig_connected = True
+        if not self.top_plot.reader.cycle_data_sig_connected:
+            self.top_plot.reader.cycle_data_sig.connect(self.bottom_plot.on_min_max_data)
+            self.top_plot.reader.cycle_data_sig_connected = True
+
+    def disconnect_emits_top_to_bottom_plot(self):
+        if not self.top_plot or not self.bottom_plot:
+            return
+        if self.top_plot.reader.p_data_sig_connected:
+            self.top_plot.reader.p_data_sig.connect(self.bottom_plot.on_tp_data)
+            self.top_plot.reader.p_data_sig_connected = False
+        if self.top_plot.reader.etc_data_sig_connected:
+            self.top_plot.reader.etc_data_sig.connect(self.bottom_plot.on_etc_data)
+            self.top_plot.reader.etc_data_sig_connected = False
+        if self.top_plot.reader.cycle_data_sig_connected:
+            self.top_plot.reader.cycle_data_sig.connect(self.bottom_plot.on_min_max_data)
+            self.top_plot.reader.cycle_data_sig_connected = False
+
 
 class MainController:
     """
@@ -347,8 +373,7 @@ class MainController:
             #start the live plotting
             if self.plot_manager.top_plot:
                 self.plot_manager.top_plot.reader.start()
-            if self.plot_manager.bottom_plot:
-                self.plot_manager.bottom_plot.reader.start()
+
             if self.recorder:
                 self.recorder.newEtcDataWritten.connect(self.plot_manager.top_plot.on_etc_data)
                 self.recorder.newEtcDataWritten.connect(self.plot_manager.bottom_plot.on_etc_data)
@@ -368,10 +393,6 @@ class MainController:
                     self.recorder.newEtcDataWritten.disconnect()
                     self.newETCDataWritten_connected = False
                 self.recorder.stop_all_recording()
-            if self.plot_manager.top_plot:
-                self.plot_manager.top_plot.stop_reader()
-            if self.plot_manager.bottom_plot:
-                self.plot_manager.bottom_plot.stop_reader()
         except Exception as e:
             self.logger.exception("Error stopping T-p recording in MainController:")
 
@@ -453,24 +474,20 @@ class MainController:
                 is_recorder_running = self.is_tp_recording_running()
                 is_log_tracker_running = self.is_log_file_tracker_running()
                 self.recorder.stop_all_recording()
-            if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'stop'):
-                self.plot_manager.top_plot.stop_reader()
-            if self.plot_manager.bottom_plot and hasattr(self.plot_manager.bottom_plot.reader, 'stop'):
-                self.plot_manager.bottom_plot.stop_reader()
-            if self.plot_manager.top_plot:
-                self.plot_manager.top_plot.reader.reading_mode = "full_test"
 
-                if not self.plot_manager.top_plot.reader.p_data_sig_connected:
-                    self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot.on_tp_data)
-                    self.plot_manager.top_plot.reader.p_data_sig_connected = True
-                if not self.plot_manager.top_plot.reader.etc_data_sig_connected:
-                    self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.on_etc_data)
-                    self.plot_manager.top_plot.reader.etc_data_sig_connected = True
-                if not self.plot_manager.top_plot.reader.cycle_data_sig_connected:
-                    self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot.on_min_max_data)
-                    self.plot_manager.top_plot.reader.cycle_data_sig_connected = True
+            self.plot_manager.init_static_plots()
 
-                self.plot_manager.top_plot.reader.start()
+
+            #if not self.plot_manager.top_plot.reader.p_data_sig_connected:
+            #    self.plot_manager.top_plot.reader.p_data_sig.connect(self.plot_manager.bottom_plot.on_tp_data)
+            #    self.plot_manager.top_plot.reader.p_data_sig_connected = True
+            #if not self.plot_manager.top_plot.reader.etc_data_sig_connected:
+            #    self.plot_manager.top_plot.reader.etc_data_sig.connect(self.plot_manager.bottom_plot.on_etc_data)
+            #    self.plot_manager.top_plot.reader.etc_data_sig_connected = True
+            #if not self.plot_manager.top_plot.reader.cycle_data_sig_connected:
+             #       self.plot_manager.top_plot.reader.cycle_data_sig.connect(self.plot_manager.bottom_plot.on_min_max_data)
+             #       self.plot_manager.top_plot.reader.cycle_data_sig_connected = True
+
 
             if is_recorder_running:
                 self.recorder.start_tp_recording()
@@ -789,8 +806,8 @@ class MainWindow(QMainWindow):
         Raises:
             Any exception during toggling is caught and logged via `self.logger.exception`.
         """
-        try:
 
+        try:
             is_on = self.ui.start_stop_static_plot_button.isChecked()
             self._toggle_button(self.ui.start_stop_static_plot_button,
                                 "Start Static Plot",
@@ -805,11 +822,6 @@ class MainWindow(QMainWindow):
                         self.plot_manager.top_plot.reader.meta_data_sig.connect(self._meta_data_received)
                         self.plot_manager.top_plot.reader.meta_data_sig_connected = True
 
-                if (self.meta_data.sample_id
-                    and not self.controller.is_log_file_tracker_running()
-                    and not self.controller.is_tp_recording_running()):
-
-                    self.controller.plot_full_test()
                 self.logger.info("Static plot mode activated")
 
             else:
@@ -826,9 +838,7 @@ class MainWindow(QMainWindow):
                     and hasattr(self.plot_manager.bottom_plot, "reader")):
 
                     self.plot_manager.top_plot.reader.start()
-                    self.plot_manager.bottom_plot.reader.start()
                     self.logger.info("Live plot activated")
-
 
         except Exception as e:
             self.logger.exception("Error toggling plotting mode in MainWindow:")
@@ -880,7 +890,7 @@ class MainWindow(QMainWindow):
             self.controller.update_sample_id(sample_id)
             self.meta_manager.update_ui(self.ui)
             if self.ui.start_stop_static_plot_button.isChecked():
-                self.controller.plot_full_test()
+                self.plot_manager.init_static_plots()
         except Exception as e:
             self.logger.exception("Error in _on_sample_id_changed:")
 
@@ -1001,6 +1011,10 @@ class MainWindow(QMainWindow):
         try:
             self.controller.stop_t_p_recording()
             self.controller.stop_log_tracking()
+            self.plot_manager.clear_plots()
+            if hasattr(self, 'memory_timer'):
+                if self.memory_timer.isActive():
+                    self.memory_timer.stop()
             super().closeEvent(event)
         except Exception as e:
             self.logger.exception("Error in closeEvent of MainWindow:")

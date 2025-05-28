@@ -344,20 +344,21 @@ class StaticPlotWindow(PlotBaseWindow):
     """
     A PlotBaseWindow subclass for static plotting.
     """
-    def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None, read_on_init=True):
+    def __init__(self, parent=None, y_axis='', meta_data: object = None, db_conn_params=None, read_on_init=True, passive_window=False):
         try:
             self.reader = ReadStatic(meta_data=meta_data, db_conn_params=db_conn_params)
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
             self.read_on_init = read_on_init
             self.enableAutoRange()
             self._mode = "static"
-            if read_on_init:
-                if not self.reader.isRunning():
-                    self.reader.start()
-                    self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
-            else:
-                self.reader.reading_mode = "by_time"
-                self._init_on_x_range_changed()
+            if not passive_window:
+                if read_on_init:
+                    if not self.reader.isRunning():
+                        self.reader.start()
+                        self.reader.whole_test_emited_sig.connect(self._init_on_x_range_changed)
+                else:
+                    self.reader.reading_mode = "by_time"
+                    self._init_on_x_range_changed()
 
         except Exception as e:
             logging.getLogger(__name__).exception("Error initializing StaticPlotWindow:")
@@ -370,9 +371,26 @@ class StaticPlotWindow(PlotBaseWindow):
             #if self.read_on_init:
                 #self.disableAutoRange()
             self.plotItem.sigXRangeChanged.connect(self._on_x_range_changed)
+            self.sigXRangeChanged_connected = True
 
         except Exception as e:
             logging.getLogger(__name__).exception("Error in _init_on_x_range_changed:")
+
+    def closeEvent(self, event):
+
+
+        # 2) disconnect the X-range signal if the plotItem still exists
+        if hasattr(self, 'plotItem') and self.plotItem is not None:
+            sig = getattr(self.plotItem, 'sigXRangeChanged', None)
+            if sig is not None and self.sigXRangeChanged_connected:
+                try:
+                    sig.disconnect()
+                except (TypeError, RuntimeError):
+                    # not connected or already torn down
+                    pass
+
+        # 3) now let the base class stop timers/threads and destroy everything cleanly
+        super().closeEvent(event)
 
 
 class UptakePlot(pg.PlotWidget):
@@ -816,7 +834,7 @@ class XYPlot(pg.PlotWidget):
         Cleanup when the plot widget is closed.
         """
         try:
-            self.logger.info("Window is being closed.")
+            #self.logger.info("Window is being closed.")
             self.db_reader.close_connection()
             super().closeEvent(event)
         except Exception as e:
