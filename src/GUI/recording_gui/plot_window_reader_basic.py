@@ -448,27 +448,33 @@ class ReadStatic(ReadData):
         super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
 
-    def start(self, reading_mode: str = None):
+    def __init__(self, meta_data, db_conn_params):
+        super().__init__(meta_data, db_conn_params=db_conn_params)
+        self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
 
+    def start(self, reading_mode: str = None):
         if reading_mode is not None:
-            self._previous_reading_mode = self.reading_mode
             self.reading_mode = reading_mode
-        super().start()
+        super().start()  # this invokes run() in the new thread
 
     def run(self):
-        if not self.reading_mode:
-            return
         self.running = True
-        self.logger.info("ReadStatic started in '%s' mode.", self.reading_mode)
-        if self.reading_mode.lower() == "full_test":
-            self._read_full_test()
-        elif self.reading_mode.lower() == "by_time":
-            self._read_data_by_time()
-        if hasattr(self, '_previous_reading_mode'):
-            self.reading_mode = self._previous_reading_mode
-            del self._previous_reading_mode
-        self.running = False
-        self.logger.info("ReadStatic finished.")
+        # start the thread's event loop
+        QTimer.singleShot(0, self._do_read)
+        self.exec()  # <-- now the thread is running an event loop
+
+    @Slot()
+    def _do_read(self):
+        """Performed in the thread context, but via the event loop."""
+        try:
+            if self.reading_mode.lower() == "full_test":
+                self._read_full_test()
+            elif self.reading_mode.lower() == "by_time":
+                self._read_data_by_time()
+        finally:
+            self.running = False
+            # signal QThread to exit its event loop and finish
+            self.quit()
 
     def _read_full_test(self):
         """
