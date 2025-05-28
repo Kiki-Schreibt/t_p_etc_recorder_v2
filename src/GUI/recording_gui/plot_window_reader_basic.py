@@ -224,23 +224,24 @@ class ReadData(QThread):
             # format however you like; here ISO‐style without microseconds:
             start_str = start.strftime("%Y-%m-%d %H:%M:%S")
             end_str   = end.strftime("%Y-%m-%d %H:%M:%S")
+        self.logger.info("Reading T-p and etc data for time range: %s -> %s", start_str, end_str)
 
         self.T_data = pd.DataFrame()
         self.p_data = pd.DataFrame()
         self.etc_data = pd.DataFrame()
         tp_table = TableConfig().TPDataTable
 
-        self.logger.info("Reading T-p data for time range: %s -> %s", start_str, end_str)
+        self.logger.debug("Reading T-p data for time range: %s -> %s", start_str, end_str)
         df_t_p = self.db_retriever.fetch_data_by_time_2(
             time_range=self.time_range_to_read,
             table_name=tp_table.table_name,
             sample_id=self.meta_data.sample_id)
         self._separate_and_append_t_p(df_t_p=df_t_p)
-        self.logger.info("Finished reading T-p data for time range: %s -> %s", start_str, end_str)
+        self.logger.debug("Finished reading T-p data for time range: %s -> %s", start_str, end_str)
 
-        self.logger.info("Reading ETC data for time range: %s -> %s", start_str, end_str)
+        self.logger.debug("Reading ETC data for time range: %s -> %s", start_str, end_str)
         self.etc_data = self._read_etc(time_range=self.time_range_to_read)
-        self.logger.info("Finished reading ETC data for time range: %s -> %s", start_str, end_str)
+        self.logger.debug("Finished reading ETC data for time range: %s -> %s", start_str, end_str)
 
         if not self.T_data.empty:
             self.T_data_sig.emit(self.T_data.copy())
@@ -250,6 +251,8 @@ class ReadData(QThread):
             self.etc_data_sig.emit(self.etc_data.copy())
         self._read_emit_cycle_data_thread()
         del df_t_p
+        self.logger.info("Finished reading T-p and etc data")
+
 
     def _separate_and_append_t_p(self, df_t_p):
         table = TableConfig().TPDataTable
@@ -335,7 +338,7 @@ class ReadData(QThread):
                         sample_id=self.meta_data.sample_id)
                 if not df_cycles.empty:
                     self.cycle_data_sig.emit(df_cycles.copy())
-                    self.logger.info("Emitted cycle data with shape: %s", df_cycles.shape)
+                    self.logger.debug("Emitted cycle data with shape: %s", df_cycles.shape)
                 else:
                     self.logger.info("No cycle data found.")
             else:
@@ -358,8 +361,6 @@ class ReadContinuous(ReadData):
         super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = "continuous"
         self.db_connection = None
-
-        #self.tp_timer.timeout.connect(print("fire"))
 
     def run(self):
         try:
@@ -464,10 +465,6 @@ class ReadStatic(ReadData):
         super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
 
-    def __init__(self, meta_data, db_conn_params):
-        super().__init__(meta_data, db_conn_params=db_conn_params)
-        self.reading_mode = READING_MODE_FULL_TEST  # "full_test" or "by_time"
-
     def start(self, reading_mode: str = None):
         if reading_mode is not None:
             self.reading_mode = reading_mode
@@ -516,7 +513,7 @@ class ReadStatic(ReadData):
                 column_names_etc=etc_cols,
                 constraints=self.constraints_etc)
             self.etc_data = etc_data
-            self.logger.info("TP data shape: %s, ETC data shape: %s", df_t_p.shape, etc_data.shape)
+            self.logger.debug("TP data shape: %s, ETC data shape: %s", df_t_p.shape, etc_data.shape)
         except Exception as e:
             self.logger.error("Exception during fetch_tp_and_etc_data: %s", e)
             self.db_retriever.limit_datapoints = previous_limit
@@ -527,10 +524,10 @@ class ReadStatic(ReadData):
 
         if not self.T_data.empty:
             self.T_data_sig.emit(self.T_data.copy())
-            self.logger.info("Emitted T_data signal, shape: %s", self.T_data.shape)
+            self.logger.debug("Emitted T_data signal, shape: %s", self.T_data.shape)
         if not self.p_data.empty:
             self.p_data_sig.emit(self.p_data.copy())
-            self.logger.info("Emitted p_data signal, shape: %s", self.p_data.shape)
+            self.logger.debug("Emitted p_data signal, shape: %s", self.p_data.shape)
         if not self.etc_data.empty:
             self.etc_data_sig.emit(self.etc_data.copy())
             self.auto_update_x_range_sig.emit()
@@ -693,12 +690,6 @@ class PlotBaseStyle(pg.PlotWidget):
             )
             self.plotItem.addItem(self.cycle_data_plot_item_min)
 
-    def closeEvent(self, event):
-        self.logger.info("Window is being closed.")
-        if hasattr(self, 'reader'):
-            self.reader.stop()
-            self.reader.wait(1000)
-        super().closeEvent(event)
 
 
 ###############################################################################
@@ -905,7 +896,7 @@ class PlotBaseWindow(PlotBaseStyle):
         if len(points) > 0:
             point = points[0]
             point_datetime = datetime.fromtimestamp(point.pos().x(), tz=local_tz_reg)
-            print('clicked a point', point_datetime)
+            self.logger.debug('clicked a point', point_datetime)
             self._change_point_color(point.pos().x())
             self.point_clicked_time_received.emit(point_datetime,  self.current_color_scatter)
 
@@ -985,7 +976,7 @@ class PlotBaseWindow(PlotBaseStyle):
             self.reader.wait(2000)# block up to 2s for it to actually finish
 
     def closeEvent(self, event):
-        self.logger.info("Window is being closed.")
+        self.logger.info("Main plot window is being closed.")
         # stop your own timers
         if hasattr(self, "_draw_timer"):
             self._draw_timer.stop()

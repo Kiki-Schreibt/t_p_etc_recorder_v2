@@ -331,7 +331,7 @@ class PeriodicTableOfElements:
             if entry.get("Symbol") == element:
                 try:
                     atomic_mass = float(entry["AtomicMass"])
-                    self.logger.info(f"Found {element}: Mass = {atomic_mass} u")
+                    self.logger.debug(f"Found {element}: Mass = {atomic_mass} u")
                     return atomic_mass
                 except ValueError:
                     self.logger.error(

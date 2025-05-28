@@ -26,7 +26,7 @@ from src.infrastructure.core.table_config import TableConfig
 
 
 local_tz = ZoneInfo("Europe/Berlin")
-
+LIMIT_DATA_POINTS = 5000
 
 class DataRetriever:
     """
@@ -104,7 +104,7 @@ class DataRetriever:
         self.db_conn_params = db_conn_params or {}
         self.qb = QueryBuilder(db_conn_params=self.db_conn_params)
         self.logger = logging.getLogger(__name__)
-        self.limit_datapoints = 10000
+        self.limit_datapoints = LIMIT_DATA_POINTS
 
 
     def fetch_latest_records(

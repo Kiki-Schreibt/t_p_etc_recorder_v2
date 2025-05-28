@@ -142,7 +142,6 @@ class DataRecorder(QObject):
         """
         Stop the T-p recording thread and wait for it to finish.
         """
-
         try:
             if self._mb_thread is not None:
                 self.logger.info("Stopping T-p recording thread...")
@@ -157,9 +156,9 @@ class DataRecorder(QObject):
         """
         Start the ETC recording thread using the LogFileTracker.
         """
-        self.logger.info("Starting ETC recording thread...")
         try:
             if self._log_tracker_thread is None:
+                self.logger.info("Starting ETC recording thread...")
                 self._log_tracker_thread = threading.Thread(target=self.log_tracker.start, daemon=True)
                 self._log_tracker_thread.start()
                 self.log_tracker.time_range_etc_import.connect(self._emit_etc_data)
@@ -171,10 +170,9 @@ class DataRecorder(QObject):
         """
         Stop the ETC recording thread.
         """
-
         try:
-            self.logger.info("Stopping ETC recording thread...")
             if self._log_tracker_thread is not None:
+                self.logger.info("Stopping ETC recording thread...")
                 self._log_tracker_thread.join()
                 self._log_tracker_thread = None
                 self.logger.info("ETC recording thread stopped.")
@@ -727,7 +725,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
             Handle widget close event and perform necessary cleanup.
             """
             try:
-                self.logger.info("Window is being closed")
+                self.logger.info("Tp dependent plot window is being closed")
                 super().closeEvent(event)
             except Exception as e:
                 self.logger.exception("Error during closeEvent in PlotTpDependent:")
@@ -834,7 +832,7 @@ class XYPlot(pg.PlotWidget):
         Cleanup when the plot widget is closed.
         """
         try:
-            #self.logger.info("Window is being closed.")
+            self.logger.info("XY plot window is being closed.")
             self.db_reader.close_connection()
             super().closeEvent(event)
         except Exception as e:

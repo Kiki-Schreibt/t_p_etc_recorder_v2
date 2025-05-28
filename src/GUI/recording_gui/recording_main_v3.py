@@ -1009,6 +1009,7 @@ class MainWindow(QMainWindow):
         Ensure that recording is stopped when the window is closed.
         """
         try:
+            self.logger.info("Shutting down main window...")
             self.controller.stop_t_p_recording()
             self.controller.stop_log_tracking()
             self.plot_manager.clear_plots()
