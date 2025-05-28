@@ -651,17 +651,6 @@ class MainWindow(QMainWindow):
                 self.ui.isotherm_check_box.isChecked()))
 
             self.ui.sample_id_edit_field.editingFinished.connect(self._on_sample_id_changed)
-            self.ui.sample_mass_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.material_composition_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.cell_volume_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.cell_type_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.first_hyd_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.test_start_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.test_end_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.max_pressure_cycling_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.min_temperature_cycling_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.cycle_duration_edit_field.editingFinished.connect(self._on_meta_data_field_changed)
-            self.ui.reservoir_volume_edit_field.editingFinished.connect(self._on_reservoir_volume_changed)
             self.ui.MinCharTimeEditField.editingFinished.connect(self._on_constraints_changed)
             self.ui.MaxCharTimeEditField.editingFinished.connect(self._on_constraints_changed)
             self.ui.MinTempIncEditField.editingFinished.connect(self._on_constraints_changed)
@@ -909,7 +898,7 @@ class MainWindow(QMainWindow):
 
     def _on_meta_data_field_changed(self):
         """
-        Handle updates when any meta data field is changed.
+        Handle updates when any metadata field is changed.
         """
         try:
             self.meta_manager.update_from_ui(self.ui, update_meta_button_pushed=False)
