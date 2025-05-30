@@ -919,13 +919,17 @@ class CyclePlotWindow(pg.PlotWidget):
         """
         try:
             reader = DataRetriever(db_conn_params=self.db_conn_params)
-            #constraints = {"where"+TableConfig.ETCDataTable.}
+
             constraints = {
     "min_TotalCharTime": 0.33,
     "max_TotalCharTime": 1,
     "min_TotalTempIncr": 2,
     "max_TotalTempIncr": 5
 }
+            join_table = TableConfig.TPDataTable.table_name
+            join_on = [(self.etc_table.cycle_number, TableConfig.TPDataTable.cycle_number)]
+            join_constraints = {TableConfig.TPDataTable.cycle_number_flag: True}
+
             cols = [
                 self.etc_table.cycle_number,
                 self.etc_table.th_conductivity,
@@ -936,16 +940,22 @@ class CyclePlotWindow(pg.PlotWidget):
                 sample_id=self.meta_data.sample_id,
                 table_name=self.etc_table.table_name,
                 column_names=cols,
-                constraints=constraints
+                constraints=constraints,
+                join_on=join_on,
+                join_table=join_table,
+                join_constraints=join_constraints
             )
             if df.empty:
                 self.logger.info("No cycle ETC data for %s", meta_data.sample_id)
                 return
-            self._plot_df(df)
+
+            if not df.empty:
+                self._plot_df(df)
         except Exception:
             self.logger.exception("Error loading cycle data")
 
     def _plot_df(self, df: pd.DataFrame):
+
         # clear existing points
         for item in (
             self.scatter_hyd_inst,
@@ -959,21 +969,30 @@ class CyclePlotWindow(pg.PlotWidget):
         hyd = df[df[self.etc_table.get_clean("de_hyd_state")] == "Hydrogenated"]
         dehyd = df[df[self.etc_table.get_clean("de_hyd_state")] == "Dehydrogenated"]
 
+        df_th_hyd = hyd[hyd[self.etc_table.get_clean("thermal_conductivity_average")].notna()].reset_index(drop=True)
+        df_th_avg_hyd = hyd[hyd[self.etc_table.get_clean("thermal_conductivity_average")].notna()].reset_index(drop=True)
+
+        df_th_dehyd = dehyd[dehyd[self.etc_table.get_clean("thermal_conductivity_average")].notna()].reset_index(drop=True)
+        df_th_avg_dehyd = dehyd[dehyd[self.etc_table.get_clean("thermal_conductivity_average")].notna()].reset_index(drop=True)
+
+
         # instantaneous
-        x_h, y_h = hyd[self.etc_table.get_clean("cycle_number")], hyd[self.etc_table.get_clean("th_conductivity")]
-        x_d, y_d = dehyd[self.etc_table.get_clean("cycle_number")], dehyd[self.etc_table.get_clean("th_conductivity")]
+        x_h, y_h = df_th_hyd[self.etc_table.get_clean("cycle_number")], df_th_hyd[self.etc_table.get_clean("th_conductivity")]
+        x_d, y_d = df_th_dehyd[self.etc_table.get_clean("cycle_number")], df_th_dehyd[self.etc_table.get_clean("th_conductivity")]
         self.scatter_hyd_inst.setData(x_h, y_h)
         self.scatter_dehyd_inst.setData(x_d, y_d)
 
         # average
-        y_h_avg = hyd[self.etc_table.get_clean("thermal_conductivity_average")]
-        y_d_avg = dehyd[self.etc_table.get_clean("thermal_conductivity_average")]
+        y_h_avg = df_th_avg_hyd[self.etc_table.get_clean("thermal_conductivity_average")]
+        y_d_avg = df_th_avg_dehyd[self.etc_table.get_clean("thermal_conductivity_average")]
         self.scatter_hyd_avg.setData(x_h, y_h_avg)
         self.scatter_dehyd_avg.setData(x_d, y_d_avg)
 
         # auto‐range to new data
         self.enableAutoRange()
         self.update()
+
+
 
 # -------------------------------
 # Test functions for standalone execution

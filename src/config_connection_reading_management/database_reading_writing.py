@@ -141,8 +141,11 @@ class DataRetriever:
         sample_id: Optional[str] = None,
         column_names_t_p: Optional[Union[List[str], Tuple[str, ...]]] = None,
         column_names_etc: Union[List[str], Tuple[str, ...]] = ('"Time"', '\"ThConductivity_avg\"'),
-        constraints: Optional[dict] = None
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        constraints: Optional[dict] = None,
+        join_table: str = None,
+        join_on: list[tuple[str,str]] = None,
+        join_constraints: dict = None
+            ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Fetches TP and ETC data based on sample_id or time_range.
         """
@@ -154,13 +157,19 @@ class DataRetriever:
                 time_range=time_range,
                 column_names=column_names_t_p,
                 table_name=table_name_tp,
-                sample_id=sample_id
-            )
+                sample_id=sample_id,
+                join_table=join_table,
+                join_on=join_on,
+                join_constraints=join_constraints
+                )
         elif sample_id and not time_range:
             tp_data = self.fetch_data_by_sample_id_2(
                 sample_id=sample_id,
                 column_names=column_names_t_p,
-                table_name=table_name_tp
+                table_name=table_name_tp,
+                join_table=join_table,
+                join_on=join_on,
+                join_constraints=join_constraints
             )
 
             if not tp_data.empty:
@@ -172,7 +181,10 @@ class DataRetriever:
                 time_range=time_range,
                 column_names=column_names_t_p,
                 table_name=table_name_tp,
-                sample_id=sample_id
+                sample_id=sample_id,
+                join_table=join_table,
+                join_on=join_on,
+                join_constraints=join_constraints
             )
         else:
             tp_data = pd.DataFrame()
@@ -183,21 +195,30 @@ class DataRetriever:
                 column_names=column_names_etc,
                 table_name=table_name_etc,
                 constraints=constraints,
-                sample_id=sample_id
+                sample_id=sample_id,
+                join_table=join_table,
+                join_on=join_on,
+                join_constraints=join_constraints
             )
         elif sample_id:
             etc_data = self.fetch_data_by_sample_id_2(
                 sample_id=sample_id,
                 column_names=column_names_etc,
                 table_name=table_name_etc,
-                constraints=constraints
+                constraints=constraints,
+                join_table=join_table,
+                join_on=join_on,
+                join_constraints=join_constraints
             )
         elif time_range:
             etc_data = self.fetch_data_by_time_2(
                 time_range=time_range,
                 column_names=column_names_etc,
                 table_name=table_name_etc,
-                constraints=constraints
+                constraints=constraints,
+                join_table=join_table,
+                join_on=join_on,
+                join_constraints=join_constraints
             )
         else:
             etc_data = pd.DataFrame()
@@ -209,15 +230,25 @@ class DataRetriever:
         sample_id: str,
         table_name: str,
         column_names: Optional[Union[List[str], Tuple[str, ...]]] = None,
-        constraints: Optional[dict] = None
+        constraints: Optional[dict] = None,
+        join_table: str = None,
+        join_on: list[tuple[str,str]] = None,
+        join_constraints: dict = None
     ) -> pd.DataFrame:
         query, values = self.qb.create_reading_query(
             sample_id=sample_id,
             table_name=table_name,
             column_names=column_names,
             limit_data_points=self.limit_datapoints,
-            constraints=constraints
+            constraints=constraints,
+            join_table=join_table,
+            join_on=join_on,
+            join_constraints=join_constraints
         )
+        print("Generated Query:")
+        print(query)
+        print("With values:")
+        print(values)
         return self.execute_fetching(
             query=query,
             column_names=column_names,
@@ -231,7 +262,10 @@ class DataRetriever:
         table_name: str,
         column_names: Optional[Union[List[str], Tuple[str, ...]]] = None,
         constraints: Optional[dict] = None,
-        sample_id: Optional[str] = None
+        sample_id: Optional[str] = None,
+        join_table: str = None,
+        join_on: list[tuple[str,str]] = None,
+        join_constraints: dict = None
     ) -> pd.DataFrame:
         query, values = self.qb.create_reading_query(
             table_name=table_name,
@@ -239,7 +273,10 @@ class DataRetriever:
             limit_data_points=self.limit_datapoints,
             column_names=column_names,
             constraints=constraints,
-            sample_id=sample_id
+            sample_id=sample_id,
+            join_table=join_table,
+            join_on=join_on,
+            join_constraints=join_constraints
         )
         return self.execute_fetching(
             query=query,
@@ -312,7 +349,10 @@ class DataRetriever:
         sample_id: str,
         column_names: Optional[Union[List[str], Tuple[str, ...]]] = None,
         constraints: Optional[dict] = None,
-        table: Optional[TableConfig] = None
+        table: Optional[TableConfig] = None,
+        join_table: str = None,
+        join_on: list[tuple[str,str]] = None,
+        join_constraints: dict = None
     ) -> pd.DataFrame:
         if not table:
             table = TableConfig().TPDataTable

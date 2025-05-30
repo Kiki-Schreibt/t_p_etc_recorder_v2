@@ -3,9 +3,11 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import logging
+import re
 
 from src.infrastructure.connections.connections import DatabaseConnection
 from src.infrastructure.core.table_config import TableConfig
+
 
 local_tz = ZoneInfo("Europe/Berlin")
 
@@ -66,65 +68,143 @@ class BaseQueryBuilder:
         else:
             return " WHERE "
 
-    def _build_base_query_reading(self, table_name, column_names=None):
-        table_name, column_names_str = self._normalize_table_names(table_name, column_names)
-        return f"SELECT {column_names_str} FROM {table_name}"
+    def _build_base_query_reading(self,
+                                  table_name: str,
+                                  column_names=None,
+                                  join_table: str = None,
+                                  join_on: list[tuple[str,str]] = None):
+        """
+        If join_table is given, we will emit:
+            FROM main_table AS m
+            JOIN join_table AS j ON m.col1 = j.colA AND m.col2 = j.colB
+        """
+        main_table, col_str = self._normalize_table_names(table_name, column_names)
+        if not join_table:
+            return f"SELECT {col_str} FROM {main_table}"
 
-    def _get_time_column(self, base_query):
+        join_table_norm, _ = self._normalize_table_names(join_table, None)
+        alias_m = "m"; alias_j = "j"
+        # build ON clauses from join_on pairs
+        on_clauses = []
+        for mcol, jcol in (join_on or []):
+            on_clauses.append(f"{alias_m}.{mcol} = {alias_j}.{jcol}")
+        on_sql = " AND ".join(on_clauses) if on_clauses else "1=1"
+
+        # re‐prefix all selected columns with m.
+        col_list = [c.strip() for c in col_str.split(",")]
+        prefixed = []
+        for c in col_list:
+            # if someone passed e.g. "etc.th_conductivity AS ThConductivity" you may need more parsing;
+            # for simplicity we just prefix bare names:
+            prefixed.append(f"{alias_m}.{c}")
+        col_str = ", ".join(prefixed)
+
+        sql = (
+            f"SELECT {col_str}\n"
+            f"  FROM {main_table} AS {alias_m}\n"
+            f"  JOIN {join_table_norm}  AS {alias_j}\n"
+            f"    ON {on_sql}"
+        )
+        return sql
+
+    def _main_alias(self, base_query: str) -> str:
+        # If you've used _build_base_query_reading with a join, you alias the main table as "m"
+        # otherwise no alias (i.e. empty string)
+        return "m" if " AS m" in base_query else ""
+
+    def _get_time_column(self, base_query: str) -> str:
+        """
+        Determine which table is the “main” one in this query,
+        whether aliased or not, and return its properly cased time column,
+        prefixed with the alias if there is one.
+        """
+        # 1) Look for an explicit alias: FROM table_name AS alias
+        m = re.search(r"FROM\s+(\S+)\s+AS\s+(\w+)", base_query, flags=re.IGNORECASE)
+        if m:
+            table_in_from, alias = m.group(1), m.group(2)
+        else:
+            table_in_from, alias = None, ""
+
+        prefix = f"{alias}." if alias else ""
+
+        # 2) If aliased, use that exact table_name → column mapping
+        if table_in_from:
+            if table_in_from == self.tp_table.table_name:
+                return prefix + self.tp_table.time
+            if table_in_from == self.etc_table.table_name:
+                return prefix + self.etc_table.time
+            if table_in_from == self.etc_xy_table.table_name:
+                return prefix + self.etc_xy_table.time
+            if table_in_from == self.cycle_data_table.table_name:
+                return prefix + self.cycle_data_table.time_start
+
+        # 3) Otherwise (no alias), detect by substring but still return the real column name
         if self.tp_table.table_name in base_query:
-            return self.tp_table.time
+            return prefix + self.tp_table.time
         if self.etc_table.table_name in base_query:
-            return self.etc_table.time
+            return prefix + self.etc_table.time
         if self.etc_xy_table.table_name in base_query:
-            return self.etc_xy_table.time
+            return prefix + self.etc_xy_table.time
         if self.cycle_data_table.table_name in base_query:
-            return self.cycle_data_table.time_start
+            return prefix + self.cycle_data_table.time_start
+
+        # 4) If somehow nothing matched, fall back to TP’s time column
+        return prefix + self.tp_table.time
 
     def _measurement_constraints_for_query(self, constraints=None, base_query=""):
         if not constraints:
             return "", ()
-        if self.tp_table.table_name in base_query:
+
+        # find explicit alias
+        m = re.search(r"FROM\s+(\S+)\s+AS\s+(\w+)", base_query, flags=re.IGNORECASE)
+        table_in_from = m.group(1) if m else None
+        alias         = m.group(2) if m else ""
+        prefix        = self._is_constraint(base_query)
+
+        # pick columns by explicit alias
+        if   table_in_from == self.tp_table.table_name:
             columns = TableConfig().get_table_column_names(table_class=self.tp_table)
-        elif self.etc_table.table_name in base_query:
+        elif table_in_from == self.etc_table.table_name:
             columns = TableConfig().get_table_column_names(table_class=self.etc_table)
-        elif self.etc_xy_table.table_name in base_query:
+        elif table_in_from == self.etc_xy_table.table_name:
             columns = TableConfig().get_table_column_names(table_class=self.etc_xy_table)
+        elif table_in_from == self.cycle_data_table.table_name:
+            columns = TableConfig().get_table_column_names(table_class=self.cycle_data_table)
         else:
-            columns = []
+            # fallback to substring detection when there's no alias
+            if self.tp_table.table_name in base_query:
+                columns = TableConfig().get_table_column_names(table_class=self.tp_table)
+            elif self.etc_table.table_name in base_query:
+                columns = TableConfig().get_table_column_names(table_class=self.etc_table)
+            elif self.etc_xy_table.table_name in base_query:
+                columns = TableConfig().get_table_column_names(table_class=self.etc_xy_table)
+            elif self.cycle_data_table.table_name in base_query:
+                columns = TableConfig().get_table_column_names(table_class=self.cycle_data_table)
+            else:
+                columns = []
 
-        clauses = []
-        params = []
-        prefix = self._is_constraint(base_query)
-
+        # build your predicates
+        clauses, params = [], []
         for key, value in constraints.items():
             if key.startswith("min_"):
-                field_name = key[len("min_"):]
-                operator = ">="
+                field_name, operator = key[4:], ">="
             elif key.startswith("max_"):
-                field_name = key[len("max_"):]
-                operator = "<="
+                field_name, operator = key[4:], "<="
             elif key.startswith("where_"):
-                field_name = key[len("where_"):]
-                operator = "="
+                field_name, operator = key[6:], "="
             else:
-                # unknown prefix → skip
                 continue
 
-            # find the actual column name that contains our field_name
-            matched = next(
-                (col for col in columns if field_name.lower() in col.lower()),
-                None
-            )
+            matched = next((c for c in columns if field_name.lower() in c.lower()), None)
             if matched:
-                clauses.append(f"{matched} {operator} %s")
+                col_ref = f"{alias}.{matched}" if alias else matched
+                clauses.append(f"{col_ref} {operator} %s")
                 params.append(value)
 
-        if clauses:
-            # join all clauses with AND, and prepend WHERE/AND as appropriate
-            clause_str = prefix + " AND ".join(clauses)
-            return clause_str, tuple(params)
+        if not clauses:
+            return "", ()
+        return prefix + " AND ".join(clauses), tuple(params)
 
-        return "", ()
 
     def _build_query_part_time_constraints(self, time_range=None, base_query="", limit_amount=None):
         """
@@ -206,6 +286,14 @@ class BaseQueryBuilder:
             params.extend([start, end])
         return " OR ".join(parts), tuple(params)
 
+    def _aliased_column_name(self, column_name: str, base_query: str) -> str:
+        """
+        If the main table was aliased as "m", returns "m.column_name",
+        otherwise just "column_name".
+        """
+        alias = self._main_alias(base_query)
+        return f"{alias}.{column_name}" if alias else column_name
+
 
 class TPQueryBuilder(BaseQueryBuilder):
     """
@@ -216,21 +304,52 @@ class TPQueryBuilder(BaseQueryBuilder):
         super().__init__(db_conn_params=db_conn_params)
 
     @filter_kwargs
-    def create_reading_query(self, column_names=None, constraints=None,
-                             time_window=None, sample_id=None, time_list=None,
-                             limit_data_points=50000):
-        base_query = self._build_base_query_reading(self.tp_table.table_name, column_names)
+    def create_reading_query(self,
+                             column_names=None,
+                             constraints=None,
+                             time_window=None,
+                             sample_id=None,
+                             time_list=None,
+                             limit_data_points=50000,
+                             join_table: str = None,
+                             join_on: list[tuple[str,str]] = None,
+                             join_constraints: dict = None):
+
+        # 1) SELECT … FROM [tp]  (with optional JOIN)
+        base_query = self._build_base_query_reading(
+            table_name=self.tp_table.table_name,
+            column_names=column_names,
+            join_table=join_table,
+            join_on=join_on
+        )
+
+        # 2) apply any TP‐table constraints
         cons_query, cons_vals = self._measurement_constraints_for_query(constraints, base_query)
         base_query += cons_query
-        values = cons_vals
+        values    = cons_vals
 
-        query_part, part_vals = self._create_tp_reading_query(
-            base_query, time_window, sample_id, time_list, limit_data_points
+        # 3) apply any filters on the joined table
+        if join_constraints:
+            sep = " WHERE " if " WHERE " not in base_query.upper() else " AND "
+            clauses = []
+            for col, v in join_constraints.items():
+                clauses.append(f"j.{col} = %s")
+                values += (v,)
+            base_query += sep + " AND ".join(clauses)
+
+        # 4) now add your time/sample‐id logic exactly as before
+        tp_part, tp_vals = self._create_tp_reading_query(
+            base_query,
+            time_window,
+            sample_id,
+            time_list,
+            limit_data_points
         )
-        query_part += f" ORDER BY {self.tp_table.time}"
-        values += part_vals
-        query = base_query + " " + query_part
-        return query, values
+        time_col = self._get_time_column(base_query)
+        base_query += tp_part + f" ORDER BY {time_col}"
+        values     += tp_vals
+
+        return base_query, values
 
     def _create_tp_reading_query(self, base_query, time_window, sample_id, time_list, limit_data_points):
         values = ()
@@ -240,7 +359,8 @@ class TPQueryBuilder(BaseQueryBuilder):
             query_part = time_query
             values += time_vals
             if sample_id:
-                query_part += f" AND {self.tp_table.sample_id} = %s"
+                prefix = self._is_constraint(base_query + query_part)
+                query_part += f" {prefix} {self.tp_table.sample_id} = %s"
                 values += (sample_id,)
         elif time_window:
             # Downsample the TP data query using limit_data_points
@@ -252,7 +372,8 @@ class TPQueryBuilder(BaseQueryBuilder):
             query_part = time_query
             values += time_vals
             if sample_id:
-                query_part += f" AND {self.tp_table.sample_id} = %s"
+                prefix = self._is_constraint(base_query + query_part)
+                query_part += f" {prefix} {self.tp_table.sample_id} = %s"
                 values += (sample_id,)
         elif sample_id:
             min_time, max_time = self._get_times_by_meta_data(sample_id)
@@ -311,19 +432,57 @@ class ETCQueryBuilder(BaseQueryBuilder):
         super().__init__(db_conn_params=db_conn_params)
 
     @filter_kwargs
-    def create_reading_query(self, column_names=None, constraints=None,
-                             time_window=None, sample_id=None, time_list=None,
-                             limit_data_points=50000):
-        base_query = self._build_base_query_reading(self.etc_table.table_name, column_names)
+    def create_reading_query(self,
+                             column_names=None,
+                             constraints=None,
+                             time_window=None,
+                             sample_id=None,
+                             time_list=None,
+                             limit_data_points=50000,
+                             join_table: str = None,
+                             join_on: list[tuple[str,str]] = None,
+                             join_constraints: dict = None
+                             ):
+
+         # 1) build the SELECT ... FROM [etc] (with optional join)
+        base_query = self._build_base_query_reading(
+            table_name=self.etc_table.table_name,
+            column_names=column_names,
+            join_table=join_table,
+            join_on=join_on
+        )
+
+        # 2) measurement‐style constraints on the etc table only:
         cons_query, cons_vals = self._measurement_constraints_for_query(constraints, base_query)
         base_query += cons_query
         values = cons_vals
 
-        query_part, part_vals = self._create_etc_reading_query(base_query, time_window, sample_id, time_list)
-        query_part += f" ORDER BY {self.etc_table.time}"
-        values += part_vals
-        query = base_query + " " + query_part
-        return query, values
+        # 3) if the user also passed some constraints on the joined table:
+        if join_constraints:
+            # assume keys are exact column names on the joined table,
+            # and we always prefix with "j." for the alias
+            parts = []
+            for col, val in join_constraints.items():
+                parts.append(f"j.{col} = %s")
+                values += (val,)
+            sep = " WHERE " if " WHERE " not in base_query.upper() else " AND "
+            base_query += sep + " AND ".join(parts)
+
+        # 4) time/window/sample_id logic stays the same,
+        #    you’ll call _build_query_part_time_constraints etc.
+        #    just remember time_column comes from the *etc* table by default.
+        time_query, time_vals = self._build_query_part_time_constraints(
+            time_range=time_window, base_query=base_query
+        )
+        sample_id_col_name = self._aliased_column_name(column_name=self.etc_table.sample_id_small, base_query=base_query)
+        prefix           = self._is_constraint(base_query)
+        base_query += time_query + f" {prefix} {sample_id_col_name} = %s"
+        values += time_vals + (sample_id,)
+
+        # 5) finish with ORDER BY
+        time_col = self._get_time_column(base_query)
+        base_query += f" ORDER BY {time_col}"
+        return base_query, values
 
     def _create_etc_reading_query(self, base_query, time_window, sample_id, time_list):
         query_part = ""
@@ -346,24 +505,48 @@ class CycleDataQueryBuilder(BaseQueryBuilder):
         super().__init__(db_conn_params=db_conn_params)
 
     @filter_kwargs
-    def create_reading_query(self, column_names=None, time_window=None,
-                             sample_id=None):
-        base_query = self._build_base_query_reading(self.cycle_data_table.table_name, column_names)
+    def create_reading_query(self,
+                             column_names=None,
+                             time_window=None,
+                             sample_id=None,
+                             join_table: str = None,
+                             join_on: list[tuple[str,str]] = None,
+                             join_constraints: dict = None):
+        # 1) SELECT … FROM [cycle]  (with optional JOIN)
+        base_query = self._build_base_query_reading(
+            table_name=self.cycle_data_table.table_name,
+            column_names=column_names,
+            join_table=join_table,
+            join_on=join_on
+        )
         values = ()
+        # 2) any joined‐table filters
+        if join_constraints:
+            sep = " WHERE " if " WHERE " not in base_query.upper() else " AND "
+            clauses = []
+            for col, v in join_constraints.items():
+                clauses.append(f"j.{col} = %s")
+                values += (v,)
+            base_query += sep + " AND ".join(clauses)
+
+        # 3) time_window / sample_id logic (as before)
         query_part = ""
         if time_window:
-            time_query, time_vals = self._build_query_part_time_constraints(time_range=time_window, base_query=base_query)
-            query_part += time_query
-            values += time_vals
+            t_q, t_v = self._build_query_part_time_constraints(time_range=time_window,
+                                                                base_query=base_query)
+            query_part += t_q
+            values     += t_v
             if sample_id:
-                query_part += f" AND {self.cycle_data_table.sample_id} = %s"
-                values += (sample_id,)
+                prefix = self._is_constraint(base_query + query_part)
+                query_part += f" {prefix} {self.cycle_data_table.sample_id} = %s"
+                values     += (sample_id,)
         elif sample_id:
             query_part += f" WHERE {self.cycle_data_table.sample_id} = %s"
-            values += (sample_id,)
-        query_part += f" ORDER BY {self.cycle_data_table.time_start}"
-        query = base_query + " " + query_part
-        return query, values
+            values     += (sample_id,)
+
+        time_col = self._get_time_column(base_query)
+        base_query += f" ORDER BY {time_col}"
+        return base_query + query_part, values
 
 
 class MetaDataQueryBuilder(BaseQueryBuilder):
@@ -437,24 +620,57 @@ def test_query_builder():
     config = GetConfig()
     qb = QueryBuilder(db_conn_params=config.db_conn_params)
     sample_id = "WAE-WA-040"
-    start_time = datetime(2022, 1, 1, 20, 21, 22)
+    start_time = datetime(2023, 1, 1, 23, 21, 22)
     end_time = datetime(2023, 1, 5, 20, 22, 22)
     time_window = (start_time, end_time)
+
+    constraints = {
+    "min_TotalCharTime": 0.33,
+    "max_TotalCharTime": 1,
+    "min_TotalTempIncr": 2,
+    "max_TotalTempIncr": 5
+}
     query, values = qb.create_reading_query(
-        table_name="t_p",  # This will now match strictly to the TP table
-        column_names="eq_pressure",
+        table_name="etc",  # This will now match strictly to the TP table
+        column_names=TableConfig().TPDataTable.pressure,
         sample_id=sample_id,
-        time_window=time_window
+        constraints=constraints,
+        limit_data_points=5
     )
     print("Generated Query:")
     print(query)
     print("With values:")
     print(values)
-    with DatabaseConnection(config.db_conn_params) as db_conn:
-        db_conn.cursor.execute(query, values)
-        records = db_conn.cursor.fetchall()
-        print("Records:")
-        print(records)
+    tp_table = TableConfig().TPDataTable
+    etc_table = TableConfig().ETCDataTable
+
+    join_table = tp_table.table_name
+    join_on = [(etc_table.time, tp_table.time)]
+    join_constraints = {tp_table.is_isotherm_flag: False}
+
+    query, values = qb.create_reading_query(
+        table_name="etc",  # This will now match strictly to the TP table
+        column_names=TableConfig().ETCDataTable.temperature_sample,
+        sample_id=sample_id,
+        time_window=time_window,
+        limit_data_points=5,
+        constraints=constraints,
+        join_on=join_on,
+        join_table=join_table,
+        join_constraints=join_constraints
+    )
+    print("Generated Query:")
+    print(query)
+    print("With values:")
+    print(values)
+
+
+
+    #with DatabaseConnection(**config.db_conn_params) as db_conn:
+    #    db_conn.cursor.execute(query, values)
+    #    records = db_conn.cursor.fetchall()
+    #    print("Records:")
+    #    print(records)
 
 
 if __name__ == "__main__":

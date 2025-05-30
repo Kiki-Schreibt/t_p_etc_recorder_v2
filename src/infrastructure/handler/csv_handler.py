@@ -397,6 +397,7 @@ class CSVDataHandler:
 
         df[self.tp_table.h2_uptake_flag] = False
         df[self.tp_table.cycle_number_flag] = False
+        df[self.tp_table.is_isotherm_flag] = False
         df.loc[condition_uptake, self.tp_table.h2_uptake_flag] = True
         df.loc[condition_is_cycle, self.tp_table.cycle_number_flag] = True
         self._set_hydrogenation_states(df)
@@ -831,8 +832,11 @@ def check_nan_values(df, fun_str=""):
 
 
 def import_all(compress_data=False):
-    sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
+    #sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
     #sample_ids = ('WAE-WA-040',)
+    sample_ids = ()
+    if not sample_ids:
+        return
     logger = logging.getLogger(__name__)
     from src.infrastructure.core.config_reader import GetConfig
     config = GetConfig()
