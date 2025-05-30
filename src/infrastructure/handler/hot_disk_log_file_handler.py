@@ -19,15 +19,16 @@ except ImportError:
 class LogFileTracker(QObject):
     time_range_etc_import = Signal(tuple)
 
-    def __init__(self, meta_data, hd_log_file_tracker_params):
+    def __init__(self, meta_data, config):
         super().__init__()
         self.meta_data = meta_data
-        self.hot_disk_log_dir_path = hd_log_file_tracker_params['HOT_DISK_LOG_FILE_PATH']
+        self.hot_disk_log_dir_path = config.hd_log_file_tracker_params['HOT_DISK_LOG_FILE_PATH']
+        self.db_conn_params = config.db_conn_params
         self.observer = None
         self.running = False
         self.logger = logging.getLogger(__name__)
         self.update_lock = threading.Lock()
-        self.event_handler = LogFileHandler(self.meta_data)
+        self.event_handler = LogFileHandler(meta_data=self.meta_data, config=config)
         self.event_handler.time_range_from_export.connect(self._emit_times)
 
     def _emit_times(self, time_range):
@@ -75,9 +76,11 @@ class LogFileHandler(FileSystemEventHandler, QObject):
 
     time_range_from_export = Signal(tuple)
 
-    def __init__(self, meta_data):
-        super().__init__()
+    def __init__(self, meta_data, config):
+        FileSystemEventHandler.__init__(self)
+        QObject.__init__(self)
         self.meta_data = meta_data
+        self.config = config
         latest_file = self.get_latest_file(folder_path=standard_hot_disk_file_path)
         self.latest_export_path = latest_file
         self.logger = logging.getLogger(__name__)
@@ -117,7 +120,6 @@ class LogFileHandler(FileSystemEventHandler, QObject):
             self.process_log_file(event.src_path)
 
     def process_log_file(self, file_path):
-        #print(f"Processing log file: {file_path}")
         self.logger.info(f"Processing log file: {file_path}")
 
         # Variable to keep track of the last result path found
@@ -132,7 +134,9 @@ class LogFileHandler(FileSystemEventHandler, QObject):
             self.handle_new_data(last_result_path)
 
     def handle_new_data(self, file_path):
-        processor = ExcelDataProcessor(file_path=file_path, meta_data=self.meta_data)
+        processor = ExcelDataProcessor(file_path=file_path,
+                                       meta_data=self.meta_data,
+                                       db_conn_params=self.config.db_conn_params)
         if self._test_mode:
             processor._test_mode = True
             self.logger.info("Test mode activated. Times of ETC data will be corrected with actual time")

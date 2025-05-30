@@ -99,9 +99,9 @@ class DataRetriever:
         etc_table.de_hyd_state: 'de_hyd_state'
     }
 
-    def __init__(self, db_conn_params=None):
+    def __init__(self, db_conn_params):
         self.running = False
-        self.db_conn_params = db_conn_params or {}
+        self.db_conn_params = db_conn_params
         self.qb = QueryBuilder(db_conn_params=self.db_conn_params)
         self.logger = logging.getLogger(__name__)
         self.limit_datapoints = LIMIT_DATA_POINTS

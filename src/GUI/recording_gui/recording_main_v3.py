@@ -711,21 +711,22 @@ class MainWindow(QMainWindow):
         Start or stop T-p recording based on button state.
         """
         try:
+            self._disconnect_set_state_signals()
             is_on = self.ui.start_stop_tp_recording_button.isChecked()
             self._toggle_button(self.ui.start_stop_tp_recording_button,
                                 "Start T-p Recording", "Stop T-p Recording", is_on)
             if is_on:
                 self._set_flags()
                 self.controller.start_t_p_recording()
-                if self.plot_manager.top_plot:
-                    self._init_continuous_plotting_connections()
             else:
-                self._disconnect_continuous_plotting_signals()
                 self.controller.stop_t_p_recording()
+            self._connect_set_state_signals()
         except Exception as e:
             self.logger.exception("Error toggling T-p recording in MainWindow:")
 
-    def _init_continuous_plotting_connections(self):
+    def _connect_set_state_signals(self):
+        if not self.plot_manager.top_plot:
+            return
         if not self.plot_manager.top_plot.reader.current_cycle_sig_connected:
             self.plot_manager.top_plot.current_cycle_sig.connect(
                 lambda n: self._set_current_state("number", n))
@@ -741,7 +742,7 @@ class MainWindow(QMainWindow):
                 lambda u: self._set_current_state("uptake", u))
             self.plot_manager.top_plot.reader.current_uptake_sig_connected = True
 
-    def _disconnect_continuous_plotting_signals(self):
+    def _disconnect_set_state_signals(self):
         if self.plot_manager.top_plot.reader.current_cycle_sig_connected:
             self.plot_manager.top_plot.current_cycle_sig.disconnect()
             self.plot_manager.top_plot.reader.current_cycle_sig_connected = False
@@ -797,6 +798,8 @@ class MainWindow(QMainWindow):
         """
 
         try:
+            #disconnect signals from plots to ui
+            self._disconnect_set_state_signals()
             is_on = self.ui.start_stop_static_plot_button.isChecked()
             self._toggle_button(self.ui.start_stop_static_plot_button,
                                 "Start Static Plot",
@@ -804,13 +807,12 @@ class MainWindow(QMainWindow):
 
             if is_on:
                 self.logger.info("Switching to static plot mode...")
-                self._disconnect_continuous_plotting_signals()
                 self.plot_manager.init_static_plots()
+
                 if self.plot_manager.top_plot and hasattr(self.plot_manager.top_plot.reader, 'meta_data_sig'):
                     if not self.plot_manager.top_plot.reader.meta_data_sig_connected:
-                        self.plot_manager.top_plot.reader.meta_data_sig.connect(self._meta_data_received)
+                        self.plot_manager.top_plot.reader.meta_data_sig.connect(self._on_meta_data_received)
                         self.plot_manager.top_plot.reader.meta_data_sig_connected = True
-
                 self.logger.info("Static plot mode activated")
 
             else:
@@ -820,14 +822,15 @@ class MainWindow(QMainWindow):
                     self.plot_manager.top_plot.reader.meta_data_sig_connected = False
 
                 self.plot_manager.init_continuous_plots()
-                self._init_continuous_plotting_connections()
 
                 if (self.plot_manager.top_plot and self.plot_manager.bottom_plot
-                    and hasattr(self.plot_manager.top_plot, "reader")
-                    and hasattr(self.plot_manager.bottom_plot, "reader")):
+                    and hasattr(self.plot_manager.top_plot, "reader")):
 
                     self.plot_manager.top_plot.reader.start()
                     self.logger.info("Live plot activated")
+
+            #connect signals from plots to ui
+            self._connect_set_state_signals()
 
         except Exception as e:
             self.logger.exception("Error toggling plotting mode in MainWindow:")
@@ -927,7 +930,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.logger.exception("Error in _on_constraints_changed:")
 
-    def _meta_data_received(self, meta_data):
+    def _on_meta_data_received(self, meta_data):
         """
         Handle receiving updated metadata from a plot widget.
         """

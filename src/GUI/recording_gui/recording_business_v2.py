@@ -68,12 +68,7 @@ class DataRecorder(QObject):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.meta_data = meta_data
-        try:
-            self.config = config
-        except Exception as e:
-            self.logger.error(f"No config provided: {e}")
-            raise
-
+        self.config = config
         self._update_lock = threading.Lock()
         self.mb_processor = self._create_mb_processor(meta_data)
         self.log_tracker = self._create_log_tracker(meta_data)
@@ -98,8 +93,7 @@ class DataRecorder(QObject):
         """
 
         try:
-            hd_log_file_tracker_params = self.config.hd_log_file_tracker_params
-            return LogFileTracker(meta_data=meta_data, hd_log_file_tracker_params=hd_log_file_tracker_params)
+            return LogFileTracker(meta_data=meta_data, config=self.config)
         except Exception as e:
             self.logger.exception("Error creating LogFileTracker:")
             raise
@@ -230,7 +224,7 @@ class DataRecorder(QObject):
         try:
             etc_table = TableConfig().ETCDataTable
             columns = (etc_table.time, etc_table.th_conductivity, etc_table.thermal_conductivity_average)
-            db_reader = DataRetriever(**self.db_conn_params)
+            db_reader = DataRetriever(self.config.db_conn_params)
             df_etc = db_reader.fetch_data_by_time_2(
                 time_range=time_range,
                 table_name=etc_table.table_name,
