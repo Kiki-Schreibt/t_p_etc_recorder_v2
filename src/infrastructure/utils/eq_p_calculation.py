@@ -132,9 +132,8 @@ class VantHoffCalcEq:
 
         m_hyd = self._H2_mass_fun(p_list=p_hyd, T_list=T_hyd, V_res_list=V_res, V_cell=V_cell, T_res_list=T_reservoir)
         m_dehyd = self._H2_mass_fun(p_list=p_dehyd, T_list=T_dehyd, V_res_list=V_res, V_cell=V_cell, T_res_list=T_reservoir)
-
         # Calculate uptake and weight percentage
-        m_uptake = m_dehyd - m_hyd
+        m_uptake = abs(m_dehyd - m_hyd)
         wt_p = m_uptake * 100 / (m_uptake + m_sample)
 
         # If meta_data.theoretical_uptake is defined, enforce condition elementwise.
@@ -143,7 +142,6 @@ class VantHoffCalcEq:
             result = np.where(condition_is_uptake, wt_p, None)
         else:
             result = wt_p
-
         # Return in the same type as the input temperature if it was a pandas Series.
         if isinstance(T_hyd, pd.Series):
             return pd.Series(result, index=T_hyd.index)

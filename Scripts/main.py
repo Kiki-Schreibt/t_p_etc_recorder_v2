@@ -147,7 +147,7 @@ class MainProgram(RecordingMainWindow):
                                                        config=self.config)
         self.uptake_corrector.show()
 
-    def change_modbus_host_ip(self, host_ip=None, port=None):
+    def change_modbus_host_ip(self, host_ip=None, port=None, switch_off=False):
         """
         Callback for DICON simulator start/stop; reconfigures the Modbus host/port.
 
@@ -168,7 +168,7 @@ class MainProgram(RecordingMainWindow):
 
         elif self.prev_mb_conn_params:
             self.controller.recorder.mb_processor.mb_conn_params = self.prev_mb_conn_params
-        if recorder_was_running:
+        if recorder_was_running and not switch_off:
             self.controller.start_t_p_recording()
             self._connect_set_state_signals()
 
@@ -184,7 +184,7 @@ class MainProgram(RecordingMainWindow):
         Overrides the base closeEvent to stop the DICON simulator.
         """
         if hasattr(self, "dicon_simulator"):
-            self.change_modbus_host_ip()  #switch host and ip back to standard
+            self.change_modbus_host_ip(switch_off=True)  #switch host and ip back to standard
             self.dicon_simulator.business.stop_server()
         super().closeEvent(event)
 

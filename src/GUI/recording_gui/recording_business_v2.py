@@ -307,7 +307,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
 
             self._init_standard_signals()
-
+            self.plotItem.sigXRangeChanged.connect(self._on_x_range_changed)
             # Enable auto-range by default
             self.enableAutoRange()
 
@@ -330,7 +330,6 @@ class ContinuousPlotWindow(PlotBaseWindow):
     def _init_standard_signals(self):
         if not self.current_cycle_sig_connected:
             self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
-            self.reader.current_cycle_sig.connect(print)
             self.current_cycle_sig_connected = True
         if not self.current_state_sig_connected:
             self.reader.current_state_sig.connect(self.current_state_sig.emit)
@@ -339,6 +338,19 @@ class ContinuousPlotWindow(PlotBaseWindow):
             self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
             self.current_uptake_sig_connected = True
 
+    def load_visible_data(self, start_time, end_time):
+        """
+        Buffer the requested window and tell our running thread
+        to fetch that slice by time—without ever stopping it.
+        """
+        visible = end_time - start_time
+        buffer_ = visible * 0.5
+        buffered_start = start_time - buffer_
+        buffered_end   = end_time   + buffer_
+        self.current_time_range = (buffered_start, buffered_end)
+
+        # emit into our thread’s queue rather than re-starting the thread
+        self.reader.by_time_request.emit(self.current_time_range)
 
 
 class StaticPlotWindow(PlotBaseWindow):
@@ -948,8 +960,6 @@ if __name__ == '__main__':
         win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params, meta_data=meta_data)
         #win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
         win.reader.start()
-
-        #win.point_clicked_time_received.connect(print)
         win.reader.meta_data = meta_data
         win.show()
         sys.exit(app.exec())

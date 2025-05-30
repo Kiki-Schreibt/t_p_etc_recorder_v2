@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
-from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, Signal, Slot)
+from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, Signal, Slot, Qt)
 from PySide6.QtWidgets import QApplication
 
 from src.infrastructure.connections.connections import DatabaseConnection
@@ -107,6 +107,7 @@ class ReadData(QThread):
     current_uptake_sig = Signal(float)
     cycle_data_sig = Signal(pd.DataFrame)
     auto_update_x_range_sig = Signal()
+    by_time_request = Signal(tuple)  #carries start and end time for a read
 
     def __init__(self, meta_data, db_conn_params):
         super().__init__()
@@ -253,7 +254,6 @@ class ReadData(QThread):
         del df_t_p
         self.logger.info("Finished reading T-p and etc data")
 
-
     def _separate_and_append_t_p(self, df_t_p):
         table = TableConfig().TPDataTable
         time_temperature_columns = [col for col in df_t_p.columns if "time" in col.lower()
@@ -357,10 +357,12 @@ class ReadContinuous(ReadData):
     Uses QTimer to schedule periodic data reads.
     """
 
+
     def __init__(self, meta_data, db_conn_params):
         super().__init__(meta_data, db_conn_params=db_conn_params)
         self.reading_mode = "continuous"
         self.db_connection = None
+        self.by_time_request.connect(self._handle_by_time_request)
 
     def run(self):
         try:
@@ -454,6 +456,14 @@ class ReadContinuous(ReadData):
             self.logger.error(f"Failed to reconnect to the database: {e}")
             self.stop()
 
+    @Slot(tuple)
+    def _handle_by_time_request(self, time_range):
+        """
+        Called in this thread whenever someone emits by_time_request.
+        Simply run your existing by-time reader.
+        """
+        self.time_range_to_read = time_range
+        self._read_data_by_time()
 
 class ReadStatic(ReadData):
     """
@@ -549,7 +559,7 @@ class PlotBaseStyle(pg.PlotWidget):
     Sets up left and right axes, legends, and tick fonts.
     """
     def __init__(self, parent=None, y_axis=''):
-        super().__init__(parent=parent)
+        super().__init__(parent=parent, viewBox=InteractiveViewBox())
         self.logger = logging.getLogger(__name__)
         self.axis_font = {'color': 'white', 'font-size': '12pt'}
         self.font_color = 'white'
@@ -589,7 +599,7 @@ class PlotBaseStyle(pg.PlotWidget):
         self._set_tick_fonts(self.plotItem.getAxis('left'))
 
     def _init_right_axis(self):
-        self.rightViewBox = pg.ViewBox()
+        self.rightViewBox = InteractiveViewBox()
         self.plotItem.showAxis('right')
         self.plotItem.scene().addItem(self.rightViewBox)
         self.plotItem.getAxis('right').linkToView(self.rightViewBox)
@@ -691,7 +701,6 @@ class PlotBaseStyle(pg.PlotWidget):
             self.plotItem.addItem(self.cycle_data_plot_item_min)
 
 
-
 ###############################################################################
 #                        Plotting Window Classes                              #
 ###############################################################################
@@ -728,7 +737,6 @@ class PlotBaseWindow(PlotBaseStyle):
         self.range_change_timer.setSingleShot(True)
         self._init_connections(y_axis=y_axis)
         self.db_conn_params = db_conn_params or {}
-
 
     def _init_plot_win_connection_check_flags(self):
         self.current_cycle_sig_connected = False
@@ -835,7 +843,10 @@ class PlotBaseWindow(PlotBaseStyle):
     @Slot()
     def _on_x_range_changed(self):
         """Starts a timer before reloading the visible x_change. timeout will trigger _on_range_change_timeout"""
-        self.range_change_timer.start(500)
+
+        vb = self.plotItem.getViewBox()
+        if vb._userTriggered:
+            self.range_change_timer.start(500)
 
     def _on_range_change_timeout(self):
         """Checks if significant changes are in x_range. Triggers load_visible_data if so"""
@@ -847,6 +858,8 @@ class PlotBaseWindow(PlotBaseStyle):
         start_time, end_time = current_x_range
         if not self._is_data_covered(start_time, end_time):
             self.load_visible_data(start_time, end_time)
+        vb = self.plotItem.getViewBox()
+        vb._userTriggered = False
 
     def _is_data_covered(self, start_time, end_time):
         if self.current_time_range is None:
@@ -1040,6 +1053,35 @@ class AxisLabel:
             variable_name = ""
             unit_str = " "
         return f"{variable_name} ({unit_str})"
+
+
+class InteractiveViewBox(pg.ViewBox):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._userTriggered = False
+
+    def mouseDragEvent(self, *args, **kwargs):
+        ev = args[0] if args else kwargs.get('event')
+        if ev.button() == Qt.LeftButton:
+            self._userTriggered = True
+        super().mouseDragEvent(*args, **kwargs)
+
+    # <- updated signature here
+    def wheelEvent(self, *args, **kwargs):
+        # mark user‐triggered on any wheel zoom
+        self._userTriggered = True
+        # forward to parent, passing axis if given
+        super().wheelEvent(*args, **kwargs)
+        # (if you ever need compatibility you could do a try/except on TypeError)
+
+    def setXRange(self, *args, **kwargs):
+        super().setXRange(*args, **kwargs)
+        self._userTriggered = False
+
+    def setYRange(self, *args, **kwargs):
+        super().setYRange(*args, **kwargs)
+        self._userTriggered = False
+
 
 
 if __name__ == '__main__':
