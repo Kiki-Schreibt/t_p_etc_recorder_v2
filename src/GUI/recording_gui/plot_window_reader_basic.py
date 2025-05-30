@@ -464,6 +464,20 @@ class ReadContinuous(ReadData):
         """
         self.time_range_to_read = time_range
         self._read_data_by_time()
+        #self.auto_update_x_range_sig.emit()
+
+    def pause(self):
+        if hasattr(self, 'tp_timer'):
+            self.tp_timer.stop()
+        if hasattr(self, 'etc_timer'):
+            self.etc_timer.stop()
+
+    def resume(self):
+        if hasattr(self, 'tp_timer'):
+            self.tp_timer.start()
+        if hasattr(self, 'etc_timer'):
+            self.etc_timer.start()
+
 
 class ReadStatic(ReadData):
     """
@@ -733,6 +747,7 @@ class PlotBaseWindow(PlotBaseStyle):
         self.plotItem.setXRange(min(self.current_time_range).timestamp(),
                                 max(self.current_time_range).timestamp())
         self.plotItem.vb.sigResized.connect(self._update_view)
+        self.plotItem.scene().sigMouseClicked.connect(self._on_double_click)
         self.range_change_timer = QTimer()
         self.range_change_timer.setSingleShot(True)
         self._init_connections(y_axis=y_axis)
@@ -986,6 +1001,12 @@ class PlotBaseWindow(PlotBaseStyle):
         if self._min_max_data is not None:
             self._update_min_max_plot(self._min_max_data)
             self._min_max_data = None
+
+    def _on_double_click(self, ev):
+        """resets the plot window"""
+        if ev.double():                          # double-click
+            pass # todo: irgendwann mal. prio -1000 aber wär schon nett eigentlich
+
 
     def stop_reader(self):
         if hasattr(self, 'reader'):

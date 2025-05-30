@@ -381,8 +381,6 @@ class StaticPlotWindow(PlotBaseWindow):
         Initialize x-axis range change behavior after static data is loaded.
         """
         try:
-            #if self.read_on_init:
-                #self.disableAutoRange()
             self.plotItem.sigXRangeChanged.connect(self._on_x_range_changed)
             self.sigXRangeChanged_connected = True
 
