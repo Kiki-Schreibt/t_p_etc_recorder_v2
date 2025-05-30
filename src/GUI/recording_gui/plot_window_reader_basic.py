@@ -711,7 +711,7 @@ class PlotBaseWindow(PlotBaseStyle):
         self._etc_data = None
         self._min_max_data = None
         self._mode = None
-
+        self._init_plot_win_connection_check_flags()
         self.sigXRangeChanged_connected = False
 
         self._draw_timer = QTimer(self)
@@ -729,6 +729,11 @@ class PlotBaseWindow(PlotBaseStyle):
         self._init_connections(y_axis=y_axis)
         self.db_conn_params = db_conn_params or {}
 
+
+    def _init_plot_win_connection_check_flags(self):
+        self.current_cycle_sig_connected = False
+        self.current_state_sig_connected = False
+        self.current_uptake_sig_connected = False
 
     def on_tp_data(self, df):
         self._tp_data = df

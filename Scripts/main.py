@@ -157,7 +157,8 @@ class MainProgram(RecordingMainWindow):
         """
         recorder_was_running = self.controller.is_tp_recording_running()
         if recorder_was_running:
-            self.controller.stop_tp_recording()
+            self._disconnect_set_state_signals()
+            self.controller.stop_t_p_recording()
 
         if host_ip and port:
             self.prev_mb_conn_params = self.controller.recorder.mb_processor.mb_conn_params
@@ -168,7 +169,8 @@ class MainProgram(RecordingMainWindow):
         elif self.prev_mb_conn_params:
             self.controller.recorder.mb_processor.mb_conn_params = self.prev_mb_conn_params
         if recorder_was_running:
-            self.controller.start_tp_recording()
+            self.controller.start_t_p_recording()
+            self._connect_set_state_signals()
 
     def _open_database_maintainer(self):
         from src.GUI.database_maintenance.database_maintainer import MaintenanceWindow
@@ -181,9 +183,11 @@ class MainProgram(RecordingMainWindow):
 
         Overrides the base closeEvent to stop the DICON simulator.
         """
-        super().closeEvent(event)
         if hasattr(self, "dicon_simulator"):
+            self.change_modbus_host_ip()  #switch host and ip back to standard
             self.dicon_simulator.business.stop_server()
+        super().closeEvent(event)
+
 
 
 def main():

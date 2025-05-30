@@ -720,6 +720,7 @@ class MainWindow(QMainWindow):
                 self.controller.start_t_p_recording()
             else:
                 self.controller.stop_t_p_recording()
+
             self._connect_set_state_signals()
         except Exception as e:
             self.logger.exception("Error toggling T-p recording in MainWindow:")
@@ -727,6 +728,7 @@ class MainWindow(QMainWindow):
     def _connect_set_state_signals(self):
         if not self.plot_manager.top_plot:
             return
+
         if not self.plot_manager.top_plot.reader.current_cycle_sig_connected:
             self.plot_manager.top_plot.current_cycle_sig.connect(
                 lambda n: self._set_current_state("number", n))
@@ -743,6 +745,10 @@ class MainWindow(QMainWindow):
             self.plot_manager.top_plot.reader.current_uptake_sig_connected = True
 
     def _disconnect_set_state_signals(self):
+        if not self.plot_manager.top_plot:
+            return
+
+
         if self.plot_manager.top_plot.reader.current_cycle_sig_connected:
             self.plot_manager.top_plot.current_cycle_sig.disconnect()
             self.plot_manager.top_plot.reader.current_cycle_sig_connected = False

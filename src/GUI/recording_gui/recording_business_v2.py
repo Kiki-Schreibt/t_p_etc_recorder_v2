@@ -58,6 +58,9 @@ class DataRecorder(QObject):
             update_h2_uptake_flag(): Update configuration dynamically.
     """
     newEtcDataWritten = Signal(pd.DataFrame)
+    h2_uptake_flag = None
+    cycling_flag = None
+    is_isotherm_flag = None
 
     def __init__(self, meta_data: object,
                          config,
@@ -124,6 +127,12 @@ class DataRecorder(QObject):
         """
         self.logger.info("Starting T-p recording thread...")
         self.mb_processor = self._create_mb_processor(meta_data=self.meta_data)
+        if self.cycling_flag:
+            self.mb_processor.mb_data_handler.cycling_flag = self.cycling_flag
+        if self.is_isotherm_flag:
+            self.mb_processor.mb_data_handler.is_isotherm_flag = self.is_isotherm_flag
+        if self.h2_uptake_flag:
+            self.mb_processor.mb_data_handler.h2_uptake_flag = self.h2_uptake_flag
         try:
             if self._mb_thread is None:
                 self._mb_thread = threading.Thread(target=self.mb_processor.run, daemon=True)
@@ -191,6 +200,7 @@ class DataRecorder(QObject):
         try:
             with self._update_lock:
                 self.mb_processor.mb_data_handler.cycling_flag = flag
+                self.cycling_flag = flag
             self.logger.info(f"Cycling flag set to: {flag}")
         except Exception as e:
             self.logger.exception("Error updating cycling flag:")
@@ -202,6 +212,7 @@ class DataRecorder(QObject):
         try:
             with self._update_lock:
                 self.mb_processor.mb_data_handler.h2_uptake_flag = flag
+                self.h2_uptake_flag = flag
             self.logger.info(f"H2 uptake flag set to: {flag}")
         except Exception as e:
             self.logger.exception("Error updating H2 uptake flag:")
@@ -213,6 +224,7 @@ class DataRecorder(QObject):
         try:
             with self._update_lock:
                 self.mb_processor.mb_data_handler.is_isotherm_flag = flag
+                self.is_isotherm_flag = flag
             self.logger.info(f"Is isothermal measurement set to: {flag}")
         except Exception as e:
             self.logger.exception("Error updating is isotherm flag:")
@@ -286,11 +298,11 @@ class ContinuousPlotWindow(PlotBaseWindow):
             self._range_connection_active = False
             self.reader_type = None
             self.reader = None
+            self._init_plot_win_connection_check_flags()
             self.meta_data = meta_data
             self.db_conn_params = db_conn_params
             self.zoom_mode_active = False
             self._mode = "continuous"
-            self. _init_continuous_plot_win_connection_check_flags()
             self._init_continuous_reader()
             super().__init__(parent=parent, y_axis=y_axis, db_conn_params=db_conn_params)
 
@@ -318,6 +330,7 @@ class ContinuousPlotWindow(PlotBaseWindow):
     def _init_standard_signals(self):
         if not self.current_cycle_sig_connected:
             self.reader.current_cycle_sig.connect(self.current_cycle_sig.emit)
+            self.reader.current_cycle_sig.connect(print)
             self.current_cycle_sig_connected = True
         if not self.current_state_sig_connected:
             self.reader.current_state_sig.connect(self.current_state_sig.emit)
@@ -326,10 +339,6 @@ class ContinuousPlotWindow(PlotBaseWindow):
             self.reader.current_uptake_sig.connect(self.current_uptake_sig.emit)
             self.current_uptake_sig_connected = True
 
-    def _init_continuous_plot_win_connection_check_flags(self):
-        self.current_cycle_sig_connected = False
-        self.current_state_sig_connected = False
-        self.current_uptake_sig_connected = False
 
 
 class StaticPlotWindow(PlotBaseWindow):
