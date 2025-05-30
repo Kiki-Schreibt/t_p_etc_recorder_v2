@@ -21,6 +21,7 @@ import pandas as pd
 import pyqtgraph as pg
 
 from PySide6.QtCore import QThread, Signal, QObject
+
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
 from src.infrastructure.handler.hot_disk_log_file_handler import LogFileTracker
 from src.infrastructure.handler.modbus_handler import ModbusProcessor
@@ -865,6 +866,115 @@ class XYPlot(pg.PlotWidget):
             self.logger.exception("Error clearing plot in XYPlot:")
 
 
+class CyclePlotWindow(pg.PlotWidget):
+    """
+    Scatter‐plot of ETC vs. cycle number, with different markers/colors
+    for Hydrogenated vs. Dehydrogenated, and separate symbols for
+    instantaneous and average conductivity.
+    """
+    def __init__(self, meta_data, parent=None, db_conn_params=None):
+        super().__init__(parent=parent)
+        self.logger = logging.getLogger(__name__)
+        self.db_conn_params = db_conn_params or {}
+        self.etc_table = TableConfig().ETCDataTable
+        self.meta_data = meta_data
+        # prepare four scatter items
+        self.scatter_hyd_inst = pg.ScatterPlotItem(
+            pen=None, symbol='o', size=8,
+            brush=pg.mkBrush('r'), name="Inst. ETC — Hyd"
+        )
+        self.scatter_hyd_avg = pg.ScatterPlotItem(
+            pen=None, symbol='t', size=8,
+            brush=pg.mkBrush('m'), name="Avg ETC — Hyd"
+        )
+        self.scatter_dehyd_inst = pg.ScatterPlotItem(
+            pen=None, symbol='x', size=8,
+            brush=pg.mkBrush('b'), name="Inst. ETC — Dehyd"
+        )
+        self.scatter_dehyd_avg = pg.ScatterPlotItem(
+            pen=None, symbol='+', size=8,
+            brush=pg.mkBrush('c'), name="Avg ETC — Dehyd"
+        )
+
+        # legend & axes
+        self.addLegend(offset=(0,1))
+        axis_font = {'color':'white','font-size':'12pt'}
+        self.getAxis('bottom').setLabel(AxisLabel.create_axis_label("cycle"), **axis_font)
+        self.getAxis('left').setLabel(AxisLabel.create_axis_label("conductivity"), **axis_font)
+
+        # add items to scene
+        for item in (
+            self.scatter_hyd_inst,
+            self.scatter_hyd_avg,
+            self.scatter_dehyd_inst,
+            self.scatter_dehyd_avg
+        ):
+            self.addItem(item)
+
+        self.enableAutoRange()
+
+    def load_data(self, constraints: dict=None):
+        """
+        Fetch ETC cycle data for this sample and scatter‐plot it.
+        """
+        try:
+            reader = DataRetriever(db_conn_params=self.db_conn_params)
+            #constraints = {"where"+TableConfig.ETCDataTable.}
+            constraints = {
+    "min_TotalCharTime": 0.33,
+    "max_TotalCharTime": 1,
+    "min_TotalTempIncr": 2,
+    "max_TotalTempIncr": 5
+}
+            cols = [
+                self.etc_table.cycle_number,
+                self.etc_table.th_conductivity,
+                self.etc_table.thermal_conductivity_average,
+                self.etc_table.de_hyd_state
+            ]
+            df = reader.fetch_data_by_sample_id_2(
+                sample_id=self.meta_data.sample_id,
+                table_name=self.etc_table.table_name,
+                column_names=cols,
+                constraints=constraints
+            )
+            if df.empty:
+                self.logger.info("No cycle ETC data for %s", meta_data.sample_id)
+                return
+            self._plot_df(df)
+        except Exception:
+            self.logger.exception("Error loading cycle data")
+
+    def _plot_df(self, df: pd.DataFrame):
+        # clear existing points
+        for item in (
+            self.scatter_hyd_inst,
+            self.scatter_hyd_avg,
+            self.scatter_dehyd_inst,
+            self.scatter_dehyd_avg
+        ):
+            item.clear()
+
+        # split by state
+        hyd = df[df[self.etc_table.get_clean("de_hyd_state")] == "Hydrogenated"]
+        dehyd = df[df[self.etc_table.get_clean("de_hyd_state")] == "Dehydrogenated"]
+
+        # instantaneous
+        x_h, y_h = hyd[self.etc_table.get_clean("cycle_number")], hyd[self.etc_table.get_clean("th_conductivity")]
+        x_d, y_d = dehyd[self.etc_table.get_clean("cycle_number")], dehyd[self.etc_table.get_clean("th_conductivity")]
+        self.scatter_hyd_inst.setData(x_h, y_h)
+        self.scatter_dehyd_inst.setData(x_d, y_d)
+
+        # average
+        y_h_avg = hyd[self.etc_table.get_clean("thermal_conductivity_average")]
+        y_d_avg = dehyd[self.etc_table.get_clean("thermal_conductivity_average")]
+        self.scatter_hyd_avg.setData(x_h, y_h_avg)
+        self.scatter_dehyd_avg.setData(x_d, y_d_avg)
+
+        # auto‐range to new data
+        self.enableAutoRange()
+        self.update()
+
 # -------------------------------
 # Test functions for standalone execution
 # -------------------------------
@@ -955,10 +1065,10 @@ if __name__ == '__main__':
         from src.infrastructure.meta_data.meta_data_handler import MetaData
         db_conn_params = GetConfig().db_conn_params
         meta_data = MetaData('WAE-WA-028', db_conn_params=db_conn_params)
-        win = StaticPlotWindow(y_axis='temperature', db_conn_params=db_conn_params, meta_data=meta_data)
+        win = CyclePlotWindow(db_conn_params=db_conn_params, meta_data=meta_data)
         #win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
-        win.reader.start()
-        win.reader.meta_data = meta_data
+        win.load_data()
+        #win.reader.meta_data = meta_data
         win.show()
         sys.exit(app.exec())
     except Exception as e:

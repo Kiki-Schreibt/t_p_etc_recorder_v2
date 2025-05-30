@@ -95,16 +95,35 @@ class BaseQueryBuilder:
         clauses = []
         params = []
         prefix = self._is_constraint(base_query)
+
         for key, value in constraints.items():
-            is_min = 'min_' in key.lower()
-            normalized_key = key.replace('min_', '').replace('max_', '').lower()
-            matched_column = next((col for col in columns if normalized_key in col.lower()), None)
-            if matched_column:
-                operator = ">=" if is_min else "<="
-                clauses.append(f"{matched_column} {operator} %s")
+            if key.startswith("min_"):
+                field_name = key[len("min_"):]
+                operator = ">="
+            elif key.startswith("max_"):
+                field_name = key[len("max_"):]
+                operator = "<="
+            elif key.startswith("where_"):
+                field_name = key[len("where_"):]
+                operator = "="
+            else:
+                # unknown prefix → skip
+                continue
+
+            # find the actual column name that contains our field_name
+            matched = next(
+                (col for col in columns if field_name.lower() in col.lower()),
+                None
+            )
+            if matched:
+                clauses.append(f"{matched} {operator} %s")
                 params.append(value)
+
         if clauses:
-            return prefix + " AND ".join(clauses), tuple(params)
+            # join all clauses with AND, and prepend WHERE/AND as appropriate
+            clause_str = prefix + " AND ".join(clauses)
+            return clause_str, tuple(params)
+
         return "", ()
 
     def _build_query_part_time_constraints(self, time_range=None, base_query="", limit_amount=None):
@@ -313,8 +332,9 @@ class ETCQueryBuilder(BaseQueryBuilder):
         query_part += time_query
         values += time_vals
         if sample_id:
-            query_part += f" AND {self.etc_table.sample_id_small} = %s"
-            values += (sample_id,)
+            prefix = self._is_constraint(base_query + query_part)
+            query_part += f"{prefix}{self.etc_table.sample_id_small} = %s"
+            values    += (sample_id,)
         return query_part, values
 
 
