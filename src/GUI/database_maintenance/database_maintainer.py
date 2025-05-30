@@ -14,9 +14,9 @@ class MaintenanceThread(QThread):
     log = Signal(str)
     finished = Signal()
 
-    def __init__(self, db_params):
+    def __init__(self, db_conn_params):
         super().__init__()
-        self.db_params = db_params
+        self.db_params = db_conn_params
 
     def run(self):
         commands = [
@@ -49,10 +49,10 @@ class MaintenanceThread(QThread):
 
 
 class MaintenanceWindow(QMainWindow):
-    def __init__(self, db_params):
+    def __init__(self, db_conn_params):
         super().__init__()
         self.setWindowTitle("Database Maintenance")
-        self.db_params = db_params
+        self.db_params = db_conn_params
 
         # Log viewer
         self.log_view = QTextEdit()
@@ -105,6 +105,8 @@ class MaintenanceWindow(QMainWindow):
         # after a short pause, hide the bar again
         QTimer.singleShot(2000, lambda: self.progress.setVisible(False))
 
+    def closeEvent(self, event):
+        super().closeEvent(event)
 
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import GetConfig

@@ -89,6 +89,7 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionDicon_Simulator.triggered.connect(self._open_dicon_simulator)
         self.ui.actionSchedule_Creator.triggered.connect(self._open_schedule_creator)
         self.ui.actionUptake_Correction.triggered.connect(self._open_uptake_correction)
+        self.ui.actionDatabase_Maintenance.triggered.connect(self._open_database_maintainer)
 
     def open_test_planner(self):
         """
@@ -168,6 +169,11 @@ class MainProgram(RecordingMainWindow):
             self.controller.recorder.mb_processor.mb_conn_params = self.prev_mb_conn_params
         if recorder_was_running:
             self.controller.start_tp_recording()
+
+    def _open_database_maintainer(self):
+        from src.GUI.database_maintenance.database_maintainer import MaintenanceWindow
+        self.db_maintainer = MaintenanceWindow(db_conn_params=self.db_conn_params)
+        self.db_maintainer.show()
 
     def closeEvent(self, event):
         """

@@ -656,6 +656,7 @@
     <addaction name="actionDicon_Simulator"/>
     <addaction name="actionSchedule_Creator"/>
     <addaction name="actionUptake_Correction"/>
+    <addaction name="actionDatabase_Maintenance"/>
    </widget>
    <addaction name="menuView"/>
   </widget>
@@ -688,6 +689,11 @@
   <action name="actionUptake_Correction">
    <property name="text">
     <string>Uptake Correction</string>
+   </property>
+  </action>
+  <action name="actionDatabase_Maintenance">
+   <property name="text">
+    <string>Database Maintenance</string>
    </property>
   </action>
  </widget>
