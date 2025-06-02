@@ -89,6 +89,7 @@ class TableConfig:
         cycle_number_flag = "cycle_number_flag"
         de_hyd_state = 'de_hyd_state'
         test_info = 'test_info'
+        is_isotherm_flag = 'is_isotherm_flag'
 
         @classmethod
         def get_clean(cls, attribute_name):

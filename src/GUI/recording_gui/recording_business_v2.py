@@ -245,7 +245,6 @@ class DataRecorder(QObject):
         except Exception as e:
             self.logger.exception("Error updating is isotherm flag:")
 
-
     def _emit_etc_data(self, time_range):
         """
         Fetch ETC data within the specified time range and emit it via the newEtcDataWritten signal.
@@ -937,15 +936,13 @@ class CyclePlotWindow(pg.PlotWidget):
             reader = DataRetriever(db_conn_params=self.db_conn_params)
 
             constraints = {
-    "min_TotalCharTime": 0.33,
-    "max_TotalCharTime": 1,
-    "min_TotalTempIncr": 2,
-    "max_TotalTempIncr": 5
-}
-            join_table = TableConfig.TPDataTable.table_name
-            join_on = [(self.etc_table.time, TableConfig.TPDataTable.time)]
-            join_constraints = {TableConfig.TPDataTable.cycle_number_flag: True}
-            reader.qb.join_time_precision = "second"
+                "min_TotalCharTime": 0.33,
+                "max_TotalCharTime": 1,
+                "min_TotalTempIncr": 2,
+                "max_TotalTempIncr": 5,
+                "where_is_isotherm_flag": False
+                        }
+
             cols = [
                 self.etc_table.cycle_number,
                 self.etc_table.th_conductivity,
@@ -956,10 +953,7 @@ class CyclePlotWindow(pg.PlotWidget):
                 sample_id=self.meta_data.sample_id,
                 table_name=self.etc_table.table_name,
                 column_names=cols,
-                constraints=constraints,
-                join_on=join_on,
-                join_table=join_table,
-                join_constraints=join_constraints
+                constraints=constraints
             )
             if df.empty:
                 self.logger.info("No cycle ETC data for %s", meta_data.sample_id)

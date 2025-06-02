@@ -97,7 +97,8 @@ class DataRetriever:
         etc_table.cycle_number: 'cycle_number',
         etc_table.cycle_number_flag: 'cycle_number_flag',
         etc_table.de_hyd_state: 'de_hyd_state',
-        etc_table.test_info: 'test_info'
+        etc_table.test_info: 'test_info',
+        etc_table.is_isotherm_flag: 'is_isotherm_flag'
     }
 
     def __init__(self, db_conn_params):
@@ -912,6 +913,8 @@ class ExcelDataProcessor:
             df_etc[self.etc_table.temperature_sample] = None
             df_etc[self.etc_table.cycle_number] = None
             df_etc[self.etc_table.cycle_number_flag] = None
+            df_etc[self.etc_table.is_isotherm_flag] = False
+            df_etc[self.etc_table.test_info] = None
         pd.set_option('future.no_silent_downcasting', True)
         df_etc.replace('(no corr.)', 0, inplace=True)
 

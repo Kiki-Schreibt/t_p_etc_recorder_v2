@@ -262,10 +262,11 @@ class TableCreator:
 def create_database(config):
 
     query = f"CREATE DATABASE {config.db_conn_params["DB_DATABASE"]} WITH OWNER = {config.db_conn_params["DB_USERNAME"]}"
+    config.db_conn_params['DB_DATABASE'] = 'test'
     with DatabaseConnection(**config.db_conn_params) as db_conn:
+        db_conn.conn.autocommit = True
         db_conn.cursor.execute(query)
-        # Commit the changes and close the connection
-        db_conn.cursor.connection.commit()
+        db_conn.conn.autocommit = False
 
 
 def test_create_table_from_class():
@@ -280,9 +281,10 @@ def test_create_table_from_class():
 
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import GetConfig
+    #create_database(GetConfig())
     creator = TableCreator(db_conn_params=GetConfig().db_conn_params)
-    creator.__delete_table__(table_name="thermal_conductivity_xy_data")
-    creator.__delete_table__(table_name="thermal_conductivity_data")
+    #creator.__delete_table__(table_name="thermal_conductivity_xy_data")
+    #creator.__delete_table__(table_name="thermal_conductivity_data")
     creator.create_all_tables()
         # Accessing class attributes with and without escaped quotes
 
