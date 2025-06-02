@@ -936,10 +936,10 @@ class CyclePlotWindow(pg.PlotWidget):
             reader = DataRetriever(db_conn_params=self.db_conn_params)
 
             constraints = {
-                "min_TotalCharTime": 0.33,
-                "max_TotalCharTime": 1,
-                "min_TotalTempIncr": 2,
-                "max_TotalTempIncr": 5,
+                "min_TotalCharTime": 0.1,
+                "max_TotalCharTime": 1.5,
+                "min_TotalTempIncr": 0,
+                "max_TotalTempIncr": 10,
                 "where_is_isotherm_flag": False
                         }
 
@@ -993,10 +993,10 @@ class CyclePlotWindow(pg.PlotWidget):
         self.scatter_dehyd_inst.setData(x_d, y_d)
 
         # average
-        y_h_avg = df_th_avg_hyd[self.etc_table.get_clean("thermal_conductivity_average")]
-        y_d_avg = df_th_avg_dehyd[self.etc_table.get_clean("thermal_conductivity_average")]
-        self.scatter_hyd_avg.setData(x_h, y_h_avg)
-        self.scatter_dehyd_avg.setData(x_d, y_d_avg)
+        x_h_avg, y_h_avg = df_th_avg_hyd[self.etc_table.get_clean("cycle_number")], df_th_avg_hyd[self.etc_table.get_clean("thermal_conductivity_average")]
+        x_d_avg, y_d_avg = df_th_avg_dehyd[self.etc_table.get_clean("cycle_number")], df_th_avg_dehyd[self.etc_table.get_clean("thermal_conductivity_average")]
+        self.scatter_hyd_avg.setData(x_h_avg, y_h_avg)
+        self.scatter_dehyd_avg.setData(x_d_avg, y_d_avg)
 
         # auto‐range to new data
         self.enableAutoRange()
