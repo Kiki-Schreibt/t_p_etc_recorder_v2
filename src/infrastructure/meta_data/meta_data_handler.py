@@ -274,7 +274,7 @@ class MetaData:
             self.enthalpy = enthalpy
             self.entropy = entropy
             self.theoretical_uptake = wt_theoretical
-            self.write()
+            #self.write()
             return enthalpy, entropy, wt_theoretical
 
         elif wt_theoretical:

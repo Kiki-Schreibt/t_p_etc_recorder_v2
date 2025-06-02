@@ -769,7 +769,6 @@ class CSVCounter:
         self.logger.info(f"Precise cycle count and uptake calculation for {sample_id} finished")
 
     def _update_meta_data_in_database(self, meta_data):
-        pass
         data_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         table = self.cycle_table
         df_cycle = data_retriever.fetch_data_by_sample_id_2(sample_id=meta_data.sample_id, table_name=table.table_name)
@@ -845,6 +844,7 @@ def import_all(compress_data=False):
         csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)
         csv_processor.process()
         #csv_processor.count_cycles(sample_id=sample_id)
+
         write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
         print(f"{sample_id} processed")
 
@@ -979,12 +979,3 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 #Methods for usage
 if __name__ == '__main__':
     import_all()
-    #from src.config_connection_reading_management.config_reader import GetConfig
-    #config = GetConfig()
-    #from src.meta_data.meta_data_handler import MetaData
-    #sample_ids = ['WAE-WA-040', 'WAE-WA-028', 'WAE-WA-030']
-    #for sample_id in sample_ids:
-    #    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
-    #    cycle_counter = CSVCounter(config=config)
-    #    cycle_counter._update_meta_data_in_database(meta_data=meta_data)
-

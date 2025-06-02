@@ -558,7 +558,7 @@ class MainWindow(QMainWindow):
 
             self.config = config
             self.setWindowTitle("T-p ETC Recorder")
-            from src.GUI.qt_styles import aqua as style
+            from src.GUI.qt_styles import gpt_dark as style
             self.setStyleSheet(style)
             self.setFont(FONT)
             self.logger = logging.getLogger(__name__)

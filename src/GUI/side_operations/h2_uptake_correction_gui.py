@@ -210,6 +210,8 @@ class UptakeCorrectionUi(QMainWindow):
         dt0 = datetime.fromtimestamp(t0, tz=local_tz)
         dt1 = datetime.fromtimestamp(t1, tz=local_tz)
         self.current_time_range = [dt0, dt1]
+        if self.backend:
+            self.backend.time_range_to_load = self.current_time_range
 
 
 class UptakeCorrectionWindow(UptakeCorrectionUi):
@@ -234,7 +236,6 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         self.show_info_button.clicked.connect(self._on_show_cycle_info)
         self.update_isotherm_flag_button.clicked.connect(self._on_update_isotherm_flag)
 
-
         self.df_uncounted_cycles = pd.DataFrame()
         self._uncounted_idx = 0
 
@@ -249,6 +250,8 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
             self.config
         )
         self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
+        self.backend.cycle_updated_sig.connect(self._delete_cycle_from_uncounted_df)
+
         try:
             self.backend.load_min_max_data()
             self.backend.calculate_uptake()
@@ -323,6 +326,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
                 self.config
             )
             self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
+            self.backend.cycle_updated_sig.connect(self._delete_cycle_from_uncounted_df)
         self.backend.load_uncounted_cycles()
         self._uncounted_idx = 0
         if not self.df_uncounted_cycles.empty:
@@ -338,8 +342,6 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         Slot to receive the DataFrame of un-counted cycles from backend.
         """
         self.df_uncounted_cycles = df
-        if self.backend:
-            self.backend.uncounted_cycles_emitted.connect(self._delete_cycle_from_uncounted_df)
 
     def _show_uncounted_cycle(self):
         """
@@ -392,12 +394,15 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         if not self.current_time_range:
             self._on_region_changed()
 
-        self.backend = UptakeCorrectionBackend(
-            self.meta_data,
-            self.current_time_range,
-            self.config
-        )
-        self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
+        if not self.backend:
+            self.backend = UptakeCorrectionBackend(
+                self.meta_data,
+                self.current_time_range,
+                self.config
+            )
+            self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
+            self.backend.cycle_updated_sig.connect(self._delete_cycle_from_uncounted_df)
+
         self.backend.load_min_max_data()
 
         last = self.backend.df_all_loaded.iloc[-1]
@@ -405,11 +410,18 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         current_de_hyd_state = last[self.backend.tp_table.de_hyd_state]
         current_uptake = last[self.backend.tp_table.h2_uptake]
 
+        if current_uptake is not None:
+            uptake_str = f"{current_uptake:.2f} wt-%"
+        else:
+            uptake_str = "N/A"
+
         self.info_text_edit.append(
             f"Info about loaded data:\n"
             f"{self.current_time_range[0]:%Y-%m-%d %H:%M:%S} → "
             f"{self.current_time_range[1]:%Y-%m-%d %H:%M:%S}\n"
-            f"Cycle Number: {current_cycle}, State: {current_de_hyd_state}, H2 Uptake = {current_uptake:.2f} wt-%"
+            f"Cycle Number: {current_cycle}, "
+            f"State: {current_de_hyd_state}, "
+            f"H2 Uptake = {uptake_str} wt-%"
         )
 
     def _delete_cycle_from_uncounted_df(self, cycle_number):
@@ -434,6 +446,10 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
                 self.current_time_range,
                 self.config
             )
+            self.backend.df_uncounted_cycles_sig.connect(self._receive_uncounted_cycles)
+            self.backend.cycle_updated_sig.connect(self._delete_cycle_from_uncounted_df)
+
+        self.backend.time_range_to_update = list(self.current_time_range)
         self.backend.is_isotherm = self.isotherm_checkbox.isChecked()
         self.info_text_edit.append("Updating isotherm flags…")
         self.update_isotherm_flag_button.setEnabled(False)
@@ -610,7 +626,6 @@ class UptakeCorrectionBackend(QObject):
             col_to_match=self.tp_table.cycle_number,
             update_between_vals=self.cycle_to_update
         )
-        #todo: update is_isotherm_flag for tp and etc data
 
         if self.uncounted_cycles_emitted:
             self.cycle_updated_sig.emit(self.cycle_to_update)
@@ -666,11 +681,6 @@ class UptakeCorrectionBackend(QObject):
         if not self.time_range_to_update:
             raise RuntimeError("No time range selected for isotherm‐flag update.")
 
-        t0, t1 = self.time_range_to_update
-        tp_col = self.tp_table.is_isotherm_flag         # e.g. "is_isotherm_flag"
-        etc_col = self.etc_table.is_isotherm_flag       # e.g. "is_isotherm_flag"
-        time_col_tp  = self.tp_table.time               # e.g. "time"
-        time_col_etc = self.etc_table.time              # e.g. "Time"
         update_df_tp = pd.Series({self.tp_table.is_isotherm_flag: self.is_isotherm})
         update_df_etc = pd.Series({self.etc_table.is_isotherm_flag: self.is_isotherm})
 
@@ -690,6 +700,9 @@ class UptakeCorrectionBackend(QObject):
             update_df=update_df_etc,
             col_to_match=self.etc_table.time,
             update_between_vals=self.time_range_to_update)
+
+        self.is_isotherm = None
+        self.time_range_to_update = None
 
     def stop(self):
         """
@@ -759,6 +772,7 @@ class UpdateIsothermWorker(QObject):
             self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
+
 
 def main():
     """

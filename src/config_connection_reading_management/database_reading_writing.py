@@ -91,7 +91,7 @@ class DataRetriever:
         etc_table.temperature_drift_rec: 'Tempdrift rec',
         etc_table.notes: 'Notes',
         etc_table.resistance: 'Rs',
-        etc_table.sample_id_small: '"Sample_ID"',
+        etc_table.sample_id_small: '"sample_id"',
         etc_table.pressure: 'pressure',
         etc_table.temperature_sample: 'temperature_sample',
         etc_table.cycle_number: 'cycle_number',
@@ -247,10 +247,7 @@ class DataRetriever:
             join_on=join_on,
             join_constraints=join_constraints
         )
-        print("Generated Query:")
-        print(query)
-        print("With values:")
-        print(values)
+
         return self.execute_fetching(
             query=query,
             column_names=column_names,
@@ -579,7 +576,11 @@ class DataBaseManipulator:
             return False
 
         table_name = table.table_name
-        sample_id_col = table.sample_id
+        if table_name == TableConfig().ETCDataTable.table_name:
+            sample_id_col = table.sample_id_small
+        else:
+            sample_id_col = table.sample_id
+
         if isinstance(update_df, pd.DataFrame):
             cols_to_update = [f"{col} = %s" for col in update_df.columns]
             tuple_values = tuple(update_df.iloc[0])
@@ -612,6 +613,8 @@ class DataBaseManipulator:
 
         with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
+                #print(query)
+                #print(f"Values: {values}")
                 db_conn.cursor.execute(query, values)
                 db_conn.cursor.connection.commit()
                 # Extract just the column names (drop the " = %s")
