@@ -108,6 +108,7 @@ class MaintenanceWindow(QMainWindow):
     def closeEvent(self, event):
         super().closeEvent(event)
 
+
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import GetConfig
 

@@ -2,7 +2,7 @@
 import pandas as pd
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QTextEdit, QPushButton, QMessageBox, QApplication
+    QTextEdit, QPushButton, QMessageBox, QApplication, QCheckBox
 )
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Signal, QObject, Slot, QThread
@@ -153,6 +153,14 @@ class UptakeCorrectionUi(QMainWindow):
         self.update_button.setFixedWidth(150)
         btn_layout.addWidget(self.update_button)
 
+        self.update_isotherm_flag_button = QPushButton("Update Isotherm Flag")
+        self.update_isotherm_flag_button.setFixedWidth(160)
+        btn_layout.addWidget(self.update_isotherm_flag_button)
+
+        self.isotherm_checkbox = QCheckBox("Set Isotherm Flag to: ")
+        self.isotherm_checkbox.setChecked(True)           # default state
+        btn_layout.addWidget(self.isotherm_checkbox)
+
         btn_layout.addStretch()
         main_layout.addLayout(btn_layout)
 
@@ -224,6 +232,8 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         self.prev_cycle_button.clicked.connect(self._on_prev_cycle)
         self.next_cycle_button.clicked.connect(self._on_next_cycle)
         self.show_info_button.clicked.connect(self._on_show_cycle_info)
+        self.update_isotherm_flag_button.clicked.connect(self._on_update_isotherm_flag)
+
 
         self.df_uncounted_cycles = pd.DataFrame()
         self._uncounted_idx = 0
@@ -263,6 +273,8 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
                 f" → {self.current_time_range[1]:%Y-%m-%d %H:%M:%S}"
             )
             self.update_button.setEnabled(False)
+
+            self.backend.time_range_to_update = list(self.current_time_range)
 
             self._update_thread = QThread(self)
             self._update_worker = UpdateWorker(self.backend)
@@ -410,6 +422,49 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
             )
         self._uncounted_idx -= 1
 
+    def _on_update_isotherm_flag(self):
+        """
+        Start a background thread to run backend.update_isotherm_flag()
+        on both TP and ETC tables.
+        """
+        if not self.backend:
+            # If no backend yet, initialize it (using current_time_range or None)
+            self.backend = UptakeCorrectionBackend(
+                self.meta_data,
+                self.current_time_range,
+                self.config
+            )
+        self.backend.is_isotherm = self.isotherm_checkbox.isChecked()
+        self.info_text_edit.append("Updating isotherm flags…")
+        self.update_isotherm_flag_button.setEnabled(False)
+
+        # Create a QThread and worker, just like in _on_update_data:
+        self._iso_thread = QThread(self)
+        self._iso_worker = UpdateIsothermWorker(self.backend)
+        self._iso_worker.moveToThread(self._iso_thread)
+
+        self._iso_thread.started.connect(self._iso_worker.run)
+        self._iso_worker.finished.connect(self._on_iso_finished)
+        self._iso_worker.error.connect(self._on_iso_error)
+        self._iso_worker.progress.connect(self.info_text_edit.append)
+
+        # Clean up when done:
+        self._iso_worker.finished.connect(self._iso_thread.quit)
+        self._iso_worker.finished.connect(self._iso_worker.deleteLater)
+        self._iso_thread.finished.connect(self._iso_thread.deleteLater)
+
+        self._iso_thread.start()
+
+    def _on_iso_finished(self):
+        """Called when isotherm‐flag update completes successfully."""
+        self.info_text_edit.append("Isotherm‐flag update complete.")
+        self.update_isotherm_flag_button.setEnabled(True)
+
+    def _on_iso_error(self, errmsg):
+        """Called if isotherm‐flag update raises an error."""
+        QMessageBox.critical(self, "Isotherm Update Error", errmsg)
+        self.update_isotherm_flag_button.setEnabled(True)
+
     def closeEvent(self, event):
         """
         Ensure backend cleanup on window close.
@@ -429,6 +484,8 @@ class UptakeCorrectionBackend(QObject):
     """
     df_uncounted_cycles_sig = Signal(pd.DataFrame)
     cycle_updated_sig = Signal(float)
+    time_range_to_update = None
+    is_isotherm = None
 
     def __init__(self, meta_data, time_range_to_load, config):
         """
@@ -553,8 +610,11 @@ class UptakeCorrectionBackend(QObject):
             col_to_match=self.tp_table.cycle_number,
             update_between_vals=self.cycle_to_update
         )
+        #todo: update is_isotherm_flag for tp and etc data
+
         if self.uncounted_cycles_emitted:
-            self.cycle_updated_sig.emti(self.cycle_to_update)
+            self.cycle_updated_sig.emit(self.cycle_to_update)
+        self.time_range_to_update = None
 
     def _create_series_to_update(self):
         """
@@ -598,6 +658,39 @@ class UptakeCorrectionBackend(QObject):
         self.df_uncounted_cycles_sig.emit(df.copy())
         self.uncounted_cycles_emitted = True
 
+    def update_isotherm_flag(self):
+        """
+        Update the TP and ETC tables’ is_isotherm_flag = TRUE
+        for all rows whose timestamp lies in self.time_range_to_update.
+        """
+        if not self.time_range_to_update:
+            raise RuntimeError("No time range selected for isotherm‐flag update.")
+
+        t0, t1 = self.time_range_to_update
+        tp_col = self.tp_table.is_isotherm_flag         # e.g. "is_isotherm_flag"
+        etc_col = self.etc_table.is_isotherm_flag       # e.g. "is_isotherm_flag"
+        time_col_tp  = self.tp_table.time               # e.g. "time"
+        time_col_etc = self.etc_table.time              # e.g. "Time"
+        update_df_tp = pd.Series({self.tp_table.is_isotherm_flag: self.is_isotherm})
+        update_df_etc = pd.Series({self.etc_table.is_isotherm_flag: self.is_isotherm})
+
+        from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
+        dbm = DataBaseManipulator(db_conn_params=self.db_conn_params)
+
+        dbm.update_data(
+            sample_id=self.meta_data.sample_id,
+            table=self.tp_table,
+            update_df=update_df_tp,
+            col_to_match=self.tp_table.time,
+            update_between_vals=self.time_range_to_update)
+
+        dbm.update_data(
+            sample_id=self.meta_data.sample_id,
+            table=self.etc_table,
+            update_df=update_df_etc,
+            col_to_match=self.etc_table.time,
+            update_between_vals=self.time_range_to_update)
+
     def stop(self):
         """
         Cleanup any resources (e.g. data retriever) when the UI closes.
@@ -639,6 +732,33 @@ class UpdateWorker(QObject):
         except Exception as e:
             self.error.emit(str(e))
 
+
+class UpdateIsothermWorker(QObject):
+    """
+    Worker to run backend.update_isotherm_flag() off the main thread.
+
+    Signals:
+        finished (): emitted when update_isotherm_flag() completes.
+        error (str): emitted with an error message if update_isotherm_flag() fails.
+        progress (str): emitted with intermediate status updates.
+    """
+    finished = Signal()
+    error = Signal(str)
+    progress = Signal(str)
+
+    def __init__(self, backend):
+        super().__init__()
+        self.backend = backend
+
+    @Slot()
+    def run(self):
+        try:
+            self.progress.emit("Starting isotherm‐flag update…")
+            self.backend.update_isotherm_flag()
+            self.progress.emit("Done updating isotherm flags.")
+            self.finished.emit()
+        except Exception as e:
+            self.error.emit(str(e))
 
 def main():
     """

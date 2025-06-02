@@ -563,7 +563,7 @@ class MainWindow(QMainWindow):
             self.setFont(FONT)
             self.logger = logging.getLogger(__name__)
 
-            ##QTimer for memory logging. Can be deleted
+#            QTimer for memory logging. Can be deleted
             from src.infrastructure.utils.memory_logger import log_memory
             from PySide6.QtCore import QTimer
             self.memory_timer = QTimer()
@@ -574,7 +574,7 @@ class MainWindow(QMainWindow):
             log_memory(logger=self.logger,
                        message="Memory after QTimer timeout")
 
-            ## End of QTimer implementation
+#           End of QTimer implementation
 
 
 

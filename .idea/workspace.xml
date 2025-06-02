@@ -6,11 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/database_maintenance/database_maintainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/database_maintenance/database_maintainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,7 +151,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\tests" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.recording_business_v2">
+  <component name="RunManager" selected="Python.h2_uptake_correction_gui">
     <configuration name="csv_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -175,7 +174,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="database_maintainer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -184,11 +183,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/database_maintenance" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/database_maintenance/database_maintainer.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -197,7 +196,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="query_builder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="h2_uptake_correction_gui" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -206,11 +205,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/config_connection_reading_management" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/side_operations" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/config_connection_reading_management/query_builder.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -265,11 +264,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.h2_uptake_correction_gui" />
+        <item itemvalue="Python.csv_handler" />
+        <item itemvalue="Python.database_maintainer" />
         <item itemvalue="Python.recording_business_v2" />
         <item itemvalue="Python.table_creator" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.csv_handler" />
-        <item itemvalue="Python.query_builder" />
       </list>
     </recent_temporary>
   </component>
@@ -355,6 +354,11 @@
           <url>file://$PROJECT_DIR$/src/tp_program_simulator.py</url>
           <line>218</line>
           <option name="timeStamp" value="525" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="568" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
