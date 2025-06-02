@@ -96,7 +96,8 @@ class DataRetriever:
         etc_table.temperature_sample: 'temperature_sample',
         etc_table.cycle_number: 'cycle_number',
         etc_table.cycle_number_flag: 'cycle_number_flag',
-        etc_table.de_hyd_state: 'de_hyd_state'
+        etc_table.de_hyd_state: 'de_hyd_state',
+        etc_table.test_info: 'test_info'
     }
 
     def __init__(self, db_conn_params):

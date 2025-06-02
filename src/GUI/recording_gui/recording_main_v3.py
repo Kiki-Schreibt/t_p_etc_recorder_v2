@@ -527,6 +527,16 @@ class MainController:
         except Exception as e:
             self.logger.exception("Error toggling Is Isotherm Flag in MainController:")
 
+    def update_test_info_from_ui(self, info_string):
+        """
+        Enable or disable hydrogen uptake measurements.
+        """
+        try:
+            if self.recorder:
+                self.recorder.update_additional_test_info(info_string)
+        except Exception as e:
+            self.logger.exception("Error updating additional test info in MainController:")
+
     def is_tp_recording_running(self):
         return self.recorder.is_tp_thread_running()
 
@@ -656,6 +666,7 @@ class MainWindow(QMainWindow):
             self.ui.MinTempIncEditField.editingFinished.connect(self._on_constraints_changed)
             self.ui.MaxTempIncEditField.editingFinished.connect(self._on_constraints_changed)
 
+            self.ui.additional_test_info_edit_field.editingFinished.connect(self._on_test_info_changed)
         except Exception as e:
             self.logger.exception("Error initializing connections in MainWindow:")
 
@@ -947,6 +958,13 @@ class MainWindow(QMainWindow):
             self.controller.update_sample_id(meta_data.sample_id)
         except Exception as e:
             self.logger.exception("Error in _meta_data_received:")
+
+    def _on_test_info_changed(self):
+        try:
+            info_str = self.ui.additional_test_info_edit_field.text() or None
+            self.controller.update_test_info_from_ui(info_string=info_str)
+        except Exception as e:
+            self.logger.error(f"Error updating test info {e}")
 
     def _toggle_button(self, button, start_text, stop_text, is_on):
         """

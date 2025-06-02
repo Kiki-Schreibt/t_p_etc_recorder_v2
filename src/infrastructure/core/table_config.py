@@ -23,6 +23,7 @@ class TableConfig:
         cycle_length_flag = 'cycle_length_flag'
         eq_pressure_real = 'eq_pressure_real'
         is_isotherm_flag = 'is_isotherm_flag'
+        test_info = 'test_info'
 
     class ETCDataTable:
         table_name = 'thermal_conductivity_data'
@@ -87,6 +88,7 @@ class TableConfig:
         cycle_number = "cycle_number"
         cycle_number_flag = "cycle_number_flag"
         de_hyd_state = 'de_hyd_state'
+        test_info = 'test_info'
 
         @classmethod
         def get_clean(cls, attribute_name):

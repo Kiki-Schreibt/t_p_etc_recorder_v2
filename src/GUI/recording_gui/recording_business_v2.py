@@ -62,6 +62,7 @@ class DataRecorder(QObject):
     h2_uptake_flag = None
     cycling_flag = None
     is_isotherm_flag = None
+    additional_test_info = None
 
     def __init__(self, meta_data: object,
                          config,
@@ -134,6 +135,8 @@ class DataRecorder(QObject):
             self.mb_processor.mb_data_handler.is_isotherm_flag = self.is_isotherm_flag
         if self.h2_uptake_flag:
             self.mb_processor.mb_data_handler.h2_uptake_flag = self.h2_uptake_flag
+        if self.additional_test_info:
+            self.mb_processor.mb_data_handler.additional_test_info = self.additional_test_info
         try:
             if self._mb_thread is None:
                 self._mb_thread = threading.Thread(target=self.mb_processor.run, daemon=True)
@@ -229,6 +232,19 @@ class DataRecorder(QObject):
             self.logger.info(f"Is isothermal measurement set to: {flag}")
         except Exception as e:
             self.logger.exception("Error updating is isotherm flag:")
+
+    def update_additional_test_info(self, info_str):
+        """
+        Update the is isotherm flag in the processors.
+        """
+        try:
+            with self._update_lock:
+                self.mb_processor.mb_data_handler.additional_test_info = info_str
+                self.additional_test_info = info_str
+            self.logger.info(f"Additional test info set to: {info_str}")
+        except Exception as e:
+            self.logger.exception("Error updating is isotherm flag:")
+
 
     def _emit_etc_data(self, time_range):
         """
@@ -927,9 +943,9 @@ class CyclePlotWindow(pg.PlotWidget):
     "max_TotalTempIncr": 5
 }
             join_table = TableConfig.TPDataTable.table_name
-            join_on = [(self.etc_table.cycle_number, TableConfig.TPDataTable.cycle_number)]
+            join_on = [(self.etc_table.time, TableConfig.TPDataTable.time)]
             join_constraints = {TableConfig.TPDataTable.cycle_number_flag: True}
-
+            reader.qb.join_time_precision = "second"
             cols = [
                 self.etc_table.cycle_number,
                 self.etc_table.th_conductivity,
@@ -991,7 +1007,6 @@ class CyclePlotWindow(pg.PlotWidget):
         # auto‐range to new data
         self.enableAutoRange()
         self.update()
-
 
 
 # -------------------------------

@@ -105,7 +105,8 @@ class TableCreator:
                             'temperature_sample': 'real',
                             'time': 'timestamp with time zone',
                             '_default': 'TEXT',
-                            'eq_pressure_real': 'real'# Default data type
+                            'eq_pressure_real': 'real',
+                            'test_info': 'text'# Default data type
                             }
 
             if "conductivity" in table_name:
@@ -170,7 +171,8 @@ class TableCreator:
                                'pressure': 'real',
                                'sample_id': 'text',
                                'temperature_sample': 'real',
-                               '_default': 'TEXT'  # Default data type
+                               '_default': 'TEXT',
+                               'test_info': 'text'# Default data type
                              }
 
             if "xy" in table_name:

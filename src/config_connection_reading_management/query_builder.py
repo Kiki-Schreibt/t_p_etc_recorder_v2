@@ -30,7 +30,7 @@ class BaseQueryBuilder:
     """
     Base query builder with common helper methods.
     """
-    def __init__(self, db_conn_params):
+    def __init__(self, db_conn_params, join_time_precision=""):
         self.logger = logging.getLogger(__name__)
         self.db_conn_params = db_conn_params
         self.table_config = TableConfig()
@@ -39,6 +39,7 @@ class BaseQueryBuilder:
         self.etc_xy_table = self.table_config.ThermalConductivityXyDataTable
         self.cycle_data_table = self.table_config.CycleDataTable
         self.meta_data_table = self.table_config.MetaDataTable
+        self.join_time_precision = join_time_precision
 
     def _normalize_table_names(self, table_name=None, column_names=None):
         if "t_p" in table_name.lower():
@@ -78,6 +79,8 @@ class BaseQueryBuilder:
             FROM main_table AS m
             JOIN join_table AS j ON m.col1 = j.colA AND m.col2 = j.colB
         """
+
+        print(self.join_time_precision)
         main_table, col_str = self._normalize_table_names(table_name, column_names)
         if not join_table:
             return f"SELECT {col_str} FROM {main_table}"
@@ -86,8 +89,16 @@ class BaseQueryBuilder:
         alias_m = "m"; alias_j = "j"
         # build ON clauses from join_on pairs
         on_clauses = []
+
         for mcol, jcol in (join_on or []):
-            on_clauses.append(f"{alias_m}.{mcol} = {alias_j}.{jcol}")
+            if self.join_time_precision == "second":
+                left  = f"date_trunc('second', {alias_m}.{mcol})"
+                right = f"date_trunc('second', {alias_j}.{jcol})"
+            else:
+                left  = f"{alias_m}.{mcol}"
+                right = f"{alias_j}.{jcol}"
+            on_clauses.append(f"{left} = {right}")
+
         on_sql = " AND ".join(on_clauses) if on_clauses else "1=1"
 
         # re‐prefix all selected columns with m.
@@ -545,8 +556,9 @@ class CycleDataQueryBuilder(BaseQueryBuilder):
             values     += (sample_id,)
 
         time_col = self._get_time_column(base_query)
+        base_query += query_part
         base_query += f" ORDER BY {time_col}"
-        return base_query + query_part, values
+        return base_query, values
 
 
 class MetaDataQueryBuilder(BaseQueryBuilder):
