@@ -956,7 +956,7 @@ class CyclePlotWindow(pg.PlotWidget):
                 constraints=constraints
             )
             if df.empty:
-                self.logger.info("No cycle ETC data for %s", meta_data.sample_id)
+                self.logger.info("No cycle ETC data for %s", self.meta_data.sample_id)
                 return
 
             if not df.empty:
@@ -1085,17 +1085,20 @@ def test_xy_read_plot():
 
 
 if __name__ == '__main__':
+
     try:
         from PySide6.QtWidgets import QApplication
         app = QApplication([])
 
         from src.infrastructure.core.config_reader import GetConfig
         from src.infrastructure.meta_data.meta_data_handler import MetaData
+
         db_conn_params = GetConfig().db_conn_params
         meta_data = MetaData('WAE-WA-028', db_conn_params=db_conn_params)
-        win = CyclePlotWindow(db_conn_params=db_conn_params, meta_data=meta_data)
+        win = test_read_plot_tp_dependent()
+        #win = CyclePlotWindow(db_conn_params=db_conn_params, meta_data=meta_data)
         #win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
-        win.load_data()
+        #win.load_data()
         #win.reader.meta_data = meta_data
         win.show()
         sys.exit(app.exec())

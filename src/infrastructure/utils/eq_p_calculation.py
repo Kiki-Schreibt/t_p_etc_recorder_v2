@@ -24,8 +24,9 @@ class VantHoffCalcEq:
         self.logger = logging.getLogger(__name__)
         self.db_conn_params = db_conn_params or {}
         self.meta_data = meta_data
-        if self.meta_data.sample_id:
-            self.enthalpy, self.entropy = self._get_enthalpy_entropy(enthalpy, entropy, hydride)
+        #if self.meta_data:
+        #    if self.meta_data.sample_id:
+        self.enthalpy, self.entropy = self._get_enthalpy_entropy(enthalpy, entropy, hydride)
 
     def _get_enthalpy_entropy(self, enthalpy: float, entropy: float, hydride: str) -> tuple:
         # Check if meta_data provides the values

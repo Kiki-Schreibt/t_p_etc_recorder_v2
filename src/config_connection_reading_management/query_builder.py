@@ -485,10 +485,14 @@ class ETCQueryBuilder(BaseQueryBuilder):
         time_query, time_vals = self._build_query_part_time_constraints(
             time_range=time_window, base_query=base_query
         )
-        sample_id_col_name = self._aliased_column_name(column_name=self.etc_table.sample_id_small, base_query=base_query)
-        prefix           = self._is_constraint(base_query)
-        base_query += time_query + f" {prefix} {sample_id_col_name} = %s"
-        values += time_vals + (sample_id,)
+        values += time_vals
+        base_query += time_query
+        if sample_id:
+            sample_id_col_name = self._aliased_column_name(column_name=self.etc_table.sample_id_small, base_query=base_query)
+            prefix           = self._is_constraint(base_query)
+            values += (sample_id,)
+            base_query += f" {prefix} {sample_id_col_name} = %s"
+
 
         # 5) finish with ORDER BY
         time_col = self._get_time_column(base_query)

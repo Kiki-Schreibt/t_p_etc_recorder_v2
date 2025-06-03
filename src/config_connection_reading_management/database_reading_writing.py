@@ -277,6 +277,8 @@ class DataRetriever:
             join_on=join_on,
             join_constraints=join_constraints
         )
+        print(query)
+        print(f"With Values: {values}")
         return self.execute_fetching(
             query=query,
             column_names=column_names,
