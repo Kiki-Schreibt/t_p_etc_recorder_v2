@@ -297,19 +297,12 @@ takezo = """
         
         
         QTreeView::branch:has-children:!has-siblings:closed,
-        QTreeView::branch:closed:has-children:has-siblings 
-        {
-            image: url(://tree-closed.png);
         
-        }
         
         
         QTreeView::branch:open:has-children:!has-siblings,
         QTreeView::branch:open:has-children:has-siblings  
-        {
-            image: url(://tree-open.png);
         
-        }
         
         
         /*-----QLineEdit-----*/
@@ -385,7 +378,7 @@ takezo = """
         
         QComboBox::down-arrow 
         {
-            image: url(://arrow-down.png);
+            
             width:8px;
             height:8px;
         
@@ -459,7 +452,7 @@ takezo = """
         
         QSpinBox::up-arrow 
         {
-            image: url(://arrow-up.png);
+            
             width: 7px;
             height: 7px;
         
@@ -492,7 +485,7 @@ takezo = """
         
         QSpinBox::down-arrow 
         {
-            image: url(://arrow-down.png);
+            
             width: 7px;
             height: 7px;
         
@@ -2153,18 +2146,7 @@ QCheckBox::indicator, QRadioButton::indicator {
     width: 16px;
     height: 16px;
 }
-QCheckBox::indicator {
-    image: url(:/icons/checkbox_off.png);
-}
-QCheckBox::indicator:checked {
-    image: url(:/icons/checkbox_on.png);
-}
-QRadioButton::indicator {
-    image: url(:/icons/radio_off.png);
-}
-QRadioButton::indicator:checked {
-    image: url(:/icons/radio_on.png);
-}
+
 
 /* Line edits, Text edits, Combo boxes */
 QLineEdit, QTextEdit, QPlainTextEdit, QComboBox {
