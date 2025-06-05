@@ -183,41 +183,6 @@ class ReadData(QThread):
             }
         return None
 
-    def _read_t_p(self, cursor=None, desc_limit=1, time_range=None):
-        table = TableConfig().TPDataTable
-        table_name = table.table_name
-        try:
-            if not cursor:
-                if time_range:
-                    previous_limit = self.db_retriever.limit_datapoints
-                    self.db_retriever.limit_datapoints = desc_limit
-                    df = self.db_retriever.fetch_data_by_time_2(
-                        time_range=time_range,
-                        table_name=table_name,
-                        sample_id=self.meta_data.sample_id)
-                    self.db_retriever.limit_datapoints = previous_limit
-                    return df
-                else:
-                    return pd.DataFrame()
-
-            df = self.db_retriever.fetch_latest_records(
-                table_name=table_name,
-                cursor=cursor,
-                constraints=self.constraints_t_p,
-                desc_limit=desc_limit,
-                sample_id=self.meta_data.sample_id)
-            if not df.empty:
-                df = df.sort_values(by=table.time, ascending=True)
-            if not df[table.sample_id].iloc[-1] == self.meta_data.sample_id:
-                from src.infrastructure.meta_data.meta_data_handler import MetaData
-                self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1], db_conn_params=self.db_conn_params)
-                self.meta_data_sig.emit(self.meta_data)
-                self.logger.info("Sample ID changed to %s", self.meta_data.sample_id)
-            return df
-        except Exception as e:
-            self.logger.error("Error while loading T-p data: %s", e)
-            return pd.DataFrame()
-
     def _read_data_by_time(self):
         start_str = end_str = ""
         if self.time_range_to_read:
@@ -254,6 +219,56 @@ class ReadData(QThread):
         del df_t_p
         self.logger.info("Finished reading T-p and etc data")
 
+    def _read_etc(self, time_range):
+        table = TableConfig().ETCDataTable
+        cols = (table.time, table.th_conductivity, table.thermal_conductivity_average)
+        try:
+            df = self.db_retriever.fetch_data_by_time_2(
+                time_range=time_range,
+                table_name=table.table_name,
+                column_names=cols,
+                constraints=self.constraints_etc,
+                sample_id=self.meta_data.sample_id)
+            return df
+        except Exception as e:
+            self.logger.error("Error while loading ETC data: %s", e)
+            return pd.DataFrame()
+
+    def _read_t_p(self, cursor=None, desc_limit=1, time_range=None):
+        table = TableConfig().TPDataTable
+        table_name = table.table_name
+        try:
+            if not cursor:
+                if time_range:
+                    previous_limit = self.db_retriever.limit_datapoints
+                    self.db_retriever.limit_datapoints = desc_limit
+                    df = self.db_retriever.fetch_data_by_time_2(
+                        time_range=time_range,
+                        table_name=table_name,
+                        sample_id=self.meta_data.sample_id)
+                    self.db_retriever.limit_datapoints = previous_limit
+                    return df
+                else:
+                    return pd.DataFrame()
+
+            df = self.db_retriever.fetch_latest_records(
+                table_name=table_name,
+                cursor=cursor,
+                constraints=self.constraints_t_p,
+                desc_limit=desc_limit,
+                sample_id=self.meta_data.sample_id)
+            if not df.empty:
+                df = df.sort_values(by=table.time, ascending=True)
+            if not df[table.sample_id].iloc[-1] == self.meta_data.sample_id:
+                from src.infrastructure.meta_data.meta_data_handler import MetaData
+                self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1], db_conn_params=self.db_conn_params)
+                self.meta_data_sig.emit(self.meta_data)
+                self.logger.info("Sample ID changed to %s", self.meta_data.sample_id)
+            return df
+        except Exception as e:
+            self.logger.error("Error while loading T-p data: %s", e)
+            return pd.DataFrame()
+
     def _separate_and_append_t_p(self, df_t_p):
         table = TableConfig().TPDataTable
         time_temperature_columns = [col for col in df_t_p.columns if "time" in col.lower()
@@ -281,21 +296,6 @@ class ReadData(QThread):
         for col in numeric_cols:
             df.loc[df[col] > self.T_max, col] = np.nan
         return df
-
-    def _read_etc(self, time_range):
-        table = TableConfig().ETCDataTable
-        cols = (table.time, table.th_conductivity, table.thermal_conductivity_average)
-        try:
-            df = self.db_retriever.fetch_data_by_time_2(
-                time_range=time_range,
-                table_name=table.table_name,
-                column_names=cols,
-                constraints=self.constraints_etc,
-                sample_id=self.meta_data.sample_id)
-            return df
-        except Exception as e:
-            self.logger.error("Error while loading ETC data: %s", e)
-            return pd.DataFrame()
 
     def _read_emit_uptake_last_cycle(self):
         table = TableConfig().CycleDataTable

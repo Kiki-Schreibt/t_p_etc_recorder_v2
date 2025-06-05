@@ -164,6 +164,7 @@ class DataRetriever:
                 join_on=join_on,
                 join_constraints=join_constraints
                 )
+
         elif sample_id and not time_range:
             tp_data = self.fetch_data_by_sample_id_2(
                 sample_id=sample_id,
@@ -178,6 +179,7 @@ class DataRetriever:
                 min_time = tp_data['time'].min()
                 max_time = tp_data['time'].max()
                 time_range = (min_time, max_time)
+
         elif sample_id and time_range:
             tp_data = self.fetch_data_by_time_2(
                 time_range=time_range,
@@ -188,6 +190,7 @@ class DataRetriever:
                 join_on=join_on,
                 join_constraints=join_constraints
             )
+
         else:
             tp_data = pd.DataFrame()
 
@@ -202,6 +205,7 @@ class DataRetriever:
                 join_on=join_on,
                 join_constraints=join_constraints
             )
+
         elif sample_id:
             etc_data = self.fetch_data_by_sample_id_2(
                 sample_id=sample_id,
@@ -212,6 +216,7 @@ class DataRetriever:
                 join_on=join_on,
                 join_constraints=join_constraints
             )
+
         elif time_range:
             etc_data = self.fetch_data_by_time_2(
                 time_range=time_range,
@@ -222,6 +227,7 @@ class DataRetriever:
                 join_on=join_on,
                 join_constraints=join_constraints
             )
+
         else:
             etc_data = pd.DataFrame()
 
@@ -247,7 +253,8 @@ class DataRetriever:
             join_on=join_on,
             join_constraints=join_constraints
         )
-
+#        print("by ID: "+query)
+#        print(f"With Values: {values}")
         return self.execute_fetching(
             query=query,
             column_names=column_names,
@@ -277,8 +284,8 @@ class DataRetriever:
             join_on=join_on,
             join_constraints=join_constraints
         )
-        #print(query)
-        #print(f"With Values: {values}")
+#        print("by time: "+query)
+#        print(f"With Values: {values}")
         return self.execute_fetching(
             query=query,
             column_names=column_names,

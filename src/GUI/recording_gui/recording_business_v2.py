@@ -893,12 +893,13 @@ class CyclePlotWindow(pg.PlotWidget):
     for Hydrogenated vs. Dehydrogenated, and separate symbols for
     instantaneous and average conductivity.
     """
-    def __init__(self, meta_data, parent=None, db_conn_params=None):
+    def __init__(self, meta_data, parent=None, db_conn_params=None, constraints=None):
         super().__init__(parent=parent)
         self.logger = logging.getLogger(__name__)
         self.db_conn_params = db_conn_params or {}
         self.etc_table = TableConfig().ETCDataTable
         self.meta_data = meta_data
+        self.constraints=constraints
         # prepare four scatter items
         self.scatter_hyd_inst = pg.ScatterPlotItem(
             pen=None, symbol='o', size=8,
@@ -934,14 +935,17 @@ class CyclePlotWindow(pg.PlotWidget):
 
         self.enableAutoRange()
 
-    def load_data(self, constraints: dict={}):
+    def load_data(self, time_range=None):
         """
         Fetch ETC cycle data for this sample and scatter‐plot it.
         """
         try:
             reader = DataRetriever(db_conn_params=self.db_conn_params)
+            if self.constraints:
+                self.constraints[self.etc_table.is_isotherm_flag] = False
+            else:
+                self.constraints = {self.etc_table.is_isotherm_flag: False}
 
-            constraints[self.etc_table.is_isotherm_flag] = False
 
             cols = [
                 self.etc_table.cycle_number,
@@ -949,11 +953,12 @@ class CyclePlotWindow(pg.PlotWidget):
                 self.etc_table.thermal_conductivity_average,
                 self.etc_table.de_hyd_state
             ]
-            df = reader.fetch_data_by_sample_id_2(
+            df = reader.fetch_data_by_time_2(
                 sample_id=self.meta_data.sample_id,
                 table_name=self.etc_table.table_name,
                 column_names=cols,
-                constraints=constraints
+                constraints=self.constraints,
+                time_range=time_range
             )
             if df.empty:
                 self.logger.info("No cycle ETC data for %s", self.meta_data.sample_id)
