@@ -258,7 +258,7 @@ class PlotManager:
             self.logger.exception("Error initializing uptake plot:")
             return None
 
-    def init_tp_dependent_plot(self, x_col, time_range):
+    def init_tp_dependent_plot(self, x_col, time_range, only_isotherms_bool=False):
         """
         Initialize the TP-dependent plot.
         """
@@ -268,7 +268,22 @@ class PlotManager:
                 self.right_plot.deleteLater()
             from src.GUI.recording_gui.recording_business_v2 import ReadPlotTpDependent
             self.right_plot = ReadPlotTpDependent.PlotTpDependent(db_conn_params=self.db_conn_params)
-            self.right_plot.load_data(time_range=time_range, x_col=x_col)
+            self.right_plot.load_data(time_range=time_range, x_col=x_col, only_isotherms_bool=only_isotherms_bool)
+            self._ensure_layout(self.ui.xy_plot_window)
+            self.ui.xy_plot_window.layout().addWidget(self.right_plot)
+            return self.right_plot
+        except Exception as e:
+            self.logger.exception("Error initializing TP dependent plot:")
+            return None
+
+    def init_cycle_dependent_plot(self):
+        try:
+            if self.right_plot:
+                self.right_plot.setParent(None)
+                self.right_plot.deleteLater()
+            from src.GUI.recording_gui.recording_business_v2 import CyclePlotWindow
+            self.right_plot = CyclePlotWindow(db_conn_params=self.db_conn_params, meta_data=self.meta_data)
+            self.right_plot.load_data()
             self._ensure_layout(self.ui.xy_plot_window)
             self.ui.xy_plot_window.layout().addWidget(self.right_plot)
             return self.right_plot
@@ -650,7 +665,7 @@ class MainWindow(QMainWindow):
             self.ui.start_stop_static_plot_button.clicked.connect(self._toggle_plotting_mode)
             self.ui.plot_uptake_button.clicked.connect(self._init_uptake_plot)
             self.ui.XyDataSelectDropDown.activated.connect(self._init_right_plot_xy)
-            self.ui.T_p_dependent_drop_down.currentIndexChanged.connect(self._init_tp_dependent_plot)
+            self.ui.T_p_dependent_drop_down.currentIndexChanged.connect(self._init_specialized_plots)
 
             #
             self.ui.h2_uptake_check_box.clicked.connect(lambda: self.controller.toggle_h2_uptake_flag(
@@ -876,6 +891,30 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.logger.exception("Error initializing uptake plot in MainWindow:")
 
+    def _init_specialized_plots(self):
+        try:
+            if self.plot_manager.bottom_plot:
+                stamps = self.plot_manager.bottom_plot.plotItem.viewRange()[0]
+                time_range = [datetime.fromtimestamp(ts, tz=local_tz) for ts in stamps]
+
+            drop_val = self.ui.T_p_dependent_drop_down.currentText().lower()
+            if 'temperature' in drop_val or 'pressure' in drop_val:
+                if self.plot_manager.bottom_plot:
+                    x_col = 'pressure' if 'pressure' in drop_val else 'temperature' if 'temperature' in drop_val else None
+                    self.plot_manager.init_tp_dependent_plot(x_col, time_range)
+            elif 'isotherm' in drop_val:
+                if self.plot_manager.bottom_plot:
+                    x_col = 'pressure'
+                    self.plot_manager.init_tp_dependent_plot(x_col, time_range, only_isotherms_bool=True)
+
+            elif 'cycle' in drop_val:
+                self._init_cycle_dependent_plot()
+
+            else:
+                return
+        except Exception as e:
+            self.logger.exception(f"Error initializing TP dependent plot in MainWindow: {e}")
+
     def _init_tp_dependent_plot(self):
         """
         Initialize the TP-dependent plot based on dropdown selection and view range.
@@ -889,6 +928,11 @@ class MainWindow(QMainWindow):
                 self.plot_manager.init_tp_dependent_plot(x_col, time_range)
         except Exception as e:
             self.logger.exception("Error initializing TP dependent plot in MainWindow:")
+
+    def _init_cycle_dependent_plot(self):
+        from src.GUI.recording_gui.recording_business_v2 import CyclePlotWindow
+        if self.plot_manager:
+            self.plot_manager.init_cycle_dependent_plot()
 
     def _on_sample_id_changed(self):
         """

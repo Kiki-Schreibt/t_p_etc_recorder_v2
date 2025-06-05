@@ -523,7 +523,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
         """
         tp_etc_data = Signal(pd.DataFrame, str, str)
 
-        def __init__(self, parent=None, constraints=None, db_conn_params=None):
+        def __init__(self, parent=None, constraints={}, db_conn_params=None):
             """
             Initialize the data loading thread.
             """
@@ -536,6 +536,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
             self.df_etc_storage = None
             self.time_range = None
             self.x_col = None
+            self.only_isotherms_bool = False
 
         def run(self):
             """
@@ -544,6 +545,10 @@ class ReadPlotTpDependent(pg.PlotWidget):
             try:
                 tp_table_name = self.tp_table.table_name
                 etc_table_name = self.etc_table.table_name
+                if self.constraints and self.only_isotherms_bool:
+                    self.constraints[self.etc_table.is_isotherm_flag] = self.only_isotherms_bool
+                elif self.only_isotherms_bool:
+                    self.constraints = {'where_'+self.etc_table.is_isotherm_flag: self.only_isotherms_bool}
 
                 df_tp_etc = self.db_reader.fetch_data_by_time_2(time_range=self.time_range,
                                                                 table_name=etc_table_name,
@@ -552,7 +557,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
 
                 if df_tp_etc[self.etc_table.pressure].isnull().all() or df_tp_etc[self.etc_table.temperature_sample].isnull().all():
                     df_tp = self.db_reader.fetch_data_by_time_2(time_range=self.time_range, table_name=tp_table_name)
-                    df_etc = self.db_reader.fetch_data_by_time_2(time_range=self.time_range, table_name=etc_table_name)
+                    df_etc = self.db_reader.fetch_data_by_time_2(time_range=self.time_range, table_name=etc_table_name, constraints=self.constraints)
                     self.df_etc_storage = df_etc
                     df_for_plot, x_axis_label, y_axis_label = self._sort_data(df_tp=df_tp, df_etc=df_etc, x_col=self.x_col)
                 else:
@@ -615,13 +620,14 @@ class ReadPlotTpDependent(pg.PlotWidget):
                 self.logger.exception("Error sorting data in ReadTpDependent:")
                 return pd.DataFrame(), "", ""
 
-        def _set_params(self, time_range, x_col):
+        def _set_params(self, time_range, x_col, only_isotherms_bool=False):
             """
             Set the parameters for data fetching.
             """
             try:
                 self.time_range = time_range
                 self.x_col = x_col
+                self.only_isotherms_bool = only_isotherms_bool
             except Exception as e:
                 self.logger.exception("Error setting parameters in ReadTpDependent:")
 
@@ -660,12 +666,12 @@ class ReadPlotTpDependent(pg.PlotWidget):
             except Exception as e:
                 logging.getLogger(__name__).exception("Error initializing PlotTpDependent:")
 
-        def load_data(self, time_range, x_col):
+        def load_data(self, time_range, x_col, only_isotherms_bool=False):
             """
             Trigger the data loading thread with the provided time range and x-axis column.
             """
             try:
-                self.reader._set_params(time_range, x_col)
+                self.reader._set_params(time_range, x_col, only_isotherms_bool)
                 self.reader.start()
             except Exception as e:
                 self.logger.exception("Error loading data in PlotTpDependent:")
@@ -928,20 +934,14 @@ class CyclePlotWindow(pg.PlotWidget):
 
         self.enableAutoRange()
 
-    def load_data(self, constraints: dict=None):
+    def load_data(self, constraints: dict={}):
         """
         Fetch ETC cycle data for this sample and scatter‐plot it.
         """
         try:
             reader = DataRetriever(db_conn_params=self.db_conn_params)
 
-            constraints = {
-                "min_TotalCharTime": 0.1,
-                "max_TotalCharTime": 1.5,
-                "min_TotalTempIncr": 0,
-                "max_TotalTempIncr": 10,
-                "where_is_isotherm_flag": False
-                        }
+            constraints[self.etc_table.is_isotherm_flag] = False
 
             cols = [
                 self.etc_table.cycle_number,
@@ -959,10 +959,9 @@ class CyclePlotWindow(pg.PlotWidget):
                 self.logger.info("No cycle ETC data for %s", self.meta_data.sample_id)
                 return
 
-            if not df.empty:
-                self._plot_df(df)
-        except Exception:
-            self.logger.exception("Error loading cycle data")
+            self._plot_df(df)
+        except Exception as e:
+            self.logger.exception(f"Error loading cycle data: {e}")
 
     def _plot_df(self, df: pd.DataFrame):
 
@@ -1095,10 +1094,10 @@ if __name__ == '__main__':
 
         db_conn_params = GetConfig().db_conn_params
         meta_data = MetaData('WAE-WA-028', db_conn_params=db_conn_params)
-        win = test_read_plot_tp_dependent()
-        #win = CyclePlotWindow(db_conn_params=db_conn_params, meta_data=meta_data)
+        #win = test_read_plot_tp_dependent()
+        win = CyclePlotWindow(db_conn_params=db_conn_params, meta_data=meta_data)
         #win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)
-        #win.load_data()
+        win.load_data()
         #win.reader.meta_data = meta_data
         win.show()
         sys.exit(app.exec())
