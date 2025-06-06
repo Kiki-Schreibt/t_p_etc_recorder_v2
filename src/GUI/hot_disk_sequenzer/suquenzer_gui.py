@@ -120,7 +120,7 @@ class ScheduleGeneratorBase(QWidget):
     """
     complete_program_sig = Signal(pd.DataFrame)
     meas_times_sig      = Signal(pd.DataFrame)
-    #todo: add saving and loading for program as well and not only schedule (maybe..)
+
     def __init__(self):
         """
         Constructs the entire UI layout (left controls + right plot).

@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMainWindow
 from src.GUI.planner_gui.planner_business import VantHoffPlot
 from src.infrastructure.utils.standard_paths import planner_ui_file_path
 
+
 class TestPlannerMain(QMainWindow):
 
 
@@ -80,7 +81,6 @@ class TestPlannerMain(QMainWindow):
         super(QMainWindow, self).resizeEvent(event)
 
 
-@staticmethod
 def _is_num_str(value, mode="Num"):
     if not value:
         return None
@@ -112,6 +112,7 @@ def _is_num_str(value, mode="Num"):
             return duration
         except ValueError:
             return False
+
 
 def load_ui_file(ui_file_path):
         try:

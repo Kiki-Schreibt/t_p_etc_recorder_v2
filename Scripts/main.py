@@ -12,7 +12,7 @@ from src.GUI.config_creation.config_creator_ui_main import ConfigWindow
 from src.infrastructure.utils.standard_paths import standard_config_file_path
 from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
 from src.GUI.simulation.simulator_gui import ModbusServerControlGUI
-from test_planner import TestPlannerMain
+from src.GUI.planner_gui.test_planner import TestPlannerMain
 from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
 try:

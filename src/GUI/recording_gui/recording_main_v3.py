@@ -456,7 +456,7 @@ class MainController:
             self.meta_data.read()
             was_log_tracker_running = False
             was_tp_recording_running = False
-            #todo: start recorder if was running afterwards. implement stop_tp_recording maybe for that
+
             if self.recorder:
                 if self.is_tp_recording_running():
                     was_tp_recording_running = True

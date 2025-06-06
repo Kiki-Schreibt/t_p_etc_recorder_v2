@@ -312,18 +312,18 @@ class DataRetriever:
                 time_value = time_value.replace(tzinfo=local_tz)
 
         # Use match-case (Python 3.10+) for clarity
-        match row_package_name.lower():
-            case 'transient':
-                column_names = (table.transient_x, table.transient_y, time_column)
-            case 'drift':
-                column_names = (table.drift_x, table.drift_y, time_column)
-            case 'calculated':
-                column_names = (table.calculated_x, table.calculated_y, time_column)
-            case 'residual':
-                column_names = (table.residual_x, table.residual_y, time_column)
-            case _:
-                self.logger.error("Invalid row package name provided: %s", row_package_name)
-                return pd.DataFrame()
+        match = row_package_name.lower()
+        if match == 'transient':
+            column_names = (table.transient_x, table.transient_y, time_column)
+        elif match == 'drift':
+            column_names = (table.drift_x, table.drift_y, time_column)
+        elif match == 'calculated':
+            column_names = (table.calculated_x, table.calculated_y, time_column)
+        elif match == 'residual':
+            column_names = (table.residual_x, table.residual_y, time_column)
+        else:
+            self.logger.error("Invalid row package name provided: %s", row_package_name)
+            return pd.DataFrame()
 
         column_names_str = ', '.join(column_names)
         query = f"SELECT {column_names_str} FROM {table_name} WHERE {time_column} = %s ORDER BY {time_column}"

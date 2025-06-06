@@ -8,6 +8,7 @@ from PySide6.QtCore import Signal
 from src.infrastructure.utils.eq_p_calculation import VantHoffCalcEq
 from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 
+
 class VantHoffPlot(pg.PlotWidget):
     p_calc_sig = Signal(float, float) #p_hyd, p_dehyd
     wt_p_sig = Signal(float)
@@ -172,7 +173,6 @@ class VantHoffPlot(pg.PlotWidget):
         self.setGeometry(self.parent().rect())
 
 
-
 def main():
     app = QApplication([])
 
@@ -183,6 +183,7 @@ def main():
     vant_hoff_plot.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

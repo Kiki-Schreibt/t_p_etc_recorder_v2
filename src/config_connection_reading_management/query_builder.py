@@ -80,7 +80,7 @@ class BaseQueryBuilder:
             JOIN join_table AS j ON m.col1 = j.colA AND m.col2 = j.colB
         """
 
-        print(self.join_time_precision)
+        #print(self.join_time_precision)
         main_table, col_str = self._normalize_table_names(table_name, column_names)
         if not join_table:
             return f"SELECT {col_str} FROM {main_table}"

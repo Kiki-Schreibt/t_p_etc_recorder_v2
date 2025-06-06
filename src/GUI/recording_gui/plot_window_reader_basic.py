@@ -424,7 +424,6 @@ class ReadContinuous(ReadData):
 
     def _read_emit_etc_data(self):
         """Read ETC data and emit signal."""
-        #todo: only works if t_p_data exists in time_range of etc recording.....
         if not self.running:
             return
         try:

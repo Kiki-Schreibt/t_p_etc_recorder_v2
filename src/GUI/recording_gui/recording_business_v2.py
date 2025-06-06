@@ -64,9 +64,10 @@ class DataRecorder(QObject):
     is_isotherm_flag = None
     additional_test_info = None
 
-    def __init__(self, meta_data: object,
-                         config,
-                         reservoir_volume: float=None):
+    def __init__(self,
+                 meta_data: object,
+                 config,
+                 reservoir_volume: float=None):
         """
         Initialize the DataRecorder with metadata and optional reservoir volume.
         """
