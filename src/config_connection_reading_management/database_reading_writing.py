@@ -883,13 +883,17 @@ class ExcelDataProcessor:
                 t_p_table.temperature_sample,
                 t_p_table.cycle_number,
                 t_p_table.cycle_number_flag,
-                t_p_table.de_hyd_state)
+                t_p_table.de_hyd_state,
+                t_p_table.is_isotherm_flag,
+                t_p_table.test_info)
         cols_etc = [etc_table.get_clean('time'),
                     t_p_table.pressure,
                     t_p_table.temperature_sample,
                     t_p_table.cycle_number,
                     t_p_table.cycle_number_flag,
-                    t_p_table.de_hyd_state]
+                    t_p_table.de_hyd_state,
+                    etc_table.is_isotherm_flag,
+                    etc_table.test_info]
         db_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         df_tp = db_retriever.fetch_data_by_time_no_limit(table=t_p_table, time_range=time_range, col_names=list(cols))
         if df_tp.empty:

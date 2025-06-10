@@ -4,15 +4,19 @@ try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
-
+t_p_table = TableConfig().TPDataTable
+cycle_table = TableConfig().CycleDataTable
+etc_table = TableConfig().ETCDataTable
+etc_xy_table = TableConfig().ThermalConductivityXyDataTable
+meta_table = TableConfig().MetaDataTable
 
 class TableCreator:
     PRIMARY_KEYS = {
-                        't_p_data':                      'time',
-                        'cycle_data':                    'time_start',
-                        'meta_data':                     'sample_id',
-                        'thermal_conductivity_data':     '"Time"',
-                        'thermal_conductivity_xy_data':  'time',
+                        t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id],
+                        cycle_table.table_name:  [cycle_table.time_start, cycle_table.sample_id],
+                        meta_table.table_name:   meta_table.sample_id,
+                        etc_table.table_name:    [etc_table.time, etc_table.sample_id_small],
+                        etc_xy_table.table_name: etc_xy_table.time,
                     }
 
     def __init__(self, db_conn_params):
@@ -281,7 +285,7 @@ def test_create_table_from_class():
 
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import GetConfig
-    #create_database(GetConfig())
+    create_database(GetConfig())
     creator = TableCreator(db_conn_params=GetConfig().db_conn_params)
     #creator.__delete_table__(table_name="thermal_conductivity_xy_data")
     #creator.__delete_table__(table_name="thermal_conductivity_data")

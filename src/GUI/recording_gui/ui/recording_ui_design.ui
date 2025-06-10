@@ -85,7 +85,7 @@
    <widget class="QWidget" name="layoutWidget_6">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>260</x>
       <y>130</y>
       <width>300</width>
       <height>26</height>
@@ -120,8 +120,8 @@
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>131</width>
-      <height>24</height>
+      <width>161</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -177,10 +177,10 @@
    <widget class="QPushButton" name="update_meta_data_button">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>650</x>
       <y>120</y>
       <width>151</width>
-      <height>24</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -206,7 +206,7 @@
       <x>1310</x>
       <y>11</y>
       <width>211</width>
-      <height>91</height>
+      <height>111</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -271,9 +271,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>70</y>
+      <y>65</y>
       <width>233</width>
-      <height>86</height>
+      <height>91</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -472,9 +472,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
-      <width>131</width>
-      <height>24</height>
+      <y>3</y>
+      <width>161</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -600,7 +600,7 @@
    <widget class="QPushButton" name="start_stop_static_plot_button">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>190</x>
       <y>10</y>
       <width>131</width>
       <height>41</height>
@@ -649,17 +649,17 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>130</y>
-      <width>491</width>
-      <height>24</height>
+      <x>880</x>
+      <y>123</y>
+      <width>601</width>
+      <height>41</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QLabel" name="label_19">
        <property name="text">
-        <string>Additiona Test Info</string>
+        <string>Additional Test Info</string>
        </property>
       </widget>
      </item>
