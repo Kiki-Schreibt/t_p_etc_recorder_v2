@@ -837,6 +837,8 @@ class XYPlot(pg.PlotWidget):
         """
         Load data and add a new curve to the plot.
         """
+        #todo: dot line plot for missing fit values ?
+
         try:
             df = self._load_data(time_value=time_value, xy_data_to_load=xy_data_to_load)
             if not df.empty:

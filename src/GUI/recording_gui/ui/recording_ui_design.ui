@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1573</width>
-    <height>821</height>
+    <height>857</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QGraphicsView" name="ExpMetaPlotLeftLower">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>450</y>
+      <x>10</x>
+      <y>470</y>
       <width>871</width>
       <height>321</height>
      </rect>
@@ -28,7 +28,7 @@
     <property name="geometry">
      <rect>
       <x>340</x>
-      <y>0</y>
+      <y>10</y>
       <width>471</width>
       <height>26</height>
      </rect>
@@ -75,8 +75,8 @@
    <widget class="QLineEdit" name="MaxCharTimeEditField">
     <property name="geometry">
      <rect>
-      <x>1240</x>
-      <y>41</y>
+      <x>1440</x>
+      <y>171</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -85,9 +85,9 @@
    <widget class="QWidget" name="layoutWidget_6">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>130</y>
-      <width>300</width>
+      <x>600</x>
+      <y>150</y>
+      <width>281</width>
       <height>26</height>
      </rect>
     </property>
@@ -95,14 +95,7 @@
      <item>
       <widget class="QCheckBox" name="h2_uptake_check_box">
        <property name="text">
-        <string>H2 Uptake Flag</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="cycle_test_check_box">
-       <property name="text">
-        <string>Cycle Test</string>
+        <string>Is Uptake</string>
        </property>
       </widget>
      </item>
@@ -113,42 +106,39 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QCheckBox" name="cycle_test_check_box">
+       <property name="text">
+        <string>Cycle Test</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QPushButton" name="start_stop_log_file_tracker_button">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>40</y>
       <width>171</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start log file tracker</string>
+     <string>Start Log File Tracker</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>1070</x>
-      <y>20</y>
-      <width>112</width>
-      <height>16</height>
+      <x>1290</x>
+      <y>150</y>
+      <width>101</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>Temperature increase</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="dT_max_sample_measurement_edit_field">
-    <property name="geometry">
-     <rect>
-      <x>1190</x>
-      <y>60</y>
-      <width>101</width>
-      <height>21</height>
-     </rect>
+     <string>Temp. Increase</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
@@ -167,8 +157,8 @@
    <widget class="QLineEdit" name="MinCharTimeEditField">
     <property name="geometry">
      <rect>
-      <x>1190</x>
-      <y>40</y>
+      <x>1390</x>
+      <y>170</y>
       <width>51</width>
       <height>22</height>
      </rect>
@@ -177,10 +167,10 @@
    <widget class="QPushButton" name="update_meta_data_button">
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>120</y>
+      <x>1070</x>
+      <y>10</y>
       <width>151</width>
-      <height>31</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -190,9 +180,9 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>1210</x>
-      <y>0</y>
-      <width>21</width>
+      <x>1400</x>
+      <y>130</y>
+      <width>31</width>
       <height>16</height>
      </rect>
     </property>
@@ -200,79 +190,12 @@
      <string>Min</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>1310</x>
-      <y>11</y>
-      <width>211</width>
-      <height>111</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_8">
-     <item>
-      <widget class="QPushButton" name="plot_uptake_button">
-       <property name="text">
-        <string>Plot Uptake</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="T_p_dependent_drop_down">
-       <item>
-        <property name="text">
-         <string>Plot Temperature Dependent</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Plot Pressure Dependent</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Plot Cycle Dependent</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Plot Isotherms</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="XyDataSelectDropDown">
-       <item>
-        <property name="text">
-         <string>Transient</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Residual</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Calculated</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Drift</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QWidget" name="layoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>65</y>
-      <width>233</width>
+      <x>10</x>
+      <y>80</y>
+      <width>271</width>
       <height>91</height>
      </rect>
     </property>
@@ -282,7 +205,7 @@
        <item>
         <widget class="QLabel" name="label_22">
          <property name="text">
-          <string>Current State</string>
+          <string>Current State </string>
          </property>
         </widget>
        </item>
@@ -300,7 +223,7 @@
        <item>
         <widget class="QLabel" name="label_21">
          <property name="text">
-          <string>Current Cycle [#]</string>
+          <string>Current Cycle [#] </string>
          </property>
         </widget>
        </item>
@@ -318,7 +241,7 @@
        <item>
         <widget class="QLabel" name="label_24">
          <property name="text">
-          <string>Capacity last cycle [wt-%]</string>
+          <string>Capacity last cycle [wt-%] </string>
          </property>
         </widget>
        </item>
@@ -336,8 +259,8 @@
    <widget class="QLineEdit" name="MinTempIncEditField">
     <property name="geometry">
      <rect>
-      <x>1190</x>
-      <y>20</y>
+      <x>1390</x>
+      <y>150</y>
       <width>51</width>
       <height>22</height>
      </rect>
@@ -346,123 +269,18 @@
    <widget class="QGraphicsView" name="xy_plot_window">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>160</y>
+      <x>890</x>
+      <y>200</y>
       <width>601</width>
       <height>521</height>
      </rect>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget_4">
-    <property name="geometry">
-     <rect>
-      <x>820</x>
-      <y>0</y>
-      <width>241</width>
-      <height>121</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_14">
-         <item alignment="Qt::AlignmentFlag::AlignVCenter">
-          <widget class="QLabel" name="label_16">
-           <property name="text">
-            <string>Max Pressure Cycling</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="max_pressure_cycling_edit_field">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_15">
-         <item>
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>Min Temperature Cycling</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="min_temperature_cycling_edit_field">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_16">
-         <item>
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>Reservoir Volume [l]</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="reservoir_volume_edit_field">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_21">
-       <item>
-        <widget class="QLabel" name="label_23">
-         <property name="text">
-          <string>Avg Cycle Duration</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="cycle_duration_edit_field">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>1080</x>
-      <y>60</y>
-      <width>95</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>dT max Sample</string>
-    </property>
-   </widget>
    <widget class="QGraphicsView" name="ExpMetaPlotLeft">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>160</y>
+      <x>10</x>
+      <y>180</y>
       <width>871</width>
       <height>291</height>
      </rect>
@@ -472,20 +290,20 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>3</y>
+      <y>10</y>
       <width>171</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start Tp recording</string>
+     <string>Start Tp Recording</string>
     </property>
    </widget>
    <widget class="QWidget" name="layoutWidget_3">
     <property name="geometry">
      <rect>
       <x>340</x>
-      <y>30</y>
+      <y>40</y>
       <width>470</width>
       <height>88</height>
      </rect>
@@ -603,7 +421,7 @@
       <x>190</x>
       <y>10</y>
       <width>131</width>
-      <height>41</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="text">
@@ -613,8 +431,8 @@
    <widget class="QLineEdit" name="MaxTempIncEditField">
     <property name="geometry">
      <rect>
-      <x>1240</x>
-      <y>20</y>
+      <x>1440</x>
+      <y>150</y>
       <width>51</width>
       <height>22</height>
      </rect>
@@ -623,22 +441,22 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>1078</x>
-      <y>38</y>
-      <width>95</width>
-      <height>16</height>
+      <x>1270</x>
+      <y>170</y>
+      <width>111</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>Total to char. time</string>
+     <string>Total to Char. Time</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>1250</x>
-      <y>0</y>
-      <width>23</width>
+      <x>1450</x>
+      <y>130</y>
+      <width>31</width>
       <height>16</height>
      </rect>
     </property>
@@ -649,10 +467,10 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>123</y>
-      <width>601</width>
-      <height>41</height>
+      <x>820</x>
+      <y>100</y>
+      <width>401</width>
+      <height>31</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -669,6 +487,163 @@
         <string/>
        </property>
       </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>130</y>
+      <width>231</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_16">
+     <item>
+      <widget class="QLabel" name="label_18">
+       <property name="text">
+        <string>Reservoir Volume [l]</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="reservoir_volume_edit_field">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QComboBox" name="T_p_dependent_drop_down">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>161</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Temperature Dependent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Pressure Dependent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Cycle Dependent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Isotherms</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Uptake</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="XyDataSelectDropDown">
+    <property name="geometry">
+     <rect>
+      <x>1080</x>
+      <y>160</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Transient</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Residual</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Calculated</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Drift</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>10</y>
+      <width>241</width>
+      <height>86</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <item alignment="Qt::AlignmentFlag::AlignVCenter">
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Max Pressure Cycling</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="max_pressure_cycling_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_15">
+       <item>
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Min Temperature Cycling</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="min_temperature_cycling_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QLabel" name="label_23">
+         <property name="text">
+          <string>Cycle Duration</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="cycle_duration_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>

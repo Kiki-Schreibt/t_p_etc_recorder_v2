@@ -666,7 +666,6 @@ class MainWindow(QMainWindow):
             self.ui.start_stop_log_file_tracker_button.clicked.connect(self._toggle_log_tracking)
             self.ui.start_stop_static_plot_button.setCheckable(True)
             self.ui.start_stop_static_plot_button.clicked.connect(self._toggle_plotting_mode)
-            self.ui.plot_uptake_button.clicked.connect(self._init_uptake_plot)
             self.ui.XyDataSelectDropDown.activated.connect(self._init_right_plot_xy)
             self.ui.T_p_dependent_drop_down.currentIndexChanged.connect(self._init_specialized_plots)
 
@@ -917,6 +916,8 @@ class MainWindow(QMainWindow):
             elif 'cycle' in drop_val:
                 self.plot_manager.init_cycle_dependent_plot(time_range=time_range, constraints=self.controller.constraints)
 
+            elif 'uptake' in drop_val:
+                self.plot_manager.init_uptake_plot(time_range=time_range)
             else:
                 return
         except Exception as e:

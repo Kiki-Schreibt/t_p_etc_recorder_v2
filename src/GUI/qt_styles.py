@@ -45,6 +45,7 @@ def extract_button_color(stylesheet, widget_name="QPushButton", property_name="b
 
     return None  # Return None if no color is found
 
+
 takezo = """
             QWidget
         {
@@ -599,6 +600,7 @@ takezo = """
         
                     }
         """
+
 
 toolery = """
             QWidget
@@ -1959,6 +1961,9 @@ QLineEdit, QTextEdit, QPlainTextEdit, QComboBox {
     border-radius: 4px;
     padding: 4px;
     color: #212121;
+    border-style: solid;
+	border-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(0, 113, 255, 255), stop:1 rgba(91, 171, 252, 255));
+
 }
 QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QComboBox:focus {
     border: 1px solid #1976d2;
@@ -2155,6 +2160,9 @@ QLineEdit, QTextEdit, QPlainTextEdit, QComboBox {
     border-radius: 4px;
     padding: 4px;
     color: #ffffff;
+    border-style: solid;
+	border-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(128, 128, 128, 0.5), stop:1 rgba(255, 255, 255, 0.5));
+
 }
 QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QComboBox:focus {
     border: 1px solid #87afda;
