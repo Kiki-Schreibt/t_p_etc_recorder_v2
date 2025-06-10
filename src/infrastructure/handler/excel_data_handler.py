@@ -52,7 +52,7 @@ class ExcelDataProcessor:
         self.parameters_sheet_name = parameters_sheet_name
         self.db_conn_params = db_conn_params or {}
         self.logger = logging.getLogger(__name__)
-        self.meta_data = MetaData(sample_id=sample_id, db_conn_params=db_conn_params) if (sample_id and db_conn_params) else (meta_data or MetaData(db_conn_params=db_conn_params))
+        self.meta_data = MetaData(sample_id=sample_id, db_conn_params=db_conn_params) if (sample_id and db_conn_params) else meta_data
         self._test_mode = False
 
     def _update_xlsx_file(self) -> None:
@@ -283,7 +283,7 @@ class ExcelDataProcessor:
         if df_etc is None or df_etc.empty:
             return None
         df_etc_xy = self._get_measurement_xy_data_as_lists(df_etc)
-        df_etc[self.etc_table.sample_id] = self.meta_data.sample_id
+        df_etc[self.etc_table.sample_id_small] = self.meta_data.sample_id
         df_etc_xy[self.xy_table.sample_id] = self.meta_data.sample_id
         df_etc = df_etc.dropna(subset=[table.get_clean("time")])
         df_etc_xy = df_etc_xy.dropna(subset=[self.xy_table.time])
@@ -399,10 +399,8 @@ def write_ETC_folder(dir_etc_folder: str, sample_id: str, logger_inst, config) -
 
 
 def main():
-    sample_id = 'WAE-WA-040'
-    dir_etc = r"C:\Daten\Kiki\WAE-WA-030-Mg2NiH4\WAE-WA-030-All\WAE-WA-030-045-400C-ParameterTest.xlsx"
-    dir_etc = r"C:\Daten\Kiki\WAE-WA-040-MgFe5wt\WAE-WA-040-038-350-420C-Cyc\WAE-WA-040-038-02.xlsx"
-
+    sample_id = 'WAE-WA-060'
+    dir_etc = r"C:\Daten\Kiki\WAE-WA-060-Mg5wtFe\WAE-WA-060-All\WAE-WA-060-000-AngleTest\WAE-WA-060-000-01-0dlong_0dtrans\WAE-WA-060-000-01.xlsx"
     test_excel_data_processor(etc_dir=dir_etc, sample_id=sample_id)
 
 if __name__ == "__main__":

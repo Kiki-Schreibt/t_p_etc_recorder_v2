@@ -91,7 +91,7 @@ class DataRetriever:
         etc_table.temperature_drift_rec: 'Tempdrift rec',
         etc_table.notes: 'Notes',
         etc_table.resistance: 'Rs',
-        etc_table.sample_id_small: '"sample_id"',
+        etc_table.sample_id_small: 'sample_id',
         etc_table.pressure: 'pressure',
         etc_table.temperature_sample: 'temperature_sample',
         etc_table.cycle_number: 'cycle_number',

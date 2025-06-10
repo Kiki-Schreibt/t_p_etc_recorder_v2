@@ -521,7 +521,7 @@
      <rect>
       <x>890</x>
       <y>161</y>
-      <width>181</width>
+      <width>201</width>
       <height>31</height>
      </rect>
     </property>
@@ -554,7 +554,7 @@
    <widget class="QComboBox" name="XyDataSelectDropDown">
     <property name="geometry">
      <rect>
-      <x>1080</x>
+      <x>1100</x>
       <y>160</y>
       <width>141</width>
       <height>31</height>

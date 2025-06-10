@@ -641,29 +641,29 @@ class ReadPlotTpDependent(pg.PlotWidget):
                 super().__init__(parent=parent)
                 self.logger = logging.getLogger(__name__)
                 self.reader = ReadPlotTpDependent.ReadTpDependent(parent=parent, constraints=constraints, db_conn_params=db_conn_params)
-                self.legend = self.plotItem.addLegend(offset=(0, 1))
                 self.reader.tp_etc_data.connect(self.plot_ETC)
                 self.tp_table = TableConfig().TPDataTable
                 self.etc_table = TableConfig().ETCDataTable
                 self.df_etc_storage = None
                 self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='o',
-                                                      size=8, brush=pg.mkBrush('w'))
+                                                      size=8, brush=pg.mkBrush('w'),
+                                                      name="Inst. ETC — Hyd")
                 self.scatter_hyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', size=10,
-                                                          brush=pg.mkBrush('r'))
+                                                          brush=pg.mkBrush('r'),
+                                                          name="Avg. ETC — Hyd")
                 self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='d',
-                                                      size=8, brush=pg.mkBrush('w'))
+                                                      size=8, brush=pg.mkBrush('w'),
+                                                        name="Inst. ETC — Deyd")
                 self.scatter_dehyd_avg = pg.ScatterPlotItem(pen=None, symbol='d',
-                                                            size=10, brush=pg.mkBrush('r'))
+                                                            size=10, brush=pg.mkBrush('r'),
+                                                            name="Inst. ETC — Dehyd")
 
                 self.addItem(self.scatter_hyd)
                 self.addItem(self.scatter_hyd_avg)
                 self.addItem(self.scatter_dehyd)
                 self.addItem(self.scatter_dehyd_avg)
+                self.addLegend(offset=(0, 1))
 
-                self.legend.addItem(self.scatter_hyd, 'Hydrogenated')
-                self.legend.addItem(self.scatter_hyd_avg, 'Hydrogenated Average')
-                self.legend.addItem(self.scatter_dehyd, 'Dehydrogenated')
-                self.legend.addItem(self.scatter_dehyd_avg, 'Dehydrogenated Average')
             except Exception as e:
                 logging.getLogger(__name__).exception("Error initializing PlotTpDependent:")
 
