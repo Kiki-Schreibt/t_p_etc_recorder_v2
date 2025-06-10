@@ -8,7 +8,7 @@ import os
 
 from PySide6.QtCore import Signal, QObject
 
-from src.config_connection_reading_management.database_reading_writing import ExcelDataProcessor
+from src.infrastructure.handler.excel_data_handler import ExcelDataProcessor
 from src.infrastructure.utils.standard_paths import standard_hot_disk_file_path
 try:
     import src.infrastructure.core.logger as logging
