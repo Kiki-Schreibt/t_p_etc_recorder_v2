@@ -134,6 +134,10 @@ class LogFileHandler(FileSystemEventHandler, QObject):
             self.handle_new_data(last_result_path)
 
     def handle_new_data(self, file_path):
+        if not file_path:
+            self.logger.info("No file path provided")
+            return
+
         processor = ExcelDataProcessor(file_path=file_path,
                                        meta_data=self.meta_data,
                                        db_conn_params=self.config.db_conn_params)
