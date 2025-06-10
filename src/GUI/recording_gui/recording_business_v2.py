@@ -648,22 +648,22 @@ class ReadPlotTpDependent(pg.PlotWidget):
                 self.df_etc_storage = None
                 self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='o',
                                                       size=5, brush=pg.mkBrush('w'))
-                self.scatter_hyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', size=5,
+                self.scatter_hyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', size=8,
                                                           brush=pg.mkBrush('r'))
                 self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='x',
                                                       size=5, brush=pg.mkBrush('w'))
                 self.scatter_dehyd_avg = pg.ScatterPlotItem(pen=None, symbol='x',
-                                                            size=5, brush=pg.mkBrush('r'))
+                                                            size=8, brush=pg.mkBrush('r'))
 
                 self.addItem(self.scatter_hyd)
                 self.addItem(self.scatter_hyd_avg)
                 self.addItem(self.scatter_dehyd)
                 self.addItem(self.scatter_dehyd_avg)
 
-                self.legend.addItem(self.scatter_hyd, 'ETC Hydrogenated')
-                self.legend.addItem(self.scatter_hyd_avg, 'ETC Hydrogenated Average')
-                self.legend.addItem(self.scatter_dehyd, 'ETC Dehydrogenated')
-                self.legend.addItem(self.scatter_dehyd_avg, 'ETC Dehydrogenated Average')
+                self.legend.addItem(self.scatter_hyd, 'Hydrogenated')
+                self.legend.addItem(self.scatter_hyd_avg, 'Hydrogenated Average')
+                self.legend.addItem(self.scatter_dehyd, 'Dehydrogenated')
+                self.legend.addItem(self.scatter_dehyd_avg, 'Dehydrogenated Average')
             except Exception as e:
                 logging.getLogger(__name__).exception("Error initializing PlotTpDependent:")
 

@@ -125,11 +125,12 @@ class LogFileHandler(FileSystemEventHandler, QObject):
         # Variable to keep track of the last result path found
         time.sleep(15)
         last_result_path = self.get_export_file_path(log_file_path=file_path)
-
+        if last_result_path == self.latest_export_path:
+            self.logger.info(f"Already exported to file: {last_result_path}")
         # Print the last result path found after reading the entire file
-        if last_result_path != self.latest_export_path:
+        else:
             #print(f"Last exported to file: {last_result_path}")
-            self.logger.info(f"Last exported to file: {last_result_path}")
+            self.logger.info(f"Sending {last_result_path} to processor...")
             self.latest_export_path = last_result_path
             self.handle_new_data(last_result_path)
 
