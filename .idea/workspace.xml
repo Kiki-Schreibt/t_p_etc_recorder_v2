@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/recording_business_v2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/hot_disk_log_file_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hot_disk_log_file_handler.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -151,7 +150,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\main_gui\ui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.code_length">
+  <component name="RunManager" selected="Python.main">
     <configuration name="code_length" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -264,9 +263,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.code_length" />
         <item itemvalue="Python.recording_main_v3" />
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.database_maintainer" />
         <item itemvalue="Python.table_creator" />
       </list>

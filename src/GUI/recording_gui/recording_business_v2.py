@@ -647,13 +647,13 @@ class ReadPlotTpDependent(pg.PlotWidget):
                 self.etc_table = TableConfig().ETCDataTable
                 self.df_etc_storage = None
                 self.scatter_hyd = pg.ScatterPlotItem(pen=None, symbol='o',
-                                                      size=5, brush=pg.mkBrush('w'))
-                self.scatter_hyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', size=8,
+                                                      size=8, brush=pg.mkBrush('w'))
+                self.scatter_hyd_avg = pg.ScatterPlotItem(pen=None, symbol='o', size=10,
                                                           brush=pg.mkBrush('r'))
-                self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='x',
-                                                      size=5, brush=pg.mkBrush('w'))
-                self.scatter_dehyd_avg = pg.ScatterPlotItem(pen=None, symbol='x',
-                                                            size=8, brush=pg.mkBrush('r'))
+                self.scatter_dehyd = pg.ScatterPlotItem(pen=None, symbol='d',
+                                                      size=8, brush=pg.mkBrush('w'))
+                self.scatter_dehyd_avg = pg.ScatterPlotItem(pen=None, symbol='d',
+                                                            size=10, brush=pg.mkBrush('r'))
 
                 self.addItem(self.scatter_hyd)
                 self.addItem(self.scatter_hyd_avg)
