@@ -16,7 +16,7 @@ class TableCreator:
                         cycle_table.table_name:  [cycle_table.time_start, cycle_table.sample_id],
                         meta_table.table_name:   meta_table.sample_id,
                         etc_table.table_name:    [etc_table.time, etc_table.sample_id_small],
-                        etc_xy_table.table_name: etc_xy_table.time,
+                        etc_xy_table.table_name: [etc_xy_table.time, etc_xy_table.sample_id]
                     }
 
     def __init__(self, db_conn_params):
