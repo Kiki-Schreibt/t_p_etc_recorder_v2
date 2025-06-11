@@ -250,7 +250,7 @@ def test_calc_h2_uptake(meta_data, db_conn_params):
 
 
 if __name__ == "__main__":
-    from src.infrastructure.meta_data.meta_data_handler import MetaData
+    from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import GetConfig
     config = GetConfig()
     meta_data = MetaData(sample_id="WAE-WA-040", db_conn_params=config.db_conn_params)

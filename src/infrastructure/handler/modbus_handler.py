@@ -15,7 +15,7 @@ from psycopg2 import IntegrityError
 from src.infrastructure.connections.connections import DatabaseConnection, ModbusConnection
 from src.infrastructure.utils.eq_p_calculation import VantHoffCalcEq as EqCalculator
 from src.config_connection_reading_management.query_builder import QueryBuilder
-from src.infrastructure.meta_data.meta_data_handler import MetaData
+from src.infrastructure.handler.metadata_handler import MetaData
 from src.infrastructure.core.table_config import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, DataBaseManipulator
 try:

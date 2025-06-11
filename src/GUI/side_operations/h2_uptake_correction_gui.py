@@ -781,7 +781,7 @@ def main():
     Opens the window for sample 'WAE-WA-028' over a fixed time range.
     """
     from src.infrastructure.core.config_reader import GetConfig
-    from src.infrastructure.meta_data.meta_data_handler import MetaData
+    from src.infrastructure.handler.metadata_handler import MetaData
 
     app = QApplication([])
     config = GetConfig()

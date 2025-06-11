@@ -11,7 +11,7 @@ from psycopg2 import IntegrityError
 
 from src.infrastructure.connections.connections import DatabaseConnection
 from src.infrastructure.utils.eq_p_calculation import VantHoffCalcEq as EqCalculator
-from src.infrastructure.meta_data.meta_data_handler import MetaData
+from src.infrastructure.handler.metadata_handler import MetaData
 from src.infrastructure.handler.modbus_handler import ModbusDBWriter, CycleCounter
 from src.infrastructure.handler.excel_data_handler import  write_ETC_folder
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
@@ -833,25 +833,6 @@ def check_nan_values(df, fun_str=""):
                         print(f"NaN value found during {fun_str}in df at row {idx}, column '{col}': {val}")
 
 
-def import_all(compress_data=False):
-    #sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    #sample_ids = ('WAE-WA-040',)
-    sample_ids = ()
-    if not sample_ids:
-        return
-    logger = logging.getLogger(__name__)
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
-    for sample_id in sample_ids:
-        dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
-        csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)
-        csv_processor.process()
-        #csv_processor.count_cycles(sample_id=sample_id)
-
-        write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
-        print(f"{sample_id} processed")
-
-
 def _import_one_example():
     logger = logging.getLogger(__name__)
     from src.infrastructure.core.config_reader import GetConfig
@@ -977,6 +958,24 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
     df['eq_pressure_real'] = inserter_wizard.eq_calculator.calc_eq(df['temperature_sample'])
     _plot_temperatures_and_pressures(df=df)
     return df
+
+def import_all(compress_data=False):
+    sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
+    #sample_ids = ('WAE-WA-040',)
+    #sample_ids = ()
+    if not sample_ids:
+        return
+    logger = logging.getLogger(__name__)
+    from src.infrastructure.core.config_reader import GetConfig
+    config = GetConfig()
+    for sample_id in sample_ids:
+        dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
+        #csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)
+        #csv_processor.process()
+        #csv_processor.count_cycles(sample_id=sample_id)
+
+        write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
+        print(f"{sample_id} processed")
 
 
 #Methods for usage

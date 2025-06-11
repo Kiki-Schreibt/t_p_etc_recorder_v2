@@ -399,7 +399,7 @@ class TPQueryBuilder(BaseQueryBuilder):
         return query_part, values
 
     def _get_times_by_meta_data(self, sample_id):
-        from src.infrastructure.meta_data.meta_data_handler import MetaData
+        from src.infrastructure.handler.metadata_handler import MetaData
 
         meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         if not meta_data.start_time or not meta_data.end_time:

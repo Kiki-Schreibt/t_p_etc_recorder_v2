@@ -1910,6 +1910,9 @@ QPushButton {
     border-radius: 4px;
     padding: 6px 12px;
     color: #212121;
+    border-style: solid;
+	border-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(0, 113, 255, 255), stop:1 rgba(91, 171, 252, 255));
+
 }
 QPushButton:hover {
     background-color: #eeeeee;

@@ -1,18 +1,9 @@
 ##database_reading_writing.py
-import numpy as np
-import win32com.client as win32
-import re
-import os
-import time
 from zoneinfo import ZoneInfo
-from multiprocessing import Pool
 from datetime import datetime
 from typing import Optional, Tuple, Union, List
-import math
-
 
 import pandas as pd
-from psycopg2 import IntegrityError
 
 from src.infrastructure.connections.connections import DatabaseConnection
 try:
@@ -21,7 +12,6 @@ except ImportError:
     import logging
 
 from src.config_connection_reading_management.query_builder import QueryBuilder
-from src.infrastructure.meta_data.meta_data_handler import MetaData
 from src.infrastructure.core.table_config import TableConfig
 
 

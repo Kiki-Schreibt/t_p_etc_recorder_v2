@@ -260,7 +260,7 @@ class ReadData(QThread):
             if not df.empty:
                 df = df.sort_values(by=table.time, ascending=True)
             if not df[table.sample_id].iloc[-1] == self.meta_data.sample_id:
-                from src.infrastructure.meta_data.meta_data_handler import MetaData
+                from src.infrastructure.handler.metadata_handler import MetaData
                 self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1], db_conn_params=self.db_conn_params)
                 self.meta_data_sig.emit(self.meta_data)
                 self.logger.info("Sample ID changed to %s", self.meta_data.sample_id)

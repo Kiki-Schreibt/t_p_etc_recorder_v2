@@ -2,13 +2,12 @@
 
 import numpy as np
 import win32com.client as win32
-import re
 import os
 import time
 from zoneinfo import ZoneInfo
 from multiprocessing import Pool
 from datetime import datetime
-from typing import Optional, Tuple, Union, List
+from typing import Optional, Tuple
 import math
 
 
@@ -21,9 +20,9 @@ try:
 except ImportError:
     import logging
 
-from src.infrastructure.meta_data.meta_data_handler import MetaData
+from src.infrastructure.handler.metadata_handler import MetaData
 from src.infrastructure.core.table_config import TableConfig
-from src.config_connection_reading_management.database_reading_writing import DataRetriever, DataBaseManipulator
+from src.config_connection_reading_management.database_reading_writing import DataRetriever
 
 local_tz = ZoneInfo("Europe/Berlin")
 LIMIT_DATA_POINTS = 5000

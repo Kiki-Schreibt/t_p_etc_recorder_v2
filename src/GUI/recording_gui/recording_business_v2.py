@@ -1022,7 +1022,7 @@ def test_read_plot_uptake():
     """
     try:
         from src.infrastructure.core.config_reader import GetConfig
-        from src.infrastructure.meta_data.meta_data_handler import MetaData
+        from src.infrastructure.handler.metadata_handler import MetaData
         meta_data = MetaData(sample_id='WAE-WA-040', db_conn_params=GetConfig().db_conn_params)
         uptake_win = UptakePlot()
         uptake_win.load_data(meta_data=meta_data)
@@ -1101,7 +1101,7 @@ if __name__ == '__main__':
         app = QApplication([])
 
         from src.infrastructure.core.config_reader import GetConfig
-        from src.infrastructure.meta_data.meta_data_handler import MetaData
+        from src.infrastructure.handler.metadata_handler import MetaData
 
         db_conn_params = GetConfig().db_conn_params
         meta_data = MetaData('WAE-WA-028', db_conn_params=db_conn_params)

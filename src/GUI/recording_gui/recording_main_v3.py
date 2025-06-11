@@ -21,7 +21,7 @@ import warnings
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
 from PySide6.QtGui import QDoubleValidator, QFont
 
-from src.infrastructure.meta_data.meta_data_handler import MetaData
+from src.infrastructure.handler.metadata_handler import MetaData
 from src.GUI.recording_gui.recording_business_v2 import DataRecorder
 from src.infrastructure.utils.standard_paths import recording_ui_file_path
 try:
@@ -464,6 +464,7 @@ class MainController:
                 if self.is_log_file_tracker_running():
                     was_log_tracker_running = True
                     self.stop_log_tracking()
+
             self.recorder = DataRecorder(meta_data=self.meta_data,
                                          config=self.config
                                          )
@@ -576,7 +577,7 @@ class MainWindow(QMainWindow):
 
             self.config = config
             self.setWindowTitle("T-p ETC Recorder")
-            from src.GUI.qt_styles import gpt_dark as style
+            from src.GUI.qt_styles import gpt_light as style
             self.setStyleSheet(style)
             self.setFont(FONT)
             self.logger = logging.getLogger(__name__)

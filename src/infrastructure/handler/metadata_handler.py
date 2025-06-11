@@ -1,4 +1,4 @@
-#meta_data_handler.py
+#metadata_handler.py
 import time
 from datetime import timedelta
 from zoneinfo import ZoneInfo
@@ -42,7 +42,7 @@ class MetaData:
         meta_table.last_de_hyd_state: 'last_de_hyd_state'
     }
 
-    def __init__(self, sample_id=None, db_conn_params=None):
+    def __init__(self, sample_id, db_conn_params):
         self.db_conn_params = db_conn_params or {}
 
         self.qb = QueryBuilder()
@@ -81,7 +81,7 @@ class MetaData:
                 query, values = self.qb.create_reading_query(table_name=self.table_name,
                                                              sample_id=self.sample_id,
                                                              column_names=column_names)
-                #print(query)
+
                 with DatabaseConnection(**self.db_conn_params) as conn:
                    # print(f"meta_data query = {query} meta_data values = {values}")
                     conn.cursor.execute(query, values)
@@ -146,6 +146,7 @@ class MetaData:
                     self.logger.info(f"Meta data updated for sample_id: {self.sample_id}")
 
     def _assign_column_names_and_values(self, column_names, df):
+        updated_using_tp_data = False
         for col_name in column_names:
             if "sample_id" in col_name.lower():
                 self.sample_id = df[col_name].iloc[0]
@@ -205,17 +206,23 @@ class MetaData:
                 self.reservoir_volume = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None #[l]
 
             if "number_cycles" in col_name.lower():
-                self.total_number_cycles = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None  #
-                if not self.total_number_cycles and self.retry_counter > 0:
+                v = df[col_name].iloc[0]
+                self.total_number_cycles = None if pd.isna(v) else float(v)  #
+                print(df[col_name].iloc[0])
+                if pd.isna(self.total_number_cycles) and self.retry_counter > 0:
+                    updated_using_tp_data = True
                     self.last_de_hyd_state, self.total_number_cycles = self.fetch_last_state_and_cycle()
-                    self.write()
                     self.retry_counter -= 1
 
-            if "de_hyd_state" in col_name.lower():
+            if "de_hyd_state" in col_name.lower() and not updated_using_tp_data:
                 self.last_de_hyd_state = df[col_name].iloc[0]  #
 
             if self.sample_material:
                 (self.enthalpy, self.entropy, self.theoretical_uptake) = self._get_enthalpy_entropy_wt_theoretical()
+
+        if updated_using_tp_data:
+            self.write(quiet=True)
+
 
     def _create_new_line_meta_data(self):
         # Create a new row with the given sample_id
@@ -324,7 +331,6 @@ class MetaData:
                     LIMIT 1
                 """
         try:
-            time_start_query_exec = time.time()
             with DatabaseConnection(**self.db_conn_params) as conn:
                 conn.cursor.execute(query, (sample_id,))
                 record = conn.cursor.fetchone()
@@ -346,12 +352,22 @@ class MetaData:
 
 
 def test_meta_data_handler(sample_id):
-    meta_data_instance = MetaData(sample_id=sample_id)
-    meta_data_instance.print()
+    from src.infrastructure.core.config_reader import GetConfig
+    config = GetConfig()
+    meta_data_instance = MetaData(sample_id=sample_id,
+                                  db_conn_params=config.db_conn_params)
+    #meta_data_instance.print()
     #meta_data_instance._create_new_line_meta_data()
 
 
 if __name__ == "__main__":
     #test_meta_data_handler()
+    from datetime import datetime
+    start = datetime.now()
     test_meta_data_handler(sample_id="WAE-WA-040")
+    first_finished = (datetime.now()-start).total_seconds()
+    print(f"WAE-WA-040 took: {first_finished} s")
+    test_meta_data_handler(sample_id="WAE-WA-060")
+    second_finished = (datetime.now()-start).total_seconds()
+    print(f"WAE-WA-060 took: {second_finished} s")
 
