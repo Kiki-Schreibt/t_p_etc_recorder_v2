@@ -208,7 +208,6 @@ class MetaData:
             if "number_cycles" in col_name.lower():
                 v = df[col_name].iloc[0]
                 self.total_number_cycles = None if pd.isna(v) else float(v)  #
-                print(df[col_name].iloc[0])
                 if pd.isna(self.total_number_cycles) and self.retry_counter > 0:
                     updated_using_tp_data = True
                     self.last_de_hyd_state, self.total_number_cycles = self.fetch_last_state_and_cycle()
@@ -222,7 +221,6 @@ class MetaData:
 
         if updated_using_tp_data:
             self.write(quiet=True)
-
 
     def _create_new_line_meta_data(self):
         # Create a new row with the given sample_id
