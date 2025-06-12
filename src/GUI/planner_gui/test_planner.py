@@ -5,16 +5,19 @@ from PySide6.QtWidgets import QMainWindow
 
 from src.GUI.planner_gui.planner_business import VantHoffPlot
 from src.infrastructure.utils.standard_paths import planner_ui_file_path
+from src.infrastructure.core import global_vars
+
+STYLE_SHEET = global_vars.style
 
 
 class TestPlannerMain(QMainWindow):
-
 
     def __init__(self):
         super().__init__()
         ui_file_path = planner_ui_file_path
         self.setWindowTitle("Test planner")
         self.ui = load_ui_file(ui_file_path)
+        self.setStyleSheet(STYLE_SHEET)
         self.setCentralWidget(self.ui)
         self.setMinimumSize(800, 650)
         self.plot = VantHoffPlot(self.ui.test_plot_window)
@@ -24,6 +27,7 @@ class TestPlannerMain(QMainWindow):
         self.ui.material_edit_field.editingFinished.connect(self.on_material_changed)
         self.ui.plot_route_button.clicked.connect(self._on_plot_route_button_clicked)
         self.ui.cell_combo_box.textActivated.connect(self._on_cell_chosen)
+
     def _init_text_box_connections(self):
         self.ui.pressure_hyd_edit_field.editingFinished.connect(lambda: self.update_vars(self.ui.pressure_hyd_edit_field.text(),"pressure_hyd"))
         self.ui.pressure_dehyd_edit_field.editingFinished.connect(lambda: self.update_vars(self.ui.pressure_dehyd_edit_field.text(),"pressure_dehyd"))

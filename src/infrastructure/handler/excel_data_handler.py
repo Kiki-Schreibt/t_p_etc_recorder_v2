@@ -15,17 +15,18 @@ import pandas as pd
 from psycopg2 import IntegrityError
 
 from src.infrastructure.connections.connections import DatabaseConnection
+from src.infrastructure.handler.metadata_handler import MetaData
+from src.infrastructure.core.table_config import TableConfig
+from src.config_connection_reading_management.database_reading_writing import DataRetriever
+from src.infrastructure.core import global_vars
+
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from src.infrastructure.handler.metadata_handler import MetaData
-from src.infrastructure.core.table_config import TableConfig
-from src.config_connection_reading_management.database_reading_writing import DataRetriever
 
-local_tz = ZoneInfo("Europe/Berlin")
-LIMIT_DATA_POINTS = 5000
+LOCAL_TZ = global_vars.local_tz
 
 
 class ExcelDataProcessor:
@@ -140,7 +141,7 @@ class ExcelDataProcessor:
             combined_sheet['Time'] = pd.to_datetime(combined_sheet['Time'])
             combined_sheet['Time'] = combined_sheet['Time'].dt.strftime('%Y-%m-%d %H:%M:%S')
             combined_sheet["Time"] = pd.to_datetime(combined_sheet["Time"])
-            combined_sheet["Time"] = combined_sheet["Time"].dt.tz_localize(local_tz, ambiguous='NaT')
+            combined_sheet["Time"] = combined_sheet["Time"].dt.tz_localize(LOCAL_TZ, ambiguous='NaT')
             return combined_sheet
         else:
             self.logger.error("The DataFrames have different lengths and cannot be concatenated directly.")
@@ -268,7 +269,7 @@ class ExcelDataProcessor:
         df_etc = df_etc.sort_values(etc_table.get_clean('time'))
         df_tp = df_tp.rename(columns={t_p_table.time: etc_table.get_clean('time')})
         df_tp = df_tp.sort_values(etc_table.get_clean('time'))
-        df_tp[etc_table.get_clean('time')] = df_tp[etc_table.get_clean('time')].dt.tz_convert(local_tz)
+        df_tp[etc_table.get_clean('time')] = df_tp[etc_table.get_clean('time')].dt.tz_convert(LOCAL_TZ)
         df_tp_etc = pd.merge_asof(df_etc, df_tp, on=etc_table.get_clean('time'),
                                   direction='nearest',
                                   suffixes=('_etc', '_tp'))

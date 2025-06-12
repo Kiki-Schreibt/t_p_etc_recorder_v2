@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 import logging
 from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
+from src.infrastructure.core import global_vars
 
 # Constants
-R_H2: float = 4124.49         # [J/(kg·K)] Specific gas constant for hydrogen
-R_universal: float = 8.31447    # [J/(mol·K)] Universal gas constant
-V_pipes: float = 1e-7         # [m³] Pipe volume
+R_H2 = global_vars.R_H2      # [J/(kg·K)] Specific gas constant for hydrogen
+R_universal = global_vars.R_universal    # [J/(mol·K)] Universal gas constant
+V_pipes = global_vars.V_pipes     # [m³] Pipe volume
 
 
 class VantHoffCalcEq:

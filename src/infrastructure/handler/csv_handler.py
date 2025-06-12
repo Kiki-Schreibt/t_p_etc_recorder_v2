@@ -16,22 +16,22 @@ from src.infrastructure.handler.modbus_handler import ModbusDBWriter, CycleCount
 from src.infrastructure.handler.excel_data_handler import  write_ETC_folder
 from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
 from src.config_connection_reading_management.database_reading_writing import DataRetriever
-
+from src.infrastructure.core.table_config import TableConfig
+from src.infrastructure.core import global_vars
 
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
-from src.infrastructure.core.table_config import TableConfig
 
-local_tz = ZoneInfo("Europe/Berlin")
-REALISTIC_MAX_TEMP = 1000
-REALISTIC_MIN_PRESSURE = 1.0
-SUPPORTED_FILE_EXTENSIONS = ['.csv', '.txt']
-STATE_HYD = 'Hydrogenated'
-STATE_DEHYD = 'Dehydrogenated'
-CYCLE_COUNTER_MODE = 'CSV_Recorder'
-COMPRESSION_FACTOR = 5
+local_tz = global_vars.local_tz
+REALISTIC_MAX_TEMP = global_vars.realistic_max_temp
+REALISTIC_MIN_PRESSURE = global_vars.realistic_min_pressure
+SUPPORTED_FILE_EXTENSIONS = global_vars.supported_file_extensions
+STATE_HYD = global_vars.state_hyd
+STATE_DEHYD = global_vars.state_dehyd
+CYCLE_COUNTER_MODE = global_vars.cycle_counter_mode_CSV_recorder
+COMPRESSION_FACTOR = global_vars.compression_factor
 
 
 class CSVProcessor:

@@ -18,16 +18,18 @@ from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.infrastructure.handler.metadata_handler import MetaData
 from src.infrastructure.core.table_config import TableConfig
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, DataBaseManipulator
+from src.infrastructure.core import global_vars
+
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-local_tz = ZoneInfo("Europe/Berlin")
+local_tz = global_vars.local_tz
 
-STANDARD_MODE = 'recording'
-STATE_HYD = 'Hydrogenated'
-STATE_DEHYD = 'Dehydrogenated'
+STANDARD_MODE = global_vars.mode_modbus_recording
+STATE_HYD = global_vars.state_hyd
+STATE_DEHYD = global_vars.state_dehyd
 
 
 #todo: implement memory usage tracking

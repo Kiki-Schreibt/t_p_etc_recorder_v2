@@ -9,42 +9,21 @@ from PySide6.QtCore import (QDateTime, QThread, QTimeZone, QTimer, Signal, Slot,
 from PySide6.QtWidgets import QApplication
 
 from src.infrastructure.connections.connections import DatabaseConnection
+from src.infrastructure.core.table_config import TableConfig
+from src.infrastructure.core import global_vars
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from src.infrastructure.core.table_config import TableConfig
 
-
-time_format_str = "yyyy-MM-dd HH:mm:ss"
-local_tz = QTimeZone(b'Europe/Berlin')
-local_tz_reg = ZoneInfo('Europe/Berlin')
-colors = [
-    "#FF0000",  # Red
-    "#00FF00",  # Lime
-    "#0000FF",  # Blue
-    "#FFFF00",  # Yellow
-    "#00FFFF",  # Cyan
-    "#FF00FF",  # Magenta
-    "#800000",  # Maroon
-    "#808000",  # Olive
-    "#008000",  # Green
-    "#800080",  # Purple
-    "#008080",  # Teal
-    "#000080",  # Navy
-    "#FFA500",  # Orange
-    "#A52A2A",  # Brown
-    "#20B2AA",  # Light Sea Green
-    "#778899",  # Light Slate Gray
-    "#D2691E",  # Chocolate
-    "#DC143C",  # Crimson
-    "#7FFF00",  # Chartreuse
-    "#6495ED"   # Cornflower Blue
-]
-colors_scatter = colors.copy()
-READING_MODE_FULL_TEST = 'full_test'
-READING_MODE_BY_TIME = 'by_time'
+TIME_FORMAT_STR = global_vars.time_format_str
+LOCAL_TZ_QT = global_vars.local_tz_qt
+local_tz_reg = global_vars.local_tz
+COLORS = global_vars.colors
+COLORS_SCATTER = COLORS.copy()
+READING_MODE_FULL_TEST = global_vars.reading_mode_full_test
+READING_MODE_BY_TIME = global_vars.reading_mode_by_time
 
 
 def down_sample_data(df, sample_rate=2):
@@ -578,7 +557,7 @@ class PlotBaseStyle(pg.PlotWidget):
         self.font_color = 'white'
         self.font_size = 10
         self.y_axis_str = y_axis
-        self.point_colors = colors_scatter
+        self.point_colors = COLORS_SCATTER
         self.color_index_scatter = 0
         self._init_left_axis(y_axis=y_axis)
         self._init_col_names(y_axis=y_axis)
@@ -657,7 +636,7 @@ class PlotBaseStyle(pg.PlotWidget):
                 continue
             if col not in df.columns or df[col].isna().all():
                 continue
-            color = colors[idx % len(colors)]
+            color = COLORS[idx % len(COLORS)]
             y = df[col].values
             plot_item = self.plotItem.plot(
                 x=x,
@@ -940,7 +919,7 @@ class PlotBaseWindow(PlotBaseStyle):
                 point_index = i
                 break
         if point_index is not None:
-            self.current_color_scatter = colors_scatter[self.color_index_scatter % len(colors_scatter)]
+            self.current_color_scatter = COLORS_SCATTER[self.color_index_scatter % len(COLORS_SCATTER)]
             self.color_index_scatter += 1
             self.point_colors[point_index] = pg.mkBrush(self.current_color_scatter)
             self.scatter_plot_item.setData(x=x_data, y=y_data, brush=self.point_colors)

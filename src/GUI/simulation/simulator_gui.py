@@ -16,7 +16,7 @@ from matplotlib.ticker import FuncFormatter
 
 from src.GUI.simulation.dicon_simulator_v2 import MBServer  # Import your MBServer class
 from src.tp_program_simulator import TemperatureControllerDiconSimulator
-
+from src.infrastructure.core import global_vars
 
 try:
     import src.infrastructure.core.logger as logging
@@ -26,7 +26,7 @@ except ImportError:
 from src.infrastructure.utils.memory_logger import log_memory
 
 logger = logging.getLogger(__name__)
-
+STYLE_SHEET = global_vars.style
 
 def seconds_to_minutes(x, pos):
     # Convert seconds to minutes:seconds
@@ -200,6 +200,7 @@ class ModbusServerControlGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Modbus Server Control")
+        self.setStyleSheet(STYLE_SHEET)
         self.resize(800, 600)
         self.business = ModbusServerControlBusiness()
 

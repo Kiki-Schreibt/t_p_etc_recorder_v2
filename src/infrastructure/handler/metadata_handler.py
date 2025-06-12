@@ -8,6 +8,8 @@ import pandas as pd
 from src.infrastructure.connections.connections import DatabaseConnection
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.infrastructure.core.table_config import TableConfig
+from src.infrastructure.core import global_vars
+
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
@@ -19,7 +21,7 @@ meta_table = TableConfig().MetaDataTable
 #       self.sensor_radius = None
 #       self.sensor_insulation = None
 #       self.sensor_coil = None
-local_tz = ZoneInfo("Europe/Berlin")
+LOCAL_TZ = global_vars.local_tz_qt
 
 
 class MetaData:
@@ -42,7 +44,7 @@ class MetaData:
         meta_table.last_de_hyd_state: 'last_de_hyd_state'
     }
 
-    def __init__(self, sample_id, db_conn_params):
+    def __init__(self, db_conn_params, sample_id=None):
         self.db_conn_params = db_conn_params or {}
 
         self.qb = QueryBuilder()
@@ -304,10 +306,10 @@ class MetaData:
 
             if self.first_hydrogenation.tzinfo is None:
                 # If no timezone info, localize to a specific timezone, e.g., UTC
-                self.first_hydrogenation = value.tz_localize(local_tz)
+                self.first_hydrogenation = value.tz_localize(LOCAL_TZ)
             else:
                 # If already timezone-aware, you may want to convert to another timezone
-                self.first_hydrogenation = value.tz_convert(local_tz)
+                self.first_hydrogenation = value.tz_convert(LOCAL_TZ)
         return value
 
     def fetch_last_state_and_cycle(self):

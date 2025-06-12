@@ -6,13 +6,14 @@ import atexit
 from datetime import datetime
 
 from src.infrastructure.utils.standard_paths import standard_log_dir
+from src.infrastructure.core.global_vars import log_file_name
 
 """
 Custom logger module that mimics the standard logging interface.
 """
 
 LOG_DIRECTORY = standard_log_dir
-LOG_FILE_NAME = 'Application_Log.log'
+LOG_FILE_NAME = log_file_name
 LOG_FILE = None
 _logger_initialized = False
 

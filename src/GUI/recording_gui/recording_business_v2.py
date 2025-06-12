@@ -530,6 +530,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
             """
             super().__init__(parent=parent)
             self.logger = logging.getLogger(__name__)
+
             self.db_reader = DataRetriever(db_conn_params=db_conn_params)
             self.constraints = constraints
             self.tp_table = TableConfig().TPDataTable
@@ -547,7 +548,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
                 tp_table_name = self.tp_table.table_name
                 etc_table_name = self.etc_table.table_name
                 if self.constraints and self.only_isotherms_bool:
-                    self.constraints[self.etc_table.is_isotherm_flag] = self.only_isotherms_bool
+                    self.constraints['where_'+self.etc_table.is_isotherm_flag] = self.only_isotherms_bool
                 elif self.only_isotherms_bool:
                     self.constraints = {'where_'+self.etc_table.is_isotherm_flag: self.only_isotherms_bool}
 
@@ -555,6 +556,9 @@ class ReadPlotTpDependent(pg.PlotWidget):
                                                                 table_name=etc_table_name,
                                                                 constraints=self.constraints)
                 self.df_etc_storage = df_tp_etc
+
+                if df_tp_etc.empty:
+                    return
 
                 if df_tp_etc[self.etc_table.pressure].isnull().all() or df_tp_etc[self.etc_table.temperature_sample].isnull().all():
                     df_tp = self.db_reader.fetch_data_by_time_2(time_range=self.time_range, table_name=tp_table_name)
@@ -566,6 +570,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
 
                 if not df_for_plot.empty:
                     self.tp_etc_data.emit(df_for_plot.copy(), x_axis_label, y_axis_label)
+
             except Exception as e:
                 self.logger.exception("Exception in loading tp-dependent data:")
 
@@ -640,6 +645,7 @@ class ReadPlotTpDependent(pg.PlotWidget):
             try:
                 super().__init__(parent=parent)
                 self.logger = logging.getLogger(__name__)
+                constraints = constraints.copy()
                 self.reader = ReadPlotTpDependent.ReadTpDependent(parent=parent, constraints=constraints, db_conn_params=db_conn_params)
                 self.reader.tp_etc_data.connect(self.plot_ETC)
                 self.tp_table = TableConfig().TPDataTable
@@ -762,6 +768,8 @@ class ReadPlotTpDependent(pg.PlotWidget):
             """
             try:
                 self.logger.info("Tp dependent plot window is being closed")
+                self.reader.tp_etc_data.disconnect()
+                self.reader = None
                 super().closeEvent(event)
             except Exception as e:
                 self.logger.exception("Error during closeEvent in PlotTpDependent:")
@@ -1104,7 +1112,7 @@ if __name__ == '__main__':
         from src.infrastructure.handler.metadata_handler import MetaData
 
         db_conn_params = GetConfig().db_conn_params
-        meta_data = MetaData('WAE-WA-028', db_conn_params=db_conn_params)
+        meta_data = MetaData(sample_id='WAE-WA-028', db_conn_params=db_conn_params)
         #win = test_read_plot_tp_dependent()
         win = CyclePlotWindow(db_conn_params=db_conn_params, meta_data=meta_data)
         #win = ContinuousPlotWindow(y_axis="temperature", meta_data=meta_data, db_conn_params=db_conn_params)

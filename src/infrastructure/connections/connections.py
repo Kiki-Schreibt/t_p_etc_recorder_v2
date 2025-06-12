@@ -336,7 +336,8 @@ def test_hot_disk_connection():
         with HotDiskConnection() as client:
             #client.send_command(f"SCHED:INIT {file}")
             client.send_command(f"*IDN?")
-            client.receive_response()
+            a= client.receive_response()
+            print(a)
     except KeyboardInterrupt:
         print("Program interrupted by user.")
     except Exception as e:
@@ -346,9 +347,9 @@ def test_hot_disk_connection():
 
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import GetConfig
-
-    # Load the configuration
     config = GetConfig()
+    # Load the configuration
+    test_hot_disk_connection()
 
 
     file = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\waittenminutes.hseq"

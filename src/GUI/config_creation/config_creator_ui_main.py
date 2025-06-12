@@ -9,6 +9,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal
 
 from src.infrastructure.utils.standard_paths import standard_config_file_path
+import src.infrastructure.core.global_vars as global_vars
+
+STYLE_SHEET = global_vars.style
 
 
 class ConfigWindow(QWidget):
@@ -17,6 +20,7 @@ class ConfigWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Connection and Database Settings")
+        self.setStyleSheet(STYLE_SHEET)
         self.config_template = {
             "LOG_DIRECTORY": "Log",
             "LOG_FILE": "Application_Log.log",

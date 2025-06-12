@@ -19,25 +19,23 @@ from zoneinfo import ZoneInfo
 import warnings
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
-from PySide6.QtGui import QDoubleValidator, QFont
+from PySide6.QtGui import QDoubleValidator
+
 
 from src.infrastructure.handler.metadata_handler import MetaData
 from src.GUI.recording_gui.recording_business_v2 import DataRecorder
 from src.infrastructure.utils.standard_paths import recording_ui_file_path
+from src.infrastructure.core import global_vars
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
 # Constants
-FONT = QFont("Arial", 8)
-local_tz = ZoneInfo("Europe/Berlin")
-STANDARD_CONSTRAINTS = {
-    "min_TotalCharTime": 0.33,
-    "max_TotalCharTime": 1,
-    "min_TotalTempIncr": 2,
-    "max_TotalTempIncr": 5
-}
+FONT = global_vars.FONT
+local_tz = global_vars.local_tz
+STANDARD_CONSTRAINTS = global_vars.STANDARD_CONSTRAINTS
+STYLE_SHEET = global_vars.style
 
 
 class MetaDataManager:
@@ -264,8 +262,11 @@ class PlotManager:
         """
         try:
             if self.right_plot:
+                self.right_plot.close()
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
+                self.right_plot = None
+
             from src.GUI.recording_gui.recording_business_v2 import ReadPlotTpDependent
             self.right_plot = ReadPlotTpDependent.PlotTpDependent(db_conn_params=self.db_conn_params,
                                                                   constraints=constraints)
@@ -577,8 +578,7 @@ class MainWindow(QMainWindow):
 
             self.config = config
             self.setWindowTitle("T-p ETC Recorder")
-            from src.GUI.qt_styles import gpt_light as style
-            self.setStyleSheet(style)
+            self.setStyleSheet(STYLE_SHEET)
             self.setFont(FONT)
             self.logger = logging.getLogger(__name__)
 
@@ -649,7 +649,7 @@ class MainWindow(QMainWindow):
         """
         try:
             self.ui.xy_plot_window.setLayout(QVBoxLayout())
-            self.setMinimumSize(1600, 900)
+            self.setMinimumSize(1600, 950)
             self.ui.reservoir_volume_edit_field.setText(str(self.controller.reservoir_volume))
             self.ui.sample_id_edit_field.setText(self.meta_data.sample_id or "")
         except Exception as e:
@@ -905,17 +905,25 @@ class MainWindow(QMainWindow):
                 time_range = [datetime.fromtimestamp(ts, tz=local_tz) for ts in stamps]
 
             drop_val = self.ui.T_p_dependent_drop_down.currentText().lower()
+
             if 'temperature' in drop_val or 'pressure' in drop_val:
                 if self.plot_manager.bottom_plot:
                     x_col = 'pressure' if 'pressure' in drop_val else 'temperature' if 'temperature' in drop_val else None
-                    self.plot_manager.init_tp_dependent_plot(x_col, time_range, constraints=self.controller.constraints)
+                    self.plot_manager.init_tp_dependent_plot(x_col,
+                                                             time_range,
+                                                             constraints=self.controller.constraints,
+                                                             only_isotherms_bool=False)
             elif 'isotherm' in drop_val:
                 if self.plot_manager.bottom_plot:
                     x_col = 'pressure'
-                    self.plot_manager.init_tp_dependent_plot(x_col, time_range, only_isotherms_bool=True, constraints=self.controller.constraints)
+                    self.plot_manager.init_tp_dependent_plot(x_col,
+                                                             time_range,
+                                                             only_isotherms_bool=True,
+                                                             constraints=self.controller.constraints)
 
             elif 'cycle' in drop_val:
-                self.plot_manager.init_cycle_dependent_plot(time_range=time_range, constraints=self.controller.constraints)
+                self.plot_manager.init_cycle_dependent_plot(time_range=time_range,
+                                                            constraints=self.controller.constraints)
 
             elif 'uptake' in drop_val:
                 self.plot_manager.init_uptake_plot(time_range=time_range)
@@ -923,8 +931,6 @@ class MainWindow(QMainWindow):
                 return
         except Exception as e:
             self.logger.exception(f"Error initializing TP dependent plot in MainWindow: {e}")
-
-
 
     def _on_sample_id_changed(self):
         """

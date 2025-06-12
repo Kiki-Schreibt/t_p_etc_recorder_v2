@@ -8,6 +8,7 @@ import re
 from zoneinfo import ZoneInfo
 
 from src.infrastructure.connections.connections import HotDiskConnection
+from src.infrastructure.core import global_vars
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
@@ -15,7 +16,7 @@ except ImportError:
 
 
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"
-local_tz = ZoneInfo("Europe/Berlin")
+local_tz = global_vars.local_tz
 
 
 class HotDiskScheduleGrabber:

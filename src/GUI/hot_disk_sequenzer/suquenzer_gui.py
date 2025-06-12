@@ -24,13 +24,15 @@ import pyqtgraph as pg
 # Local project imports (assumed available in your project structure)
 from src.tp_program_simulator import TemperatureControllerHotDiskSequenzer
 from src.infrastructure.handler.hot_disk_handler import HotDiskController
+from src.infrastructure.core import global_vars
 
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-local_tz = ZoneInfo("Europe/Berlin")
+STYLE_SHEET = global_vars.style
+local_tz = global_vars.local_tz
 standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\config\tps_schedules"
 
 
@@ -126,6 +128,7 @@ class ScheduleGeneratorBase(QWidget):
         Constructs the entire UI layout (left controls + right plot).
         """
         super().__init__()
+        self.setStyleSheet(STYLE_SHEET)
         self.init_ui()
 
     def init_ui(self):

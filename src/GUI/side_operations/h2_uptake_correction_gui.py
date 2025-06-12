@@ -10,11 +10,14 @@ from pyqtgraph import LinearRegionItem
 from datetime import datetime
 
 from src.config_connection_reading_management.database_reading_writing import DataRetriever, local_tz
+from src.infrastructure.core import global_vars
 
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
     import logging
+
+STYLE_SHEET = global_vars.style
 
 
 class UptakeCorrectionUi(QMainWindow):
@@ -30,6 +33,7 @@ class UptakeCorrectionUi(QMainWindow):
 
     def __init__(self, meta_data, config, time_range_to_read):
         super().__init__()
+        self.setStyleSheet(STYLE_SHEET)
         self._init_plots(meta_data=meta_data,
                          config=config,
                          time_range_to_read=time_range_to_read)
@@ -102,19 +106,19 @@ class UptakeCorrectionUi(QMainWindow):
         btn_layout_top.addStretch()
 
         self.linear_region_button = QPushButton("Update Region")
-        self.linear_region_button.setFixedWidth(150)
+        self.linear_region_button.setFixedWidth(180)
         btn_layout_top.addWidget(self.linear_region_button)
 
         self.find_uncounted_cycles_button = QPushButton("Find Uncounted Cycles")
-        self.find_uncounted_cycles_button.setFixedWidth(150)
+        self.find_uncounted_cycles_button.setFixedWidth(180)
         btn_layout_top.addWidget(self.find_uncounted_cycles_button)
 
         self.prev_cycle_button = QPushButton("Prev Cycle")
-        self.prev_cycle_button.setFixedWidth(120)
+        self.prev_cycle_button.setFixedWidth(150)
         btn_layout_top.addWidget(self.prev_cycle_button)
 
         self.next_cycle_button = QPushButton("Next Cycle")
-        self.next_cycle_button.setFixedWidth(120)
+        self.next_cycle_button.setFixedWidth(150)
         btn_layout_top.addWidget(self.next_cycle_button)
 
         btn_layout_top.addStretch()
@@ -157,7 +161,7 @@ class UptakeCorrectionUi(QMainWindow):
         self.update_isotherm_flag_button.setFixedWidth(160)
         btn_layout.addWidget(self.update_isotherm_flag_button)
 
-        self.isotherm_checkbox = QCheckBox("Set Isotherm Flag to: ")
+        self.isotherm_checkbox = QCheckBox("Set Isotherm Flag")
         self.isotherm_checkbox.setChecked(True)           # default state
         btn_layout.addWidget(self.isotherm_checkbox)
 

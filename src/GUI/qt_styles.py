@@ -2112,7 +2112,7 @@ QWidget, QMainWindow {
     background-color: #2b2b2b;
     color: #e1e1e0;
     font-family: Arial, sans-serif;
-    font-size: 11pt;
+    font-size: 10pt;
 }
 
 /* Tooltips */
