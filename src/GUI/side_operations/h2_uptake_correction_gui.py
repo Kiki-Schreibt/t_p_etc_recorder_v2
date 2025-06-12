@@ -531,6 +531,7 @@ class UptakeCorrectionBackend(QObject):
         self.data_retriever = DataRetriever(db_conn_params=self.db_conn_params)
 
         self.row_min = self.row_max = pd.Series()
+        self.reservoir_volume = None
         self.h2_uptake = None
         self.cycle_to_update = None
         self.params_uptake = None
@@ -549,6 +550,11 @@ class UptakeCorrectionBackend(QObject):
                 sample_id=self.meta_data.sample_id,
                 table_name=self.tp_table.table_name
             )
+            if df[self.tp_table.reservoir_volume].iloc[0] != df[self.tp_table.reservoir_volume].iloc[-1]:
+                self.logger.error("Detected change in reservoir volume during hydrogenation. Please fix")
+                return
+
+            self.reservoir_volume = df[self.tp_table.reservoir_volume].iloc[0]
             self.row_min, self.row_max = self._filter_min_max_vals(df)
         except Exception as e:
             self.logger.error("Could not load data from time range: %s", e)
@@ -594,7 +600,7 @@ class UptakeCorrectionBackend(QObject):
             'p_dehyd':  self.row_max[self.tp_table.pressure],
             'T_hyd':    self.row_min[self.tp_table.temperature_sample],
             'T_dehyd':  self.row_max[self.tp_table.temperature_sample],
-            'V_res':    self.meta_data.reservoir_volume,
+            'V_res':    self.reservoir_volume,
             'V_cell':   self.meta_data.volume_measurement_cell,
             'm_sample': self.meta_data.sample_mass
         }
@@ -789,7 +795,7 @@ def main():
 
     app = QApplication([])
     config = GetConfig()
-    meta_data = MetaData(sample_id="WAE-WA-028", db_conn_params=config.db_conn_params)
+    meta_data = MetaData(sample_id="WAE-WA-040", db_conn_params=config.db_conn_params)
     from datetime import datetime
     time_range = [datetime(2021, 9, 18), datetime(2021, 9, 21)]
     win = UptakeCorrectionWindow(

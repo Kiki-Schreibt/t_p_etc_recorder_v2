@@ -215,7 +215,8 @@ class DataRetriever:
                 constraints=constraints,
                 join_table=join_table,
                 join_on=join_on,
-                join_constraints=join_constraints
+                join_constraints=join_constraints,
+                sample_id=sample_id
             )
 
         else:
