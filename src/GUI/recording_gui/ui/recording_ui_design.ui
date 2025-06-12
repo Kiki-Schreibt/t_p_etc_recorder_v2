@@ -207,7 +207,7 @@
    <widget class="QWidget" name="xy_plot_window" native="true">
     <property name="geometry">
      <rect>
-      <x>879</x>
+      <x>890</x>
       <y>220</y>
       <width>611</width>
       <height>531</height>
@@ -292,7 +292,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -354,7 +354,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGroupBox" name="">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>331</x>
@@ -440,7 +440,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGroupBox" name="">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>640</x>
@@ -508,7 +508,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGroupBox" name="">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>890</x>
@@ -570,7 +570,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGroupBox" name="">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>10</x>

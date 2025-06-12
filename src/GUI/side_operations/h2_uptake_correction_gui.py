@@ -460,7 +460,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
 
         # Create a QThread and worker, just like in _on_update_data:
         self._iso_thread = QThread(self)
-        self._iso_worker = UpdateIsothermWorker(self.backend)
+        self._iso_worker = UpdateValueWorker(self.backend, "isotherm_flag")
         self._iso_worker.moveToThread(self._iso_thread)
 
         self._iso_thread.started.connect(self._iso_worker.run)
@@ -683,16 +683,18 @@ class UptakeCorrectionBackend(QObject):
         self.df_uncounted_cycles_sig.emit(df.copy())
         self.uncounted_cycles_emitted = True
 
-    def update_isotherm_flag(self):
+    def update_value(self, column_to_update):
         """
         Update the TP and ETC tables’ is_isotherm_flag = TRUE
         for all rows whose timestamp lies in self.time_range_to_update.
         """
+        update_df_tp = pd.Series()
+        update_df_etc = pd.Series()
         if not self.time_range_to_update:
             raise RuntimeError("No time range selected for isotherm‐flag update.")
-
-        update_df_tp = pd.Series({self.tp_table.is_isotherm_flag: self.is_isotherm})
-        update_df_etc = pd.Series({self.etc_table.is_isotherm_flag: self.is_isotherm})
+        if column_to_update == "isotherm_flag":
+            update_df_tp = pd.Series({self.tp_table.is_isotherm_flag: self.is_isotherm})
+            update_df_etc = pd.Series({self.etc_table.is_isotherm_flag: self.is_isotherm})
 
         from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
         dbm = DataBaseManipulator(db_conn_params=self.db_conn_params)
@@ -756,7 +758,7 @@ class UpdateWorker(QObject):
             self.error.emit(str(e))
 
 
-class UpdateIsothermWorker(QObject):
+class UpdateValueWorker(QObject):
     """
     Worker to run backend.update_isotherm_flag() off the main thread.
 
@@ -769,19 +771,23 @@ class UpdateIsothermWorker(QObject):
     error = Signal(str)
     progress = Signal(str)
 
-    def __init__(self, backend):
+    def __init__(self, backend, column_to_update):
         super().__init__()
         self.backend = backend
+        self.column_to_update = column_to_update
+
 
     @Slot()
     def run(self):
         try:
-            self.progress.emit("Starting isotherm‐flag update…")
+            self.progress.emit(f"Starting {self.column_to_update} update…")
             self.backend.update_isotherm_flag()
-            self.progress.emit("Done updating isotherm flags.")
+            self.progress.emit(f"Done updating {self.column_to_update} ")
             self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
+
+
 
 
 def main():

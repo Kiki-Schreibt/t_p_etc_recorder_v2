@@ -953,12 +953,12 @@ class CyclePlotWindow(pg.PlotWidget):
         try:
             reader = DataRetriever(db_conn_params=self.db_conn_params)
             if self.constraints:
-                self.constraints[self.etc_table.is_isotherm_flag] = False
-                self.constraints[self.etc_table.cycle_number_flag] = True
+                self.constraints['where_'+self.etc_table.is_isotherm_flag] = False
+                self.constraints['where_'+self.etc_table.cycle_number_flag] = True
             else:
                 self.constraints = {
-                                    self.etc_table.is_isotherm_flag: False,
-                                    self.etc_table.cycle_number_flag: True
+                                    'where_'+self.etc_table.is_isotherm_flag: False,
+                                    'where_'+self.etc_table.cycle_number_flag: True
                                     }
 
             cols = [
