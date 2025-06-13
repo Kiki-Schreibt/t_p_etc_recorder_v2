@@ -693,7 +693,8 @@ class ReadPlotTpDependent(pg.PlotWidget):
                     return df.loc[mask]
 
                 def create_color_map(color_vals):
-                    c_map = pg.colormap.get('CET-L4')
+#                   'viridis', 'plasma', 'cividis', 'coolwarm', 'CET-L4'
+                    c_map = pg.colormap.get('viridis')
                     normalized_vals = (color_vals - color_vals.min()) / (color_vals.max() - color_vals.min())
                     colors = c_map.map(normalized_vals, mode='qcolor')
                     return colors
@@ -910,7 +911,7 @@ class CyclePlotWindow(pg.PlotWidget):
         self.db_conn_params = db_conn_params or {}
         self.etc_table = TableConfig().ETCDataTable
         self.meta_data = meta_data
-        self.constraints=constraints
+        self.constraints = constraints.copy()
         # prepare four scatter items
         self.scatter_hyd_inst = pg.ScatterPlotItem(
             pen=None, symbol='o', size=8,
