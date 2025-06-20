@@ -268,6 +268,10 @@ class PlotIndividualizerMainWindow(PlotIndividualizerUI):
                                                    time_range=time_range,
                                                    constraints=constraints)
 
+    def closeEvent(self, event):
+        self.individual_plot_widget.close()
+        super().closeEvent(event)
+
 
 class IndividualPlotWindow(pg.PlotWidget):
 
@@ -377,6 +381,10 @@ class IndividualPlotWindow(pg.PlotWidget):
     @Slot(str)
     def _on_data_error(self, msg):
         QMessageBox.critical(self, "Data Load Error", msg)
+
+    def closeEvent(self, event):
+        self._cleanup_thread()
+        super().closeEvent(event)
 
 
 class DataLoadWorker(QObject):
