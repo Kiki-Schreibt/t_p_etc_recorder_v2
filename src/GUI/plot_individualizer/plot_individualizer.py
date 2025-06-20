@@ -1,27 +1,34 @@
 #plot_individualizer.py
 
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout,
-                                       QLabel, QComboBox)
-from table_config import TableConfig
+                                       QLabel, QComboBox, QHBoxLayout)
+import pyqtgraph as pg
 
+from src.infrastructure.core.table_config import TableConfig
+from src.config_connection_reading_management.database_reading_writing import DataRetriever
 
-EXCLUDE_TABLES = {"meta_data", "cycle_data"}       # tables to hide
+tp_table = TableConfig().TPDataTable
+etc_table = TableConfig().ETCDataTable
+etc_xy_table = TableConfig().ThermalConductivityXyDataTable
+cycle_table = TableConfig().CycleDataTable
+meta_table = TableConfig().MetaDataTable
+
+EXCLUDE_TABLES = {meta_table.table_name,
+                  etc_xy_table.table_name}       # tables to hide
 EXCLUDE_COLUMNS = {
-                      "t_p_data": {"time"},
-                      "thermal_conductivity_data": {"\"Time\"", "\"File\""},
+                      etc_table: {etc_table.file},
                     }
 
 
 class TableSelectorWindow(QWidget):
-               # columns to hide
 
-
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
         self.setWindowTitle("Table and Column Selector")
         self.resize(400, 200)
 
-        self.config = TableConfig()
+        self.config = config
+
         self.table_classes = [
             TableConfig.TPDataTable,
             TableConfig.ETCDataTable,
@@ -37,8 +44,7 @@ class TableSelectorWindow(QWidget):
                             if cls.table_name not in EXCLUDE_TABLES
                         }
         self._init_ui()
-
-
+        self.setMinimumSize(700, 450)
         # Initialize columns for the default table
         self.update_columns(self.tableCombo.currentText())
 
@@ -46,6 +52,12 @@ class TableSelectorWindow(QWidget):
         self.tableCombo.currentTextChanged.connect(self.update_columns)
 
     def _init_ui(self):
+        main_layout = QHBoxLayout(self)
+        main_layout.addLayout(self._init_combo_boxes())
+        main_layout.addWidget(self._init_plot_window())
+
+
+    def _init_combo_boxes(self):
         layout = QVBoxLayout(self)
 
         # Table selection
@@ -63,10 +75,19 @@ class TableSelectorWindow(QWidget):
         layout.addWidget(QLabel("Select Column 2:"))
         self.colCombo2 = QComboBox()
         layout.addWidget(self.colCombo2)
+        return layout
+
+
+    def _init_plot_window(self):
+
+        self.plot_widget = IndividualPlotWindow(config=self.config)
+        #self.plot_widget.setBackground('r')  # optional: set a white background
+        return self.plot_widget
+
 
     def update_columns(self, table_name: str):
         # Get all column names
-        cols = self.config.get_table_column_names(table_name=table_name) or []
+        cols = TableConfig().get_table_column_names(table_name=table_name) or []
 
         # Filter out the ones in EXCLUDE_COLUMNS
         ex = EXCLUDE_COLUMNS.get(table_name, set())
@@ -78,9 +99,24 @@ class TableSelectorWindow(QWidget):
         self.colCombo2.clear();  self.colCombo2.addItems(filtered)
 
 
+class IndividualPlotWindow(pg.PlotWidget):
+
+    def __init__(self, config, parent=None):
+        super().__init__(parent=parent)
+        self.config = config
+
+    def load_data(self, table_name, x_col, y_col, time_range=None, constraints=None):
+
+
+        pass
+
+
+
+
 if __name__ == '__main__':
     import sys
+    from src.infrastructure.core.config_reader import GetConfig
     app = QApplication(sys.argv)
-    win = TableSelectorWindow()
+    win = TableSelectorWindow(config=GetConfig())
     win.show()
     sys.exit(app.exec())
