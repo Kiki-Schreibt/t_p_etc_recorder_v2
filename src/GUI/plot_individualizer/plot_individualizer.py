@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pyqtgraph as pg
 import pandas as pd
+from pandas.api import types as ptypes
 
 from PySide6.QtCore import Qt, QObject, Signal, Slot, QThread
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton,
@@ -276,7 +277,9 @@ class IndividualPlotWindow(pg.PlotWidget):
         self._worker = None
         self._thread = None
         self.table_name = None
-        self.scatter_plot_item = pg.ScatterPlotItem()
+        self.scatter_plot_item = pg.ScatterPlotItem(pen=None, symbol='o', size=10,
+                                                          brush=pg.mkBrush('w'),
+                                                          )
         self.addItem(self.scatter_plot_item)
 
     def load_plot_data(self,
@@ -286,22 +289,25 @@ class IndividualPlotWindow(pg.PlotWidget):
                        sample_id,
                        time_range=None,
                        constraints=None):
-
-        # if user passed comboboxes, extract text
+        # Handle combobox args
         if hasattr(x_col, "currentText"):
             x_col = x_col.currentText()
         if hasattr(y_col, "currentText"):
             y_col = y_col.currentText()
 
-        # 1) Tear down any old worker/thread
-        if self._thread and self._thread.isRunning():
-            self._thread.quit()
-            self._thread.wait()
+        # 1) If there’s an old thread still alive, quit it.
+        try:
+            if self._thread and self._thread.isRunning():
+                self._thread.quit()
+        except RuntimeError:
+            # it was already deleted by Qt; forget it
             self._thread = None
-        self.clear()
-        self.table_name = table_name
+            self._worker = None
 
-        # 2) Make worker + thread
+        # Clear the old plot so user sees we’re loading
+        #self.clear()
+
+        # 2) Create new worker + thread
         self._worker = DataLoadWorker(
             db_conn_params=self.config.db_conn_params,
             table_name=table_name,
@@ -318,24 +324,51 @@ class IndividualPlotWindow(pg.PlotWidget):
         self._thread.started.connect(self._worker.run)
         self._worker.data_loaded.connect(self._on_data_loaded)
         self._worker.error.connect(self._on_data_error)
-        # clean up
+
+        # when the worker finishes or errors, quit the thread
         self._worker.data_loaded.connect(self._thread.quit)
         self._worker.error.connect(self._thread.quit)
-        self._thread.finished.connect(self._worker.deleteLater)
-        self._thread.finished.connect(self._thread.deleteLater)
 
-        # 4) Kick it off
+        # unified cleanup
+        self._thread.finished.connect(self._cleanup_thread)
+
+        # 4) Start it
         self._thread.start()
+
+    @Slot()
+    def _cleanup_thread(self):
+        """Called when thread finishes: delete both thread & worker,
+        and clear our references so we don't keep dangling pointers."""
+        if self._worker:
+            self._worker.deleteLater()
+        if self._thread:
+            self._thread.deleteLater()
+        self._worker = None
+        self._thread = None
 
     @Slot(pd.DataFrame)
     def _on_data_loaded(self, df):
-        # assume df[x_col] and df[y_col] exist
+
+        self._create_axis_labels(df.columns.to_list())
         self._plot_data(df)
         #self.plot(x, y, pen=pg.mkPen(width=2), symbol='o')
 
     def _plot_data(self, df):
-        self._create_axis_labels(df.columns.to_list())
-        self.scatter_plot_item.setData(x=df.iloc[0].to_list(), y=df.iloc[1].to_list())
+
+        df = df.dropna().copy()
+        for col in df.columns:
+            #todo: pandas future warning
+            is_dt = ptypes.is_datetime64_any_dtype(df[col])
+            is_td = ptypes.is_timedelta64_dtype(df[col])
+            if is_dt:
+                df.loc[:, col] = [t.timestamp() for t in df[col]]
+            if is_td:
+                secs = df[col].dt.total_seconds()
+                df.loc[:, col] = secs.astype('float64')
+
+        self.scatter_plot_item.setData(x=df.iloc[:, 0], y=df.iloc[:, 1])
+        self.update()
+        self.getViewBox().autoRange()
 
     def _create_axis_labels(self, col_names):
         self.plotItem.getAxis('bottom').setLabel(col_names[0])
