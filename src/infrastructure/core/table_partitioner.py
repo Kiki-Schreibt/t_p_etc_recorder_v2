@@ -117,6 +117,8 @@ class Partitioner:
                 f"ALTER TABLE {full_new} RENAME TO {table_name};"
             )
             conn.conn.commit()
+        self.logger.info(f"{table_name} is partitioned. All good")
+
 
     def get_monthly_partition_ranges(self, start_date: date, months_ahead: int):
         current = start_date.replace(day=1)

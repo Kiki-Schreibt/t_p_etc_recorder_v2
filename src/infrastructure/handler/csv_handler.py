@@ -975,10 +975,10 @@ def import_all(compress_data=False):
         csv_processor.process()
         #csv_processor.count_cycles(sample_id=sample_id)
 
-       # write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
+        write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
         print(f"{sample_id} processed")
 
 
 #Methods for usage
 if __name__ == '__main__':
-    import_all(True)
+    import_all()
