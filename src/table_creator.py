@@ -26,6 +26,7 @@ PARTITIONING_KEYS = {
                     etc_xy_table.table_name: etc_xy_table.time
                     }
 
+
 class TableCreator:
 
 
