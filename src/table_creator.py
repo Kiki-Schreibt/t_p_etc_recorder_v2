@@ -1,3 +1,4 @@
+from psycopg2 import sql, errors
 from src.infrastructure.core.table_config import TableConfig
 from src.infrastructure.connections.connections import DatabaseConnection
 try:
@@ -10,14 +11,24 @@ etc_table = TableConfig().ETCDataTable
 etc_xy_table = TableConfig().ThermalConductivityXyDataTable
 meta_table = TableConfig().MetaDataTable
 
-class TableCreator:
-    PRIMARY_KEYS = {
+PRIMARY_KEYS = {
                         t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id],
                         cycle_table.table_name:  [cycle_table.time_start, cycle_table.sample_id],
                         meta_table.table_name:   meta_table.sample_id,
                         etc_table.table_name:    [etc_table.time, etc_table.sample_id_small],
                         etc_xy_table.table_name: [etc_xy_table.time, etc_xy_table.sample_id]
                     }
+
+PARTITIONING_KEYS = {
+                    t_p_table.table_name:    t_p_table.time,
+                    cycle_table.table_name:  cycle_table.time_start,
+                    etc_table.table_name:    etc_table.time,
+                    etc_xy_table.table_name: etc_xy_table.time
+                    }
+
+class TableCreator:
+
+
 
     def __init__(self, db_conn_params):
         self.db_conn_params = db_conn_params
@@ -28,7 +39,6 @@ class TableCreator:
             # Exclude any special or private attributes (those starting with '__')
             if not attr_name.startswith('__') and isinstance(attr_value, type):
                 self.create_table(attr_value)
-        self.create_index()
 
     def create_table(self, table_class, table_name=None):
         # Check if the table already exists
@@ -54,38 +64,55 @@ class TableCreator:
             columns_sql = [f"    {col} {dtype}" for col, dtype in columns_data_types.items()]
 
             # If the table_class has a primary_key attribute, use it
-            pk = self.PRIMARY_KEYS.get(table_name)
+            pk = PRIMARY_KEYS.get(table_name)
+            partitioning_key = PARTITIONING_KEYS.get(table_name) or None
             if pk:
                 if isinstance(pk, (list, tuple)):
                     pk_cols = ", ".join(pk)
                 else:
                     pk_cols = pk
                 columns_sql.append(f"    PRIMARY KEY ({pk_cols})")
-
-            create_table_sql = (
+            if partitioning_key:
+                create_table_sql = (
                 f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
                 + ",\n".join(columns_sql)
-                + "\n);"
-            )
+                + f"\n) PARTITION BY RANGE ({partitioning_key});"
+                )
+            else:
+                create_table_sql = (
+                    f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
+                    + ",\n".join(columns_sql)
+                    + "\n);"
+                )
             self._execute(create_table_sql)
             self.logger.info(f"New Table Created: {table_name} with primary key {pk_cols}")
+            self.create_index(table_name, pk_cols)
 
         else:
             self.logger.info(f"{table_name} table exists in database. All good")
 
-    def create_index(self):
-        tp_table = TableConfig().TPDataTable
-        queries = []
-        queries.append(f'CREATE INDEX IF NOT EXISTS idx_time ON {tp_table.table_name}({tp_table.time})')
-        queries.append(f'CREATE INDEX IF NOT EXISTS idx_sample_id ON {tp_table.table_name}({tp_table.sample_id})')
+    def create_index(self, table_name, pk_cols):
+        #tp_table = TableConfig().TPDataTable
+        #queries = []
+       # queries.append(f'CREATE INDEX IF NOT EXISTS idx_time ON {tp_table.table_name}({tp_table.time})')
+       # queries.append(f'CREATE INDEX IF NOT EXISTS idx_sample_id ON {tp_table.table_name}({tp_table.sample_id})')
+        query = f"""CREATE INDEX idx_{table_name}_time_sample_id
+                    ON {table_name} ({pk_cols})"""
+        try:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
+                db_conn.conn.autocommit = True
+                db_conn.cursor.execute(query)
+                db_conn.conn.autocommit = False
 
-        with DatabaseConnection(**self.db_conn_params) as db_conn:
-            for query in queries:
-                try:
-                    db_conn.cursor.execute(query)
-                    self.logger.info(f"Executed query: {query}")
-                except Exception as e:
-                    self.logger.error(f"Error executing query {query}: {e}")
+        except Exception as e:
+            self.logger.info(f"Couldn't create index: {e}")
+       # with DatabaseConnection(**self.db_conn_params) as db_conn:
+       #     for query in queries:
+        #        try:
+         #           db_conn.cursor.execute(query)
+          #          self.logger.info(f"Executed query: {query}")
+           #     except Exception as e:
+            #        self.logger.error(f"Error executing query {query}: {e}")
 
     @staticmethod
     def _extract_columns_and_assign_data_types(table_class):
@@ -267,10 +294,13 @@ def create_database(config):
 
     query = f"CREATE DATABASE {config.db_conn_params["DB_DATABASE"]} WITH OWNER = {config.db_conn_params["DB_USERNAME"]}"
     config.db_conn_params['DB_DATABASE'] = 'test'
-    with DatabaseConnection(**config.db_conn_params) as db_conn:
-        db_conn.conn.autocommit = True
-        db_conn.cursor.execute(query)
-        db_conn.conn.autocommit = False
+    try:
+        with DatabaseConnection(**config.db_conn_params) as db_conn:
+            db_conn.conn.autocommit = True
+            db_conn.cursor.execute(query)
+            db_conn.conn.autocommit = False
+    except errors.DuplicateDatabase:
+        print("DataBase already exists. Skipping creation")
 
 
 def test_create_table_from_class():

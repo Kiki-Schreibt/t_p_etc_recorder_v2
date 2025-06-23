@@ -32,7 +32,7 @@ state_hyd = 'Hydrogenated'
 state_dehyd = 'Dehydrogenated'
 cycle_counter_mode_CSV_recorder = 'CSV_Recorder'
 mode_modbus_recording = 'recording'
-compression_factor = 5
+compression_factor = 60
 
 ###pyside related
 try:

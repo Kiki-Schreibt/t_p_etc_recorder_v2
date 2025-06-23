@@ -20,7 +20,7 @@ class MaintenanceThread(QThread):
 
     def run(self):
         commands = [
-            ("VACUUM FULL",       "VACUUM FULL;"),
+            ("VACUUM VERBOSE",       "VACUUM VERBOSE;"),
             ("ANALYZE",           "ANALYZE;"),
             ("REINDEX DATABASE",  f"REINDEX DATABASE {self.db_params['DB_DATABASE']};"),
         ]

@@ -959,9 +959,10 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
     _plot_temperatures_and_pressures(df=df)
     return df
 
+
 def import_all(compress_data=False):
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    #sample_ids = ('WAE-WA-040',)
+    #sample_ids = ('WAE-WA-028',)
     #sample_ids = ()
     if not sample_ids:
         return
@@ -970,14 +971,14 @@ def import_all(compress_data=False):
     config = GetConfig()
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
-        #csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)
-        #csv_processor.process()
+        csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)
+        csv_processor.process()
         #csv_processor.count_cycles(sample_id=sample_id)
 
-        write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
+       # write_ETC_folder(dir_etc_folder=dir_etc, sample_id=sample_id, logger_inst=logger, config=config)
         print(f"{sample_id} processed")
 
 
 #Methods for usage
 if __name__ == '__main__':
-    import_all()
+    import_all(True)
