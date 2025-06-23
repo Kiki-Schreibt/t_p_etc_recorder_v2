@@ -6,17 +6,23 @@ from src.infrastructure.connections.connections import DatabaseConnection
 from src.infrastructure.core.table_config import TableConfig
 from src.table_creator import TableCreator
 
+try:
+    import src.infrastructure.core.logger as logging
+except ImportError:
+    import logging
+
 
 class Partitioner:
     """
     Utility class for converting tables to monthly range partitions
     and ensuring future or arbitrary-range partitions exist.
     """
-    def __init__(self, db_conn_params: dict):
+    def __init__(self, db_conn_params: dict, schema='public'):
         self.db_conn_params = db_conn_params
+        self.logger = logging.getLogger(__name__)
+        self.schema = schema
 
     def convert_table_to_monthly_partitions(self,
-                                            parent_schema: str,
                                             parent_table_class):
         """
         Convert a non-partitioned table into a partitioned parent with
@@ -24,9 +30,9 @@ class Partitioner:
         """
         table = parent_table_class.table_name
         time_col = parent_table_class.time
-        full_old = f"{parent_schema}.{table}"
-        archive = f"{parent_schema}.{table}_old"
-        full_new = f"{parent_schema}.{table}_new"
+        full_old = f"{self.schema}.{table}"
+        archive = f"{self.schema}.{table}_old"
+        full_new = f"{self.schema}.{table}_new"
 
         # 1) rename existing
         with DatabaseConnection(**self.db_conn_params) as conn:
@@ -61,8 +67,11 @@ class Partitioner:
         with DatabaseConnection(**self.db_conn_params) as conn:
             while current < end_boundary:
                 suffix = f"{current.year:04d}_{current.month:02d}"
-                self._create_partition(conn, parent_schema, table + "_new",
-                                       suffix, current, current + step)
+                self._create_partition(conn,
+                                       table + "_new",
+                                       suffix,
+                                       current,
+                                       current + step)
                 current += step
             conn.conn.commit()
 
@@ -106,31 +115,30 @@ class Partitioner:
             current += relativedelta(months=1)
         return ranges
 
-    def _create_partition(self, conn, schema: str, parent_table: str,
+    def _create_partition(self, conn, parent_table: str,
                           suffix: str, from_date: date, to_date: date):
         # always qualify partition name with schema and parent_table
-        full_part = f"{schema}.{parent_table}_{suffix}"
+        full_part = f"{self.schema}.{parent_table}_{suffix}"
         conn.cursor.execute(
             f"""
             CREATE TABLE IF NOT EXISTS {full_part}
-              PARTITION OF {schema}.{parent_table}
+              PARTITION OF {self.schema}.{parent_table}
               FOR VALUES FROM ('{from_date}') TO ('{to_date}');
             """
         )
 
-    def ensure_future_monthly_partitions(self, parent_schema: str,
-                                         parent_table_class,
+    def ensure_future_monthly_partitions(self,                                          parent_table_class,
                                          months_ahead: int = 3):
         table = parent_table_class.table_name
         today = date.today()
         ranges = self.get_monthly_partition_ranges(today, months_ahead)
         with DatabaseConnection(**self.db_conn_params) as conn:
             for suffix, start, end in ranges:
-                self._create_partition(conn, parent_schema, table,
+                self._create_partition(conn, table,
                                        suffix, start, end)
             conn.conn.commit()
 
-    def ensure_monthly_partitions_between(self, parent_schema: str,
+    def ensure_monthly_partitions_between(self,
                                           parent_table_class,
                                           start_date: date,
                                           end_date: date):
@@ -138,10 +146,22 @@ class Partitioner:
         ranges = self.get_monthly_partition_ranges_between(start_date, end_date)
         with DatabaseConnection(**self.db_conn_params) as conn:
             for suffix, start, end in ranges:
-                self._create_partition(conn, parent_schema, table,
+                self._create_partition(conn, table,
                                        suffix, start, end)
             conn.conn.commit()
 
+
+def convert_existing_to_partitioned_table(config, table_class, schema='public'):
+    partitioner = Partitioner(db_conn_params=config.db_conn_params,
+                              schema=schema)
+    partitioner.convert_table_to_monthly_partitions(parent_table_class=table_class)
+
+def partition_by_time(config, table_class, start_date, end_date, schema='public'):
+    partitioner = Partitioner(db_conn_params=config.db_conn_params,
+                              schema=schema)
+    partitioner.ensure_monthly_partitions_between(parent_table_class=table_class,
+                                                  start_date=start_date,
+                                                  end_date=end_date)
 
 # Example usage:
 if __name__ == '__main__':
@@ -154,11 +174,5 @@ if __name__ == '__main__':
     end_date = datetime.datetime(2024, 12, 25)
 
     db_conn_params = config.db_conn_params
-    schema = 'public'
-    table = TableConfig().TPDataTable
-    partitioner = Partitioner(db_conn_params=db_conn_params)
-    partitioner.ensure_monthly_partitions_between(parent_schema=schema,
-                                                  parent_table_class=table,
-                                                  start_date=start_date,
-                                                  end_date=end_date)
+
 

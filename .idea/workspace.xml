@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/infrastructure/core/table_partitioner.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/database_maintenance/database_maintainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/database_maintenance/database_maintainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/config_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/config_reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/table_partitioner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_partitioner.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
