@@ -194,15 +194,124 @@ def partition_ahead(config, table_class, months_ahead, schema='public'):
         months_ahead=months_ahead
     )
 
+
+class SamplePartitioner:
+    """
+    Utility class for converting tables to LIST-partitioned tables by sample_id.
+    """
+    def __init__(self, db_conn_params: dict, schema: str = 'public'):
+        self.db_conn_params = db_conn_params
+        self.schema = schema
+        self.logger = logging.getLogger(__name__)
+
+    def convert_table_to_sample_partitions(self, parent_table_class):
+        table = parent_table_class.table_name
+        full_orig = f"{self.schema}.{table}"
+        archive   = f"{self.schema}.{table}_old"
+        full_new  = f"{self.schema}.{table}_new"
+
+        # 1) rename existing
+        self.logger.info(f"Renaming {full_orig} to {archive}")
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(
+                f"ALTER TABLE {full_orig} RENAME TO {table}_old;"
+            )
+            conn.conn.commit()
+
+        # 2) create new parent with LIST partition on sample_id
+        self.logger.info(f"Creating LIST-partitioned parent for {table}")
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(
+                f"CREATE TABLE {full_new} (LIKE {archive} INCLUDING ALL) PARTITION BY LIST (sample_id);"
+            )
+            conn.conn.commit()
+
+        # 3) discover distinct sample_ids
+        self.logger.info(f"Fetching distinct sample_id values from {archive}")
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(
+                f"SELECT DISTINCT sample_id FROM {archive};"
+            )
+            sample_ids = [row[0] for row in conn.cursor.fetchall()]
+
+        # 4) create one child per sample_id
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            for sid in sample_ids:
+                safe = sid.replace('-', '_').replace(' ', '_')
+                part_name = f"{table}_{safe}"
+                full_part = f"{self.schema}.{part_name}"
+                self.logger.info(f"Creating partition {full_part} FOR VALUES IN ('{sid}')")
+                conn.cursor.execute(
+                    f"CREATE TABLE IF NOT EXISTS {full_part} PARTITION OF {full_new} FOR VALUES IN ('{sid}');"
+                )
+            conn.conn.commit()
+
+        # 5) copy data
+        self.logger.info(f"Inserting data from {archive} to {full_new}")
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(
+                f"INSERT INTO {full_new} SELECT * FROM {archive};"
+            )
+            conn.conn.commit()
+
+        # 6) drop old
+        self.logger.info(f"Dropping archive table {archive}")
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(f"DROP TABLE {archive};")
+            conn.conn.commit()
+
+        # 7) rename new
+        self.logger.info(f"Renaming {full_new} to {full_orig}")
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(
+                f"ALTER TABLE {full_new} RENAME TO {table};"
+            )
+            conn.conn.commit()
+
+    def ensure_partitions_for_all_samples(self, parent_table_class):
+        table = parent_table_class.table_name
+        parent = f"{self.schema}.{table}"
+        # 1) get all sample_ids in the parent
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(f"SELECT DISTINCT sample_id FROM {parent}")
+            ids = {row[0] for row in conn.cursor.fetchall()}
+
+            # 2) get already-existing partitions
+            conn.cursor.execute("""
+              SELECT relname
+                FROM pg_class c
+                JOIN pg_inherits i ON c.oid = i.inhrelid
+                JOIN pg_class p ON p.oid = i.inhparent
+               WHERE p.relname = %s
+            """, (table,))
+            existing = {r[0] for r in conn.cursor.fetchall()}
+
+            # 3) for each id without a partition, create one
+            for sid in ids:
+                part = f"{table}_{sid.replace('-', '_')}"
+                if part not in existing:
+                    conn.cursor.execute(f"""
+                      CREATE TABLE {self.schema}.{part}
+                        PARTITION OF {parent}
+                        FOR VALUES IN ('{sid}');
+                    """)
+            conn.conn.commit()
+
+
+def partition_by_sample_id(config, table_class, schema: str = 'public'):
+    partitioner = SamplePartitioner(db_conn_params=config.db_conn_params, schema=schema)
+    partitioner.convert_table_to_sample_partitions(parent_table_class=table_class)
+
+
 # Example usage:
 if __name__ == '__main__':
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
+    from src.infrastructure.core.table_config import TableConfig
     table_classes = [
-        #TableConfig().CycleDataTable,
+        TableConfig().CycleDataTable,
         TableConfig().ETCDataTable,
         TableConfig().ThermalConductivityXyDataTable,
         TableConfig().TPDataTable
     ]
     for tc in table_classes:
-        convert_existing_to_partitioned_table(config, tc)
+        partition_by_sample_id(config, tc)
