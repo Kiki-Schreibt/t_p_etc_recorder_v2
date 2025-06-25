@@ -20,10 +20,10 @@ PRIMARY_KEYS = {
                     }
 
 PARTITIONING_KEYS = {
-                    t_p_table.table_name:    t_p_table.time,
-                    cycle_table.table_name:  cycle_table.time_start,
-                    etc_table.table_name:    etc_table.time,
-                    etc_xy_table.table_name: etc_xy_table.time
+                    t_p_table.table_name:    t_p_table.sample_id,
+                    cycle_table.table_name:  cycle_table.sample_id,
+                    etc_table.table_name:    etc_table.sample_id_small,
+                    etc_xy_table.table_name: etc_xy_table.sample_id
                     }
 
 
@@ -73,18 +73,19 @@ class TableCreator:
                 else:
                     pk_cols = pk
                 columns_sql.append(f"    PRIMARY KEY ({pk_cols})")
-            if partitioning_key:
-                create_table_sql = (
-                f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
-                + ",\n".join(columns_sql)
-                + f"\n) PARTITION BY RANGE ({partitioning_key});"
-                )
+
+            if 'time' in partitioning_key:
+                query_part_partition = f"PARTITION BY RANGE ({partitioning_key})"
+            elif 'sample' in partitioning_key:
+                query_part_partition = f"PARTITION BY LIST ({partitioning_key})"
             else:
-                create_table_sql = (
-                    f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
-                    + ",\n".join(columns_sql)
-                    + "\n);"
-                )
+                query_part_partition = ""
+            create_table_sql = (
+            f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
+            + ",\n".join(columns_sql)
+            + f"\n) + {query_part_partition} ;"
+            )
+
             self._execute(create_table_sql)
             self.logger.info(f"New Table Created: {table_name} with primary key {pk_cols}")
             self.create_index(table_name, pk_cols)

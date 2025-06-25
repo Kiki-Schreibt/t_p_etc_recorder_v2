@@ -220,11 +220,19 @@ class SamplePartitioner:
 
         # 2) create new parent with LIST partition on sample_id
         self.logger.info(f"Creating LIST-partitioned parent for {table}")
+        creator = TableCreator(db_conn_params=self.db_conn_params)
+        creator.create_table(table_class=parent_table_class)
         with DatabaseConnection(**self.db_conn_params) as conn:
             conn.cursor.execute(
-                f"CREATE TABLE {full_new} (LIKE {archive} INCLUDING ALL) PARTITION BY LIST (sample_id);"
+                f"ALTER TABLE {full_orig} RENAME TO {table}_new;"
             )
             conn.conn.commit()
+
+       # with DatabaseConnection(**self.db_conn_params) as conn:
+           # conn.cursor.execute(
+           #     f"CREATE TABLE {full_new} (LIKE {archive} INCLUDING ALL) PARTITION BY LIST ({parent_table_class.sample_id});"
+           # )
+           # conn.conn.commit()
 
         # 3) discover distinct sample_ids
         self.logger.info(f"Fetching distinct sample_id values from {archive}")
@@ -249,9 +257,24 @@ class SamplePartitioner:
         # 5) copy data
         self.logger.info(f"Inserting data from {archive} to {full_new}")
         with DatabaseConnection(**self.db_conn_params) as conn:
+            # fetch ordered column list
             conn.cursor.execute(
-                f"INSERT INTO {full_new} SELECT * FROM {archive};"
+                """
+                SELECT column_name
+                  FROM information_schema.columns
+                 WHERE table_schema = %s
+                   AND table_name = %s
+                 ORDER BY ordinal_position
+                """, (self.schema, f"{table}_old")
             )
+            cols = [row[0] for row in conn.cursor.fetchall()]
+            # quote each identifier to preserve capitalization
+            quoted_cols = [f'"{col}"' for col in cols]
+            col_list = ", ".join(quoted_cols)
+            insert_sql = (
+                f"INSERT INTO {full_new} ({col_list}) SELECT {col_list} FROM {archive};"
+            )
+            conn.cursor.execute(insert_sql)
             conn.conn.commit()
 
         # 6) drop old
@@ -297,10 +320,39 @@ class SamplePartitioner:
                     """)
             conn.conn.commit()
 
+    def create_partition_for_sample(self, parent_table_class, sample_id: str):
+        """
+        Create a LIST partition for a single sample_id on an existing partitioned table.
+        """
+        table = parent_table_class.table_name
+        full_parent = f"{self.schema}.{table}"
+        safe = sample_id.replace('-', '_').replace(' ', '_')
+        part_name = f"{table}_{safe}"
+        full_part = f"{self.schema}.{part_name}"
+        self.logger.info(f"Creating partition {full_part} FOR VALUES IN ('{sample_id}')")
+        with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute(
+                f"CREATE TABLE IF NOT EXISTS {full_part} PARTITION OF {full_parent} FOR VALUES IN ('{sample_id}');"
+            )
+            conn.conn.commit()
+
 
 def partition_by_sample_id(config, table_class, schema: str = 'public'):
     partitioner = SamplePartitioner(db_conn_params=config.db_conn_params, schema=schema)
     partitioner.convert_table_to_sample_partitions(parent_table_class=table_class)
+
+
+def create_new_partition_for_sample(db_conn_params, sample_id: str):
+    from src.infrastructure.core.table_config import TableConfig
+    table_classes = [
+                        TableConfig().CycleDataTable,
+                        TableConfig().ETCDataTable,
+                        TableConfig().ThermalConductivityXyDataTable,
+                        TableConfig().TPDataTable
+                    ]
+    creator = SamplePartitioner(db_conn_params=db_conn_params)
+    for table_class in table_classes:
+        creator.create_partition_for_sample(sample_id=sample_id, parent_table_class=table_class)
 
 
 # Example usage:
@@ -308,7 +360,7 @@ if __name__ == '__main__':
     from src.infrastructure.core.config_reader import config
     from src.infrastructure.core.table_config import TableConfig
     table_classes = [
-        TableConfig().CycleDataTable,
+        #TableConfig().CycleDataTable,
         TableConfig().ETCDataTable,
         TableConfig().ThermalConductivityXyDataTable,
         TableConfig().TPDataTable
