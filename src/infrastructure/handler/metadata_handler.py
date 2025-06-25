@@ -119,9 +119,6 @@ class MetaData:
             if not self.sample_id:
                 return
             self._create_new_line_meta_data()
-        from src.infrastructure.core.table_partitioner import create_new_partition_for_sample
-
-        create_new_partition_for_sample(db_conn_params=self.db_conn_params, sample_id=self.sample_id)
         # Build a mapping from column names to attribute values
         column_value_mapping = {}
         for column_name, attribute_name in self.column_attribute_mapping.items():

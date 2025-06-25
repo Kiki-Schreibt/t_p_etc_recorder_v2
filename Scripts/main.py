@@ -178,7 +178,7 @@ class MainProgram(RecordingMainWindow):
         self.db_maintainer.show()
         self.db_maintainer.started.connect(self.controller.stop_t_p_recording)
 
-    
+
 
     def closeEvent(self, event):
         """

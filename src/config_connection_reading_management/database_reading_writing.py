@@ -13,10 +13,10 @@ except ImportError:
 
 from src.config_connection_reading_management.query_builder import QueryBuilder
 from src.infrastructure.core.table_config import TableConfig
-
+from src.infrastructure.core.global_vars import data_point_reading_limit
 
 local_tz = ZoneInfo("Europe/Berlin")
-LIMIT_DATA_POINTS = 5000
+LIMIT_DATA_POINTS = data_point_reading_limit
 
 class DataRetriever:
     """

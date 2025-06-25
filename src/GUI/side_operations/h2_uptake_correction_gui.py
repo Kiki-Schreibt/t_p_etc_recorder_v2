@@ -781,7 +781,7 @@ class UpdateValueWorker(QObject):
     def run(self):
         try:
             self.progress.emit(f"Starting {self.column_to_update} update…")
-            self.backend.update_isotherm_flag()
+            self.backend.update_value(column_to_update=self.column_to_update)
             self.progress.emit(f"Done updating {self.column_to_update} ")
             self.finished.emit()
         except Exception as e:

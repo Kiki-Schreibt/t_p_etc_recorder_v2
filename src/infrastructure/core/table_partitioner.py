@@ -329,30 +329,45 @@ class SamplePartitioner:
         safe = sample_id.replace('-', '_').replace(' ', '_')
         part_name = f"{table}_{safe}"
         full_part = f"{self.schema}.{part_name}"
-        self.logger.info(f"Creating partition {full_part} FOR VALUES IN ('{sample_id}')")
+
         with DatabaseConnection(**self.db_conn_params) as conn:
+            conn.cursor.execute("""
+                            SELECT EXISTS (
+                              SELECT 1
+                                FROM pg_class c
+                                JOIN pg_inherits i ON i.inhrelid = c.oid
+                                WHERE c.relname = %s
+                                  AND i.inhparent = %s::regclass
+                            );
+                        """, (full_part, full_parent))
+            existed = conn.cursor.fetchone()[0]
+
+            if not existed:
+                return
+
+            self.logger.info(f"Creating partition {full_part} FOR VALUES IN '{sample_id} if not exists already'")
             conn.cursor.execute(
                 f"CREATE TABLE IF NOT EXISTS {full_part} PARTITION OF {full_parent} FOR VALUES IN ('{sample_id}');"
             )
             conn.conn.commit()
 
+    def create_partition_for_sample_all_tables(self, sample_id: str):
+        from src.infrastructure.core.table_config import TableConfig
+        table_classes = [
+                            TableConfig().CycleDataTable,
+                            TableConfig().ETCDataTable,
+                            TableConfig().ThermalConductivityXyDataTable,
+                            TableConfig().TPDataTable
+                        ]
+
+        for table_class in table_classes:
+            self.create_partition_for_sample(sample_id=sample_id, parent_table_class=table_class)
+
+
 
 def partition_by_sample_id(config, table_class, schema: str = 'public'):
     partitioner = SamplePartitioner(db_conn_params=config.db_conn_params, schema=schema)
     partitioner.convert_table_to_sample_partitions(parent_table_class=table_class)
-
-
-def create_new_partition_for_sample(db_conn_params, sample_id: str):
-    from src.infrastructure.core.table_config import TableConfig
-    table_classes = [
-                        TableConfig().CycleDataTable,
-                        TableConfig().ETCDataTable,
-                        TableConfig().ThermalConductivityXyDataTable,
-                        TableConfig().TPDataTable
-                    ]
-    creator = SamplePartitioner(db_conn_params=db_conn_params)
-    for table_class in table_classes:
-        creator.create_partition_for_sample(sample_id=sample_id, parent_table_class=table_class)
 
 
 # Example usage:

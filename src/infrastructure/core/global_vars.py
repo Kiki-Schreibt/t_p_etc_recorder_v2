@@ -33,6 +33,7 @@ state_dehyd = 'Dehydrogenated'
 cycle_counter_mode_CSV_recorder = 'CSV_Recorder'
 mode_modbus_recording = 'recording'
 compression_factor = 60
+data_point_reading_limit = 500
 
 ###pyside related
 try:

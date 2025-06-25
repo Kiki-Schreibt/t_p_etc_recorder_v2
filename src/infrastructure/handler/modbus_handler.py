@@ -32,7 +32,7 @@ STATE_HYD = global_vars.state_hyd
 STATE_DEHYD = global_vars.state_dehyd
 
 
-#todo: implement memory usage tracking
+
 class ModbusProcessor:
     """
     Handles Modbus processing tasks including reading from the Modbus device,
@@ -98,6 +98,13 @@ class ModbusProcessor:
         """
         Starts data reading, processing and writing in a continuous loop.
         """
+
+        from src.infrastructure.core.table_partitioner import SamplePartitioner
+        if not self.meta_data.sample_id:
+            self.logger.error("No Sample ID entered")
+            return
+        partitioner = SamplePartitioner(db_conn_params=self.db_conn_params)
+        partitioner.create_partition_for_sample_all_tables(sample_id=self.meta_data.sample_id)
         self.running = True
         retry_count = 0
         max_retries = 5
