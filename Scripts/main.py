@@ -176,6 +176,9 @@ class MainProgram(RecordingMainWindow):
         from src.GUI.database_maintenance.database_maintainer import MaintenanceWindow
         self.db_maintainer = MaintenanceWindow(db_conn_params=self.db_conn_params)
         self.db_maintainer.show()
+        self.db_maintainer.started.connect(self.controller.stop_t_p_recording)
+
+    
 
     def closeEvent(self, event):
         """

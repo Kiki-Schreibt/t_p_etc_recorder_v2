@@ -360,7 +360,7 @@ if __name__ == '__main__':
     from src.infrastructure.core.config_reader import config
     from src.infrastructure.core.table_config import TableConfig
     table_classes = [
-        #TableConfig().CycleDataTable,
+        TableConfig().CycleDataTable,
         TableConfig().ETCDataTable,
         TableConfig().ThermalConductivityXyDataTable,
         TableConfig().TPDataTable

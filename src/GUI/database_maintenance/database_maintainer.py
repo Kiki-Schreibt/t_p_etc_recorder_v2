@@ -20,7 +20,7 @@ class MaintenanceThread(QThread):
 
     def run(self):
         commands = [
-            ("VACUUM VERBOSE",       "VACUUM FULL;"),
+            ("VACUUM FULL",       "VACUUM FULL;"),
             ("ANALYZE",           "ANALYZE;"),
             ("REINDEX DATABASE",  f"REINDEX DATABASE {self.db_params['DB_DATABASE']};"),
         ]
@@ -49,6 +49,9 @@ class MaintenanceThread(QThread):
 
 
 class MaintenanceWindow(QMainWindow):
+    started = Signal()
+    finished = Signal()
+
     def __init__(self, db_conn_params):
         super().__init__()
         self.setWindowTitle("Database Maintenance")
@@ -78,6 +81,7 @@ class MaintenanceWindow(QMainWindow):
 
     def start_maintenance(self):
         # disable the button, clear logs
+        self.started.emit()
         self.run_btn.setEnabled(False)
         self.log_view.clear()
 
@@ -104,6 +108,7 @@ class MaintenanceWindow(QMainWindow):
 
         # after a short pause, hide the bar again
         QTimer.singleShot(2000, lambda: self.progress.setVisible(False))
+        self.finished.emit()
 
     def closeEvent(self, event):
         super().closeEvent(event)
