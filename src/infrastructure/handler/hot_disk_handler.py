@@ -85,7 +85,10 @@ class HotDiskScheduleGrabber:
 
 class HotDiskController:
 
-    def __init__(self, template_folder_path=standard_hot_disk_schedule_folder, sensor_insulation="Mica", sensor_type="5465", standard_number_of_measurements=3, hd_conn_params=None):
+    def __init__(self, hd_conn_params,
+                     template_folder_path=standard_hot_disk_schedule_folder,
+                     sensor_insulation="Mica",
+                     sensor_type="5465", standard_number_of_measurements=3):
         self.logger = logging.getLogger(__name__)
         self.hd_conn_params = hd_conn_params or {}
         self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type)
@@ -215,6 +218,13 @@ class HotDiskController:
         formatted = f"{hours:02d}:{minutes:02d}:{seconds:02d} till next measurement at {target_time}"
         #print(formatted)
 
+    def start_active_schedule(self):
+        try:
+            with HotDiskConnection(**self.hd_conn_params) as client:
+                client.send_command(f"SCHED:INIT")
+                self.logger.info(f"Current loaded schedule started in constants analyzer")
+        except Exception as e:
+            self.logger.error(f"Could not start schedule file: {e}")
 
 def test_hd_controller():
     from datetime import timedelta

@@ -625,6 +625,19 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="start_etc_measurement_button">
+    <property name="geometry">
+     <rect>
+      <x>1200</x>
+      <y>80</y>
+      <width>151</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start ETC Measurement</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

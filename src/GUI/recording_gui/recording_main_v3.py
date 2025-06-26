@@ -21,7 +21,7 @@ import warnings
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
 from PySide6.QtGui import QDoubleValidator
 
-
+from hot_disk_handler import HotDiskController
 from src.infrastructure.handler.metadata_handler import MetaData
 from src.GUI.recording_gui.recording_business_v2 import DataRecorder
 from src.infrastructure.utils.standard_paths import recording_ui_file_path
@@ -557,6 +557,10 @@ class MainController:
         except Exception as e:
             self.logger.exception("Error updating additional test info in MainController:")
 
+    def start_etc_measurement(self):
+        hd_controller = HotDiskController(hd_conn_params=self.config.hd_conn_params)
+        hd_controller.start_active_schedule()
+
     def is_tp_recording_running(self):
         return self.recorder.is_tp_thread_running()
 
@@ -661,6 +665,7 @@ class MainWindow(QMainWindow):
         """
         try:
             self.ui.update_meta_data_button.clicked.connect(self._update_meta_data)
+            self.ui.start_etc_measurement_button.clicked.connect(self.controller.start_etc_measurement)
             self.ui.start_stop_tp_recording_button.setCheckable(True)
             self.ui.start_stop_tp_recording_button.clicked.connect(self._toggle_tp_recording)
             self.ui.start_stop_log_file_tracker_button.setCheckable(True)
