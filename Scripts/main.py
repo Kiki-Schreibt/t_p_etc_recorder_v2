@@ -129,7 +129,7 @@ class MainProgram(RecordingMainWindow):
         """
         Launch the Schedule Creator module in its own window.
         """
-        self.schedule_creator = SequenzerMainWindow()
+        self.schedule_creator = SequenzerMainWindow(config=self.config)
         self.schedule_creator.show()
 
     def _open_uptake_correction(self):

@@ -90,7 +90,7 @@ class HotDiskController:
                      sensor_insulation="Mica",
                      sensor_type="5465", standard_number_of_measurements=3):
         self.logger = logging.getLogger(__name__)
-        self.hd_conn_params = hd_conn_params or {}
+        self.hd_conn_params = hd_conn_params
         self.schedule_grabber = HotDiskScheduleGrabber(template_folder_path, sensor_insulation=sensor_insulation, sensor_type=sensor_type)
         self.running_event = threading.Event()
         self.stop_event = threading.Event()
@@ -225,6 +225,7 @@ class HotDiskController:
                 self.logger.info(f"Current loaded schedule started in constants analyzer")
         except Exception as e:
             self.logger.error(f"Could not start schedule file: {e}")
+
 
 def test_hd_controller():
     from datetime import timedelta

@@ -46,6 +46,7 @@ class SignaledHotDiskController(QObject, HotDiskController):
     latest_program_step_sig = Signal(datetime.datetime)
 
     def __init__(self,
+                 hd_conn_params,
                  template_folder_path: str = standard_hot_disk_schedule_folder,
                  sensor_insulation: str = "Mica",
                  sensor_type: str = "5465",
@@ -61,6 +62,7 @@ class SignaledHotDiskController(QObject, HotDiskController):
         QObject.__init__(self, parent)
         HotDiskController.__init__(
             self,
+            hd_conn_params=hd_conn_params,
             template_folder_path=template_folder_path,
             sensor_insulation=sensor_insulation,
             sensor_type=sensor_type,
@@ -380,12 +382,14 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
     Extends the base UI to wire up schedule parsing, controller thread,
     and countdown display.
     """
-    def __init__(self):
+    def __init__(self, config):
         """
         Connect all signals/slots for schedule creation and start button.
         """
         super().__init__()
         self.logger = logging.getLogger(__name__)
+        self.hd_conn_params = config.hd_conn_params
+
         self.start_schedule_button.clicked.connect(self.create_and_start_schedule)
         self.complete_program_sig.connect(self.plot_program)
         self.meas_times_sig.connect(self.plot_meas_times)
@@ -466,10 +470,11 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             return
         try:
             self.hot_disk_controller = SignaledHotDiskController(
-                template_folder_path=folder_path,
-                sensor_insulation=sensor_insulation,
-                sensor_type=sensor_type
-            )
+                        hd_conn_params=self.hd_conn_params,
+                        template_folder_path=folder_path,
+                        sensor_insulation=sensor_insulation,
+                        sensor_type=sensor_type
+                    )
 
         except Exception as e:
             QMessageBox.critical(self, "Controller Error",
@@ -798,8 +803,10 @@ class DateAxisItem(pg.AxisItem):
 # Main execution
 # =============================================================================
 if __name__ == '__main__':
+    from src.infrastructure.core.config_reader import config
     app = QApplication([])
-    window = SequenzerMainWindow()
+
+    window = SequenzerMainWindow(config=config)
     window.setWindowTitle("HotDisk Temperature Schedule Generator")
     window.show()
     app.exec()

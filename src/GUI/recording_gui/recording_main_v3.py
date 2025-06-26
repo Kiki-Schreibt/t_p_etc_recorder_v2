@@ -561,6 +561,7 @@ class MainController:
         hd_controller = HotDiskController(hd_conn_params=self.config.hd_conn_params)
         hd_controller.start_active_schedule()
 
+
     def is_tp_recording_running(self):
         return self.recorder.is_tp_thread_running()
 

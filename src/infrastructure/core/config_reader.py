@@ -84,6 +84,9 @@ class GetConfig:
 
         self.HOT_DISK_LOG_FILE_PATH = config['HOT_DISK_LOG_FILE_PATH']
 
+        self.hd_conn_params = {'HD_HOST': 'localhost',
+                                'HD_PORT': 50009}
+
     @staticmethod
     def _has_uppercase(string):
         return any(char.isupper() for char in string)
