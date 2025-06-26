@@ -7,7 +7,7 @@ from material_properties import MaterialProperties
 from models import KaganerModel, ZehnerBauerSchluenderModel  # Use appropriate model here
 from src.GUI.data_fitter.model_fitter import ModelFitter
 from plotter import Plotter
-from src.infrastructure.core.config_reader import GetConfig
+from src.infrastructure.core.config_reader import config
 from scipy.optimize import curve_fit
 
 
@@ -111,7 +111,7 @@ class ZBSFitter:
 
 def main(fit_method='curve_fit'):
     # Retrieve configuration for database connection
-    config = GetConfig()
+
     data_loader = DataLoader(
         sample_id="WAE-WA-040",
         cycle_number=0.5,

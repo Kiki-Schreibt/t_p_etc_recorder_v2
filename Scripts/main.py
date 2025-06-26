@@ -225,8 +225,7 @@ def launch_main_program(app):
         app (QApplication): The running QApplication instance.
     """
     try:
-        from src.infrastructure.core.config_reader import GetConfig
-        config = GetConfig()
+        from src.infrastructure.core.config_reader import config
         main_program = MainProgram(config=config)
         main_program.show()
     except Exception as e:

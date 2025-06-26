@@ -1107,8 +1107,7 @@ def convert_value(value):
 
 
 def test_mb_reading_writing(sample_id):
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
    # config.mb_conn_params["MB_PORT"] = "503"
    # config.mb_conn_params["MB_HOST"] = "localhost"
     meta = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)

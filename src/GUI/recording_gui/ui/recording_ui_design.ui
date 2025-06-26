@@ -268,8 +268,8 @@
      <rect>
       <x>1190</x>
       <y>10</y>
-      <width>171</width>
-      <height>71</height>
+      <width>261</width>
+      <height>121</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -283,12 +283,25 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>151</width>
+       <width>241</width>
        <height>51</height>
       </rect>
      </property>
      <property name="text">
       <string>Update Metadata</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="start_etc_measurement_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>241</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start ETC Measurement</string>
      </property>
     </widget>
    </widget>
@@ -514,7 +527,7 @@
       <x>890</x>
       <y>10</y>
       <width>291</width>
-      <height>111</height>
+      <height>121</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -625,18 +638,27 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="start_etc_measurement_button">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>1200</x>
-      <y>80</y>
-      <width>151</width>
-      <height>51</height>
+      <x>0</x>
+      <y>0</y>
+      <width>2</width>
+      <height>2</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Start ETC Measurement</string>
+    <layout class="QVBoxLayout" name="verticalLayout_9"/>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>2</width>
+      <height>2</height>
+     </rect>
     </property>
+    <layout class="QVBoxLayout" name="verticalLayout_10"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

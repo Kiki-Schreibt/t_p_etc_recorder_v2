@@ -1105,9 +1105,9 @@ def main():
     Entry point for the application.
     """
     try:
-        from src.infrastructure.core.config_reader import GetConfig
+        from src.infrastructure.core.config_reader import config
         app = QApplication([])
-        main_window = MainWindow(config=GetConfig())
+        main_window = MainWindow(config=config)
         main_window.show()
         app.exec()
     except Exception as e:

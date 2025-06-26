@@ -71,9 +71,8 @@ class MainWindow(QMainWindow):
         self._last_run_month = current_month
 
 if __name__ == "__main__":
-    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import config
 
-    config = GetConfig()
     app = QApplication(sys.argv)
     win = MainWindow(db_conn_params=config.db_conn_params)
     win.resize(400,200)

@@ -354,8 +354,7 @@ class ExcelDataProcessor:
 
 
 def test_excel_data_processor(etc_dir: str, sample_id: str) -> None:
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
     etc_processor = ExcelDataProcessor(sample_id=sample_id, file_path=etc_dir, db_conn_params=config.db_conn_params)
     etc_processor.execute()
 

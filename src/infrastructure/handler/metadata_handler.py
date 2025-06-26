@@ -351,8 +351,7 @@ class MetaData:
 
 
 def test_meta_data_handler(sample_id):
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
     meta_data_instance = MetaData(sample_id=sample_id,
                                   db_conn_params=config.db_conn_params)
     #meta_data_instance.print()

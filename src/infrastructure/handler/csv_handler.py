@@ -835,8 +835,8 @@ def check_nan_values(df, fun_str=""):
 
 def _import_one_example():
     logger = logging.getLogger(__name__)
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
+
     sample_id = "WAE-WA-028"
     file_path = r'C:\Daten\Kiki\WAE-WA-028-MgFe3wt\WAE-WA-028-TundP-Verläufe\WAE-WA-028-Mg3wtFe_2021_ 9_16_12_05_Uhr_WAE-WA-028-014.csv'
     dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
@@ -937,8 +937,7 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
         plt.gcf().autofmt_xdate()
         plt.gca().autoscale()
         plt.show()
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
     data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
     data_retriever.limit_datapoints = data_points_max
     table_name = TableConfig().TPDataTable.table_name
@@ -967,8 +966,7 @@ def import_all(compress_data=False):
     if not sample_ids:
         return
     logger = logging.getLogger(__name__)
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
         csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)

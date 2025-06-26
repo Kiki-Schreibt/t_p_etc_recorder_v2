@@ -423,8 +423,8 @@ class DataLoadWorker(QObject):
 
 if __name__ == '__main__':
     import sys
-    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import config
     app = QApplication(sys.argv)
-    win = PlotIndividualizerMainWindow(config=GetConfig())
+    win = PlotIndividualizerMainWindow(config=config)
     win.show()
     sys.exit(app.exec())

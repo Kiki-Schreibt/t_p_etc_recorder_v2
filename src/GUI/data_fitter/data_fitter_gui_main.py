@@ -77,12 +77,12 @@ class DataFitterMain(DataFitterGuiWindow):
             sample_id = self.sample_id_input.text()
             cycle_number = float(self.cycle_number_input.text())
             temperature = float(self.temperature_input.text())
-            from src.infrastructure.core.config_reader import GetConfig
+            from src.infrastructure.core.config_reader import config
             self.data_loader = DataLoader(
                 sample_id=sample_id,
                 cycle_number=cycle_number,
                 temperature=temperature,
-                db_conn_params=GetConfig().db_conn_params
+                db_conn_params=config.db_conn_params
             )
             self.isotherm, self.mean_temperature, self.de_hyd_state = self.data_loader.get_isotherm()
             if self.isotherm is not None and not self.isotherm.empty:

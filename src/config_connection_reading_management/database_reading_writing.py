@@ -668,9 +668,9 @@ def _to_native(val):
 
 
 def test_data_retriever() -> None:
-    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import config
 
-    data_retriever = DataRetriever(db_conn_params=GetConfig().db_conn_params)
+    data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
     sample_id = 'WAE-WA-030'
     table_name = TableConfig().TPDataTable.table_name
     df = data_retriever.fetch_data_by_sample_id_2(

@@ -55,7 +55,8 @@ class QuickExport:
                           self.etc_table.cycle_number_flag,
                           self.etc_table.output_power,
                           self.etc_table.measurement_time,
-                          self.etc_table.resistance)
+                          self.etc_table.resistance,
+                          self.etc_table.test_info)
         if not constraints_etc:
             constraints_etc = {
                                     "min_TotalCharTime": 0.3,
@@ -220,13 +221,13 @@ class QuickExport:
 
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
-    sample_ids = 'WAE-WA-030'
+    sample_id = 'WAE-WA-030'
 
     from src.infrastructure.handler.metadata_handler import MetaData
-    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import config
 
-    meta_data = MetaData(sample_id=sample_id, db_conn_params=GetConfig().db_conn_params)
-    exporter = QuickExport(meta_data=meta_data, db_conn_params=GetConfig().db_conn_params)
+    meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
+    exporter = QuickExport(meta_data=meta_data, db_conn_params=config.db_conn_params)
     exporter.export_all(constraints_etc={})
     #5344,289444522186 origin
     #5345,30476 python

@@ -316,9 +316,9 @@ def test_create_table_from_class():
 
 
 if __name__ == "__main__":
-    from src.infrastructure.core.config_reader import GetConfig
-    create_database(GetConfig())
-    creator = TableCreator(db_conn_params=GetConfig().db_conn_params)
+    from src.infrastructure.core.config_reader import config
+    create_database(config)
+    creator = TableCreator(db_conn_params=config.db_conn_params)
     #creator.__delete_table__(table_name="thermal_conductivity_xy_data")
     #creator.__delete_table__(table_name="thermal_conductivity_data")
     creator.create_all_tables()

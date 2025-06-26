@@ -632,8 +632,7 @@ class QueryBuilder:
 
 # --- Test function for quick verification ---
 def test_query_builder():
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
     qb = QueryBuilder(db_conn_params=config.db_conn_params)
     sample_id = "WAE-WA-040"
     start_time = datetime(2023, 1, 1, 23, 21, 22)

@@ -198,10 +198,10 @@ class HotDiskConnection:
         hd_conn.send_command_receive_response(f"*IDN?")  #returns hot disk id
     """
 
-    def __init__(self, HD_HOST=None, HD_PORT=None):
+    def __init__(self, HD_HOST, HD_PORT):
         self.logger = logging.getLogger(__name__)
-        self.HD_HOST = HD_HOST or 'localhost'
-        self.HD_PORT = HD_PORT or 50009
+        self.HD_HOST = HD_HOST
+        self.HD_PORT = HD_PORT
         self.sock = None
 
     def __enter__(self):
@@ -331,9 +331,9 @@ def test_connection_simulated_modbus():
             print("An error occurred:", e)
 
 
-def test_hot_disk_connection():
+def test_hot_disk_connection(config):
     try:
-        with HotDiskConnection() as client:
+        with HotDiskConnection(**config.hd_conn_params) as client:
             #client.send_command(f"SCHED:INIT {file}")
             client.send_command(f"*IDN?")
             a= client.receive_response()
@@ -346,8 +346,7 @@ def test_hot_disk_connection():
 # Run the test function
 
 if __name__ == "__main__":
-    from src.infrastructure.core.config_reader import GetConfig
-    config = GetConfig()
+    from src.infrastructure.core.config_reader import config
     # Load the configuration
     test_hot_disk_connection()
 

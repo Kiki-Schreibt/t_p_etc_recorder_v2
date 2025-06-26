@@ -796,11 +796,10 @@ def main():
 
     Opens the window for sample 'WAE-WA-028' over a fixed time range.
     """
-    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import config
     from src.infrastructure.handler.metadata_handler import MetaData
 
     app = QApplication([])
-    config = GetConfig()
     meta_data = MetaData(sample_id="WAE-WA-040", db_conn_params=config.db_conn_params)
     from datetime import datetime
     time_range = [datetime(2021, 9, 18), datetime(2021, 9, 21)]

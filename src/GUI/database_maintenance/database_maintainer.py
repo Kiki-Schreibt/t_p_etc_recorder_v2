@@ -115,12 +115,12 @@ class MaintenanceWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    from src.infrastructure.core.config_reader import GetConfig
+    from src.infrastructure.core.config_reader import config
 
     app = QApplication(sys.argv)
-    cfg = GetConfig()
 
-    win = MaintenanceWindow(cfg.db_conn_params)
+
+    win = MaintenanceWindow(config.db_conn_params)
     win.resize(600, 400)
     win.show()
     sys.exit(app.exec())

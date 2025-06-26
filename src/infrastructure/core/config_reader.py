@@ -218,5 +218,4 @@ config = GetConfig()
 
 if __name__ == "__main__":
     # For testing whether the configuration reader works.
-    config = GetConfig()
     print("LOG_FILE from configuration:", config.db_conn_params)

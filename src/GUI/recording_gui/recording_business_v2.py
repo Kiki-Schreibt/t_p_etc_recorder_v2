@@ -1030,9 +1030,9 @@ def test_read_plot_uptake():
     Test function for UptakePlot.
     """
     try:
-        from src.infrastructure.core.config_reader import GetConfig
+        from src.infrastructure.core.config_reader import config
         from src.infrastructure.handler.metadata_handler import MetaData
-        meta_data = MetaData(sample_id='WAE-WA-040', db_conn_params=GetConfig().db_conn_params)
+        meta_data = MetaData(sample_id='WAE-WA-040', db_conn_params=config.db_conn_params)
         uptake_win = UptakePlot()
         uptake_win.load_data(meta_data=meta_data)
         return uptake_win
@@ -1109,10 +1109,10 @@ if __name__ == '__main__':
         from PySide6.QtWidgets import QApplication
         app = QApplication([])
 
-        from src.infrastructure.core.config_reader import GetConfig
+        from src.infrastructure.core.config_reader import config
         from src.infrastructure.handler.metadata_handler import MetaData
 
-        db_conn_params = GetConfig().db_conn_params
+        db_conn_params = config.db_conn_params
         meta_data = MetaData(sample_id='WAE-WA-028', db_conn_params=db_conn_params)
         #win = test_read_plot_tp_dependent()
         win = CyclePlotWindow(db_conn_params=db_conn_params, meta_data=meta_data)
