@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from src.infrastructure.connections.connections import HotDiskConnection
 from src.infrastructure.core import global_vars
+import concurrent.futures
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
@@ -83,7 +84,7 @@ class HotDiskScheduleGrabber:
         return matching_files
 
 
-class HotDiskController:
+class HotDiskSequenzerBackend:
 
     def __init__(self, hd_conn_params,
                      template_folder_path=standard_hot_disk_schedule_folder,
@@ -112,7 +113,6 @@ class HotDiskController:
             self.logger.exception(e)
 
         for measurement in temp_schedule_dict_list:
-
             if not measurement['file_path']:
                 self.logger.error(f"No scheduler file for measurement at {measurement['measurement_time']}")
                 self.running_event.clear()
@@ -218,13 +218,65 @@ class HotDiskController:
         formatted = f"{hours:02d}:{minutes:02d}:{seconds:02d} till next measurement at {target_time}"
         #print(formatted)
 
+
+class HotDiskController:
+
+    def __init__(self, hd_conn_params, response_delay=10):
+        self.logger = logging.getLogger(__name__)
+        self.hd_conn_params = hd_conn_params
+        self.response_delay = response_delay
+        self.running = False
+
+    def run(self):
+        self.running = True
+        try:
+            with HotDiskConnection(**self.hd_conn_params, response_delay=self.response_delay) as client:
+                status = self.ask_status(client=client)
+            return status
+        except Exception as e:
+            self.logger.error(f"{e}")
+            return None
+
+    def select_rows(self, start_row=None, end_row=None):
+        if start_row and end_row:
+            row_str = f"{start_row}-{end_row}"
+        else:
+            row_str = "ALL"
+
+        with HotDiskConnection(**self.hd_conn_params) as client:
+            client.send_command(f"ROW:SEL {row_str}")
+
+    def ask_status(self,client):
+
+        response = client.send_command_receive_response("*OPC?")
+        return response
+
+    def export_results(self, folder_path, result_file_name, start_row=None, end_row=None):
+        full_path = os.path.join(folder_path, result_file_name+'.xlsx')
+
+        delete_file_if_exists(full_file_path=full_path, logger=self.logger)
+        self.select_rows(start_row=start_row,
+                             end_row=end_row)
+        with HotDiskConnection(**self.hd_conn_params, response_delay=self.response_delay) as client:
+            client.send_command(f"EXPORT {full_path}")
+
     def start_active_schedule(self):
         try:
-            with HotDiskConnection(**self.hd_conn_params) as client:
+            with HotDiskConnection(**self.hd_conn_params, response_delay=self.response_delay) as client:
                 client.send_command(f"SCHED:INIT")
                 self.logger.info(f"Current loaded schedule started in constants analyzer")
         except Exception as e:
             self.logger.error(f"Could not start schedule file: {e}")
+
+
+def delete_file_if_exists(full_file_path, logger):
+    if os.path.exists(full_file_path):
+        try:
+            os.remove(full_file_path)  # Delete the file
+            logger.info(f"File '{full_file_path}' already exists and has been deleted.")
+        except Exception as e:
+            print(f"Error while deleting file: {e}")
+
 
 
 def test_hd_controller():
@@ -250,7 +302,7 @@ def test_hd_controller():
         },
         # More entries...
     ]
-    hd_controller = HotDiskController()
+    hd_controller = HotDiskSequenzerBackend()
     hd_controller.run(temp_schedule_dict_list=measurements)    # Print the updated measurements list
     import pprint
     pprint.pprint(measurements)
@@ -258,14 +310,21 @@ def test_hd_controller():
 
 
 if __name__ == '__main__':
-   test_hd_controller()
-   hd_conn_params = {}
-   #hd_controller = HotDiskController()
-   #with HotDiskConnection(**hd_conn_params) as client:
-   #    client.send_command("ROW:SEL ALL")
-   #rc = hd_controller.get_result_val()
-   #print(rc)
+  # test_hd_controller()
+    from src.infrastructure.core.config_reader import config
+    hd_conn_params = config.hd_conn_params
+    hd_controller = HotDiskController(hd_conn_params=hd_conn_params, response_delay=None)
+    file_name = 'WAE-WA-060-000-08'
+    folder_path = r'C:\Daten\Kiki\WAE-WA-060-Mg5wtFe\WAE-WA-060-All\WAE-WA-060-000-AngleTest\WAE-WA-060-000-08-00dlong_0dtrans_50C'
 
 
 
-     #   response = client.receive_response()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+      future = executor.submit(hd_controller.run)
+      result = future.result()
+      print(result)
+
+
+   # hd_controller.export_results(folder_path=folder_path,
+              #                   result_file_name=file_name)
+   # print(result)

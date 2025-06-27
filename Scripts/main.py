@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 
+import global_vars
 from src.GUI.config_creation.config_creator_ui_main import ConfigWindow
 from src.infrastructure.utils.standard_paths import standard_config_file_path
 from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
@@ -15,6 +16,7 @@ from src.GUI.simulation.simulator_gui import ModbusServerControlGUI
 from src.GUI.planner_gui.test_planner import TestPlannerMain
 from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
+from src.GUI.etc_measurement_starter.start_etc_measurement_gui import StartETCMeasurementGUI
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
@@ -90,6 +92,7 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionSchedule_Creator.triggered.connect(self._open_schedule_creator)
         self.ui.actionUptake_Correction.triggered.connect(self._open_uptake_correction)
         self.ui.actionDatabase_Maintenance.triggered.connect(self._open_database_maintainer)
+        self.ui.actionETC_Measurement_Starter.triggered.connect(self._open_etc_measurement_performer)
 
     def open_test_planner(self):
         """
@@ -177,6 +180,13 @@ class MainProgram(RecordingMainWindow):
         self.db_maintainer = MaintenanceWindow(db_conn_params=self.db_conn_params)
         self.db_maintainer.show()
         self.db_maintainer.started.connect(self.controller.stop_t_p_recording)
+
+    def _open_etc_measurement_performer(self):
+        etc_ms = StartETCMeasurementGUI(config=self.config,
+                                        standard_etc_folder_path=global_vars.standard_etc_folder_path,
+                                        meta_data=self.meta_data)
+        etc_ms.show()
+        etc_ms.new_etc_data_written.connect(self.controller.recorder._emit_etc_data)
 
 
 

@@ -198,11 +198,12 @@ class HotDiskConnection:
         hd_conn.send_command_receive_response(f"*IDN?")  #returns hot disk id
     """
 
-    def __init__(self, HD_HOST, HD_PORT):
+    def __init__(self, HD_HOST, HD_PORT, response_delay=10):
         self.logger = logging.getLogger(__name__)
         self.HD_HOST = HD_HOST
         self.HD_PORT = HD_PORT
         self.sock = None
+        self.timeout = response_delay
 
     def __enter__(self):
         self.connect()
@@ -217,7 +218,7 @@ class HotDiskConnection:
     def connect(self):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(10)  # Set timeout [s]
+            self.sock.settimeout(self.timeout)  # Set timeout [s]
             self.logger.info(f"Connecting to {self.HD_HOST}:{self.HD_PORT}...")
             self.sock.connect((self.HD_HOST, self.HD_PORT))
             self.logger.info("Connected.")

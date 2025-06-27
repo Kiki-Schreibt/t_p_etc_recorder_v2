@@ -23,7 +23,7 @@ import pyqtgraph as pg
 
 # Local project imports (assumed available in your project structure)
 from src.tp_program_simulator import TemperatureControllerHotDiskSequenzer
-from src.infrastructure.handler.hot_disk_handler import HotDiskController
+from src.infrastructure.handler.hot_disk_handler import HotDiskSequenzerBackend
 from src.infrastructure.core import global_vars
 
 try:
@@ -37,7 +37,7 @@ standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_rec
 
 
 
-class SignaledHotDiskController(QObject, HotDiskController):
+class SignaledHotDiskSequenzerBackend(QObject, HotDiskSequenzerBackend):
     """
     A HotDiskController that emits a Qt signal on each step change.
 
@@ -60,7 +60,7 @@ class SignaledHotDiskController(QObject, HotDiskController):
         :param parent:               Optional Qt parent.
         """
         QObject.__init__(self, parent)
-        HotDiskController.__init__(
+        HotDiskSequenzerBackend.__init__(
             self,
             hd_conn_params=hd_conn_params,
             template_folder_path=template_folder_path,
@@ -80,7 +80,7 @@ class SignaledHotDiskController(QObject, HotDiskController):
         super().wait_until(target_time=target_time)
 
 
-class SignaledHotDiskControllerThreader(QObject):
+class SignaledHotDiskSequenzerThreader(QObject):
     """
     Worker that runs a HotDiskController schedule in its own QThread.
 
@@ -90,7 +90,7 @@ class SignaledHotDiskControllerThreader(QObject):
     latest_program_step = Signal(datetime.datetime)
     finished = Signal()
 
-    def __init__(self, controller: SignaledHotDiskController, schedule: list, logger: logging.getLogger()):
+    def __init__(self, controller: SignaledHotDiskSequenzerBackend, schedule: list, logger: logging.getLogger()):
         """
         :param controller: Instance of SignaledHotDiskController.
         :param schedule:   List of dicts with heating and measurement steps.
@@ -469,7 +469,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                                 "Sensor settings or template folder cannot be empty.")
             return
         try:
-            self.hot_disk_controller = SignaledHotDiskController(
+            self.hot_disk_controller = SignaledHotDiskSequenzerBackend(
                         hd_conn_params=self.hd_conn_params,
                         template_folder_path=folder_path,
                         sensor_insulation=sensor_insulation,
@@ -483,7 +483,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
 
         # thread + worker
         self.hot_disk_thread = QThread()
-        self.hot_disk_worker = SignaledHotDiskControllerThreader(
+        self.hot_disk_worker = SignaledHotDiskSequenzerThreader(
             controller=self.hot_disk_controller,
             schedule=scheduled_dict_list,
             logger = self.logger

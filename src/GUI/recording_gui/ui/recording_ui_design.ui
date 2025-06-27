@@ -638,7 +638,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -649,7 +649,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_9"/>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -681,6 +681,7 @@
     <addaction name="actionSchedule_Creator"/>
     <addaction name="actionUptake_Correction"/>
     <addaction name="actionDatabase_Maintenance"/>
+    <addaction name="actionETC_Measurement_Starter"/>
    </widget>
    <addaction name="menuView"/>
   </widget>
@@ -718,6 +719,11 @@
   <action name="actionDatabase_Maintenance">
    <property name="text">
     <string>Database Maintenance</string>
+   </property>
+  </action>
+  <action name="actionETC_Measurement_Starter">
+   <property name="text">
+    <string>ETC Measurement Starter</string>
    </property>
   </action>
  </widget>

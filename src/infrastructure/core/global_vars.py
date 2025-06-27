@@ -34,7 +34,7 @@ cycle_counter_mode_CSV_recorder = 'CSV_Recorder'
 mode_modbus_recording = 'recording'
 compression_factor = 60
 data_point_reading_limit = 500
-
+standard_etc_folder_path = r"C:\Daten\Kiki"
 ###pyside related
 try:
     from src.GUI.qt_styles import gpt_light as style

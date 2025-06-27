@@ -29,7 +29,7 @@ class LogFileTracker(QObject):
         self.logger = logging.getLogger(__name__)
         self.update_lock = threading.Lock()
         self.event_handler = LogFileHandler(meta_data=self.meta_data, config=config)
-        self.event_handler.time_range_from_export.connect(self._emit_times)
+        self.event_handler.time_range_from_export_sig.connect(self._emit_times)
 
     def _emit_times(self, time_range):
         self.time_range_etc_import.emit(time_range)
@@ -74,7 +74,7 @@ class LogFileTracker(QObject):
 
 class LogFileHandler(FileSystemEventHandler, QObject):
 
-    time_range_from_export = Signal(tuple)
+    time_range_from_export_sig = Signal(tuple)
 
     def __init__(self, meta_data, config):
         FileSystemEventHandler.__init__(self)
@@ -147,7 +147,7 @@ class LogFileHandler(FileSystemEventHandler, QObject):
             self.logger.info("Test mode activated. Times of ETC data will be corrected with actual time")
 
         time_range = processor.execute()
-        self.time_range_from_export.emit(time_range)
+        self.time_range_from_export_sig.emit(time_range)
 
 
 def create_temp_log_file(temp_log_file_path):
