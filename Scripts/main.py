@@ -186,7 +186,7 @@ class MainProgram(RecordingMainWindow):
                                         standard_etc_folder_path=global_vars.standard_etc_folder_path,
                                         meta_data=self.meta_data)
         etc_ms.show()
-        etc_ms.new_etc_data_written.connect(self.controller.recorder._emit_etc_data)
+        #etc_ms.new_etc_data_written.connect(self.controller.recorder._emit_etc_data)
 
 
 

@@ -431,7 +431,11 @@ class MainController:
         """
         try:
             if self.recorder:
+                if self.newETCDataWritten_connected:
+                    self.recorder.newEtcDataWritten.disconnect()
+                    self.newETCDataWritten_connected = False
                 self.recorder.stop_etc_recording()
+
         except Exception as e:
             self.logger.exception("Error stopping log tracking in MainController:")
 
@@ -560,7 +564,6 @@ class MainController:
     def start_etc_measurement(self):
         hd_controller = HotDiskController(hd_conn_params=self.config.hd_conn_params)
         hd_controller.start_active_schedule()
-
 
     def is_tp_recording_running(self):
         return self.recorder.is_tp_thread_running()

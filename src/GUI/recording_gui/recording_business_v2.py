@@ -181,6 +181,8 @@ class DataRecorder(QObject):
         try:
             if self._log_tracker_thread is not None:
                 self.logger.info("Stopping ETC recording thread...")
+                self.log_tracker.time_range_etc_import.disconnect()
+                self.log_tracker.stop()
                 self._log_tracker_thread.join()
                 self._log_tracker_thread = None
                 self.logger.info("ETC recording thread stopped.")
