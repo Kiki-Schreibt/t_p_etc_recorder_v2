@@ -18,7 +18,8 @@ class StartETCMeasurementGUI(QWidget):
     file_exported_sig = Signal(str)
     new_etc_data_written = Signal(tuple)
 
-    def __init__(self, config, standard_etc_folder_path, response_delay=None, meta_data=None):
+    def __init__(self, config, standard_etc_folder_path,
+                 response_delay=None, meta_data=None):
         super().__init__()
         self.setWindowTitle("Start ETC Measurement")
         self.setGeometry(300, 300, 400, 250)
@@ -151,7 +152,9 @@ def main():
 
 
     app = QApplication(sys.argv)
-    window = StartETCMeasurementGUI(hd_conn_params, standard_etc_folder_path, meta_data=meta_data)
+    window = StartETCMeasurementGUI(config=config,
+                                    standard_etc_folder_path=standard_etc_folder_path,
+                                    meta_data=meta_data)
     window.show()
     sys.exit(app.exec())
 

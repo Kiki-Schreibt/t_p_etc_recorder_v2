@@ -182,10 +182,13 @@ class MainProgram(RecordingMainWindow):
         self.db_maintainer.started.connect(self.controller.stop_t_p_recording)
 
     def _open_etc_measurement_performer(self):
-        etc_ms = StartETCMeasurementGUI(config=self.config,
-                                        standard_etc_folder_path=global_vars.standard_etc_folder_path,
-                                        meta_data=self.meta_data)
-        etc_ms.show()
+        try:
+            self.etc_ms = StartETCMeasurementGUI(config=self.config,
+                                            standard_etc_folder_path=global_vars.standard_etc_folder_path,
+                                            meta_data=self.meta_data)
+            self.etc_ms.show()
+        except Exception as e:
+            self.logger.error(f"Error opening measurement performer: {e}")
         #etc_ms.new_etc_data_written.connect(self.controller.recorder._emit_etc_data)
 
 
