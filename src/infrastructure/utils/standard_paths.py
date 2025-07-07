@@ -32,6 +32,7 @@ def get_user_home_path(subpath):
 planner_ui_file_path = get_ui_file_path('planner_gui', 'planner_ui.ui')
 recording_ui_file_path = get_ui_file_path('recording_gui','recording_ui_design.ui')
 main_ui_file_path = get_ui_file_path("recording_gui", "recording_ui_design.ui")
+exporter_ui_file_path = get_ui_file_path("exporter_gui", "exporter_gui_ui.ui")
 
 # Paths relative to the script location
 standard_periodic_table_txt = get_config_path('Periodic_Table_of_Elements.txt')
