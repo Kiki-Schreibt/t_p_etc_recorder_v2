@@ -146,7 +146,6 @@ def main():
     from src.infrastructure.core.global_vars import standard_etc_folder_path
     from src.infrastructure.handler.metadata_handler import MetaData
     meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-060")
-    hd_conn_params = config
 
     # Standard folder path for the export
 
