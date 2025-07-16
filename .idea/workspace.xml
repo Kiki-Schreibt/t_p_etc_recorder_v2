@@ -6,11 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/exporter_gui/exporter_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/exporter_gui/exporter_business.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/exporter_gui/ui/exporter_gui_ui.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/exporter_gui/ui/exporter_gui_ui.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/plot_individualizer/plot_individualizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/plot_individualizer/plot_individualizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/plot_window_reader_basic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/global_vars.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/global_vars.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

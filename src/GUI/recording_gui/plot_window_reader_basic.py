@@ -99,7 +99,7 @@ class ReadData(QThread):
         self.meta_data = meta_data
 
     def _init_standard_params(self):
-        self.limit_amount_storage = self.db_retriever.limit_datapoints
+        self.limit_amount_storage = self.db_retriever.limit_datapoints * 10
         self.running = False
         self.T_max = 1000
         self.p_max = 500
