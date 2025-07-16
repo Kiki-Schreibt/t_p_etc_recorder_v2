@@ -17,6 +17,8 @@ from src.GUI.planner_gui.test_planner import TestPlannerMain
 from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
 from src.GUI.etc_measurement_starter.start_etc_measurement_gui import StartETCMeasurementGUI
+from src.GUI.plot_individualizer.plot_individualizer import PlotIndividualizerMainWindow
+
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
@@ -93,6 +95,7 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionUptake_Correction.triggered.connect(self._open_uptake_correction)
         self.ui.actionDatabase_Maintenance.triggered.connect(self._open_database_maintainer)
         self.ui.actionETC_Measurement_Starter.triggered.connect(self._open_etc_measurement_performer)
+        self.ui.actionPlot_Individualizer.triggered.connect(self._open_plot_individualizer)
 
     def open_test_planner(self):
         """
@@ -191,7 +194,13 @@ class MainProgram(RecordingMainWindow):
             self.logger.error(f"Error opening measurement performer: {e}")
         #etc_ms.new_etc_data_written.connect(self.controller.recorder._emit_etc_data)
 
-
+    def _open_plot_individualizer(self):
+        try:
+            self.plot_individualizer = PlotIndividualizerMainWindow(config=self.config,
+                                                                meta_data=self.meta_data)
+            self.plot_individualizer.show()
+        except Exception as e:
+            self.logger.error(f"Error opening plot individualizer: {e}")
 
     def closeEvent(self, event):
         """

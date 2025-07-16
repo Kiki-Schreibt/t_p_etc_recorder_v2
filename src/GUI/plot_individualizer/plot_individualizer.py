@@ -176,7 +176,7 @@ class PlotIndividualizerUI(QWidget):
 
 class PlotIndividualizerMainWindow(PlotIndividualizerUI):
 
-    def __init__(self, config):
+    def __init__(self, config, meta_data=None):
         super().__init__(config=config)
 
         # Initialize columns for the default table
@@ -184,6 +184,11 @@ class PlotIndividualizerMainWindow(PlotIndividualizerUI):
         # Connect signal
         self.tableCombo.currentTextChanged.connect(self.update_columns)
         self.plotButton.clicked.connect(self._trigger_data_loading)
+        if meta_data:
+            self.meta_data=meta_data
+            self.sample_id_edit_field.setText(self.meta_data.sample_id)
+            self._on_sample_id_changed()
+
 
     def update_columns(self, table_name: str):
         # Get all column names
@@ -424,6 +429,8 @@ class DataLoadWorker(QObject):
 if __name__ == '__main__':
     import sys
     from src.infrastructure.core.config_reader import config
+    from src.infrastructure.handler.metadata_handler import MetaData
+    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-030")
     app = QApplication(sys.argv)
     win = PlotIndividualizerMainWindow(config=config)
     win.show()

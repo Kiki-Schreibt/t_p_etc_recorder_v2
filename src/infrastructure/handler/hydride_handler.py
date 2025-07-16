@@ -418,7 +418,7 @@ if __name__ == "__main__":
     # test_metal_hydride_database_and_periodic_table()
 
     # Example usage:
-    hydride_str = "MgH2"
+    hydride_str = "Mg2FeH6"
     mh_database = MetalHydrideDatabase()
     density = mh_database.get_density(hydride_str)
     conductivity = mh_database.get_bulk_conductivity(hydride_str)
@@ -427,3 +427,4 @@ if __name__ == "__main__":
     print(f"Density: {density}")
     print(f"Bulk Conductivity: {conductivity}")
     print(f"Capacity: {capacity}")
+    print(f"enthalpy, entropy {mh_database.get_enthalpy_entropy(hydride_str)}")

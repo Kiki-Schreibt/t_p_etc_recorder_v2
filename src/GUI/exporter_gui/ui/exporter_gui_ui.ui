@@ -33,13 +33,13 @@
     </rect>
    </property>
   </widget>
-  <widget class="QFrame" name="">
+  <widget class="QFrame" name="frame">
    <property name="geometry">
     <rect>
      <x>30</x>
      <y>20</y>
      <width>194</width>
-     <height>24</height>
+     <height>41</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
