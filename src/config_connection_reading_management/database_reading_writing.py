@@ -5,6 +5,7 @@ from typing import Optional, Tuple, Union, List
 
 import pandas as pd
 
+import global_vars
 from src.infrastructure.connections.connections import DatabaseConnection
 try:
     import src.infrastructure.core.logger as logging
@@ -350,9 +351,12 @@ class DataRetriever:
         constraints: Optional[dict] = None,
         table: Optional[TableConfig] = None,
         join_table: str = None,
-        join_on: list[tuple[str,str]] = None,
-        join_constraints: dict = None
+        join_on: list[tuple[str, str]] = None,
+        join_constraints: dict = None,
+        asc_desc: bool = False,
+        avg_cycle_dur: int = None
     ) -> pd.DataFrame:
+
 
         if not table:
             table = TableConfig().TPDataTable
@@ -366,21 +370,33 @@ class DataRetriever:
             self.logger.error("Couldn't find column names")
             return pd.DataFrame()
 
-        if isinstance(cycle_numbers, (list, tuple)):
-            #todo: asc und desc limit when cycle amount  = 2
-            # (DESC/ASC limit average_cycle_duration.total_seconds*1/sleep_intervall * 2?
+        if not asc_desc:
+            if isinstance(cycle_numbers, (list, tuple)):
+                # Convert possible numpy types to native float
+                cycle_numbers = [float(cn) for cn in cycle_numbers]
+                placeholders = ', '.join(['%s'] * len(cycle_numbers))
+                query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
+                         f"{table.cycle_number} IN ({placeholders}) ORDER BY {table.time}")
+                values = [sample_id] + cycle_numbers
+            else:
+                query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
+                         f"{table.cycle_number} = %s ORDER BY {table.time}")
+                values = [sample_id, float(cycle_numbers)]
+            df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
 
-            # Convert possible numpy types to native float
-            cycle_numbers = [float(cn) for cn in cycle_numbers]
-            placeholders = ', '.join(['%s'] * len(cycle_numbers))
+        elif len(cycle_numbers) == 2:
+             #todo: test!
+
+            asc_desc_limit = avg_cycle_dur*2/global_vars.sleep_interval
             query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
-                     f"{table.cycle_number} IN ({placeholders}) ORDER BY {table.time}")
-            values = [sample_id] + cycle_numbers
-        else:
+                         f"{table.cycle_number} = %s ORDER BY {table.time} DESC LIMIT {asc_desc_limit} ")
+            values = [sample_id, float(min(cycle_numbers))]
+            df_prev = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
             query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
-                     f"{table.cycle_number} = %s ORDER BY {table.time}")
-            values = [sample_id, float(cycle_numbers)]
-        df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+                         f"{table.cycle_number} = %s ORDER BY {table.time} ASC LIMIT {asc_desc_limit} ")
+            values = [sample_id, float(max(cycle_numbers))]
+            df_curr = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+            df = pd.concat([df_prev, df_curr], axis=0, ignore_index=True)
 
         return df
 

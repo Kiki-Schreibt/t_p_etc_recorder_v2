@@ -12,10 +12,10 @@ etc_xy_table = TableConfig().ThermalConductivityXyDataTable
 meta_table = TableConfig().MetaDataTable
 
 PRIMARY_KEYS = {
-                        t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id],
+                        t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id, t_p_table.cycle_number],
                         cycle_table.table_name:  [cycle_table.time_start, cycle_table.sample_id],
                         meta_table.table_name:   meta_table.sample_id,
-                        etc_table.table_name:    [etc_table.time, etc_table.sample_id_small],
+                        etc_table.table_name:    [etc_table.time, etc_table.sample_id_small, etc_table.cycle_number],
                         etc_xy_table.table_name: [etc_xy_table.time, etc_xy_table.sample_id]
                     }
 

@@ -570,6 +570,7 @@ class CycleCounter:
             pd.DataFrame """
 
         try:
+
             df_one_cycle = self.data_retriever.fetch_data_by_cycle(
                 sample_id=self.meta_data.sample_id,
                 cycle_numbers=[prev_cycle, self.cycle]

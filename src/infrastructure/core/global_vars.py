@@ -15,6 +15,10 @@ STANDARD_CONSTRAINTS = {
 ####for logger
 log_file_name = 'Application_Log.log'
 
+
+####for reader / should equal sleep interval in config file
+sleep_interval = 0.5
+
 ###for calculators
 R_H2: float = 4124.49         # [J/(kg·K)] Specific gas constant for hydrogen
 R_universal: float = 8.31447    # [J/(mol·K)] Universal gas constant

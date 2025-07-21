@@ -72,7 +72,7 @@ class GetConfig:
                             "START_REG": int(config['START_REG']),
                             "END_REG": int(config['END_REG']),
                             "REGS_OF_INTEREST": [int(x) for x in config['REGS_OF_INTEREST']],
-                            "SLEEP_INTERVAL": int(config['SLEEP_INTERVAL'])
+                            "SLEEP_INTERVAL": float(config['SLEEP_INTERVAL'])
                                 }
 
         self.app_logger_params = {
@@ -219,3 +219,4 @@ config = GetConfig()
 if __name__ == "__main__":
     # For testing whether the configuration reader works.
     print("LOG_FILE from configuration:", config.db_conn_params)
+    print(config.mb_reading_params)
