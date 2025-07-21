@@ -19,6 +19,7 @@ from src.infrastructure.core.global_vars import data_point_reading_limit
 local_tz = ZoneInfo("Europe/Berlin")
 LIMIT_DATA_POINTS = data_point_reading_limit
 
+
 class DataRetriever:
     """
     Class for retrieving data from the database.
@@ -385,17 +386,32 @@ class DataRetriever:
             df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
 
         elif len(cycle_numbers) == 2:
-             #todo: test!
+             #todo: start and end of cycle will not be determined correctly like this! Maybe four reads and then sort out duplicates...
 
-            asc_desc_limit = avg_cycle_dur*2/global_vars.sleep_interval
+            asc_desc_limit = avg_cycle_dur*3/global_vars.sleep_interval
+
+            query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
+                         f"{table.cycle_number} = %s ORDER BY {table.time} ASC LIMIT {asc_desc_limit} ")
+            values = [sample_id, float(min(cycle_numbers))]
+            df_prev_start = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
             query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
                          f"{table.cycle_number} = %s ORDER BY {table.time} DESC LIMIT {asc_desc_limit} ")
             values = [sample_id, float(min(cycle_numbers))]
-            df_prev = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+            df_prev_end = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+            df_prev = pd.concat([df_prev_start, df_prev_end], axis=0, ignore_index=True)
+            df_prev.drop_duplicates(subset=table.time)
+
             query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
                          f"{table.cycle_number} = %s ORDER BY {table.time} ASC LIMIT {asc_desc_limit} ")
             values = [sample_id, float(max(cycle_numbers))]
-            df_curr = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+            df_curr_start = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+            query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
+                         f"{table.cycle_number} = %s ORDER BY {table.time} DESC LIMIT {asc_desc_limit} ")
+            values = [sample_id, float(max(cycle_numbers))]
+            df_curr_end = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+            df_curr = pd.concat([df_curr_start, df_curr_end], axis=0, ignore_index=True)
+            df_curr.drop_duplicates(subset=table.time)
+
             df = pd.concat([df_prev, df_curr], axis=0, ignore_index=True)
 
         return df
@@ -674,7 +690,6 @@ class DataBaseManipulator:
                 return False
 
 
-
 def _to_native(val):
     # unwrap numpy scalars
     try:
@@ -700,4 +715,23 @@ def test_data_retriever() -> None:
         sample_id=sample_id
     )
     print(df)
+
+
+if __name__ == '__main__':
+    from src.infrastructure.core.config_reader import config
+    from src.infrastructure.handler.metadata_handler import MetaData
+    sample_id = 'WAE-WA-060'
+    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id=sample_id)
+
+    db_retriever = DataRetriever(db_conn_params=config.db_conn_params)
+
+    df = db_retriever.fetch_data_by_cycle(cycle_numbers=[0, 0.5],
+                                          sample_id=sample_id,
+                                          asc_desc=True,
+                                          avg_cycle_dur=meta_data.average_cycle_duration.total_seconds())
+
+    print(df)
+    #print(meta_data.average_cycle_duration)
+    #print(meta_data.average_cycle_duration.total_seconds())
+    #print(21600*4)
 

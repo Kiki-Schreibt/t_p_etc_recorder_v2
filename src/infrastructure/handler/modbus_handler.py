@@ -487,7 +487,7 @@ class CycleCounter:
             return self.cycle
 
         # Retrieve and separate cycle data
-        cycle_data = self._retrieve_cycle_data()
+        cycle_data = self._retrieve_cycle_data(mode=mode)
         if not cycle_data:
             return self.cycle
 
@@ -539,7 +539,7 @@ class CycleCounter:
             f"First hydrogenation for {self.meta_data.sample_id} set to {self.meta_data.first_hydrogenation}"
         )
 
-    def _retrieve_cycle_data(self, special_case=False):
+    def _retrieve_cycle_data(self, special_case=False, mode=STANDARD_MODE):
         """
         Retrieves and separates cycle data into current and previous cycles.
 
@@ -548,7 +548,7 @@ class CycleCounter:
 
         prev_cycle = self.cycle-0.5 if not special_case else self.cycle
 
-        df_one_cycle = self._retrieve_cycle_data_by_cycle_number(prev_cycle=prev_cycle)
+        df_one_cycle = self._retrieve_cycle_data_by_cycle_number(prev_cycle=prev_cycle, mode=mode)
 
         if df_one_cycle.empty:
             return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), False
@@ -562,7 +562,7 @@ class CycleCounter:
 
         return df_one_cycle, df_current_cycle, df_previous_cycle, is_uptake
 
-    def _retrieve_cycle_data_by_cycle_number(self, prev_cycle):
+    def _retrieve_cycle_data_by_cycle_number(self, prev_cycle, mode=STANDARD_MODE):
         """
         Retrieves and separates cycle data into current and previous cycles.
 
@@ -570,15 +570,22 @@ class CycleCounter:
             pd.DataFrame """
 
         try:
+            df_one_cycle = pd.DataFrame()
+            if mode == STANDARD_MODE:
+                df_one_cycle = self.data_retriever.fetch_data_by_cycle(
+                    sample_id=self.meta_data.sample_id,
+                    cycle_numbers=[prev_cycle, self.cycle],
+                    asc_desc=True,
+                    avg_cycle_dur=self.meta_data.average_cycle_duration.total_seconds()
+                )
 
-            df_one_cycle = self.data_retriever.fetch_data_by_cycle(
-                sample_id=self.meta_data.sample_id,
-                cycle_numbers=[prev_cycle, self.cycle]
-            )
+            elif mode == global_vars.cycle_counter_mode_CSV_recorder:
+                df_one_cycle = self.data_retriever.fetch_data_by_cycle(
+                    sample_id=self.meta_data.sample_id,
+                    cycle_numbers=[prev_cycle, self.cycle]
+                )
             if df_one_cycle.empty:
-                self.logger.warning("No data found for the current and previous cycles.")
-
-                return pd.DataFrame()
+                    self.logger.warning("No data found for the current and previous cycles.")
 
             return df_one_cycle
         except Exception as e:
@@ -821,7 +828,7 @@ class CycleCounter:
         time_range_to_update = (time_start, time_end)
         if mode == STANDARD_MODE:
             treat_cycle_bool = self._handle_too_short_cycles_recording(df=df,  time_range_to_update=time_range_to_update)
-        elif mode == 'CSV_Recorder':
+        elif mode == global_vars.cycle_counter_mode_CSV_recorder:
             treat_cycle_bool = self._handle_too_short_cycles_csv_recorder(df=df, time_range_to_update=time_range_to_update)
 
         return treat_cycle_bool
