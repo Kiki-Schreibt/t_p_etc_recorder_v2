@@ -393,6 +393,7 @@ class MainController:
             if self.plot_manager.top_plot:
                 self.plot_manager.top_plot.reader.start()
 
+            #connect signals
             if self.recorder:
                 self.recorder.newEtcDataWritten.connect(self.plot_manager.top_plot.on_etc_data)
                 self.recorder.newEtcDataWritten.connect(self.plot_manager.bottom_plot.on_etc_data)
@@ -1070,6 +1071,8 @@ class MainWindow(QMainWindow):
         self.controller.toggle_cycling_flag(self.ui.cycle_test_check_box.isChecked())
         self.controller.toggle_is_isotherm_flag(self.ui.isotherm_check_box.isChecked())
         self.controller.toggle_h2_uptake_flag(self.ui.h2_uptake_check_box.isChecked())
+
+
 
     def closeEvent(self, event):
         """

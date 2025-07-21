@@ -353,6 +353,7 @@ class DataRetriever:
         join_on: list[tuple[str,str]] = None,
         join_constraints: dict = None
     ) -> pd.DataFrame:
+
         if not table:
             table = TableConfig().TPDataTable
         table_name = table.table_name
@@ -366,6 +367,9 @@ class DataRetriever:
             return pd.DataFrame()
 
         if isinstance(cycle_numbers, (list, tuple)):
+            #todo: asc und desc limit when cycle amount  = 2
+            # (DESC/ASC limit average_cycle_duration.total_seconds*1/sleep_intervall * 2?
+
             # Convert possible numpy types to native float
             cycle_numbers = [float(cn) for cn in cycle_numbers]
             placeholders = ', '.join(['%s'] * len(cycle_numbers))
@@ -374,9 +378,10 @@ class DataRetriever:
             values = [sample_id] + cycle_numbers
         else:
             query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
-                     f"{table.cycle_number} = %s")
+                     f"{table.cycle_number} = %s ORDER BY {table.time}")
             values = [sample_id, float(cycle_numbers)]
         df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
+
         return df
 
     def fetch_data_by_time_no_limit(self, table: TableConfig,
