@@ -374,6 +374,7 @@ class MainController:
         try:
             self.reservoir_volume = volume
             self.meta_data.reservoir_volume = volume
+            self.meta_data.write()
             if self.recorder:
                 self.recorder.update_reservoir_volume(volume)
         except Exception as e:
