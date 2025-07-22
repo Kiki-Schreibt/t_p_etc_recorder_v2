@@ -62,7 +62,7 @@ class HotDiskScheduleGrabber:
         :return: List of matching file paths
         """
         # Build regex pattern to match filenames containing the parameters in any order
-        pattern = rf"^(?=.*{int(temperature)}_C)(?=.*{int(heat_pulse_duration)}_s)(?=.*{int(heating_power)}_mW)(?=.*{self.sensor_insulation}_ins)(?=.*{self.sensor_type}_type).*\.hseq$"
+        pattern = rf"^(?=.*{temperature}_C)(?=.*{heat_pulse_duration}_s)(?=.*{heating_power}_mW)(?=.*{self.sensor_insulation}_ins)(?=.*{self.sensor_type}_type).*\.hseq$"
         regex = re.compile(pattern)
 
         # List all files in the directory
@@ -278,7 +278,6 @@ def delete_file_if_exists(full_file_path, logger):
             print(f"Error while deleting file: {e}")
 
 
-
 def test_hd_controller():
     from datetime import timedelta
     measurements = [
@@ -302,15 +301,18 @@ def test_hd_controller():
         },
         # More entries...
     ]
-    hd_controller = HotDiskSequenzerBackend()
-    hd_controller.run(temp_schedule_dict_list=measurements)    # Print the updated measurements list
-    import pprint
-    pprint.pprint(measurements)
+    #hd_controller = HotDiskSequenzerBackend()
+    #hd_controller.run(temp_schedule_dict_list=measurements)    # Print the updated measurements list
+    #import pprint
+    #pprint.pprint(measurements)
+
+
+# tests/test_hot_disk_schedule_grabber.py
 
 
 
 if __name__ == '__main__':
-  # test_hd_controller()
+
     from src.infrastructure.core.config_reader import config
     hd_conn_params = config.hd_conn_params
     hd_controller = HotDiskController(hd_conn_params=hd_conn_params, response_delay=None)
@@ -325,6 +327,6 @@ if __name__ == '__main__':
       print(result)
 
 
-   # hd_controller.export_results(folder_path=folder_path,
+    # hd_controller.export_results(folder_path=folder_path,
               #                   result_file_name=file_name)
-   # print(result)
+    # print(result)

@@ -37,47 +37,44 @@ standard_hot_disk_schedule_folder = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_rec
 
 
 
-class SignaledHotDiskSequenzerBackend(QObject, HotDiskSequenzerBackend):
+class SignaledHotDiskSequenzerBackend(QObject):
     """
-    A HotDiskController that emits a Qt signal on each step change.
-
-    Inherits from both QObject (to allow signals) and HotDiskController (core logic).
+    Wraps a HotDiskSequenzerBackend and re‑emits its wait_until calls
+    as a Qt Signal.
     """
     latest_program_step_sig = Signal(datetime.datetime)
 
-    def __init__(self,
-                 hd_conn_params,
-                 template_folder_path: str = standard_hot_disk_schedule_folder,
-                 sensor_insulation: str = "Mica",
-                 sensor_type: str = "5465",
-                 standard_number_of_measurements: int = 3,
-                 parent: QObject = None):
-        """
-        :param template_folder_path: Directory containing schedule templates.
-        :param sensor_insulation:    Type of sensor insulation.
-        :param sensor_type:          Sensor model identifier.
-        :param standard_number_of_measurements: Default measurements per step.
-        :param parent:               Optional Qt parent.
-        """
-        QObject.__init__(self, parent)
-        HotDiskSequenzerBackend.__init__(
-            self,
-            hd_conn_params=hd_conn_params,
-            template_folder_path=template_folder_path,
-            sensor_insulation=sensor_insulation,
-            sensor_type=sensor_type,
-            standard_number_of_measurements=standard_number_of_measurements
+    def __init__(
+        self,
+        hd_conn_params,
+        template_folder_path: str = standard_hot_disk_schedule_folder,
+        sensor_insulation: str = "Mica",
+        sensor_type: str = "5465",
+        standard_number_of_measurements: int = 3,
+        parent: QObject = None
+    ):
+        super().__init__(parent)
+        # create the real backend
+        self._backend = HotDiskSequenzerBackend(
+            hd_conn_params,
+            template_folder_path,
+            sensor_insulation,
+            sensor_type,
+            standard_number_of_measurements
         )
 
     def wait_until(self, target_time: datetime.datetime):
-        """
-        Overrides HotDiskController.wait_until to emit a Qt signal before blocking
-        until the given time.
-
-        :param target_time: The datetime to wait for.
-        """
+        # first emit your Qt signal…
         self.latest_program_step_sig.emit(target_time)
-        super().wait_until(target_time=target_time)
+        # …then delegate to the real backend
+        return self._backend.wait_until(target_time)
+
+    def run(self, schedule: list):
+        # just forward to the backend.run()
+        return self._backend.run(schedule)
+
+    def end(self):
+        return self._backend.end()
 
 
 class SignaledHotDiskSequenzerThreader(QObject):
@@ -90,7 +87,7 @@ class SignaledHotDiskSequenzerThreader(QObject):
     latest_program_step = Signal(datetime.datetime)
     finished = Signal()
 
-    def __init__(self, controller: SignaledHotDiskSequenzerBackend, schedule: list, logger: logging.getLogger()):
+    def __init__(self, controller, schedule: list, logger: logging.getLogger()):
         """
         :param controller: Instance of SignaledHotDiskController.
         :param schedule:   List of dicts with heating and measurement steps.
@@ -218,7 +215,7 @@ class ScheduleGeneratorBase(QWidget):
         folder_path = QFileDialog.getExistingDirectory(
             self,
             "Select Template Folder",
-            "",
+            standard_hot_disk_schedule_folder,
             options=options
         )
         if folder_path:
@@ -277,7 +274,7 @@ class ScheduleGeneratorBase(QWidget):
         """
         Add controls to choose sensor insulation and type, with auto-complete.
         """
-        sensor_type_suggestions = ["5465", "asdf"]
+        sensor_type_suggestions = ["5465", "5465-F1", "5465-F2"]
         sensor_insulation_suggestions = ["Mica", "Kapton", "Teflon"]
         insulation_completer = QCompleter(sensor_insulation_suggestions)
         type_completer       = QCompleter(sensor_type_suggestions)
@@ -454,6 +451,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
 
         scheduled_dict_list = schedule.to_dict(orient='records')
         if not scheduled_dict_list:
+
             QMessageBox.warning(self, "Schedule Error",
                                 "Could not generate a valid schedule.")
             return
@@ -469,6 +467,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                                 "Sensor settings or template folder cannot be empty.")
             return
         try:
+
             self.hot_disk_controller = SignaledHotDiskSequenzerBackend(
                         hd_conn_params=self.hd_conn_params,
                         template_folder_path=folder_path,
@@ -477,6 +476,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                     )
 
         except Exception as e:
+            print(e)
             QMessageBox.critical(self, "Controller Error",
                                  f"Failed to initialize HotDiskController: {e}")
             return
@@ -513,7 +513,6 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
         scheduled_program = program_with_meas_times.rename(
             columns={'measurement_power_watt': 'heating_power'}
         )
-        scheduled_program['heating_power'] *= 1e3
         return scheduled_program
 
     def get_temperature_program(self) -> list:
@@ -534,18 +533,18 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                 if None in (temp_item, duration_item, meas_power_item, meas_time_item):
                     continue
 
-                temp       = float(temp_item.text())
+                temp       = int(temp_item.text())
                 duration   = duration_item.text()
 
-
-                meas_power = float(meas_power_item.text()) if meas_power_item.text() else None
-                meas_time = float(meas_time_item.text()) if meas_time_item.text() else None
+                meas_power = transform_dash_string(meas_power_item.text(), lambda x: x*1e3)
+                meas_time = transform_dash_string(meas_time_item.text(), lambda x:x)
 
                 if not self.validate_duration(duration):
                     raise ValueError(
                         f"Invalid duration format in row {row+1} (expected HH:MM:SS)."
                     )
                 temperature_program.append((temp, duration, meas_power, meas_time))
+
             except ValueError as ve:
                 QMessageBox.warning(self, "Input Error", str(ve))
                 return None
@@ -553,6 +552,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                 QMessageBox.warning(self, "Input Error",
                                     f"Error in row {row+1}: {e}")
                 return None
+
         return temperature_program
 
     def get_repetition_parameters(self):
@@ -707,6 +707,39 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
                 self.hot_disk_thread.wait(2000)
             self.status_label.setText("Status: Stopped")
         super().closeEvent(event)
+
+from typing import Callable
+def transform_dash_string(
+    s: str,
+    func: Callable[[float], float],
+    *,
+    as_int_when_possible: bool = True
+) -> str:
+    """
+    Split a hyphen‑separated string of numbers, apply `func` to each number,
+    and recombine back into a hyphen‑separated string.
+
+    :param s: Input string like "3-5-7.5"
+    :param func: A function that takes a float and returns a float
+    :param as_int_when_possible: If True, results that are whole numbers
+                                 will be formatted without a decimal.
+    :returns: e.g. transform_dash_string("3-5", lambda x: x+1) -> "4-6"
+    """
+    parts = [p.strip() for p in s.split('-') if p.strip()]
+    if not parts:
+        return None
+    out_parts = []
+    for p in parts:
+        try:
+            num = float(p)
+        except ValueError:
+            raise ValueError(f"Invalid number in range string: {p!r}")
+        new_num = func(num)
+        if as_int_when_possible and float(new_num).is_integer():
+            out_parts.append(str(int(new_num)))
+        else:
+            out_parts.append(str(new_num))
+    return '-'.join(out_parts)
 
 
 class ProgramPlotWidget(pg.PlotWidget):
