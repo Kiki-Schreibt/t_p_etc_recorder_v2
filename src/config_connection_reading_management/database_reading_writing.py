@@ -380,8 +380,12 @@ class DataRetriever:
                          f"{table.cycle_number} IN ({placeholders}) ORDER BY {table.time}")
                 values = [sample_id] + cycle_numbers
             else:
+                if table_name == TableConfig().CycleDataTable.table_name:
+                    time_col = TableConfig().CycleDataTable.time_start
+                else:
+                    time_col = TableConfig().TPDataTable.time
                 query = (f"SELECT {column_name_str} FROM {table_name} WHERE {sample_id_col} = %s AND "
-                         f"{table.cycle_number} = %s ORDER BY {table.time}")
+                         f"{table.cycle_number} = %s ORDER BY {time_col}")
                 values = [sample_id, float(cycle_numbers)]
             df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
 
