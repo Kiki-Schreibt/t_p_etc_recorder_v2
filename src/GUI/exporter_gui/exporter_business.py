@@ -1,49 +1,62 @@
 import sys
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 
-from src.infrastructure.utils.standard_paths import exporter_ui_file_path
+from src.GUI.recording_gui.recording_business_v2 import StaticPlotWindow
+
+try:
+    import src.infrastructure.core.logger as logging
+except ImportError:
+    import logging
 
 
-class ExporterWindow(QMainWindow):
-    def __init__(self, ui_file_path, parent=None):
-        super().__init__(parent=parent)
-        self.ui = self._load_ui(ui_file_path)
-        self.setCentralWidget(self.ui)
-        self.setMinimumSize(800, 600)
+class ExporterBackend:
 
-    def _load_ui(self, ui_path):
-        """
-        Load the UI file using QUiLoader.
-        """
-        try:
-            from PySide6.QtUiTools import QUiLoader
-            from PySide6.QtCore import QFile
-            loader = QUiLoader()
-            ui_file = QFile(ui_path)
-            if not ui_file.exists():
-                self.logger.error(f"UI file {ui_path} does not exist.")
-                return None
-            if not ui_file.open(QFile.ReadOnly):
-                self.logger.error(f"Unable to open UI file: {ui_path}")
-                return None
-            ui = loader.load(ui_file)
-            ui_file.close()
-            if ui is None:
-                self.logger.error("Failed to load UI file.")
-            return ui
-        except Exception as e:
-            self.logger.exception("Exception occurred while loading UI:")
-            return None
+    def __init__(self, config, meta_data=None):
+        self.config = config
+        self.meta_data = meta_data
+        self.init_static_plots() if self.meta_data else None
+
+
+
+
+
+
+    def init_static_plots(self):
+        self.top_plot = StaticPlotWindow(y_axis='temperature',
+                                         meta_data=self.meta_data,
+                                         db_conn_params=self.config.db_conn_params)
+
+        self.bottom_plot = StaticPlotWindow(y_axis="pressure",
+                                            meta_data=self.meta_data,
+                                            db_conn_params=self.config.db_conn_params,
+                                            passive_window=True)
 
 
 
 def main():
-    app = QApplication(sys.argv)
-    win = ExporterWindow(exporter_ui_file_path)
-    win.show()
-    sys.exit(app.exec())
+    try:
+        from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
+        from src.infrastructure.core.config_reader import config
+        from src.infrastructure.handler.metadata_handler import MetaData
 
+        app = QApplication(sys.argv)
+        widget = QWidget()
+        #layout = QVBoxLayout(widget)
+        widget.resize(800,600)
+        # load metadata
+        #meta_data = MetaData(sample_id='WAE-WA-028',
+        #                     db_conn_params=config.db_conn_params)
 
-if __name__ == '__main__':
-    main()
+        # this is the one that was failing
+        #backend = ExporterBackend(config=config, meta_data=meta_data)
+
+        # now add your plots
+        #layout.addWidget(backend.top_plot)
+        #layout.addWidget(backend.bottom_plot)  # if you actually want the second one
+        widget.show()
+
+        sys.exit(app.exec())
+    except Exception as e:
+        logging.getLogger(__name__).exception("Error in main block of recording_busines_v2.py:")
+

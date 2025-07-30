@@ -708,6 +708,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
             self.status_label.setText("Status: Stopped")
         super().closeEvent(event)
 
+
 from typing import Callable
 def transform_dash_string(
     s: str,
