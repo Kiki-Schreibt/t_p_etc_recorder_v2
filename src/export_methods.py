@@ -22,13 +22,26 @@ class QuickExport:
         self.meta_data = meta_data
 
     def export_all(self, constraints_etc: dict= {}, subfolder_name_str=""):
+        #export all data
         self.export_etc_data(constraints_etc=constraints_etc, subfolder_name_str=subfolder_name_str)
+        #export isotherms
+        self.export_etc_data(constraints_etc=constraints_etc,
+                             subfolder_name_str=subfolder_name_str,
+                             export_filter='isotherms')
+        #export cycle dependent
+        self.export_etc_data(constraints_etc=constraints_etc,
+                             subfolder_name_str=subfolder_name_str,
+                             export_filter='cycles')
+
+
         self.export_capacity_data(subfolder_name_str=subfolder_name_str)
         self.export_t_p_data(subfolder_name_str=subfolder_name_str)
 
-    def export_etc_data(self, constraints_etc: dict = {}, subfolder_name_str=""):
+    def export_etc_data(self, constraints_etc: dict = {}, subfolder_name_str="", export_filter=""):
         self.logger.info(f"Starting ETC data export for {self.meta_data.sample_id}")
-        etc_data, file_edition_etc = self._get_etc_data_full_test(constraints_etc=constraints_etc)
+        etc_data, file_edition_etc = self._get_etc_data_full_test(constraints_etc=constraints_etc, export_filter=export_filter)
+        if etc_data.empty:
+            return
         self._write_data(
                          data=etc_data,
                          file_addition=file_edition_etc,
@@ -42,7 +55,7 @@ class QuickExport:
                         file_addition=file_edition_cap,
                         subfolder_name=subfolder_name_str)
 
-    def _get_etc_data_full_test(self, constraints_etc: dict = {}):
+    def _get_etc_data_full_test(self, constraints_etc: dict={}, export_filter=""):
         cols_to_export = (self.etc_table.time,
                           self.etc_table.pressure,
                           self.etc_table.temperature_sample,
@@ -57,6 +70,7 @@ class QuickExport:
                           self.etc_table.measurement_time,
                           self.etc_table.resistance,
                           self.etc_table.test_info)
+        export_filter_string = ""
         if not constraints_etc:
             constraints_etc = {
                                     "min_TotalCharTime": 0.3,
@@ -65,12 +79,18 @@ class QuickExport:
                                     "max_TotalTempIncr": 5.2
                                 }
 
+        export_filter_struct, export_filter_string = self._get_constraints_from_export_filter(export_filter)
+        if export_filter_struct:
+            constraints_etc.update(export_filter_struct)
+
         data_to_export = self.db_retriever.fetch_data_by_sample_id_2(table_name=self.etc_table.table_name,
                                                                      column_names=cols_to_export,
                                                                      constraints=constraints_etc,
                                                                      sample_id=self.meta_data.sample_id
                                                                     )
-
+        if data_to_export.empty:
+            print(f"no {export_filter} data found")
+            return pd.DataFrame, ""
         data_to_export = data_to_export.dropna(subset=self.etc_table.get_clean('time'))
         #calculate relative times
         time_start = self.meta_data.start_time
@@ -84,7 +104,7 @@ class QuickExport:
         data_to_export['hours'] = time_intervall.cumsum()
         data_to_export['hours'] = data_to_export['hours'] + time_shift
 
-        return data_to_export, "_Conductivity_Data"
+        return data_to_export, "_Conductivity_Data"+export_filter_string
 
     def _get_capacity_data_full_test(self):
         cols_to_export = (self.cycle_table.cycle_number,
@@ -218,10 +238,24 @@ class QuickExport:
         else:
             return pd.DataFrame(), ""
 
+    def _get_constraints_from_export_filter(self, filter_string):
+        if filter_string == 'isotherms':
+            export_filter_struct = {'where_'+self.etc_table.is_isotherm_flag: '1',
+                                    'where_'+self.etc_table.cycle_number_flag: '0'}
+            export_filter_string = '_isotherms'
+        if filter_string == 'cycles':
+            export_filter_struct = {'where_'+self.etc_table.is_isotherm_flag: '0',
+                                    'where_'+self.etc_table.cycle_number_flag: '1'}
+            export_filter_string = '_cycles'
+        else:
+            export_filter_struct = {}
+            export_filter_string = '_all'
+
+        return export_filter_struct, export_filter_string
 
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
-    sample_id = 'WAE-WA-030'
+    sample_id = 'WAE-WA-028'
 
     from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import config
