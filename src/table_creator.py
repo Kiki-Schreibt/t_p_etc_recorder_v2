@@ -139,6 +139,7 @@ class TableCreator:
                             'time': 'timestamp with time zone',
                             '_default': 'TEXT',
                             'eq_pressure_real': 'real',
+                            'is_isotherm_flag': 'boolean',
                             'test_info': 'text'# Default data type
                             }
 
@@ -205,6 +206,7 @@ class TableCreator:
                                'sample_id': 'text',
                                'temperature_sample': 'real',
                                '_default': 'TEXT',
+                               'is_isotherm_flag': 'boolean',
                                'test_info': 'text'# Default data type
                              }
 

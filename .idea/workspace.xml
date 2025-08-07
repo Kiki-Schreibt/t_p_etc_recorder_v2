@@ -7,6 +7,7 @@
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/export_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/export_methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -273,8 +274,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.export_methods" />
-        <item itemvalue="Python.recording_main_v3" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.recording_main_v3" />
         <item itemvalue="Python.modbus_handler" />
         <item itemvalue="Python.code_length" />
       </list>

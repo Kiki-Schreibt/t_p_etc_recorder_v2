@@ -6,7 +6,7 @@ local_tz = ZoneInfo("Europe/Berlin")
 time_format_str = "yyyy-MM-dd HH:mm:ss"
 
 STANDARD_CONSTRAINTS = {
-    "min_TotalCharTime": 0.3,
+    "min_TotalCharTime": 0.28,
     "max_TotalCharTime": 1.1,
     "min_TotalTempIncr": 1.8,
     "max_TotalTempIncr": 5.2

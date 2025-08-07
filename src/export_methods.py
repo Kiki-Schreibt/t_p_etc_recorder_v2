@@ -89,14 +89,14 @@ class QuickExport:
                                                                      sample_id=self.meta_data.sample_id
                                                                     )
         if data_to_export.empty:
-            print(f"no {export_filter} data found")
+            self.logger.error(f"No {export_filter} data found")
             return pd.DataFrame, ""
         data_to_export = data_to_export.dropna(subset=self.etc_table.get_clean('time'))
         #calculate relative times
         time_start = self.meta_data.start_time
         time_shift = (data_to_export[self.etc_table.get_clean('time')].iloc[0] - time_start)
         time_shift = time_shift.total_seconds()/3600
-        print(f"Difference between test start and first etc measurement: {time_shift} s")
+        self.logger.info(f"Difference between test start and first etc measurement: {time_shift} s")
         time_intervall = data_to_export[self.etc_table.get_clean('time')].diff().dt.total_seconds() / 3600
         time_intervall[0] = 0
 
@@ -243,7 +243,7 @@ class QuickExport:
             export_filter_struct = {'where_'+self.etc_table.is_isotherm_flag: '1',
                                     'where_'+self.etc_table.cycle_number_flag: '0'}
             export_filter_string = '_isotherms'
-        if filter_string == 'cycles':
+        elif filter_string == 'cycles':
             export_filter_struct = {'where_'+self.etc_table.is_isotherm_flag: '0',
                                     'where_'+self.etc_table.cycle_number_flag: '1'}
             export_filter_string = '_cycles'
@@ -255,7 +255,7 @@ class QuickExport:
 
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
-    sample_id = 'WAE-WA-028'
+    sample_id = 'WAE-WA-040'
 
     from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import config
