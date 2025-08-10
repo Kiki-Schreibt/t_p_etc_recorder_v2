@@ -37,7 +37,7 @@ class QuickExport:
         self.export_capacity_data(subfolder_name_str=subfolder_name_str)
         self.export_t_p_data(subfolder_name_str=subfolder_name_str)
 
-    def export_etc_data(self, constraints_etc: dict = {}, subfolder_name_str="", export_filter=""):
+    def export_etc_data(self, constraints_etc: dict={}, subfolder_name_str="", export_filter=""):
         self.logger.info(f"Starting ETC data export for {self.meta_data.sample_id}")
         etc_data, file_edition_etc = self._get_etc_data_full_test(constraints_etc=constraints_etc, export_filter=export_filter)
         if etc_data.empty:

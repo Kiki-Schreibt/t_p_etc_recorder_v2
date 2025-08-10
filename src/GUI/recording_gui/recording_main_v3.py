@@ -47,6 +47,13 @@ class MetaDataManager:
         update_ui(): Set UI fields based on the current MetaData instance.
     """
     def __init__(self, meta_data: MetaData):
+        """Initialize the manager with a :class:`MetaData` instance.
+
+        Parameters
+        ----------
+        meta_data:
+            The metadata object that will be kept in sync with the UI.
+        """
         self.meta_data = meta_data
 
     def update_from_ui(self, ui, update_meta_button_pushed=True):
@@ -281,6 +288,15 @@ class PlotManager:
             return None
 
     def init_cycle_dependent_plot(self, time_range=None, constraints=None):
+        """Initialize a plot that displays values versus cycle number.
+
+        Parameters
+        ----------
+        time_range:
+            Optional ``(start, end)`` tuple limiting the loaded data.
+        constraints:
+            Optional dictionary with additional filtering constraints.
+        """
         try:
             if self.right_plot:
                 self.right_plot.setParent(None)
@@ -306,6 +322,7 @@ class PlotManager:
             self.logger.exception("Error ensuring layout in PlotManager:")
 
     def connect_emits_top_to_bottom_plot(self):
+        """Link signals from the top plot's reader to the bottom plot handlers."""
         if not self.top_plot.reader.p_data_sig_connected:
             self.top_plot.reader.p_data_sig.connect(self.bottom_plot.on_tp_data)
             self.top_plot.reader.p_data_sig_connected = True
@@ -317,6 +334,7 @@ class PlotManager:
             self.top_plot.reader.cycle_data_sig_connected = True
 
     def disconnect_emits_top_to_bottom_plot(self):
+        """Disconnect signals between the top and bottom plot readers."""
         if not self.top_plot or not self.bottom_plot:
             return
         if self.top_plot.reader.p_data_sig_connected:
@@ -349,7 +367,19 @@ class MainController:
                  plot_manager: PlotManager,
                  logger,
                  config):
+        """Instantiate the controller coordinating recording and plotting.
 
+        Parameters
+        ----------
+        meta_data:
+            Metadata object containing experiment information.
+        plot_manager:
+            Manager responsible for creating and arranging plots.
+        logger:
+            Logger used for reporting errors and warnings.
+        config:
+            Application configuration object.
+        """
         self.newETCDataWritten_connected = False
         self.meta_data = meta_data
         self.config = config
@@ -564,13 +594,16 @@ class MainController:
             self.logger.exception("Error updating additional test info in MainController:")
 
     def start_etc_measurement(self):
+        """Trigger an ETC measurement via the HotDisk controller."""
         hd_controller = HotDiskController(hd_conn_params=self.config.hd_conn_params)
         hd_controller.start_active_schedule()
 
     def is_tp_recording_running(self):
+        """Return ``True`` if the T-p recording thread is active."""
         return self.recorder.is_tp_thread_running()
 
     def is_log_file_tracker_running(self):
+        """Return ``True`` if the log file tracking thread is active."""
         return self.recorder.is_log_thread_running()
 
 

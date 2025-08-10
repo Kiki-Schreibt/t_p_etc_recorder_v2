@@ -1,4 +1,11 @@
 #metadata_handler.py
+"""Utilities for managing experimental metadata.
+
+This module defines :class:`MetaData`, a helper that synchronises
+information about a measurement with the metadata stored in the
+database.  It provides convenience methods to read, update and create
+metadata entries for a given sample.
+"""
 import time
 from datetime import timedelta
 from zoneinfo import ZoneInfo
@@ -75,6 +82,17 @@ class MetaData:
         self.read()
 
     def reading_thread(self, column_names=None, mode="read"):
+        """Load metadata for ``sample_id`` and populate attributes.
+
+        Parameters
+        ----------
+        column_names : sequence or None
+            Specific column names to fetch.  All available columns are
+            requested when ``None``.
+        mode : {"read", "create"}
+            When set to ``"create"`` a new metadata row will be created if
+            ``sample_id`` is missing.
+        """
         if self.sample_id:
             if not column_names:
                 column_names = TableConfig().get_table_column_names(table_name=self.table_name)
@@ -104,6 +122,13 @@ class MetaData:
             self.sample_id = None
 
     def read(self, column_names=None):
+        """Convenience wrapper around :meth:`reading_thread`.
+
+        Parameters
+        ----------
+        column_names : sequence or None
+            Names of columns to read from the metadata table.
+        """
         #time_start_reading = time.time()
         if self.sample_id:
             self.reading_thread(column_names)
@@ -115,6 +140,16 @@ class MetaData:
         #    print(f"Reading meta data took longer than 1 s: {time_passed} s")
 
     def write(self, quiet=False):
+        """Persist current metadata values to the database.
+
+        If no row exists for ``sample_id`` a new one is created.  Only
+        attributes with non ``None`` values are written.
+
+        Parameters
+        ----------
+        quiet : bool, optional
+            Suppress log messages when ``True``.
+        """
         if not self._sample_id_exists():
             if not self.sample_id:
                 return
@@ -147,6 +182,15 @@ class MetaData:
                     self.logger.info(f"Meta data updated for sample_id: {self.sample_id}")
 
     def _assign_column_names_and_values(self, column_names, df):
+        """Set object attributes using values read from the database.
+
+        Parameters
+        ----------
+        column_names : sequence
+            Names of the columns that were fetched.
+        df : pandas.DataFrame
+            DataFrame containing the corresponding values.
+        """
         updated_using_tp_data = False
         for col_name in column_names:
             if "sample_id" in col_name.lower():
@@ -224,7 +268,7 @@ class MetaData:
             self.write(quiet=True)
 
     def _create_new_line_meta_data(self):
-        # Create a new row with the given sample_id
+        """Insert a new metadata row for the current ``sample_id``."""
         table_name = TableConfig().MetaDataTable.table_name
         column_name = TableConfig().MetaDataTable.sample_id
         value = (self.sample_id,)
@@ -236,7 +280,7 @@ class MetaData:
         self.logger.info(f"Sample ID does not exist. New entry was created for: {self.sample_id} ")
 
     def _sample_id_exists(self):
-        # Check if the sample_id exists in the table
+        """Return ``True`` if a row exists for the current ``sample_id``."""
         table_name = self.table_name
         column_name = TableConfig().MetaDataTable.sample_id
         query = f"SELECT 1 FROM {table_name} WHERE {column_name} = '{self.sample_id}'"
@@ -268,6 +312,7 @@ class MetaData:
         print("Last de_hyd state:", self.last_de_hyd_state) if self.last_de_hyd_state else print("No defined de_hyd state")
 
     def _get_enthalpy_entropy_wt_theoretical(self):
+        """Retrieve thermodynamic properties for the sample material."""
         from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
         if self.enthalpy is not None and self.entropy is not None and self.theoretical_uptake is not None:
             return self.enthalpy, self.entropy, self.theoretical_uptake
@@ -289,6 +334,7 @@ class MetaData:
             return None, None, None
 
     def remove_sample_id(self):
+        """Remove the current ``sample_id`` from the metadata table."""
         if self._sample_id_exists():
             query = f"DELETE from {meta_table.table_name} WHERE {meta_table.sample_id} = %s"
             values = (self.sample_id,)
@@ -297,7 +343,7 @@ class MetaData:
                 self.logger.info(f"{self.sample_id} removed from database")
 
     def _make_tz_aware(self, value):
-
+        """Return timezone-aware version of ``value`` if possible."""
         if not pd.isna(value):  # Make sure it's not NaN
             if not isinstance(value, pd.Timestamp):
                 # Convert to Timestamp if not already
@@ -312,6 +358,7 @@ class MetaData:
         return value
 
     def fetch_last_state_and_cycle(self):
+        """Fetch the last recorded de/hydration state and cycle number."""
         from src.infrastructure.core.table_config import TableConfig
         table = TableConfig().TPDataTable
         table_name = table.table_name
