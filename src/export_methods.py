@@ -122,7 +122,7 @@ class QuickExport:
 
         # Merge with the original dataframe to identify missing values
         merged_df = pd.merge(expected_df, data_to_export, on=self.cycle_table.cycle_number, how='left')
-
+        merged_df.loc[merged_df[self.cycle_table.cycle_number].mod(1).eq(0), self.cycle_table.h2_uptake] *= -1
         # Fill missing values with NaN
         merged_df.fillna(np.nan, inplace=True)
 
@@ -255,14 +255,14 @@ class QuickExport:
 
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
-    sample_id = 'WAE-WA-040'
+    sample_ids = ['WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040']
 
     from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import config
-
-    meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
-    exporter = QuickExport(meta_data=meta_data, db_conn_params=config.db_conn_params)
-    exporter.export_all(constraints_etc={})
+    for sample_id in sample_ids:
+        meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
+        exporter = QuickExport(meta_data=meta_data, db_conn_params=config.db_conn_params)
+        exporter.export_all(constraints_etc={})
     #5344,289444522186 origin
     #5345,30476 python
     #31-03-2022 15:25:05 origin

@@ -157,14 +157,23 @@ class UptakeCorrectionUi(QMainWindow):
         self.update_button.setFixedWidth(150)
         btn_layout.addWidget(self.update_button)
 
-        self.update_isotherm_flag_button = QPushButton("Update Isotherm Flag")
+        self.update_isotherm_flag_button = QPushButton("Update Flags")
         self.update_isotherm_flag_button.setFixedWidth(160)
         btn_layout.addWidget(self.update_isotherm_flag_button)
 
+        checkbox_layout = QVBoxLayout()
         self.isotherm_checkbox = QCheckBox("Set Isotherm Flag")
         self.isotherm_checkbox.setChecked(True)           # default state
-        btn_layout.addWidget(self.isotherm_checkbox)
+        checkbox_layout.addWidget(self.isotherm_checkbox)
 
+        self.h2_flag_checkbox = QCheckBox("Set h2 uptake flag")
+        self.h2_flag_checkbox.setChecked(False)           # default state
+        checkbox_layout.addWidget(self.h2_flag_checkbox)
+
+        self.cycling_checkbox = QCheckBox("Set cycling flag")
+        self.cycling_checkbox.setChecked(False)           # default state
+        checkbox_layout.addWidget(self.cycling_checkbox)
+        btn_layout.addLayout(checkbox_layout)
         btn_layout.addStretch()
         main_layout.addLayout(btn_layout)
 
@@ -238,7 +247,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         self.prev_cycle_button.clicked.connect(self._on_prev_cycle)
         self.next_cycle_button.clicked.connect(self._on_next_cycle)
         self.show_info_button.clicked.connect(self._on_show_cycle_info)
-        self.update_isotherm_flag_button.clicked.connect(self._on_update_isotherm_flag)
+        self.update_isotherm_flag_button.clicked.connect(self._on_update_flags)
 
         self.df_uncounted_cycles = pd.DataFrame()
         self._uncounted_idx = 0
@@ -438,7 +447,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
             )
         self._uncounted_idx -= 1
 
-    def _on_update_isotherm_flag(self):
+    def _on_update_flags(self):
         """
         Start a background thread to run backend.update_isotherm_flag()
         on both TP and ETC tables.
@@ -455,12 +464,14 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
 
         self.backend.time_range_to_update = list(self.current_time_range)
         self.backend.is_isotherm = self.isotherm_checkbox.isChecked()
-        self.info_text_edit.append("Updating isotherm flags…")
+        self.backend.is_cycle = self.cycling_checkbox.isChecked()
+        self.backend.h2_uptake_flag = self.h2_flag_checkbox.isChecked()
+        self.info_text_edit.append("Updating flags…")
         self.update_isotherm_flag_button.setEnabled(False)
 
         # Create a QThread and worker, just like in _on_update_data:
         self._iso_thread = QThread(self)
-        self._iso_worker = UpdateValueWorker(self.backend, "isotherm_flag")
+        self._iso_worker = UpdateValueWorker(self.backend)
         self._iso_worker.moveToThread(self._iso_thread)
 
         self._iso_thread.started.connect(self._iso_worker.run)
@@ -506,6 +517,8 @@ class UptakeCorrectionBackend(QObject):
     cycle_updated_sig = Signal(float)
     time_range_to_update = None
     is_isotherm = None
+    is_cycle = None
+    h2_uptake_flag = None
 
     def __init__(self, meta_data, time_range_to_load, config):
         """
@@ -683,7 +696,7 @@ class UptakeCorrectionBackend(QObject):
         self.df_uncounted_cycles_sig.emit(df.copy())
         self.uncounted_cycles_emitted = True
 
-    def update_value(self, column_to_update):
+    def update_value(self):
         """
         Update the TP and ETC tables’ is_isotherm_flag = TRUE
         for all rows whose timestamp lies in self.time_range_to_update.
@@ -692,9 +705,12 @@ class UptakeCorrectionBackend(QObject):
         update_df_etc = pd.Series()
         if not self.time_range_to_update:
             raise RuntimeError("No time range selected for isotherm‐flag update.")
-        if column_to_update == "isotherm_flag":
-            update_df_tp = pd.Series({self.tp_table.is_isotherm_flag: self.is_isotherm})
-            update_df_etc = pd.Series({self.etc_table.is_isotherm_flag: self.is_isotherm})
+
+        update_df_tp = pd.Series({self.tp_table.is_isotherm_flag: self.is_isotherm,
+                                  self.tp_table.h2_uptake_flag: self.h2_uptake_flag,
+                                  self.tp_table.cycle_number_flag: self.is_cycle})
+        update_df_etc = pd.Series({self.etc_table.is_isotherm_flag: self.is_isotherm,
+                                   self.etc_table.cycle_number_flag: self.is_cycle})
 
         from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
         dbm = DataBaseManipulator(db_conn_params=self.db_conn_params)
@@ -714,6 +730,8 @@ class UptakeCorrectionBackend(QObject):
             update_between_vals=self.time_range_to_update)
 
         self.is_isotherm = None
+        self.is_cycle = None
+        self.h2_uptake_flag = None
         self.time_range_to_update = None
 
     def stop(self):
@@ -771,18 +789,24 @@ class UpdateValueWorker(QObject):
     error = Signal(str)
     progress = Signal(str)
 
-    def __init__(self, backend, column_to_update):
+    def __init__(self, backend):
         super().__init__()
         self.backend = backend
-        self.column_to_update = column_to_update
+
 
 
     @Slot()
     def run(self):
         try:
-            self.progress.emit(f"Starting {self.column_to_update} update…")
-            self.backend.update_value(column_to_update=self.column_to_update)
-            self.progress.emit(f"Done updating {self.column_to_update} ")
+            self.progress.emit(f"Setting {self.backend.tp_table.cycle_number_flag} = {bool(self.backend.is_cycle)} "
+                               f"\n"
+                               f"{self.backend.tp_table.h2_uptake_flag} = {bool(self.backend.h2_uptake_flag)} "
+                               f"\n"
+                               f"{self.backend.tp_table.is_isotherm_flag} = {bool(self.backend.is_isotherm)} "
+                               f"\n"
+                               f"...")
+            self.backend.update_value()
+            self.progress.emit(f"Done updating ")
             self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
