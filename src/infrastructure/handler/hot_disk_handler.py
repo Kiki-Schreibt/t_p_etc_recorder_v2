@@ -321,10 +321,10 @@ if __name__ == '__main__':
 
 
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-      future = executor.submit(hd_controller.run)
-      result = future.result()
-      print(result)
+    #with concurrent.futures.ThreadPoolExecutor() as executor:
+    #  future = executor.submit(hd_controller.run)
+    #  result = future.result()
+    #  print(result)
 
 
     # hd_controller.export_results(folder_path=folder_path,

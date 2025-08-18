@@ -430,7 +430,7 @@ if __name__ == '__main__':
     import sys
     from src.infrastructure.core.config_reader import config
     from src.infrastructure.handler.metadata_handler import MetaData
-    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-030")
+    meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
     app = QApplication(sys.argv)
     win = PlotIndividualizerMainWindow(config=config)
     win.show()

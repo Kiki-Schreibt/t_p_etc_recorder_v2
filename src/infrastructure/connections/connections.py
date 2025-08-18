@@ -349,10 +349,15 @@ def test_hot_disk_connection(config):
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import config
     # Load the configuration
-    test_hot_disk_connection()
+    i=0
+    while i<=200:
+        test_hot_disk_connection(config)
+        i+=1
+        time.sleep(1)
+
 
 
     file = r"C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts\temp_for_hotdisk\waittenminutes.hseq"
 
-    test_functionality(config)
-    #test_hot_disk_connection()
+    #test_functionality(config)
+    test_hot_disk_connection(config=config)

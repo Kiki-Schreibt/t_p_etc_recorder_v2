@@ -72,12 +72,8 @@ class QuickExport:
                           self.etc_table.test_info)
         export_filter_string = ""
         if not constraints_etc:
-            constraints_etc = {
-                                    "min_TotalCharTime": 0.3,
-                                    "max_TotalCharTime": 1.1,
-                                    "min_TotalTempIncr": 1.7,
-                                    "max_TotalTempIncr": 5.2
-                                }
+            from src.infrastructure.core.global_vars import STANDARD_CONSTRAINTS
+            constraints_etc = STANDARD_CONSTRAINTS
 
         export_filter_struct, export_filter_string = self._get_constraints_from_export_filter(export_filter)
         if export_filter_struct:
@@ -88,6 +84,7 @@ class QuickExport:
                                                                      constraints=constraints_etc,
                                                                      sample_id=self.meta_data.sample_id
                                                                     )
+
         if data_to_export.empty:
             self.logger.error(f"No {export_filter} data found")
             return pd.DataFrame, ""
@@ -103,6 +100,7 @@ class QuickExport:
         # Calculate the cumulative sum of the intervals
         data_to_export['hours'] = time_intervall.cumsum()
         data_to_export['hours'] = data_to_export['hours'] + time_shift
+        data_to_export[self.etc_table.test_info] = data_to_export.pop(self.etc_table.test_info)
 
         return data_to_export, "_Conductivity_Data"+export_filter_string
 
@@ -253,9 +251,11 @@ class QuickExport:
 
         return export_filter_struct, export_filter_string
 
+
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
     sample_ids = ['WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040']
+    sample_ids = ['WAE-WA-028']
 
     from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import config

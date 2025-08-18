@@ -295,7 +295,7 @@ class ExcelDataProcessor:
             df_etc[self.etc_table.pressure] = None
             df_etc[self.etc_table.temperature_sample] = None
             df_etc[self.etc_table.cycle_number] = None
-            df_etc[self.etc_table.cycle_number_flag] = None
+            df_etc[self.etc_table.cycle_number_flag] = False
             df_etc[self.etc_table.is_isotherm_flag] = False
             df_etc[self.etc_table.test_info] = None
         pd.set_option('future.no_silent_downcasting', True)
@@ -397,10 +397,23 @@ def write_ETC_folder(dir_etc_folder: str, sample_id: str, logger_inst, config) -
     logger_inst.info("Import took %.2f hours", (time.time() - start_time) / 3600)
 
 
+def _import_nickel_rene():
+    from src.infrastructure.core.config_reader import config
+    logger = logging.getLogger(__name__)
+    sample_id = 'ALR-AB-017'
+    dir_etc = r"C:\Daten\Rene\ALR-AB-017\All"
+    write_ETC_folder(dir_etc_folder=dir_etc,
+                     logger_inst=logger,
+                     config=config,
+                     sample_id=sample_id)
+
+
 def main():
     sample_id = 'WAE-WA-060'
     dir_etc = r"C:\Daten\Kiki\WAE-WA-060-Mg5wtFe\WAE-WA-060-All\WAE-WA-060-000-AngleTest\WAE-WA-060-000-01-0dlong_0dtrans\WAE-WA-060-000-01.xlsx"
     test_excel_data_processor(etc_dir=dir_etc, sample_id=sample_id)
 
 if __name__ == "__main__":
+
+
     main()

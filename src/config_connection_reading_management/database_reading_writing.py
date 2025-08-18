@@ -390,7 +390,7 @@ class DataRetriever:
             df = self.execute_fetching(query=query, column_names=column_names, table_name=table_name, values=values)
 
         elif len(cycle_numbers) == 2:
-             #todo: start and end of cycle will not be determined correctly like this! Maybe four reads and then sort out duplicates...
+
 
             asc_desc_limit = avg_cycle_dur*3/global_vars.sleep_interval
 
@@ -724,9 +724,10 @@ def test_data_retriever() -> None:
 if __name__ == '__main__':
     from src.infrastructure.core.config_reader import config
     from src.infrastructure.handler.metadata_handler import MetaData
+    import time
     sample_id = 'WAE-WA-060'
     meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id=sample_id)
-
+    time_start = time.time()
     db_retriever = DataRetriever(db_conn_params=config.db_conn_params)
 
     df = db_retriever.fetch_data_by_cycle(cycle_numbers=[0, 0.5],
@@ -738,4 +739,4 @@ if __name__ == '__main__':
     #print(meta_data.average_cycle_duration)
     #print(meta_data.average_cycle_duration.total_seconds())
     #print(21600*4)
-
+    print(f"passed time {int(time.time()-time_start)} s")
