@@ -2,7 +2,7 @@
 import pandas as pd
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QTextEdit, QPushButton, QMessageBox, QApplication, QCheckBox
+    QTextEdit, QPushButton, QMessageBox, QApplication, QCheckBox, QLineEdit
 )
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Signal, QObject, Slot, QThread
@@ -175,7 +175,25 @@ class UptakeCorrectionUi(QMainWindow):
         checkbox_layout.addWidget(self.cycling_checkbox)
         btn_layout.addLayout(checkbox_layout)
         btn_layout.addStretch()
+
+        reservoir_update_layout = QHBoxLayout()
+        self.update_res_button = QPushButton("Update Reservoir \n Volume [l]")
+        self.update_res_button.setFixedWidth(150)
+
+        self.update_res_line_edit = QLineEdit()
+        self.update_res_line_edit.setFixedHeight(30)
+        self.update_res_line_edit.setFixedWidth(40)
+
+        reservoir_update_layout.addWidget(self.update_res_button)
+        reservoir_update_layout.addWidget(self.update_res_line_edit)
+        reservoir_update_layout.addStretch()
+
+        btn_layout.addLayout(reservoir_update_layout)
+        btn_layout.addStretch()
+
         main_layout.addLayout(btn_layout)
+
+
 
     def _setup_linear_region(self):
         """
@@ -248,6 +266,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         self.next_cycle_button.clicked.connect(self._on_next_cycle)
         self.show_info_button.clicked.connect(self._on_show_cycle_info)
         self.update_isotherm_flag_button.clicked.connect(self._on_update_flags)
+        self.update_res_button.clicked.connect(self._on_update_reservoir)
 
         self.df_uncounted_cycles = pd.DataFrame()
         self._uncounted_idx = 0
@@ -273,7 +292,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
                 f"{self.current_time_range[0]:%Y-%m-%d %H:%M:%S}"
                 f" → {self.current_time_range[1]:%Y-%m-%d %H:%M:%S}"
             )
-            result = f"Calculated uptake: {self.backend.h2_uptake:.4f} wt-%"
+            result = f"Calculated uptake: {self.backend.h2_uptake:.4f} wt-%. Used V = {self.backend.reservoir_volume} l"
             self.info_text_edit.append(result)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Calculation failed: {e}")
@@ -313,7 +332,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         """Called when the background update task completes successfully."""
         self.info_text_edit.append("Update complete.")
         self.update_button.setEnabled(True)
-
+ 
     def _on_update_error(self, errmsg):
         """Called if the background update task raises an error."""
         QMessageBox.critical(self, "Update Error", errmsg)
@@ -422,11 +441,13 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         current_cycle = last[self.backend.tp_table.cycle_number]
         current_de_hyd_state = last[self.backend.tp_table.de_hyd_state]
         current_uptake = last[self.backend.tp_table.h2_uptake]
+        reservoir_volume_cycle_start = self.backend.reservoir_volume
+        reservoir_volume_cycle_end = last[self.backend.tp_table.reservoir_volume]
 
         if current_uptake is not None:
-            uptake_str = f"{current_uptake:.2f} wt-%"
+            uptake_str = f"{current_uptake:.2f}"
         else:
-            uptake_str = "N/A"
+            uptake_str = f"N/A"
 
         self.info_text_edit.append(
             f"Info about loaded data:\n"
@@ -434,7 +455,9 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
             f"{self.current_time_range[1]:%Y-%m-%d %H:%M:%S}\n"
             f"Cycle Number: {current_cycle}, "
             f"State: {current_de_hyd_state}, "
-            f"H2 Uptake = {uptake_str} wt-%"
+            f"H2 Uptake = {uptake_str} wt-%, \n"
+            f"Reservoir Volume Cycle Start = {reservoir_volume_cycle_start:.3f} l, \n"
+            f"Reservoir Volume Cycle End = {reservoir_volume_cycle_end:.3f} l "
         )
 
     def _delete_cycle_from_uncounted_df(self, cycle_number):
@@ -496,6 +519,45 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         QMessageBox.critical(self, "Isotherm Update Error", errmsg)
         self.update_isotherm_flag_button.setEnabled(True)
 
+    def _on_update_reservoir(self):
+        if not self.backend:
+            # If no backend yet, initialize it (using current_time_range or None)
+            self.backend = UptakeCorrectionBackend(
+                self.meta_data,
+                self.current_time_range,
+                self.config
+            )
+        self.backend.time_range_to_update = list(self.current_time_range)
+        self.backend.reservoir_volume = float(self.update_res_line_edit.text())
+        self.info_text_edit.append("Updating reservoir volume…")
+        self.update_res_button.setEnabled(False)
+
+        # Create a QThread and worker, just like in _on_update_data:
+        self._res_thread = QThread(self)
+        self._res_worker = UpdateResWorker(self.backend)
+        self._res_worker.moveToThread(self._res_thread)
+
+        self._res_thread.started.connect(self._res_worker.run)
+        self._res_worker.finished.connect(self._on_res_finished)
+        self._res_worker.error.connect(self._on_res_error)
+        self._res_worker.progress.connect(self.info_text_edit.append)
+
+        # Clean up when done:
+        self._res_worker.finished.connect(self._res_thread.quit)
+        self._res_worker.finished.connect(self._res_worker.deleteLater)
+        self._res_thread.finished.connect(self._res_thread.deleteLater)
+        self._res_thread.start()
+
+    def _on_res_finished(self):
+        """Called when isotherm‐flag update completes successfully."""
+        self.info_text_edit.append("Reservoir volume update complete.")
+        self.update_res_button.setEnabled(True)
+
+    def _on_res_error(self, errmsg):
+        """Called if isotherm‐flag update raises an error."""
+        QMessageBox.critical(self, "Reservoir Update Error", errmsg)
+        self.update_res_button.setEnabled(True)
+
     def closeEvent(self, event):
         """
         Ensure backend cleanup on window close.
@@ -519,6 +581,7 @@ class UptakeCorrectionBackend(QObject):
     is_isotherm = None
     is_cycle = None
     h2_uptake_flag = None
+    reservoir_volume = None
 
     def __init__(self, meta_data, time_range_to_load, config):
         """
@@ -564,8 +627,7 @@ class UptakeCorrectionBackend(QObject):
                 table_name=self.tp_table.table_name
             )
             if df[self.tp_table.reservoir_volume].iloc[0] != df[self.tp_table.reservoir_volume].iloc[-1]:
-                self.logger.error("Detected change in reservoir volume during hydrogenation. Please fix")
-                return
+                self.logger.warning(f"Reservoir volume changed in range — using first value: V = {df[self.tp_table.reservoir_volume].iloc[0]} l")
 
             self.reservoir_volume = df[self.tp_table.reservoir_volume].iloc[0]
             self.row_min, self.row_max = self._filter_min_max_vals(df)
@@ -734,6 +796,31 @@ class UptakeCorrectionBackend(QObject):
         self.h2_uptake_flag = None
         self.time_range_to_update = None
 
+    def update_res_volume(self):
+        """
+        Update the TP and ETC tables’ is_isotherm_flag = TRUE
+        for all rows whose timestamp lies in self.time_range_to_update.
+        """
+        update_df_tp = pd.Series()
+        update_df_etc = pd.Series()
+        if not self.time_range_to_update:
+            raise RuntimeError("No time range selected for isotherm‐flag update.")
+
+        update_df_tp = pd.Series({self.tp_table.reservoir_volume: self.reservoir_volume})
+
+
+        from src.config_connection_reading_management.database_reading_writing import DataBaseManipulator
+        dbm = DataBaseManipulator(db_conn_params=self.db_conn_params)
+
+        dbm.update_data(
+            sample_id=self.meta_data.sample_id,
+            table=self.tp_table,
+            update_df=update_df_tp,
+            col_to_match=self.tp_table.time,
+            update_between_vals=self.time_range_to_update)
+
+        self.reservoir_volume = None
+
     def stop(self):
         """
         Cleanup any resources (e.g. data retriever) when the UI closes.
@@ -776,6 +863,37 @@ class UpdateWorker(QObject):
             self.error.emit(str(e))
 
 
+class UpdateResWorker(QObject):
+    """
+    Worker QObject to run backend.update_res_volume() off the main thread.
+
+    Signals:
+        finished (): emitted when update_res_volume completes.
+        error (str): emitted with an error message if update_res_volume raises.
+        progress (str): emitted with status updates.
+    """
+    finished = Signal()
+    error = Signal(str)
+    progress = Signal(str)
+
+    def __init__(self, backend):
+        """
+        Args:
+            backend (UptakeCorrectionBackend): The backend instance to call.
+        """
+        super().__init__()
+        self.backend = backend
+
+    def run(self):
+        try:
+            self.progress.emit("Starting update reservoir volume")
+            self.backend.update_res_volume()
+            self.progress.emit("Done.")
+            self.finished.emit()
+        except Exception as e:
+            self.error.emit(str(e))
+
+
 class UpdateValueWorker(QObject):
     """
     Worker to run backend.update_isotherm_flag() off the main thread.
@@ -792,8 +910,6 @@ class UpdateValueWorker(QObject):
     def __init__(self, backend):
         super().__init__()
         self.backend = backend
-
-
 
     @Slot()
     def run(self):

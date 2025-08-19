@@ -791,8 +791,10 @@ class MainWindow(QMainWindow):
             if is_on:
                 self._set_flags()
                 self.controller.start_t_p_recording()
+                self.ui.start_stop_static_plot_button.setEnabled(False)
             else:
                 self.controller.stop_t_p_recording()
+                self.ui.start_stop_static_plot_button.setEnabled(True)
 
             self._connect_set_state_signals()
         except Exception as e:
