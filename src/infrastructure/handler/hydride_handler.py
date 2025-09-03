@@ -418,7 +418,7 @@ if __name__ == "__main__":
     # test_metal_hydride_database_and_periodic_table()
 
     # Example usage:
-    hydride_str = "Mg2FeH6"
+    hydride_str = "Mg2NiH4"
     mh_database = MetalHydrideDatabase()
     density = mh_database.get_density(hydride_str)
     conductivity = mh_database.get_bulk_conductivity(hydride_str)
@@ -428,3 +428,23 @@ if __name__ == "__main__":
     print(f"Bulk Conductivity: {conductivity}")
     print(f"Capacity: {capacity}")
     print(f"enthalpy, entropy {mh_database.get_enthalpy_entropy(hydride_str)}")
+    periodic_table = PeriodicTableOfElements()
+    m_Mg = periodic_table.atomic_mass_grabber("Mg")
+    m_Ni = periodic_table.atomic_mass_grabber("Ni")
+    m_H = periodic_table.atomic_mass_grabber("H")
+    print(f"M_Mg = {m_Mg}")
+    print(f"M_Ni = {m_Ni}")
+    print(f"M_H = {m_H}")
+    m_Mg2NiH4 = 2 * m_Mg + m_Ni + 4 * m_H
+    wt_Mg2NiH4 = 400 * m_H / m_Mg2NiH4
+
+    print (f"M_Mg2NiH4 = {m_Mg2NiH4}")
+    print(f"4*M_H/M_Mg2NiH4 *100 = {wt_Mg2NiH4} ")
+
+    m_MgH2 = m_Mg + 2*m_H
+    wt_MgH2 = 200*m_H/m_MgH2
+    print (f"M_MgH2 = {m_MgH2} u")
+    print(f"2*M_H/M_MgH2 *100 = {wt_MgH2} wt-%")
+
+
+

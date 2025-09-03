@@ -332,7 +332,7 @@ class UptakeCorrectionWindow(UptakeCorrectionUi):
         """Called when the background update task completes successfully."""
         self.info_text_edit.append("Update complete.")
         self.update_button.setEnabled(True)
- 
+
     def _on_update_error(self, errmsg):
         """Called if the background update task raises an error."""
         QMessageBox.critical(self, "Update Error", errmsg)
@@ -926,8 +926,6 @@ class UpdateValueWorker(QObject):
             self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
-
-
 
 
 def main():

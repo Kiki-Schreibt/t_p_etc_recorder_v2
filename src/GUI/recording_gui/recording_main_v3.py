@@ -790,6 +790,7 @@ class MainWindow(QMainWindow):
                                 "Start T-p Recording", "Stop T-p Recording", is_on)
             if is_on:
                 self._set_flags()
+                self.controller.update_test_info_from_ui(self.ui.additional_test_info_edit_field.text())
                 self.controller.start_t_p_recording()
                 self.ui.start_stop_static_plot_button.setEnabled(False)
             else:
@@ -920,6 +921,7 @@ class MainWindow(QMainWindow):
         """
         Initialize the right XY plot based on the dropdown selection.
         """
+        #todo implement _set_selected_state for additional edit field. Maybe info box that can be closed when done
         try:
             self.plot_manager.init_right_plot_xy(self.ui.XyDataSelectDropDown.currentText())
             self.plot_manager.right_plot.cycle_number_sig.connect(lambda number: self._set_current_state(key="number", value=number))
@@ -1107,8 +1109,6 @@ class MainWindow(QMainWindow):
         self.controller.toggle_cycling_flag(self.ui.cycle_test_check_box.isChecked())
         self.controller.toggle_is_isotherm_flag(self.ui.isotherm_check_box.isChecked())
         self.controller.toggle_h2_uptake_flag(self.ui.h2_uptake_check_box.isChecked())
-
-
 
     def closeEvent(self, event):
         """
