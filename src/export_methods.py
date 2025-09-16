@@ -93,7 +93,7 @@ class QuickExport:
         time_start = self.meta_data.start_time
         time_shift = (data_to_export[self.etc_table.get_clean('time')].iloc[0] - time_start)
         time_shift = time_shift.total_seconds()/3600
-        self.logger.info(f"Difference between test start and first etc measurement: {time_shift} s")
+        self.logger.info(f"Difference between test start and first etc measurement: {time_shift} h")
         time_intervall = data_to_export[self.etc_table.get_clean('time')].diff().dt.total_seconds() / 3600
         time_intervall[0] = 0
 
@@ -254,8 +254,8 @@ class QuickExport:
 
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
-    sample_ids = ['WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040']
-    sample_ids = ['WAE-WA-028']
+   # sample_ids = ['WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040']
+    sample_ids = ['WAE-WA-040']
 
     from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import config

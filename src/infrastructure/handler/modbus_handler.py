@@ -1097,6 +1097,50 @@ class ModbusDBWriter:
             self.meta_data.write()
 
 
+class KineticCalculator:
+    """
+        Calculates the slope of a pressure curve for a de-/hydrogenation cycle
+        and translates it to uptake/time. Stores the resulting xy data in
+        database
+    """
+
+    def __init__(self, meta_data, config):
+        self.meta_data = meta_data
+        self.config = config
+        self.data_retriever = DataRetriever(db_conn_params=self.config.db_conn_params)
+        self.tp_table = TableConfig().TPDataTable
+
+    def compute_and_plot(self, cycle_number):
+        df = self._grab_cycle(cycle_number)
+        df_kin = self._calculate_kinetics(df)
+        self._write_kinetic_to_database(df_kin, cycle_number)
+        self._temporary_plot(df)
+
+
+    def _grab_cycle(self, cycle_number):
+
+        constraints = {'where_'+self.tp_table.h2_uptake_flag: True,
+                            'where_'+self.tp_table.cycle_number_flag: True}
+
+        df_tp = self.data_retriever.fetch_data_by_cycle(
+                                                        sample_id = self.meta_data.sample_id,
+                                                        table=self.tp_table,
+                                                        cycle_numbers=cycle_number,
+                                                        constraints=constraints)
+
+        return df_tp
+
+    def _calculate_kinetics(self, df):
+        #calc slope
+        #calc dm/time
+        pass
+
+    def _write_kinetic_to_database(self, df, cycle_number):
+        pass
+
+    def _temporary_plot(self, df):
+        pass
+
 #global methods
 def convert_value(value):
     # Convert NumPy types
