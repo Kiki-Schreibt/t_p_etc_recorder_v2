@@ -213,6 +213,303 @@ class VantHoffCalcEq:
         p = m * R_H2 * 1e-5 / (((V_res + V_pipes) / T_res) + (V_cell / T_cell))
         return p
 
+
+
+from typing import Optional, Sequence, Tuple, Union
+from zoneinfo import ZoneInfo
+
+Number = Union[int, float, np.number]
+TimeLike = Union[pd.Timestamp, str]
+
+
+class KineticCalcBackend:
+    """
+    Compute hydrogen uptake kinetics from pressure/temperature time series.
+
+    Inputs:
+        - DataFrame or (pressure, temperature) Series with a timezone-aware DatetimeIndex.
+        - Geometry and sample info (V_cell [µL], V_res [mL], m_sample [g]).
+        - Reservoir temperature can be scalar (°C) or a time series aligned to pressure.
+
+    Features:
+        - Uptake(t) from gas mass balance: uptake(t) = m_gas(t0) - m_gas(t)
+          (for absorption; flips sign automatically for desorption if you prefer).
+        - Kinetic slopes (dm/dt) in kg/s and d(wt%)/dt in %/min.
+        - Optional resampling (e.g., '2S') and/or custom time windows ([(t0,t1), ...]).
+        - Works with gaps/duplicates; enforces monotonic time within each window.
+
+    Outputs:
+        A pandas.DataFrame with:
+            'p_bar', 'T_cell_C', 'T_res_C', 'm_gas_kg',
+            'uptake_kg', 'uptake_wt_pct',
+            'uptake_rate_kg_s', 'uptake_rate_pct_min'
+    """
+
+    def __init__(
+        self,
+        V_cell_mL: Number,
+        V_res_L: Number,
+        m_sample_g: Number,
+        *,
+        T_reservoir_C: Union[Number, pd.Series] = 30,
+        absorption_sign: int = +1,
+    ) -> None:
+        """
+        Args:
+            V_cell_mL: Cell volume in µL.
+            V_res_L: Reservoir volume in mL.
+            m_sample_g: Sample mass in g.
+            T_reservoir_C: Reservoir temperature (°C), scalar or Series aligned to pressure.
+            columns: (pressure_col, temperature_col) in the input DataFrame.
+            absorption_sign: +1 for uptake = m(t0)-m(t) (absorption),
+                             -1 for uptake = m(t)-m(t0) (desorption).
+        """
+        from src.infrastructure.core.table_config import TableConfig
+        self.V_cell_m3 = float(V_cell_mL) * 1e-6
+        self.V_res_m3 = float(V_res_L) * 1e-3
+        self.m_sample_kg = float(m_sample_g) * 1e-3
+        self.tp_table = TableConfig().TPDataTable
+        self.p_col, self.T_cell_col = self.tp_table.pressure, self.tp_table.temperature_sample
+        if absorption_sign not in (+1, -1):
+            raise ValueError("absorption_sign must be +1 (absorption) or -1 (desorption).")
+        self.sign = absorption_sign
+        self.T_reservoir_C = T_reservoir_C
+
+    # ---- public API ---------------------------------------------------------
+
+    def compute(
+        self,
+        df: pd.DataFrame,
+        *,
+        intervals: Optional[Sequence[Tuple[TimeLike, TimeLike]]] = None,
+        resample_rule: Optional[str] = None,
+        resample_how: str = "nearest",  # 'ffill'|'bfill'|'nearest'|'mean'
+        smooth_seconds: Optional[Number] = None,  # optional rolling mean for noise (seconds)
+        enforce_monotonic: bool = True,
+    ) -> pd.DataFrame:
+        """
+        Main entry: returns a DataFrame with uptake & kinetics columns.
+
+        Args:
+            df: DataFrame containing at least pressure and temperature columns with
+                a tz-aware DatetimeIndex. Pressure in bar; temperature in °C.
+            intervals: Optional list of (start, end) times to analyze. Outside
+                these windows is ignored. Results from windows are concatenated.
+            resample_rule: Optional pandas offset alias (e.g., '1S', '200L').
+            resample_how: Aggregation/alignment strategy when resampling.
+            smooth_seconds: Optional centered rolling average window (seconds) to
+                reduce noise before differentiating.
+            enforce_monotonic: If True, drops duplicate/descending timestamps per window.
+
+        Returns:
+            DataFrame indexed by time with computed columns.
+        """
+        df_in = df.copy()
+        time_col = self.tp_table.time
+        if time_col not in df_in.columns:
+            raise KeyError(f"time_col '{time_col}' not in DataFrame.")
+        df_in.index = pd.to_datetime(df_in[time_col], errors="raise")
+        df_in.drop(columns=[time_col], inplace=True)
+        df_in = self._ensure_dt_index(df_in)
+
+        # Basic column checks
+        for col in (self.p_col, self.T_cell_col):
+            if col not in df_in.columns:
+                raise KeyError(f"Missing required column '{col}' in DataFrame.")
+
+        # T_reservoir handling (scalar or Series)
+        T_res_series = self._align_T_reservoir(df_in.index)
+
+        # Handle intervals → list of sliced DataFrames
+        windows = self._slice_into_windows(df_in, intervals)
+
+        # Process each window independently (keeps baseline m_gas(t0) per window)
+        out_chunks = []
+        for win_df in windows:
+            if win_df.empty:
+                continue
+            # optional resample
+            if resample_rule:
+                win_df, T_res_win = self._resample_window(
+                    win_df, T_res_series, resample_rule, resample_how
+                )
+            else:
+                T_res_win = T_res_series.reindex(win_df.index, method=None)
+
+            # clean/monotonic
+            if enforce_monotonic:
+                win_df = self._ensure_monotonic(win_df)
+
+            # optional smoothing
+            if smooth_seconds and smooth_seconds > 0:
+                win_df = self._smooth(win_df, smooth_seconds)
+                if isinstance(T_res_win, pd.Series):
+                    T_res_win = self._smooth_series(T_res_win, smooth_seconds)
+
+            # compute gas mass and kinetics
+            out_chunks.append(self._compute_window(win_df, T_res_win))
+
+        if not out_chunks:
+            return pd.DataFrame(columns=[
+                self.p_col, self.T_cell_col, "T_res_C",
+                "m_gas_kg", "uptake_kg", "uptake_wt_pct",
+                "uptake_rate_kg_s", "uptake_rate_pct_min"
+            ])
+
+        out = pd.concat(out_chunks).sort_index()
+        return out
+
+    # ---- internals ----------------------------------------------------------
+
+    def _align_T_reservoir(self, index: pd.DatetimeIndex) -> pd.Series:
+        """Return a Series of reservoir temperature (°C) aligned to index."""
+        if isinstance(self.T_reservoir_C, pd.Series):
+            # Ensure timezone/align
+            s = self.T_reservoir_C.copy()
+            if s.index.tz is None and index.tz is not None:
+                raise ValueError("T_reservoir series must have a tz-aware index to match df.")
+            return s.reindex(index, method="nearest")  # rough alignment
+        else:
+            return pd.Series(self.T_reservoir_C, index=index, dtype=float)
+
+    def _slice_into_windows(
+        self,
+        df: pd.DataFrame,
+        intervals: Optional[Sequence[Tuple[TimeLike, TimeLike]]],
+    ) -> list:
+        if intervals is None:
+            return [df]
+        chunks = []
+        for start, end in intervals:
+            start_ts = pd.to_datetime(start)
+            end_ts = pd.to_datetime(end)
+            # keep tz — if naive, interpret in df's tz
+            if start_ts.tz is None and df.index.tz is not None:
+                start_ts = start_ts.tz_localize(df.index.tz)
+            if end_ts.tz is None and df.index.tz is not None:
+                end_ts = end_ts.tz_localize(df.index.tz)
+            chunks.append(df.loc[start_ts:end_ts])
+        return chunks
+
+    def _resample_window(
+        self,
+        win_df: pd.DataFrame,
+        T_res_series: pd.Series,
+        rule: str,
+        how: str,
+    ) -> Tuple[pd.DataFrame, pd.Series]:
+        if how == "ffill":
+            df_r = win_df.resample(rule).ffill()
+            Tres_r = T_res_series.reindex(df_r.index).ffill()
+        elif how == "bfill":
+            df_r = win_df.resample(rule).bfill()
+            Tres_r = T_res_series.reindex(df_r.index).bfill()
+        elif how == "nearest":
+            # use asfreq + nearest reindex to avoid averaging
+            idx = pd.date_range(win_df.index.min(), win_df.index.max(), freq=rule, tz=win_df.index.tz)
+            df_r = win_df.reindex(idx, method="nearest")
+            Tres_r = T_res_series.reindex(idx, method="nearest")
+        elif how == "mean":
+            df_r = win_df.resample(rule).mean(numeric_only=True)
+            Tres_r = T_res_series.reindex(df_r.index, method="nearest")
+        else:
+            raise ValueError("resample_how must be one of: 'ffill', 'bfill', 'nearest', 'mean'.")
+        return df_r, Tres_r
+
+    def _ensure_monotonic(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df[~df.index.duplicated(keep="first")].sort_index()
+        # drop negative time deltas
+        return df
+
+    def _smooth(self, df: pd.DataFrame, seconds: Number) -> pd.DataFrame:
+        window = f"{int(seconds)}S"
+        out = df.copy()
+        out[self.p_col] = df[self.p_col].rolling(window, center=True, min_periods=1).mean()
+        out[self.T_cell_col] = df[self.T_cell_col].rolling(window, center=True, min_periods=1).mean()
+        return out
+
+    def _smooth_series(self, s: pd.Series, seconds: Number) -> pd.Series:
+        window = f"{int(seconds)}S"
+        return s.rolling(window, center=True, min_periods=1).mean()
+
+    def _gas_mass_kg(
+        self,
+        p_bar: pd.Series,
+        T_cell_C: pd.Series,
+        T_res_C: pd.Series,
+    ) -> pd.Series:
+        """
+        m_gas = p * (V_res+V_pipes)/R/T_res + p * V_cell/R/T_cell
+        with unit conversions to SI.
+        """
+        p_Pa = p_bar.astype(float) * 1e5
+        T_cell_K = T_cell_C.astype(float) + 273.15
+        T_res_K = T_res_C.astype(float) + 273.15
+
+        term_res = p_Pa * (self.V_res_m3 + V_pipes) / (R_H2 * T_res_K)
+        term_cell = p_Pa * self.V_cell_m3 / (R_H2 * T_cell_K)
+        return term_res + term_cell  # [kg]
+
+    def _compute_window(
+        self,
+        win_df: pd.DataFrame,
+        T_res_win: pd.Series,
+    ) -> pd.DataFrame:
+        dfw = self._ensure_dt_index(win_df[[self.p_col, self.T_cell_col]].copy())
+        dfw.rename(columns={self.p_col: "p_bar", self.T_cell_col: "T_cell_C"}, inplace=True)
+        dfw["T_res_C"] = T_res_win.astype(float)
+
+        # Gas mass in the rig
+        dfw["m_gas_kg"] = self._gas_mass_kg(dfw["p_bar"], dfw["T_cell_C"], dfw["T_res_C"])
+
+        # Baseline at window start
+        m0 = dfw["m_gas_kg"].iloc[0]
+
+        # Uptake definition: absorption (+) = m0 - m(t); desorption (+) = m(t) - m0
+        dfw["uptake_kg"] = self.sign * (m0 - dfw["m_gas_kg"])
+        # Keep uptake non-negative for the chosen direction
+        dfw["uptake_kg"] = dfw["uptake_kg"].clip(lower=0)
+
+        # wt% over time
+        dfw["uptake_wt_pct"] = 100.0 * dfw["uptake_kg"] / (dfw["uptake_kg"] + self.m_sample_kg)
+
+        # Time delta in seconds for derivatives
+        dt_s = (dfw.index.to_series().diff().dt.total_seconds()).astype(float)
+        dt_s = pd.Series([np.nan, *dt_s.iloc[1:]], index=dfw.index)
+
+        # Rates (simple backward diff). For less noise, you can smooth before.
+        dfw["uptake_rate_kg_s"] = dfw["uptake_kg"].diff() / dt_s
+        dfw["uptake_rate_pct_min"] = dfw["uptake_wt_pct"].diff() / (dt_s / 60.0)
+
+        return dfw
+
+    def _ensure_dt_index(self, df: pd.DataFrame) -> pd.DataFrame:
+        idx = df.index
+
+        # Case 1: already datetime
+        if isinstance(idx, pd.DatetimeIndex):
+            if idx.tz is None:
+                df = df.copy()
+                df.index = idx.tz_localize(ZoneInfo("Europe/Berlin"))
+            return df
+
+        # Case 2: numeric → refuse (this is what led to 1970 microseconds)
+        if is_integer_dtype(idx) or is_float_dtype(idx):
+            raise TypeError(
+                "DataFrame index is numeric. Please pass a tz-aware DatetimeIndex "
+                "or specify time_col=... so I can build it."
+            )
+
+        # Case 3: strings/objects → parse
+        if is_string_dtype(idx) or idx.dtype == "object":
+            new_idx = pd.to_datetime(idx, errors="raise")
+            if new_idx.tz is None:
+                new_idx = new_idx.tz_localize(ZoneInfo("Europe/Berlin"))
+            df = df.copy()
+            df.index = new_idx
+            return df
+
+        raise TypeError("Unsupported index type for time axis.")
 # Example test functions to check behavior:
 
 

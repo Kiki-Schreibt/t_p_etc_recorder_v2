@@ -1097,6 +1097,7 @@ class ModbusDBWriter:
             self.meta_data.write()
 
 
+from src.infrastructure.utils.eq_p_calculation import KineticCalcBackend
 class KineticCalculator:
     """
         Calculates the slope of a pressure curve for a de-/hydrogenation cycle
@@ -1110,17 +1111,18 @@ class KineticCalculator:
         self.data_retriever = DataRetriever(db_conn_params=self.config.db_conn_params)
         self.tp_table = TableConfig().TPDataTable
 
-    def compute_and_plot(self, cycle_number):
+    def run(self, cycle_number):
         df = self._grab_cycle(cycle_number)
         df_kin = self._calculate_kinetics(df)
         self._write_kinetic_to_database(df_kin, cycle_number)
-        self._temporary_plot(df)
 
 
     def _grab_cycle(self, cycle_number):
 
-        constraints = {'where_'+self.tp_table.h2_uptake_flag: True,
-                            'where_'+self.tp_table.cycle_number_flag: True}
+        constraints = {
+                        'where_'+self.tp_table.h2_uptake_flag: True,
+                        'where_'+self.tp_table.cycle_number_flag: True
+                        }
 
         df_tp = self.data_retriever.fetch_data_by_cycle(
                                                         sample_id = self.meta_data.sample_id,
@@ -1131,15 +1133,27 @@ class KineticCalculator:
         return df_tp
 
     def _calculate_kinetics(self, df):
-        #calc slope
-        #calc dm/time
-        pass
+        absoprtion_sign = 1
+        kin_calc = KineticCalcBackend(
+                                        V_cell_mL=self.meta_data.volume_measurement_cell,
+                                        V_res_L=df[self.tp_table.reservoir_volume].iloc[0],
+                                        m_sample_g=self.meta_data.sample_mass,
+                                        absorption_sign=absoprtion_sign
+                                        )
+        df_kin = kin_calc.compute(
+                                    df=df,
+                                    resample_rule='60s',
+                                    resample_how='mean'
+
+                                    )
+        print(df_kin)
+        import matplotlib.pyplot as plt
+        df_kin["uptake_rate_pct_min"].plot()
+        plt.show()
 
     def _write_kinetic_to_database(self, df, cycle_number):
         pass
 
-    def _temporary_plot(self, df):
-        pass
 
 #global methods
 def convert_value(value):
@@ -1182,8 +1196,12 @@ def test_mb_reading_writing(sample_id):
 
 
 if __name__ == "__main__":
-    test_mb_reading_writing("test")
-
-
+    #test_mb_reading_writing("test")
+    from src.infrastructure.core.config_reader import config
+    from src.infrastructure.handler.metadata_handler import MetaData
+    sample_id = 'WAE-WA-028'
+    meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
+    calc = KineticCalculator(meta_data=meta_data, config=config)
+    calc.run(2.5)
 
 

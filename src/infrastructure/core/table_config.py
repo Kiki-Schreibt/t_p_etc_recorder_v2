@@ -149,6 +149,12 @@ class TableConfig:
         time_min = 'time_min'
         time_max = 'time_max'
 
+    class KineticsTable:
+        table_name = 'kinetics'
+        uptake_wt_p = 'uptake_wt_percent'
+        uptake_kg = 'uptake_kg'
+        rate_wt_p_min = 'rate_wt_p_min'
+        rate_kg_min = 'rate_kg_min'
 
     def get_table_column_names(self, table_class=None, table_name=None):
         """
