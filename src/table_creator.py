@@ -10,20 +10,23 @@ cycle_table = TableConfig().CycleDataTable
 etc_table = TableConfig().ETCDataTable
 etc_xy_table = TableConfig().ThermalConductivityXyDataTable
 meta_table = TableConfig().MetaDataTable
+kinetics_table = TableConfig().KineticsTable
 
 PRIMARY_KEYS = {
                         t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id, t_p_table.cycle_number],
                         cycle_table.table_name:  [cycle_table.time_start, cycle_table.sample_id],
                         meta_table.table_name:   meta_table.sample_id,
                         etc_table.table_name:    [etc_table.time, etc_table.sample_id_small, etc_table.cycle_number],
-                        etc_xy_table.table_name: [etc_xy_table.time, etc_xy_table.sample_id]
+                        etc_xy_table.table_name: [etc_xy_table.time, etc_xy_table.sample_id],
+                        kinetics_table.table_name: [kinetics_table.sample_id, kinetics_table.cycle_number]
                     }
 
 PARTITIONING_KEYS = {
                     t_p_table.table_name:    t_p_table.sample_id,
                     cycle_table.table_name:  cycle_table.sample_id,
                     etc_table.table_name:    etc_table.sample_id_small,
-                    etc_xy_table.table_name: etc_xy_table.sample_id
+                    etc_xy_table.table_name: etc_xy_table.sample_id,
+                    kinetics_table.table_name: kinetics_table.sample_id
                     }
 
 
@@ -83,7 +86,7 @@ class TableCreator:
             create_table_sql = (
             f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
             + ",\n".join(columns_sql)
-            + f"\n) + {query_part_partition} ;"
+            + f"\n) {query_part_partition} ;"
             )
 
             self._execute(create_table_sql)
@@ -261,6 +264,23 @@ class TableCreator:
                 '_default': 'TEXT'  # Default data type
                             }
 
+            if "kinetics" in table_name:
+                data_map = {
+                                'sample_id':           'TEXT',
+                                'time':                'TIMESTAMPTZ[]',
+                                'cycle_number':        'real',
+                                'pressure':            'DOUBLE PRECISION[]',
+                                'temperature_res':     'DOUBLE PRECISION[]',
+                                'temperature_sample':  'DOUBLE PRECISION[]',
+                                'uptake_wt_percent':   'DOUBLE PRECISION[]',
+                                'uptake_kg':           'DOUBLE PRECISION[]',
+                                'rate_wt_p_min':       'DOUBLE PRECISION[]',
+                                'rate_kg_min':         'DOUBLE PRECISION[]',
+                                'time_delta_min':      'DOUBLE PRECISION[]',
+                                'm_gas_kg':            'DOUBLE PRECISION[]',
+                                '_default':            'TEXT[]'
+                            }
+
             return data_map
 
         # Initial mappings of column name fragments to data types
@@ -284,6 +304,7 @@ class TableCreator:
     def _execute(self, query):
         with DatabaseConnection(**self.db_conn_params) as db_conn:
             # Execute the SQL statement to create the table
+            #print(query)
             db_conn.cursor.execute(query)
             # Commit the changes and close the connection
             db_conn.cursor.connection.commit()
@@ -297,7 +318,7 @@ class TableCreator:
 def create_database(config):
 
     query = f"CREATE DATABASE {config.db_conn_params["DB_DATABASE"]} WITH OWNER = {config.db_conn_params["DB_USERNAME"]}"
-    config.db_conn_params['DB_DATABASE'] = 'test'
+    #config.db_conn_params['DB_DATABASE'] = 'test'
     try:
         with DatabaseConnection(**config.db_conn_params) as db_conn:
             db_conn.conn.autocommit = True

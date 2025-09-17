@@ -151,10 +151,18 @@ class TableConfig:
 
     class KineticsTable:
         table_name = 'kinetics'
+        sample_id = 'sample_id'
+        cycle_number = 'cycle_number'
+        time = 'time'
+        pressure = 'pressure'
+        temperature = 'temperature_sample'
+        temperature_res = 'temperature_res'
+        m_gas_kg = 'm_gas_kg'
         uptake_wt_p = 'uptake_wt_percent'
         uptake_kg = 'uptake_kg'
         rate_wt_p_min = 'rate_wt_p_min'
         rate_kg_min = 'rate_kg_min'
+        time_delta_min = 'time_delta_min'
 
     def get_table_column_names(self, table_class=None, table_name=None):
         """
@@ -171,6 +179,8 @@ class TableConfig:
                 table_class = self.MetaDataTable
             elif "cycle" in table_name.lower():
                 table_class = self.CycleDataTable
+            elif "kinetics" in table_name.lower():
+                table_class = self.KineticsTable
 
         if table_class:
             column_names = []
@@ -184,7 +194,6 @@ class TableConfig:
         else:
             print(f'Could not find table class {table_class}')
             return None
-
 
     def writing_query_from_df(self, df, table_name: str, map: dict = None):
         if map:

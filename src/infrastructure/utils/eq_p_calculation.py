@@ -242,7 +242,7 @@ class KineticCalcBackend:
         A pandas.DataFrame with:
             'p_bar', 'T_cell_C', 'T_res_C', 'm_gas_kg',
             'uptake_kg', 'uptake_wt_pct',
-            'uptake_rate_kg_s', 'uptake_rate_pct_min'
+            'uptake_rate_kg_min', 'uptake_rate_pct_min'
     """
 
     def __init__(
@@ -269,7 +269,9 @@ class KineticCalcBackend:
         self.V_res_m3 = float(V_res_L) * 1e-3
         self.m_sample_kg = float(m_sample_g) * 1e-3
         self.tp_table = TableConfig().TPDataTable
+        self.kinetics_table = TableConfig().KineticsTable
         self.p_col, self.T_cell_col = self.tp_table.pressure, self.tp_table.temperature_sample
+
         if absorption_sign not in (+1, -1):
             raise ValueError("absorption_sign must be +1 (absorption) or -1 (desorption).")
         self.sign = absorption_sign
@@ -351,12 +353,17 @@ class KineticCalcBackend:
 
         if not out_chunks:
             return pd.DataFrame(columns=[
-                self.p_col, self.T_cell_col, "T_res_C",
-                "m_gas_kg", "uptake_kg", "uptake_wt_pct",
-                "uptake_rate_kg_s", "uptake_rate_pct_min"
+                self.p_col, self.T_cell_col, self.kinetics_table.temperature_res,
+                self.kinetics_table.m_gas_kg, self.kinetics_table.uptake_kg,
+                self.kinetics_table.uptake_wt_p,
+                self.kinetics_table.uptake_rate_kg_min, self.kinetics_table.uptake_rate_pct_min
             ])
 
         out = pd.concat(out_chunks).sort_index()
+        out["time_delta_min"] = (out.index - out.index[0]) / pd.Timedelta(seconds=1)/60
+       # out.rename(columns={"p_bar": self.kinetics_table.pressure,
+       #                     "T_cell_C": self.kinetics_table.temperature,
+       #                     "T_res_C": self.kinetics_table.temperature_res}, inplace=True)
         return out
 
     # ---- internals ----------------------------------------------------------
@@ -456,30 +463,31 @@ class KineticCalcBackend:
         T_res_win: pd.Series,
     ) -> pd.DataFrame:
         dfw = self._ensure_dt_index(win_df[[self.p_col, self.T_cell_col]].copy())
-        dfw.rename(columns={self.p_col: "p_bar", self.T_cell_col: "T_cell_C"}, inplace=True)
-        dfw["T_res_C"] = T_res_win.astype(float)
+        dfw[self.kinetics_table.temperature_res] = T_res_win.astype(float)
 
         # Gas mass in the rig
-        dfw["m_gas_kg"] = self._gas_mass_kg(dfw["p_bar"], dfw["T_cell_C"], dfw["T_res_C"])
+        dfw[self.kinetics_table.m_gas_kg] = self._gas_mass_kg(dfw[self.kinetics_table.pressure],
+                                                              dfw[self.kinetics_table.temperature],
+                                                              dfw[self.kinetics_table.temperature_res])
 
         # Baseline at window start
-        m0 = dfw["m_gas_kg"].iloc[0]
+        m0 = dfw[self.kinetics_table.m_gas_kg].iloc[0]
 
         # Uptake definition: absorption (+) = m0 - m(t); desorption (+) = m(t) - m0
-        dfw["uptake_kg"] = self.sign * (m0 - dfw["m_gas_kg"])
+        dfw[self.kinetics_table.uptake_kg] = self.sign * (m0 - dfw[self.kinetics_table.m_gas_kg])
         # Keep uptake non-negative for the chosen direction
-        dfw["uptake_kg"] = dfw["uptake_kg"].clip(lower=0)
+        dfw[self.kinetics_table.uptake_kg] = dfw[self.kinetics_table.uptake_kg].clip(lower=0)
 
         # wt% over time
-        dfw["uptake_wt_pct"] = 100.0 * dfw["uptake_kg"] / (dfw["uptake_kg"] + self.m_sample_kg)
+        dfw[self.kinetics_table.uptake_wt_p] = 100.0 * dfw[self.kinetics_table.uptake_kg] / (dfw[self.kinetics_table.uptake_kg] + self.m_sample_kg)
 
         # Time delta in seconds for derivatives
         dt_s = (dfw.index.to_series().diff().dt.total_seconds()).astype(float)
         dt_s = pd.Series([np.nan, *dt_s.iloc[1:]], index=dfw.index)
 
         # Rates (simple backward diff). For less noise, you can smooth before.
-        dfw["uptake_rate_kg_s"] = dfw["uptake_kg"].diff() / dt_s
-        dfw["uptake_rate_pct_min"] = dfw["uptake_wt_pct"].diff() / (dt_s / 60.0)
+        dfw[self.kinetics_table.rate_kg_min] = dfw[self.kinetics_table.uptake_kg].diff() / (dt_s / 60.0)
+        dfw[self.kinetics_table.rate_wt_p_min] = dfw[self.kinetics_table.uptake_wt_p].diff() / (dt_s / 60.0)
 
         return dfw
 

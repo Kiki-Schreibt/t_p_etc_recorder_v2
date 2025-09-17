@@ -325,29 +325,35 @@ class SamplePartitioner:
         Create a LIST partition for a single sample_id on an existing partitioned table.
         """
         table = parent_table_class.table_name
+        part_name = f"{table}_{sample_id.replace('-', '_').replace(' ', '_')}"
         full_parent = f"{self.schema}.{table}"
-        safe = sample_id.replace('-', '_').replace(' ', '_')
-        part_name = f"{table}_{safe}"
-        full_part = f"{self.schema}.{part_name}"
+        full_part   = f"{self.schema}.{part_name}"
 
         with DatabaseConnection(**self.db_conn_params) as conn:
+            # does a child named <schema>.<part_name> already exist and belong to <schema>.<table>?
             conn.cursor.execute("""
-                            SELECT EXISTS (
-                              SELECT 1
-                                FROM pg_class c
-                                JOIN pg_inherits i ON i.inhrelid = c.oid
-                                WHERE c.relname = %s
-                                  AND i.inhparent = %s::regclass
-                            );
-                        """, (full_part, full_parent))
-            existed = conn.cursor.fetchone()[0]
+                SELECT EXISTS (
+                  SELECT 1
+                    FROM pg_inherits i
+                    JOIN pg_class     c  ON c.oid = i.inhrelid
+                    JOIN pg_namespace nc ON nc.oid = c.relnamespace
+                    JOIN pg_class     p  ON p.oid = i.inhparent
+                    JOIN pg_namespace np ON np.oid = p.relnamespace
+                   WHERE c.relname = %s AND nc.nspname = %s
+                     AND p.relname = %s AND np.nspname = %s
+                );
+            """, (part_name, self.schema, table, self.schema))
+            exists = conn.cursor.fetchone()[0]
 
-            if not existed:
+            if exists:
+                self.logger.info(f"Partition {full_part} already exists; skipping.")
                 return
 
-            self.logger.info(f"Creating partition {full_part} FOR VALUES IN '{sample_id} if not exists already'")
+            self.logger.info(f"Creating partition {full_part} FOR VALUES IN ('{sample_id}')")
+            # note: `sample_id` is a value, not an identifier
             conn.cursor.execute(
-                f"CREATE TABLE IF NOT EXISTS {full_part} PARTITION OF {full_parent} FOR VALUES IN ('{sample_id}');"
+                f"CREATE TABLE IF NOT EXISTS {full_part} PARTITION OF {full_parent} FOR VALUES IN (%s);",
+                (sample_id,)
             )
             conn.conn.commit()
 
@@ -357,12 +363,12 @@ class SamplePartitioner:
                             TableConfig().CycleDataTable,
                             TableConfig().ETCDataTable,
                             TableConfig().ThermalConductivityXyDataTable,
-                            TableConfig().TPDataTable
+                            TableConfig().TPDataTable,
+                            TableConfig().KineticsTable
                         ]
 
         for table_class in table_classes:
             self.create_partition_for_sample(sample_id=sample_id, parent_table_class=table_class)
-
 
 
 def partition_by_sample_id(config, table_class, schema: str = 'public'):
@@ -374,11 +380,16 @@ def partition_by_sample_id(config, table_class, schema: str = 'public'):
 if __name__ == '__main__':
     from src.infrastructure.core.config_reader import config
     from src.infrastructure.core.table_config import TableConfig
-    table_classes = [
-        TableConfig().CycleDataTable,
-        TableConfig().ETCDataTable,
-        TableConfig().ThermalConductivityXyDataTable,
-        TableConfig().TPDataTable
-    ]
-    for tc in table_classes:
-        partition_by_sample_id(config, tc)
+   # table_classes = [
+       # TableConfig().CycleDataTable,
+       # TableConfig().ETCDataTable,
+       # TableConfig().ThermalConductivityXyDataTable,
+       # TableConfig().TPDataTable,
+    #    TableConfig().KineticsTable
+    #]
+    #for tc in table_classes:
+    #    partition_by_sample_id(config, tc)
+    sample_ids = ['WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040', 'WAE-WA-060']
+    partitioner = SamplePartitioner(db_conn_params=config.db_conn_params)
+    for sample_id in sample_ids:
+        partitioner.create_partition_for_sample_all_tables(sample_id=sample_id)

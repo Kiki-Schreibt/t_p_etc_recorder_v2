@@ -1098,6 +1098,8 @@ class ModbusDBWriter:
 
 
 from src.infrastructure.utils.eq_p_calculation import KineticCalcBackend
+
+
 class KineticCalculator:
     """
         Calculates the slope of a pressure curve for a de-/hydrogenation cycle
@@ -1113,8 +1115,17 @@ class KineticCalculator:
 
     def run(self, cycle_number):
         df = self._grab_cycle(cycle_number)
-        df_kin = self._calculate_kinetics(df)
-        self._write_kinetic_to_database(df_kin, cycle_number)
+        if cycle_number % 1 == 0.5:
+            absorption_sign = 1
+        else:
+            absorption_sign = -1
+
+        df_kin = self._calculate_kinetics(df, absorption_sign)
+
+        self._write_kinetic_to_database(df=df_kin,
+                                        cycle_number=cycle_number,
+                                        sample_id=sample_id
+                                        )
 
 
     def _grab_cycle(self, cycle_number):
@@ -1132,13 +1143,13 @@ class KineticCalculator:
 
         return df_tp
 
-    def _calculate_kinetics(self, df):
-        absoprtion_sign = 1
+    def _calculate_kinetics(self, df, absorption_sign):
+
         kin_calc = KineticCalcBackend(
                                         V_cell_mL=self.meta_data.volume_measurement_cell,
                                         V_res_L=df[self.tp_table.reservoir_volume].iloc[0],
                                         m_sample_g=self.meta_data.sample_mass,
-                                        absorption_sign=absoprtion_sign
+                                        absorption_sign=absorption_sign
                                         )
         df_kin = kin_calc.compute(
                                     df=df,
@@ -1146,13 +1157,36 @@ class KineticCalculator:
                                     resample_how='mean'
 
                                     )
-        print(df_kin)
-        import matplotlib.pyplot as plt
-        df_kin["uptake_rate_pct_min"].plot()
-        plt.show()
+       # print(df_kin)
+        #import matplotlib.pyplot as plt
+        #df_kin["pressure"].plot()
+        #plt.show()
+        return df_kin
 
-    def _write_kinetic_to_database(self, df, cycle_number):
-        pass
+    def _write_kinetic_to_database(self, df, cycle_number, sample_id):
+        kinetics_table = TableConfig().KineticsTable
+        #prepare data by creating single row df with list columns
+        df_one_row = pd.DataFrame([{
+                                        **{c: df[c].tolist() for c in df.columns},
+                                        kinetics_table.time: df.index.tolist()             # or 'index_iso': [ts.isoformat() ...]
+                                    }])
+        #df_one_row[kinetics_table.time] = df.index.tolist()
+        df_one_row[kinetics_table.sample_id] = sample_id
+        df_one_row[kinetics_table.cycle_number] = cycle_number
+
+
+
+        kin_insert_query, kin_values = TableConfig().writing_query_from_df(
+            df=df_one_row,
+            map=None,
+            table_name=TableConfig().KineticsTable.table_name
+        )
+        #print(kin_insert_query)
+        #print(kin_values)
+        with DatabaseConnection(**self.config.db_conn_params) as db_conn:
+            db_conn.cursor.executemany(kin_insert_query, kin_values)
+            db_conn.cursor.connection.commit()
+
 
 
 #global methods
@@ -1201,7 +1235,17 @@ if __name__ == "__main__":
     from src.infrastructure.handler.metadata_handler import MetaData
     sample_id = 'WAE-WA-028'
     meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
+    end = float(meta_data.total_number_cycles)   # e.g. 207.5
+    steps = int(round(end * 2))                  # 415
+    cycles = [i * 0.5 for i in range(steps + 1)]
     calc = KineticCalculator(meta_data=meta_data, config=config)
-    calc.run(2.5)
+    failures = []
+    for c in cycles:
+        try:
+            print(f"Running cycle {c}")
+            calc.run(c)
+        except Exception as e:
+            print(f"Cycle {c} failed")
+            failures.append((c, repr(e)))
 
 
