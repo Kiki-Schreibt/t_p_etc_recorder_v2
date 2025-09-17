@@ -278,9 +278,10 @@ class TableCreator:
                                 'rate_kg_min':         'DOUBLE PRECISION[]',
                                 'time_delta_min':      'DOUBLE PRECISION[]',
                                 'm_gas_kg':            'DOUBLE PRECISION[]',
+                                'v_cell':              'real',
+                                'v_res':               'real',
                                 '_default':            'TEXT[]'
                             }
-
             return data_map
 
         # Initial mappings of column name fragments to data types

@@ -154,6 +154,8 @@ class TableConfig:
         sample_id = 'sample_id'
         cycle_number = 'cycle_number'
         time = 'time'
+        V_cell = 'v_cell'
+        V_res = 'v_res'
         pressure = 'pressure'
         temperature = 'temperature_sample'
         temperature_res = 'temperature_res'

@@ -7,9 +7,7 @@
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/table_partitioner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_partitioner.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

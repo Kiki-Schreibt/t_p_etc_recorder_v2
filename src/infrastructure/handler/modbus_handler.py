@@ -1121,12 +1121,12 @@ class KineticCalculator:
             absorption_sign = -1
 
         df_kin = self._calculate_kinetics(df, absorption_sign)
-
+        V_res = df[self.tp_table.reservoir_volume].iloc[0]
         self._write_kinetic_to_database(df=df_kin,
                                         cycle_number=cycle_number,
-                                        sample_id=sample_id
+                                        meta_data=self.meta_data,
+                                        V_res=V_res
                                         )
-
 
     def _grab_cycle(self, cycle_number):
 
@@ -1163,18 +1163,20 @@ class KineticCalculator:
         #plt.show()
         return df_kin
 
-    def _write_kinetic_to_database(self, df, cycle_number, sample_id):
+    def _write_kinetic_to_database(self, df, cycle_number, meta_data, V_res):
         kinetics_table = TableConfig().KineticsTable
         #prepare data by creating single row df with list columns
         df_one_row = pd.DataFrame([{
                                         **{c: df[c].tolist() for c in df.columns},
                                         kinetics_table.time: df.index.tolist()             # or 'index_iso': [ts.isoformat() ...]
                                     }])
+
+
         #df_one_row[kinetics_table.time] = df.index.tolist()
-        df_one_row[kinetics_table.sample_id] = sample_id
+        df_one_row[kinetics_table.sample_id] = meta_data.sample_id
         df_one_row[kinetics_table.cycle_number] = cycle_number
-
-
+        df_one_row[kinetics_table.V_res] = V_res
+        df_one_row[kinetics_table.V_cell] = meta_data.volume_measurement_cell
 
         kin_insert_query, kin_values = TableConfig().writing_query_from_df(
             df=df_one_row,
@@ -1247,5 +1249,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Cycle {c} failed")
             failures.append((c, repr(e)))
+
+    print(failures)
 
 
