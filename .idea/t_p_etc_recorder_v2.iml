@@ -26,6 +26,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/GUI/plot_individualizer" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/GUI/etc_measurement_starter" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/GUI/exporter_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/GUI/kinetics_gui" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
     <orderEntry type="inheritedJdk" />

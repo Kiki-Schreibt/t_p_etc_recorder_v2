@@ -1112,6 +1112,8 @@ class KineticCalculator:
         self.config = config
         self.data_retriever = DataRetriever(db_conn_params=self.config.db_conn_params)
         self.tp_table = TableConfig().TPDataTable
+        self.kinetics_table = TableConfig().KineticsTable
+        self.logger = logging.getLogger(__name__)
 
     def run(self, cycle_number):
         df = self._grab_cycle(cycle_number)
@@ -1158,9 +1160,13 @@ class KineticCalculator:
 
                                     )
        # print(df_kin)
-        #import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt
         #df_kin["pressure"].plot()
         #plt.show()
+        df_kin[self.kinetics_table.uptake_kg].plot()
+        plt.show()
+        df_kin[self.kinetics_table.rate_kg_min].plot()
+        plt.show()
         return df_kin
 
     def _write_kinetic_to_database(self, df, cycle_number, meta_data, V_res):
@@ -1185,10 +1191,29 @@ class KineticCalculator:
         )
         #print(kin_insert_query)
         #print(kin_values)
-        with DatabaseConnection(**self.config.db_conn_params) as db_conn:
-            db_conn.cursor.executemany(kin_insert_query, kin_values)
-            db_conn.cursor.connection.commit()
+        try:
+            with DatabaseConnection(**self.config.db_conn_params) as db_conn:
+                db_conn.cursor.executemany(kin_insert_query, kin_values)
+                db_conn.cursor.connection.commit()
+                self.logger.info(f"Kinetics data for {meta_data.sample_id} cycle #{cycle_number} written to database")
 
+        except IntegrityError as e:
+            self.logger.info(f"Kinetics data for {meta_data.sample_id} cycle #{cycle_number} already exists. "
+                             f"Will be overwritten")
+            self._delete_kinetic_from_database(cycle_number=cycle_number, sample_id=meta_data.sample_id)
+            self._write_kinetic_to_database(df, cycle_number, meta_data, V_res)
+        except Exception as e:
+            self.logger.error(f"Error in writing kinetics: %s", e)
+
+
+    def _delete_kinetic_from_database(self, cycle_number, sample_id):
+
+        del_query = (f"DELETE from {self.kinetics_table.table_name} "
+                     f"WHERE {self.kinetics_table.sample_id} = %s "
+                     f"AND {self.kinetics_table.cycle_number} = %s")
+        with DatabaseConnection(**self.config.db_conn_params) as db_conn:
+            db_conn.cursor.execute(del_query, (sample_id, cycle_number))
+        self.logger.info(f"Kinetics data for {meta_data.sample_id} cycle #{cycle_number} deleted")
 
 
 #global methods
@@ -1239,7 +1264,8 @@ if __name__ == "__main__":
     meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
     end = float(meta_data.total_number_cycles)   # e.g. 207.5
     steps = int(round(end * 2))                  # 415
-    cycles = [i * 0.5 for i in range(steps + 1)]
+    cycles = [1.5]
+   # cycles = [i * 0.5 for i in range(steps + 1)]
     calc = KineticCalculator(meta_data=meta_data, config=config)
     failures = []
     for c in cycles:
