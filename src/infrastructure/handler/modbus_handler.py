@@ -1123,26 +1123,30 @@ class KineticCalculator:
             absorption_sign = -1
 
         df_kin = self._calculate_kinetics(df, absorption_sign)
-        #V_res = df[self.tp_table.reservoir_volume].iloc[0]
-        #self._write_kinetic_to_database(df=df_kin,
-        #                                cycle_number=cycle_number,
-        #                                meta_data=self.meta_data,
-        #                                V_res=V_res
-        #                                )
+        V_res = df[self.tp_table.reservoir_volume].iloc[0]
+        self._write_kinetic_to_database(df=df_kin,
+                                        cycle_number=cycle_number,
+                                        meta_data=self.meta_data,
+                                        V_res=V_res
+                                        )
 
     def _grab_cycle(self, cycle_number):
 
-        constraints = {
-                        'where_'+self.tp_table.cycle_number: cycle_number,
-                        'where_'+self.tp_table.h2_uptake_flag: True,
-                        'where_'+self.tp_table.cycle_number_flag: True,
-                        }
 
-        df_tp = self.data_retriever.fetch_data_by_sample_id_2(
-                                                        sample_id = self.meta_data.sample_id,
-                                                        table_name=self.tp_table.table_name,
+        query = (f"SELECT * FROM {self.tp_table.table_name} WHERE "
+                 f"{self.tp_table.sample_id} = %s "
+                 f"AND {self.tp_table.cycle_number} = %s "
+                 f"AND {self.tp_table.cycle_number_flag} = %s "
+                 f"AND {self.tp_table.h2_uptake_flag} = %s "
+                 f"AND {self.tp_table.is_isotherm_flag} = %s "
+                 f"ORDER by {self.tp_table.time}")
 
-                                                        constraints=constraints)
+        values = (self.meta_data.sample_id, cycle_number, True, True, False)
+        df_tp = self.data_retriever.execute_fetching(query=query,
+                                                     values=values,
+                                                     table_name=self.tp_table.table_name)
+
+
 
         return df_tp
 
@@ -1154,22 +1158,24 @@ class KineticCalculator:
                                         m_sample_g=self.meta_data.sample_mass,
                                         absorption_sign=absorption_sign
                                         )
-        #df_kin = kin_calc.compute(
-        #                            df=df,
-        #                            resample_rule='60s',
-        #                            resample_how='mean'
+        df_kin = kin_calc.compute(
+                                    df=df,
+                                    resample_rule='60s',
+                                    resample_how='mean'
+                                    )
 
-        #                            )
+
+        #import matplotlib.pyplot as plt
+        #df["pressure"].plot()
+
+        #plt.show()
         #print(df_kin)
-        import matplotlib.pyplot as plt
-        df["pressure"].plot()
-        
-        plt.show()
+
         #df_kin[self.kinetics_table.uptake_kg].plot()
         #plt.show()
         #df_kin[self.kinetics_table.rate_kg_min].plot()
         #plt.show()
-        #return df_kin
+        return df_kin
 
     def _write_kinetic_to_database(self, df, cycle_number, meta_data, V_res):
         kinetics_table = TableConfig().KineticsTable

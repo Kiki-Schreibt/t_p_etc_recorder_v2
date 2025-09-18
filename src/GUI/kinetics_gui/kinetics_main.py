@@ -35,6 +35,7 @@ from src.infrastructure.core.config_reader import config
 from src.infrastructure.connections.connections import DatabaseConnection
 from src.GUI.kinetics_gui.kinetics_ui import KineticsView, DataAccess, KineticsWorker, Series
 
+
 # -----------------------------
 # CONTROLLER (logic only)
 # -----------------------------
@@ -44,27 +45,32 @@ class KineticsController(QObject):
         self.view = view
         self.dal = dal
         self._worker: KineticsWorker | None = None
+        # Track what's currently shown (cycle -> Series)
+        self._visible_series: Dict[float, Series] = {}
 
         # Connect view signals to controller slots
         self.view.loadRequested.connect(self.on_load_curves)
         self.view.runRequested.connect(self.on_run_kinetics)
-        self.view.clearRequested.connect(self.view.clear_plot)
+        self.view.clearRequested.connect(self._on_clear_all)
+        self.view.exportRequested.connect(self.on_export_to_origin)
 
     # ---------- helpers ----------
-    def _parse_cycles(self, text: str, *, sample_id: str | None = None) -> List[int]:
-        """Parse cycles like "1-3,7,10" into [1,2,3,7,10]. If empty, fetch all cycles for sample.
+    def _parse_cycles(self, text: str, *, sample_id: str | None = None) -> List[float]:
+        """Parse cycles like "1-3,7,10" into floats with 0.5 increments.
+           Example: "1-3" → [1.0, 1.5, 2.0, 2.5, 3.0].
+           If empty, fetch all cycles for sample.
         """
         text = (text or "").strip()
         if not text:
             if not sample_id:
                 return []
             try:
-                return self.dal.list_cycles(sample_id)
+                return [float(c) for c in self.dal.list_cycles(sample_id)]
             except Exception as e:  # noqa: BLE001
                 self.view.show_error(f"Failed to list cycles: {e}")
                 return []
-        # tokenize
-        out: List[int] = []
+
+        out: List[float] = []
         for part in text.split(','):
             part = part.strip()
             if not part:
@@ -72,26 +78,28 @@ class KineticsController(QObject):
             if '-' in part:
                 a, b = part.split('-', 1)
                 try:
-                    ai = int(a)
-                    bi = int(b)
+                    ai = float(a)
+                    bi = float(b)
                 except ValueError:
                     continue
-                if ai <= bi:
-                    out.extend(range(ai, bi + 1))
-                else:
-                    out.extend(range(ai, bi - 1, -1))
+                step = 0.5 if ai <= bi else -0.5
+                # + step ensures the endpoint is included
+                n_steps = int(round((bi - ai) / step)) + 1
+                seq = [ai + i * step for i in range(n_steps)]
+                out.extend(seq)
             else:
                 try:
-                    out.append(int(part))
+                    out.append(float(part))
                 except ValueError:
                     continue
+
         # de-dup & sort
         return sorted(set(out))
+
 
     # ---------- slots (invoked by the view) ----------
     @Slot(str, str, str)
     def on_load_curves(self, sample_id: str, cycles_text: str, y_val_text) -> None:
-        #todo: choose which data to load
         if not sample_id:
             self.view.show_error("Please enter a Sample ID.")
             return
@@ -106,10 +114,13 @@ class KineticsController(QObject):
                 return
             for cyc in cycles:
                 if cyc in series_map:
-                    self.view.plot_measurement(cyc, series_map[cyc])
+                    s = series_map[cyc]
+                    self.view.plot_measurement(cyc, s)
+                    self._visible_series[float(cyc)] = s              # track it
             self.view.set_status(f"Loaded measurement curves for cycles: {cycles}")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             self.view.show_error(f"DB error while loading curves: {e}")
+
 
     @Slot(str, str)
     def on_run_kinetics(self, sample_id: str, cycles_text: str) -> None:
@@ -120,17 +131,17 @@ class KineticsController(QObject):
         if not cycles:
             self.view.show_error("No cycles to process (input empty and none found).")
             return
-        # Ensure measurement curves are visible first
         try:
             series_map = self.dal.fetch_measurements(sample_id, cycles)
             for cyc in cycles:
                 if cyc in series_map:
-                    self.view.plot_measurement(cyc, series_map[cyc])
-        except Exception as e:  # noqa: BLE001
+                    s = series_map[cyc]
+                    self.view.plot_measurement(cyc, s)
+                    self._visible_series[float(cyc)] = s              # track it
+        except Exception as e:
             self.view.show_error(f"DB error while preparing curves: {e}")
             return
 
-        # Kick off worker
         self.view.set_running(True)
         self.view.set_progress(0)
         self.view.set_status("Calculating kinetics…")
@@ -143,6 +154,12 @@ class KineticsController(QObject):
         self._worker.start()
 
     # ---------- worker callbacks ----------
+    @Slot()
+    def _on_clear_all(self) -> None:
+        """Clear plot AND our local registry."""
+        self._visible_series.clear()
+        self.view.clear_plot()
+
     @Slot(str)
     def _on_worker_error(self, msg: str) -> None:
         self.view.show_error(f"Kinetics calculation failed: {msg}")
@@ -159,6 +176,74 @@ class KineticsController(QObject):
             if replace:
                 self.view.remove_measurement(cyc)
             self.view.plot_kinetics(cyc, series)
+            # prefer showing kinetics if replace is on; either way, track what the user now sees
+            self._visible_series[float(cyc)] = series
+
+    # ---------- Origin export ----------
+    @Slot()
+    def on_export_to_origin(self) -> None:
+        """Create one Origin worksheet and add X/Y columns per cycle, then plot them all."""
+        if not self._visible_series:
+            self.view.show_error("There are no visible curves to export.")
+            return
+
+        try:
+            import originpro as op
+        except Exception:
+            self.view.show_error(
+                "The 'originpro' package is not available. "
+                "Install with `pip install originpro` and ensure Origin/OriginPro is installed."
+            )
+            return
+
+        try:
+            op.set_show()  # bring up Origin if it isn't visible
+
+            # One worksheet for all curves (safe even if X lengths differ between cycles)
+            wks = op.new_sheet('w')
+            wks.name = "Kinetics_Export"
+
+            # One graph window with a single layer
+            gp = op.new_graph()
+            gl = gp[0]
+
+            made = 0
+            # We’ll add two columns per cycle: X then Y
+            for idx, cyc in enumerate(sorted(self._visible_series.keys())):
+                s = self._visible_series[cyc]
+                xcol = 2 * idx
+                ycol = xcol + 1
+
+
+
+                # Fill columns and set designations/labels
+                # X column
+                wks.from_list(
+                    xcol,
+                    s.x.tolist(),
+                    lname=f"Time_Cyc_{str(cyc).replace('.', '_')}",
+                    units="s",
+                    axis="X",
+                )
+                # Y column
+                wks.from_list(
+                    ycol,
+                    s.z.tolist(),
+                    lname=f"Value_Cyc_{str(cyc).replace('.', '_')}",
+                    axis="Y",
+                )
+
+                # Add plot for this (X,Y) pair
+                p = gl.add_plot(wks, coly=ycol, colx=xcol, type=202)  # 202 = Line+Symbol
+                p.legend = f"Cycle {cyc}"
+                made += 1
+
+            gl.rescale()
+            self.view.set_status(f"Exported {made} curve(s) to Origin (one worksheet, X/Y pairs).")
+            op.exit()
+        except Exception as e:
+            self.view.show_error(f"Failed to export to Origin: {e}")
+            op.exit()
 
 
 def main() -> None:

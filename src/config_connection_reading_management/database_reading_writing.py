@@ -440,6 +440,9 @@ class DataRetriever:
     ) -> pd.DataFrame:
         if column_names is None:
             column_names = TableConfig().get_table_column_names(table_name=table_name)
+            column_names_str = ', '.join(column_names)
+            query = query.replace("SELECT *", f"SELECT {column_names_str}")
+            #print(query)
         try:
             with DatabaseConnection(**self.db_conn_params) as db_conn:
                 db_conn.cursor.execute(query, values)

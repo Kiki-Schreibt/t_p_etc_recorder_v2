@@ -230,6 +230,7 @@ class KineticsView(QMainWindow):
     loadRequested = Signal(str, str, str)   # sample_id, cycles_text
     runRequested = Signal(str, str)    # sample_id, cycles_text
     clearRequested = Signal()
+    exportRequested = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -248,6 +249,7 @@ class KineticsView(QMainWindow):
 
         self.cycles_edit = QLineEdit()
         self.cycles_edit.setPlaceholderText("Cycles (e.g., 1-3,7,10)")
+
         from src.infrastructure.core.table_config import TableConfig
         kinetics_table = TableConfig().KineticsTable
         self.combo_box_y_select = QComboBox()
@@ -256,6 +258,10 @@ class KineticsView(QMainWindow):
         self.btn_load = QPushButton("Load Curves")
         self.btn_run = QPushButton("Run Kinetics")
         self.btn_clear = QPushButton("Clear Plot")
+
+        self.btnSendToOrigin = QPushButton("Send to Origin")
+        self.btnSendToOrigin.setToolTip("Create current visible plot in Origin")
+        self.btnSendToOrigin.clicked.connect(self.exportRequested)
 
         self.chk_replace = QCheckBox("Replace measurement with kinetics after calc")
         self.chk_replace.setChecked(True)
@@ -282,6 +288,7 @@ class KineticsView(QMainWindow):
         form.addRow(self.btn_run)
         form.addRow(self.btn_clear)
         form.addRow(self.chk_replace)
+        form.addRow(self.btnSendToOrigin)
         form.addRow("Progress", self.progress)
         form.addRow("Status", self.status_label)
         left.setLayout(form)
