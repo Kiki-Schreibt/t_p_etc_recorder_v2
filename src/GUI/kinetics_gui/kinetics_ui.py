@@ -65,6 +65,7 @@ from PySide6.QtWidgets import (
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — needed for 3D projection
+from scipy.interpolate import krogh_interpolate
 
 from src.GUI.kinetics_gui.kinetics_worker import DataAccess, Series, KineticsWorker
 from src.infrastructure.connections.connections import DatabaseConnection
@@ -252,9 +253,9 @@ class KineticsView(QMainWindow):
 
         from src.infrastructure.core.table_config import TableConfig
         kinetics_table = TableConfig().KineticsTable
+        kinetics_selectables = [kinetics_table.uptake_wt_p, kinetics_table.uptake_kg, kinetics_table.rate_kg_min, kinetics_table.rate_wt_p_min]
         self.combo_box_y_select = QComboBox()
-        self.combo_box_y_select.addItem(kinetics_table.rate_wt_p_min)
-        self.combo_box_y_select.addItem(kinetics_table.uptake_wt_p)
+        self.combo_box_y_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
         self.btn_load = QPushButton("Load Curves")
         self.btn_run = QPushButton("Run Kinetics")
         self.btn_clear = QPushButton("Clear Plot")
