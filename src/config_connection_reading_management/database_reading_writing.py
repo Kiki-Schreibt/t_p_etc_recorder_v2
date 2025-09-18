@@ -418,6 +418,7 @@ class DataRetriever:
 
             df = pd.concat([df_prev, df_curr], axis=0, ignore_index=True)
 
+
         return df
 
     def fetch_data_by_time_no_limit(self, table: TableConfig,

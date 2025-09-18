@@ -46,6 +46,7 @@ from PySide6.QtCore import Qt, QThread, Signal, Slot, QObject
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
@@ -57,6 +58,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QSizePolicy,
     QVBoxLayout,
+    QComboBox,
     QWidget,
 )
 
@@ -137,6 +139,55 @@ class Plot3DManager:
         ax.set_zlim(z0, z1)
         self.canvas.draw_idle()
 
+      # ---- limits API (for axis controls) ----
+    def get_current_limits(self) -> Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float]]:
+        """Return ((x0,x1), (y0,y1), (z0,z1)) from the Matplotlib axes."""
+        ax = self.ax
+        return ax.get_xlim(), ax.get_ylim(), ax.get_zlim()
+
+    def get_data_bounds(self) -> Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float]] | None:
+        """Return tracked data bounds or None if we don't have finite bounds yet."""
+        vals = [self._x_min, self._x_max, self._y_min, self._y_max, self._z_min, self._z_max]
+        if not all(np.isfinite(v) for v in vals):
+            return None
+        return (self._x_min, self._x_max), (self._y_min, self._y_max), (self._z_min, self._z_max)
+
+    def set_limits(
+        self,
+        xlim: Tuple[float, float] | None = None,
+        ylim: Tuple[float, float] | None = None,
+        zlim: Tuple[float, float] | None = None,
+        *,
+        draw: bool = True,
+    ) -> None:
+        """Set any subset of axis limits."""
+        ax = self.ax
+        if xlim is not None:
+            ax.set_xlim(*xlim)
+        if ylim is not None:
+            ax.set_ylim(*ylim)
+        if zlim is not None:
+            ax.set_zlim(*zlim)
+        if draw:
+            self.canvas.draw_idle()
+
+    def fit_to_data(self) -> None:
+        """Apply the tracked data bounds (with padding) like autoscale."""
+        self._apply_bounds()
+
+    def reset_view(self) -> None:
+        """Clear limits and camera to the default configured in _init_axes."""
+        # keep the plotted artists; just reset view and auto limits from data if present
+        elev, azim = 22, -60
+        self.ax.view_init(elev=elev, azim=azim)
+        if self.get_data_bounds() is not None:
+            self._apply_bounds()
+        else:
+            # no data yet; restore the vanilla axes
+            self.canvas._init_axes()
+        self.canvas.draw_idle()
+
+
     # ---- plotting ----
     def plot_measurement(self, cycle: int, series: Series) -> None:
         (line,) = self.ax.plot(series.x, series.y, series.z, linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
@@ -176,7 +227,7 @@ class Plot3DManager:
 # -----------------------------
 class KineticsView(QMainWindow):
     # Signals that the controller can subscribe to
-    loadRequested = Signal(str, str)   # sample_id, cycles_text
+    loadRequested = Signal(str, str, str)   # sample_id, cycles_text
     runRequested = Signal(str, str)    # sample_id, cycles_text
     clearRequested = Signal()
 
@@ -191,12 +242,17 @@ class KineticsView(QMainWindow):
         self.canvas = Matplotlib3DCanvas()
         self.plot_mgr = Plot3DManager(self.canvas)
 
+
         self.sample_edit = QLineEdit()
         self.sample_edit.setPlaceholderText("e.g., SAMPLE_001")
 
         self.cycles_edit = QLineEdit()
         self.cycles_edit.setPlaceholderText("Cycles (e.g., 1-3,7,10)")
-
+        from src.infrastructure.core.table_config import TableConfig
+        kinetics_table = TableConfig().KineticsTable
+        self.combo_box_y_select = QComboBox()
+        self.combo_box_y_select.addItem(kinetics_table.rate_wt_p_min)
+        self.combo_box_y_select.addItem(kinetics_table.uptake_wt_p)
         self.btn_load = QPushButton("Load Curves")
         self.btn_run = QPushButton("Run Kinetics")
         self.btn_clear = QPushButton("Clear Plot")
@@ -209,12 +265,19 @@ class KineticsView(QMainWindow):
         self.progress.setValue(0)
         self.progress.setTextVisible(True)
 
+        # Compact, non-expanding status label that won't grow the window
         self.status_label = QLabel("Ready")
+        self.status_label.setWordWrap(True)
+        self.status_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.status_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        self.status_label.setMinimumHeight(24)
+        self.status_label.setMaximumHeight(48) # two lines max
 
         left = QGroupBox("Controls")
         form = QFormLayout()
         form.addRow("Sample ID", self.sample_edit)
         form.addRow("Cycles", self.cycles_edit)
+        form.addRow(self.combo_box_y_select)
         form.addRow(self.btn_load)
         form.addRow(self.btn_run)
         form.addRow(self.btn_clear)
@@ -222,17 +285,92 @@ class KineticsView(QMainWindow):
         form.addRow("Progress", self.progress)
         form.addRow("Status", self.status_label)
         left.setLayout(form)
-
+        axes_box = self._build_axes_control()
         root = QWidget()
         hl = QHBoxLayout(root)
-        hl.addWidget(left, 0)
+        # Use a narrow column for controls + axes stacked vertically
+        left_col = QVBoxLayout()
+        left_col.addWidget(left)
+        left_col.addWidget(axes_box)
+        left_col.addStretch(1)
+        left_wrap = QWidget(); left_wrap.setLayout(left_col)
+
+        hl.addWidget(left_wrap, 0)
         hl.addWidget(self.canvas, 1)
+        self.setCentralWidget(root)
         self.setCentralWidget(root)
 
         # Wire UI events to outward-facing signals (no logic here)
-        self.btn_load.clicked.connect(lambda: self.loadRequested.emit(self.sample_edit.text().strip(), self.cycles_edit.text().strip()))
+        self.btn_load.clicked.connect(lambda: self.loadRequested.emit(self.sample_edit.text().strip(), self.cycles_edit.text().strip(), self.combo_box_y_select.currentText().strip()))
         self.btn_run.clicked.connect(lambda: self.runRequested.emit(self.sample_edit.text().strip(), self.cycles_edit.text().strip()))
         self.btn_clear.clicked.connect(self.clearRequested)
+        self.btn_axes_apply.clicked.connect(self._on_axes_apply_clicked)
+        self.btn_axes_sync.clicked.connect(self._on_axes_sync_clicked)
+        self.btn_axes_fit.clicked.connect(self._on_axes_fit_clicked)
+        self.btn_axes_reset.clicked.connect(self._on_axes_reset_clicked)
+
+        # Initialize editors from current plot limits
+        self._on_axes_sync_clicked()
+
+    def _build_axes_control(self):
+        # --- Axes controls ---
+        axes_box = QGroupBox("Axes")
+        axes_form = QFormLayout()
+
+        def _mk_spin():
+            s = QDoubleSpinBox()
+            s.setDecimals(6)
+            s.setRange(-1e12, 1e12)
+            s.setSingleStep(0.1)
+            s.setButtonSymbols(QDoubleSpinBox.ButtonSymbols.NoButtons)
+            s.setMinimumWidth(110)
+            return s
+
+        # X axis editors
+        self.xmin_spin = _mk_spin()
+        self.xmax_spin = _mk_spin()
+        xrow = QHBoxLayout()
+        xrow.addWidget(QLabel("X min")); xrow.addWidget(self.xmin_spin)
+        xrow.addSpacing(8)
+        xrow.addWidget(QLabel("X max")); xrow.addWidget(self.xmax_spin)
+        xw = QWidget(); xw.setLayout(xrow)
+        axes_form.addRow("Time (min):", xw)
+
+        # Y axis editors
+        self.ymin_spin = _mk_spin()
+        self.ymax_spin = _mk_spin()
+        yrow = QHBoxLayout()
+        yrow.addWidget(QLabel("Y min")); yrow.addWidget(self.ymin_spin)
+        yrow.addSpacing(8)
+        yrow.addWidget(QLabel("Y max")); yrow.addWidget(self.ymax_spin)
+        yw = QWidget(); yw.setLayout(yrow)
+        axes_form.addRow("Cycle:", yw)
+
+        # Z axis editors
+        self.zmin_spin = _mk_spin()
+        self.zmax_spin = _mk_spin()
+        zrow = QHBoxLayout()
+        zrow.addWidget(QLabel("Z min")); zrow.addWidget(self.zmin_spin)
+        zrow.addSpacing(8)
+        zrow.addWidget(QLabel("Z max")); zrow.addWidget(self.zmax_spin)
+        zw = QWidget(); zw.setLayout(zrow)
+        axes_form.addRow("Value:", zw)
+
+        # Buttons
+        btn_row = QHBoxLayout()
+        self.btn_axes_apply = QPushButton("Apply")
+        self.btn_axes_sync = QPushButton("Sync From Plot")
+        self.btn_axes_fit  = QPushButton("Fit Data")
+        self.btn_axes_reset = QPushButton("Reset View")
+        btn_row.addWidget(self.btn_axes_apply)
+        btn_row.addWidget(self.btn_axes_sync)
+        btn_row.addWidget(self.btn_axes_fit)
+        btn_row.addWidget(self.btn_axes_reset)
+        btnw = QWidget(); btnw.setLayout(btn_row)
+        axes_form.addRow(btnw)
+
+        axes_box.setLayout(axes_form)
+        return axes_box
 
     # --------- Thin helpers the controller can use ---------
     def set_status(self, text: str) -> None:
@@ -265,6 +403,45 @@ class KineticsView(QMainWindow):
     def clear_plot(self) -> None:
         self.plot_mgr.clear_all()
 
+        # --------- Axis helpers ---------
+    def _on_axes_sync_clicked(self) -> None:
+        """Populate editors from the current plot limits."""
+        (x0, x1), (y0, y1), (z0, z1) = self.plot_mgr.get_current_limits()
+        self.xmin_spin.setValue(float(x0)); self.xmax_spin.setValue(float(x1))
+        self.ymin_spin.setValue(float(y0)); self.ymax_spin.setValue(float(y1))
+        self.zmin_spin.setValue(float(z0)); self.zmax_spin.setValue(float(z1))
+        self.set_status("Synced axis editors from plot.")
+
+    def _on_axes_apply_clicked(self) -> None:
+        """Apply editor values to the plot axes."""
+        x0, x1 = self.xmin_spin.value(), self.xmax_spin.value()
+        y0, y1 = self.ymin_spin.value(), self.ymax_spin.value()
+        z0, z1 = self.zmin_spin.value(), self.zmax_spin.value()
+
+        # Basic guard: swap if user entered reversed bounds
+        if x0 > x1: x0, x1 = x1, x0
+        if y0 > y1: y0, y1 = y1, y0
+        if z0 > z1: z0, z1 = z1, z0
+
+        self.plot_mgr.set_limits((x0, x1), (y0, y1), (z0, z1))
+        self.set_status("Applied custom axis limits.")
+
+    def _on_axes_fit_clicked(self) -> None:
+        """Autoscale to tracked data bounds (with padding)."""
+        bounds = self.plot_mgr.get_data_bounds()
+        if bounds is None:
+            self.show_error("No data bounds yet — plot some data first.")
+            return
+        self.plot_mgr.fit_to_data()
+        # Also sync editors so they reflect what you see
+        self._on_axes_sync_clicked()
+        self.set_status("Fitted axes to data.")
+
+    def _on_axes_reset_clicked(self) -> None:
+        """Restore default camera and reasonable limits."""
+        self.plot_mgr.reset_view()
+        self._on_axes_sync_clicked()
+        self.set_status("Reset view.")
 
 # -----------------------------
 # Entrypoint

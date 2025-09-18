@@ -1123,24 +1123,25 @@ class KineticCalculator:
             absorption_sign = -1
 
         df_kin = self._calculate_kinetics(df, absorption_sign)
-        V_res = df[self.tp_table.reservoir_volume].iloc[0]
-        self._write_kinetic_to_database(df=df_kin,
-                                        cycle_number=cycle_number,
-                                        meta_data=self.meta_data,
-                                        V_res=V_res
-                                        )
+        #V_res = df[self.tp_table.reservoir_volume].iloc[0]
+        #self._write_kinetic_to_database(df=df_kin,
+        #                                cycle_number=cycle_number,
+        #                                meta_data=self.meta_data,
+        #                                V_res=V_res
+        #                                )
 
     def _grab_cycle(self, cycle_number):
 
         constraints = {
+                        'where_'+self.tp_table.cycle_number: cycle_number,
                         'where_'+self.tp_table.h2_uptake_flag: True,
-                        'where_'+self.tp_table.cycle_number_flag: True
+                        'where_'+self.tp_table.cycle_number_flag: True,
                         }
 
-        df_tp = self.data_retriever.fetch_data_by_cycle(
+        df_tp = self.data_retriever.fetch_data_by_sample_id_2(
                                                         sample_id = self.meta_data.sample_id,
-                                                        table=self.tp_table,
-                                                        cycle_numbers=cycle_number,
+                                                        table_name=self.tp_table.table_name,
+
                                                         constraints=constraints)
 
         return df_tp
@@ -1153,21 +1154,22 @@ class KineticCalculator:
                                         m_sample_g=self.meta_data.sample_mass,
                                         absorption_sign=absorption_sign
                                         )
-        df_kin = kin_calc.compute(
-                                    df=df,
-                                    resample_rule='60s',
-                                    resample_how='mean'
+        #df_kin = kin_calc.compute(
+        #                            df=df,
+        #                            resample_rule='60s',
+        #                            resample_how='mean'
 
-                                    )
-       # print(df_kin)
+        #                            )
+        #print(df_kin)
         import matplotlib.pyplot as plt
-        #df_kin["pressure"].plot()
+        df["pressure"].plot()
+        
+        plt.show()
+        #df_kin[self.kinetics_table.uptake_kg].plot()
         #plt.show()
-        df_kin[self.kinetics_table.uptake_kg].plot()
-        plt.show()
-        df_kin[self.kinetics_table.rate_kg_min].plot()
-        plt.show()
-        return df_kin
+        #df_kin[self.kinetics_table.rate_kg_min].plot()
+        #plt.show()
+        #return df_kin
 
     def _write_kinetic_to_database(self, df, cycle_number, meta_data, V_res):
         kinetics_table = TableConfig().KineticsTable
@@ -1264,8 +1266,8 @@ if __name__ == "__main__":
     meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
     end = float(meta_data.total_number_cycles)   # e.g. 207.5
     steps = int(round(end * 2))                  # 415
-    cycles = [1.5]
-   # cycles = [i * 0.5 for i in range(steps + 1)]
+   # cycles = [1.5]
+    cycles = [i * 0.5 for i in range(steps + 1)]
     calc = KineticCalculator(meta_data=meta_data, config=config)
     failures = []
     for c in cycles:

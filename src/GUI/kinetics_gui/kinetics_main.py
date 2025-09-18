@@ -89,8 +89,8 @@ class KineticsController(QObject):
         return sorted(set(out))
 
     # ---------- slots (invoked by the view) ----------
-    @Slot(str, str)
-    def on_load_curves(self, sample_id: str, cycles_text: str) -> None:
+    @Slot(str, str, str)
+    def on_load_curves(self, sample_id: str, cycles_text: str, y_val_text) -> None:
         #todo: choose which data to load
         if not sample_id:
             self.view.show_error("Please enter a Sample ID.")
@@ -100,7 +100,7 @@ class KineticsController(QObject):
             self.view.show_error("No cycles to load (input empty and none found).")
             return
         try:
-            series_map = self.dal.fetch_measurements(sample_id, cycles)
+            series_map = self.dal.fetch_measurements(sample_id, cycles, y_val_text)
             if not series_map:
                 self.view.show_error("No measurement data returned for the requested cycles.")
                 return

@@ -360,7 +360,12 @@ class KineticCalcBackend:
             ])
 
         out = pd.concat(out_chunks).sort_index()
-        out["time_delta_min"] = (out.index - out.index[0]) / pd.Timedelta(seconds=1)/60
+        out[self.kinetics_table.time_delta_min] = (out.index - out.index[0]) / pd.Timedelta(seconds=1)/60
+        if self.sign < 0:
+            out[self.kinetics_table.uptake_kg] *= self.sign
+            out[self.kinetics_table.uptake_wt_p] *= self.sign
+            out[self.kinetics_table.rate_kg_min] *= self.sign
+            out[self.kinetics_table.rate_wt_p_min] *= self.sign
        # out.rename(columns={"p_bar": self.kinetics_table.pressure,
        #                     "T_cell_C": self.kinetics_table.temperature,
        #                     "T_res_C": self.kinetics_table.temperature_res}, inplace=True)

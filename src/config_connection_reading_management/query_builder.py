@@ -216,7 +216,6 @@ class BaseQueryBuilder:
             return "", ()
         return prefix + " AND ".join(clauses), tuple(params)
 
-
     def _build_query_part_time_constraints(self, time_range=None, base_query="", limit_amount=None):
         """
         For a given time_range, this method either returns a simple BETWEEN clause

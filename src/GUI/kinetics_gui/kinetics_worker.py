@@ -48,16 +48,16 @@ class DataAccess:
             f"SELECT DISTINCT {self.cycle_data_table.cycle_number} FROM {self.cycle_data_table.table_name} "
             f"WHERE {self.cycle_data_table.sample_id} = %s ORDER BY {self.cycle_data_table.cycle_number}"
         )
-        print(query)
+       # print(query)
         with DatabaseConnection(**self.config.db_conn_params) as db_conn:
             db_conn.cursor.execute(query, (sample_id,))
             rows = db_conn.cursor.fetchall()
-        print([r[0] for r in rows])
+       # print([r[0] for r in rows])
         return [r[0] for r in rows]
 
     def fetch_measurements(
-        self, sample_id: str, cycles: Iterable[int]
-    ) -> Dict[int, Series]:
+        self, sample_id: str, cycles: Iterable[int], y_col_name=""
+    ) -> Dict[float, Series]:
         """Return raw measurement curves for each cycle.
 
         Expected table columns: sample_id, cycle, t_sec, value_y
@@ -66,27 +66,34 @@ class DataAccess:
         if not cycles:
             return {}
 
-        sql = (
-            f"SELECT cycle, t_sec, value_y "
-            f"FROM measurements "
-            f"WHERE sample_id = %s AND cycle = ANY(%s) "
-            f"ORDER BY cycle, t_sec"
+        query = (
+            f"SELECT {self.kinetics_table.cycle_number}, "
+            f"          {self.kinetics_table.time_delta_min}, "
+            f"          {y_col_name} "
+            f"FROM {self.kinetics_table.table_name} "
+            f"WHERE {self.kinetics_table.sample_id} = %s AND {self.kinetics_table.cycle_number} = ANY(%s) "
+            f"ORDER BY {self.kinetics_table.cycle_number}, {self.kinetics_table.time_delta_min}"
         )
-        data: Dict[int, List[Tuple[float, float]]] = {}
-        with self.db as conn:
-            with conn.cursor() as cur:
-                cur.execute(sql, (sample_id, cycles))
-                for cyc, t, y in cur.fetchall():
-                    data.setdefault(int(cyc), []).append((float(t), float(y)))
 
-        series: Dict[int, Series] = {}
-        for cyc, pts in data.items():
-            arr = np.asarray(pts, dtype=float)
-            x = arr[:, 0]
-            z = arr[:, 1]
-            y_axis = np.full_like(x, fill_value=float(cyc))
-            series[cyc] = Series(x=x, y=y_axis, z=z)
-        return series
+        with DatabaseConnection(**self.config.db_conn_params) as db_conn:
+            db_conn.cursor.execute(query, (sample_id, cycles))
+            rows = db_conn.cursor.fetchall()
+
+
+        out: Dict[float, Series] = {}
+        for cyc, t_list, y_list in rows:
+            if t_list is None or y_list is None:
+                continue
+            tx = np.asarray(list(t_list), dtype=float)
+            yz = np.asarray(list(y_list), dtype=float)
+            n = min(len(tx), len(yz))
+            if n == 0:
+                continue
+            x = tx[:n]
+            z = yz[:n]
+            y_axis = np.full(n, float(cyc), dtype=float)
+            out[float(cyc)] = Series(x=x, y=y_axis, z=z)
+        return out
 
 
 # -----------------------------
