@@ -190,18 +190,21 @@ class Plot3DManager:
 
 
     # ---- plotting ----
-    def plot_measurement(self, cycle: int, series: Series) -> None:
-        (line,) = self.ax.plot(series.x, series.y, series.z, linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
-        arts = self.measurement_lines.setdefault(cycle, [])
-        arts.append(line)
+    def plot_measurement(self, cycle: float, series: Series) -> None:
+        (line,) = self.ax.plot(series.x, series.y, series.z,
+                               linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
+        line.set_picker(True)          # enable picking
+        line.set_pickradius(8)         # easier to click in 3D
+        self.measurement_lines.setdefault(float(cycle), []).append(line)
         self._update_bounds(series)
         self._apply_bounds()
 
-    def plot_kinetics(self, cycle: int, series: Series) -> None:
-        # Make kinetics visually distinct (dashed, thicker)
-        (line,) = self.ax.plot(series.x, series.y, series.z, linestyle="--", linewidth=2.0, alpha=0.95, label=f"kin c{cycle}")
-        arts = self.kinetics_lines.setdefault(cycle, [])
-        arts.append(line)
+    def plot_kinetics(self, cycle: float, series: Series) -> None:
+        (line,) = self.ax.plot(series.x, series.y, series.z,
+                               linestyle="--", linewidth=2.0, alpha=0.95, label=f"kin c{cycle}")
+        line.set_picker(True)
+        line.set_pickradius(8)
+        self.kinetics_lines.setdefault(float(cycle), []).append(line)
         self._update_bounds(series)
         self._apply_bounds()
 
@@ -220,6 +223,25 @@ class Plot3DManager:
         self.kinetics_lines.clear()
         self._x_min = self._y_min = self._z_min = math.inf
         self._x_max = self._y_max = self._z_max = -math.inf
+        self.canvas.draw_idle()
+
+    def resolve_artist(self, artist):
+        for cyc, arts in self.measurement_lines.items():
+            if artist in arts:
+                return ("meas", float(cyc))
+        for cyc, arts in self.kinetics_lines.items():
+            if artist in arts:
+                return ("kin", float(cyc))
+        return (None, None)
+
+    def mark_selected(self, artist):
+        # reset all
+        for d in (self.measurement_lines, self.kinetics_lines):
+            for arts in d.values():
+                for a in arts:
+                    a.set_linewidth(1.5); a.set_alpha(0.9); a.set_zorder(1)
+        # emphasize selected
+        artist.set_linewidth(3.0); artist.set_alpha(1.0); artist.set_zorder(10)
         self.canvas.draw_idle()
 
 

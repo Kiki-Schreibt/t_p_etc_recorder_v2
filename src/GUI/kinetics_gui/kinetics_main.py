@@ -53,6 +53,7 @@ class KineticsController(QObject):
         self.view.runRequested.connect(self.on_run_kinetics)
         self.view.clearRequested.connect(self._on_clear_all)
         self.view.exportRequested.connect(self.on_export_to_origin)
+        self.view.canvas.mpl_connect('pick_event', self._on_pick)
 
     # ---------- helpers ----------
     def _parse_cycles(self, text: str, *, sample_id: str | None = None) -> List[float]:
@@ -245,6 +246,16 @@ class KineticsController(QObject):
             self.view.show_error(f"Failed to export to Origin: {e}")
             op.exit()
 
+    def _on_pick(self, event):
+        artist = event.artist
+        kind, cycle = self.view.plot_mgr.resolve_artist(artist)
+        if cycle is None:
+            return
+        self.view.plot_mgr.mark_selected(artist)
+        self.view.set_status(f"Selected {kind} line — cycle {cycle}")
+        print(cycle)
+        # If you want the value programmatically:
+        # do something with `cycle` (store it, open a detail pane, etc.)
 
 def main() -> None:
     # Services
