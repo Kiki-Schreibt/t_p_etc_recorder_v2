@@ -275,7 +275,7 @@ class KineticsView(QMainWindow):
 
         from src.infrastructure.core.table_config import TableConfig
         kinetics_table = TableConfig().KineticsTable
-        kinetics_selectables = [kinetics_table.uptake_wt_p, kinetics_table.uptake_kg, kinetics_table.rate_kg_min, kinetics_table.rate_wt_p_min]
+        kinetics_selectables = [kinetics_table.pressure, kinetics_table.uptake_wt_p, kinetics_table.uptake_kg, kinetics_table.rate_kg_min, kinetics_table.rate_wt_p_min]
         self.combo_box_y_select = QComboBox()
         self.combo_box_y_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
         self.btn_load = QPushButton("Load Curves")
