@@ -59,7 +59,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QVBoxLayout,
     QComboBox,
-    QWidget,
+    QWidget
 )
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -254,18 +254,21 @@ class KineticsView(QMainWindow):
     runRequested = Signal(str, str)    # sample_id, cycles_text
     clearRequested = Signal()
     exportRequested = Signal()
+    correctionRequested = Signal()
 
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Kinetics 3D Viewer")
         self.resize(1200, 720)
         self._build_ui()
+        self.selected_cycle = 0
 
     # --------- UI creation ---------
     def _build_ui(self) -> None:
         self.canvas = Matplotlib3DCanvas()
+        self.canvas.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.canvas.customContextMenuRequested.connect(self._on_canvas_context_menu)
         self.plot_mgr = Plot3DManager(self.canvas)
-
 
         self.sample_edit = QLineEdit()
         self.sample_edit.setPlaceholderText("e.g., WAE-WA-028")
@@ -275,11 +278,18 @@ class KineticsView(QMainWindow):
 
         from src.infrastructure.core.table_config import TableConfig
         kinetics_table = TableConfig().KineticsTable
-        kinetics_selectables = [kinetics_table.pressure, kinetics_table.uptake_wt_p, kinetics_table.uptake_kg, kinetics_table.rate_kg_min, kinetics_table.rate_wt_p_min]
+        kinetics_selectables = [
+            kinetics_table.pressure,
+            kinetics_table.uptake_wt_p,
+            kinetics_table.uptake_kg,
+            kinetics_table.rate_kg_min,
+            kinetics_table.rate_wt_p_min,
+        ]
         self.combo_box_y_select = QComboBox()
         self.combo_box_y_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
+
         self.btn_load = QPushButton("Load Curves")
-        self.btn_run = QPushButton("Run Kinetics")
+        self.btn_run = QPushButton("Run Kinetics")   # ← will be placed in the new group
         self.btn_clear = QPushButton("Clear Plot")
 
         self.btnSendToOrigin = QPushButton("Send to Origin")
@@ -294,33 +304,64 @@ class KineticsView(QMainWindow):
         self.progress.setValue(0)
         self.progress.setTextVisible(True)
 
-        # Compact, non-expanding status label that won't grow the window
         self.status_label = QLabel("Ready")
         self.status_label.setWordWrap(True)
         self.status_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.status_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         self.status_label.setMinimumHeight(24)
-        self.status_label.setMaximumHeight(48) # two lines max
+        self.status_label.setMaximumHeight(48)
 
+        # --- Controls (keep Run button out of here) ---
         left = QGroupBox("Controls")
         form = QFormLayout()
         form.addRow("Sample ID", self.sample_edit)
         form.addRow("Cycles", self.cycles_edit)
         form.addRow(self.combo_box_y_select)
         form.addRow(self.btn_load)
-        form.addRow(self.btn_run)
         form.addRow(self.btn_clear)
         form.addRow(self.chk_replace)
         form.addRow(self.btnSendToOrigin)
         form.addRow("Progress", self.progress)
         form.addRow("Status", self.status_label)
         left.setLayout(form)
+
+        # --- NEW: Kinetics options group (Run button moved here) ---
+        kin_box = QGroupBox("Kinetics")
+        kin_form = QFormLayout()
+
+        self.resample_rule_edit = QLineEdit()
+        self.resample_rule_edit.setPlaceholderText("e.g., 60s")
+        self.resample_rule_edit.setText("60s")
+
+        self.resample_how_combo = QComboBox()
+        self.resample_how_combo.addItems(["mean", "nearest"])
+        self.resample_how_combo.setCurrentText("mean")
+
+        self.smooth_seconds_spin = QDoubleSpinBox()
+        self.smooth_seconds_spin.setRange(0.0, 1e9)
+        self.smooth_seconds_spin.setDecimals(2)
+        self.smooth_seconds_spin.setSingleStep(1.0)
+        self.smooth_seconds_spin.setSpecialValueText("off")  # 0 = off
+        self.smooth_seconds_spin.setValue(0.0)
+
+        self.enforce_monotonic_chk = QCheckBox("Enforce monotonic")
+        self.enforce_monotonic_chk.setChecked(True)
+
+        kin_form.addRow("Resample rule", self.resample_rule_edit)
+        kin_form.addRow("Resample how", self.resample_how_combo)
+        kin_form.addRow("Smooth seconds", self.smooth_seconds_spin)
+        kin_form.addRow(self.enforce_monotonic_chk)
+        kin_form.addRow(self.btn_run)    # ← Run button placed at the bottom of this group
+        kin_box.setLayout(kin_form)
+
         axes_box = self._build_axes_control()
+
         root = QWidget()
         hl = QHBoxLayout(root)
-        # Use a narrow column for controls + axes stacked vertically
+
         left_col = QVBoxLayout()
         left_col.addWidget(left)
+        left_col.addWidget(kin_box)   # ← place the new group “down” from Controls
         left_col.addWidget(axes_box)
         left_col.addStretch(1)
         left_wrap = QWidget(); left_wrap.setLayout(left_col)
@@ -328,18 +369,23 @@ class KineticsView(QMainWindow):
         hl.addWidget(left_wrap, 0)
         hl.addWidget(self.canvas, 1)
         self.setCentralWidget(root)
-        self.setCentralWidget(root)
 
-        # Wire UI events to outward-facing signals (no logic here)
-        self.btn_load.clicked.connect(lambda: self.loadRequested.emit(self.sample_edit.text().strip(), self.cycles_edit.text().strip(), self.combo_box_y_select.currentText().strip()))
-        self.btn_run.clicked.connect(lambda: self.runRequested.emit(self.sample_edit.text().strip(), self.cycles_edit.text().strip()))
+        # wiring (unchanged signature)
+        self.btn_load.clicked.connect(lambda: self.loadRequested.emit(
+            self.sample_edit.text().strip(),
+            self.cycles_edit.text().strip(),
+            self.combo_box_y_select.currentText().strip()
+        ))
+        self.btn_run.clicked.connect(lambda: self.runRequested.emit(
+            self.sample_edit.text().strip(),
+            self.cycles_edit.text().strip()
+        ))
         self.btn_clear.clicked.connect(self.clearRequested)
         self.btn_axes_apply.clicked.connect(self._on_axes_apply_clicked)
         self.btn_axes_sync.clicked.connect(self._on_axes_sync_clicked)
         self.btn_axes_fit.clicked.connect(self._on_axes_fit_clicked)
         self.btn_axes_reset.clicked.connect(self._on_axes_reset_clicked)
 
-        # Initialize editors from current plot limits
         self._on_axes_sync_clicked()
 
     def _build_axes_control(self):
@@ -434,6 +480,7 @@ class KineticsView(QMainWindow):
         self.plot_mgr.clear_all()
 
         # --------- Axis helpers ---------
+
     def _on_axes_sync_clicked(self) -> None:
         """Populate editors from the current plot limits."""
         (x0, x1), (y0, y1), (z0, z1) = self.plot_mgr.get_current_limits()
@@ -472,6 +519,31 @@ class KineticsView(QMainWindow):
         self.plot_mgr.reset_view()
         self._on_axes_sync_clicked()
         self.set_status("Reset view.")
+
+    def get_kinetics_options(self):
+        """Return (resample_rule: str, resample_how: str, smooth_seconds: float|None, enforce_monotonic: bool)."""
+        resample_rule = (self.resample_rule_edit.text() or "60s").strip()
+        resample_how = self.resample_how_combo.currentText()
+        smooth_val = float(self.smooth_seconds_spin.value())
+        smooth_seconds = None if smooth_val == 0.0 else smooth_val
+        enforce_monotonic = self.enforce_monotonic_chk.isChecked()
+        return resample_rule, resample_how, smooth_seconds, enforce_monotonic
+
+    def _on_canvas_context_menu(self, pos):
+        from PySide6.QtWidgets import QMenu
+        global_pos = self.canvas.mapToGlobal(pos)
+        menu = QMenu(self)
+        act_reset = menu.addAction("Reset view")
+        act_fit   = menu.addAction("Fit to data")
+        act_correction   = menu.addAction("Correct Curve")
+        chosen = menu.exec(global_pos)
+        if chosen == act_reset:
+            self.plot_mgr.reset_view()
+        elif chosen == act_fit:
+            self.plot_mgr.fit_to_data()
+        elif chosen == act_correction:
+            self.correctionRequested.emit()
+
 
 # -----------------------------
 # Entrypoint

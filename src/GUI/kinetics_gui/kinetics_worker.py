@@ -58,7 +58,7 @@ class DataAccess:
         return [r[0] for r in rows]
 
     def fetch_measurements(
-        self, sample_id: str, cycles: Iterable[int], y_col_name=""
+        self, sample_id: str, cycles: Iterable[float], y_col_name=""
     ) -> Dict[float, Series]:
         """Return raw measurement curves for each cycle.
 

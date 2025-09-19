@@ -47,13 +47,14 @@ class KineticsController(QObject):
         self._worker: KineticsWorker | None = None
         # Track what's currently shown (cycle -> Series)
         self._visible_series: Dict[float, Series] = {}
-
+        self.selected_cycle = None
         # Connect view signals to controller slots
         self.view.loadRequested.connect(self.on_load_curves)
         self.view.runRequested.connect(self.on_run_kinetics)
         self.view.clearRequested.connect(self._on_clear_all)
         self.view.exportRequested.connect(self.on_export_to_origin)
         self.view.canvas.mpl_connect('pick_event', self._on_pick)
+        self.view.correctionRequested.connect(self._on_correction_requested)
 
     # ---------- helpers ----------
     def _parse_cycles(self, text: str, *, sample_id: str | None = None) -> List[float]:
@@ -151,6 +152,12 @@ class KineticsController(QObject):
         self._worker = KineticsWorker(cycles=cycles,
                                       sample_id=sample_id,
                                       config=self.dal.config)
+        rr, rh, ss, em = self.view.get_kinetics_options()
+        self._worker.resample_rule = rr
+        self._worker.resample_how = rh
+        self._worker.smooth_seconds = ss
+        self._worker.enforce_monotonic = em
+
         self._worker.progress.connect(self.view.set_progress)
         self._worker.error.connect(self._on_worker_error)
         self._worker.result.connect(self._on_worker_result)
@@ -256,9 +263,23 @@ class KineticsController(QObject):
             return
         self.view.plot_mgr.mark_selected(artist)
         self.view.set_status(f"Selected {kind} line — cycle {cycle}")
-        print(cycle)
+        self.selected_cycle = [cycle]
+        #print(cycle)
         # If you want the value programmatically:
         # do something with `cycle` (store it, open a detail pane, etc.)
+
+    def _on_correction_requested(self):
+        if not self.selected_cycle:
+            return
+        from src.infrastructure.core.table_config import TableConfig
+
+        dates = self.dal.fetch_measurements(sample_id=self.view.sample_edit.text(),
+                                    cycles=self.selected_cycle,
+                                    y_col_name=TableConfig().KineticsTable.time)
+        print(dates)
+        self.selected_cycle = None
+        #time_range = [dates.min(), dates.max()]
+
 
 def main() -> None:
     # Services
