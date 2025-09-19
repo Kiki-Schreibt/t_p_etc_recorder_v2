@@ -222,7 +222,7 @@ Number = Union[int, float, np.number]
 TimeLike = Union[pd.Timestamp, str]
 
 
-class KineticCalcBackend:
+class KineticCalcEquations:
     """
     Compute hydrogen uptake kinetics from pressure/temperature time series.
 

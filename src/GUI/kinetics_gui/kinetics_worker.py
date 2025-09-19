@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import math
@@ -18,6 +19,7 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — needed for 3D projecti
 
 from src.infrastructure.connections.connections import DatabaseConnection
 from src.infrastructure.core.table_config import TableConfig
+from src.infrastructure.handler.modbus_handler import KineticCalculator
 
 
 # -----------------------------
@@ -96,6 +98,24 @@ class DataAccess:
         return out
 
 
+class DataCreator:
+
+    def __init__(self, config, meta_data):
+        self.config = config
+        self.meta_data = meta_data
+        self.logger = logging.getLogger(__name__)
+        self.calculator = KineticCalculator(config=self.config,
+                                            meta_data=self.meta_data)
+
+    def calculate_kinetics(self, cycle_number, resample_rule='60s', resample_how='mean',
+                            smooth_seconds=None, enforce_monotonic=True):
+
+        self.calculator.run(cycle_number=cycle_number,
+                            resample_rule=resample_rule,
+                            resample_how=resample_how,
+                            smooth_seconds=smooth_seconds,
+                            enforce_monotonic=enforce_monotonic)
+
 # -----------------------------
 # Kinetics calculation (placeholder)
 # -----------------------------
@@ -104,54 +124,43 @@ class KineticsWorker(QThread):
     error = Signal(str)
     result = Signal(dict)  # dict[cycle:int] -> Series
 
-    def __init__(self, sample_id: str, cycles: List[int], dal: DataAccess):
+    def __init__(self, cycles: List[float], config, sample_id):
         super().__init__()
         self.sample_id = sample_id
         self.cycles = cycles
-        self.dal = dal
+        self.config = config
+        from src.infrastructure.handler.metadata_handler import MetaData
+        self.meta_data = MetaData(sample_id=self.sample_id,
+                                  db_conn_params=self.config.db_conn_params)
+        self.logger = logging.getLogger(__name__)
+        self.calculator = KineticCalculator(config=self.config,
+                                            meta_data=self.meta_data)
+        self.resample_rule = '60s'
+        self.resample_how = 'mean'
+        self.smooth_seconds = None
+        self.enforce_monotonic = True
 
-    def _compute_kinetics(self, x: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Example kinetics calc (replace with your real backend).
+    def _compute_kinetics(self, cycle_number):
 
-        - Smooth with a moving average
-        - Compute normalized derivative as a toy "rate" curve
-        Returns (x, kinetics_z)
-        """
-        if len(z) < 3:
-            return x, z.copy()
-        # moving average smoothing
-        win = max(3, min(31, len(z) // 20 * 2 + 1))  # odd window
-        pad = win // 2
-        z_pad = np.pad(z, (pad, pad), mode="edge")
-        kernel = np.ones(win) / win
-        z_smooth = np.convolve(z_pad, kernel, mode="valid")
-        # derivative (simple finite diff)
-        dx = np.gradient(x)
-        dz = np.gradient(z_smooth)
-        rate = np.divide(dz, dx, out=np.zeros_like(dz), where=dx != 0)
-        # scale for visibility
-        rate_norm = (rate - np.min(rate))
-        if np.ptp(rate_norm) > 0:
-            rate_norm = rate_norm / np.ptp(rate_norm)
-        return x, rate_norm
+        self.calculator.run(cycle_number=cycle_number,
+                            resample_rule=self.resample_rule,
+                            resample_how=self.resample_how,
+                            smooth_seconds=self.smooth_seconds,
+                            enforce_monotonic=self.enforce_monotonic)
 
     def run(self) -> None:
-        try:
-            total = len(self.cycles)
-            if total == 0:
-                self.result.emit({})
-                return
-            out: Dict[int, Series] = {}
-            # Fetch raw data once for all requested cycles
-            raw = self.dal.fetch_measurements(self.sample_id, self.cycles)
-            for i, cyc in enumerate(self.cycles, start=1):
-                if cyc not in raw:
-                    continue
-                x, _, z = raw[cyc].x, raw[cyc].y, raw[cyc].z
-                xk, zk = self._compute_kinetics(x, z)
-                y_axis = np.full_like(xk, fill_value=float(cyc))
-                out[cyc] = Series(x=xk, y=y_axis, z=zk)
-                self.progress.emit(int(i / max(1, total) * 100))
-            self.result.emit(out)
-        except Exception as e:  # noqa: BLE001
-            self.error.emit(str(e))
+        total = len(self.cycles)
+        if total == 0:
+            self.result.emit({})
+            return
+        out: Dict[int, Series] = {}
+        for cyc in self.cycles:
+            try:
+                self._compute_kinetics(cyc)
+                self.progress.emit(int(cyc / max(1, total) * 100))
+            except Exception as e:  # noqa: BLE001
+                self.logger.error(str(e))
+                self.progress.emit(int(cyc / max(1, total) * 100))
+                #self.error.emit(str(e))
+        self.progress.emit(100)
+        #self.result.emit(out)

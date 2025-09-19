@@ -1097,7 +1097,7 @@ class ModbusDBWriter:
             self.meta_data.write()
 
 
-from src.infrastructure.utils.eq_p_calculation import KineticCalcBackend
+from src.infrastructure.utils.eq_p_calculation import KineticCalcEquations
 
 
 class KineticCalculator:
@@ -1115,14 +1115,16 @@ class KineticCalculator:
         self.kinetics_table = TableConfig().KineticsTable
         self.logger = logging.getLogger(__name__)
 
-    def run(self, cycle_number):
+    def run(self, cycle_number, resample_rule='60s', resample_how='mean',
+            smooth_seconds=None, enforce_monotonic=True):
         df = self._grab_cycle(cycle_number)
         if cycle_number % 1 == 0.5:
             absorption_sign = 1
         else:
             absorption_sign = -1
 
-        df_kin = self._calculate_kinetics(df, absorption_sign)
+        df_kin = self._calculate_kinetics(df, absorption_sign, resample_rule,
+                                          resample_how, smooth_seconds, enforce_monotonic)
         V_res = df[self.tp_table.reservoir_volume].iloc[0]
         self._write_kinetic_to_database(df=df_kin,
                                         cycle_number=cycle_number,
@@ -1150,9 +1152,10 @@ class KineticCalculator:
 
         return df_tp
 
-    def _calculate_kinetics(self, df, absorption_sign):
+    def _calculate_kinetics(self, df, absorption_sign, resample_rule='60s', resample_how='mean',
+                            smooth_seconds=None, enforce_monotonic=True):
 
-        kin_calc = KineticCalcBackend(
+        kin_calc = KineticCalcEquations(
                                         V_cell_mL=self.meta_data.volume_measurement_cell,
                                         V_res_L=df[self.tp_table.reservoir_volume].iloc[0],
                                         m_sample_g=self.meta_data.sample_mass,
@@ -1160,8 +1163,10 @@ class KineticCalculator:
                                         )
         df_kin = kin_calc.compute(
                                     df=df,
-                                    resample_rule='60s',
-                                    resample_how='mean'
+                                    resample_rule=resample_rule,
+                                    resample_how=resample_how,
+                                    smooth_seconds=smooth_seconds,
+                                    enforce_monotonic=enforce_monotonic
                                     )
 
 
@@ -1221,7 +1226,7 @@ class KineticCalculator:
                      f"AND {self.kinetics_table.cycle_number} = %s")
         with DatabaseConnection(**self.config.db_conn_params) as db_conn:
             db_conn.cursor.execute(del_query, (sample_id, cycle_number))
-        self.logger.info(f"Kinetics data for {meta_data.sample_id} cycle #{cycle_number} deleted")
+        self.logger.info(f"Kinetics data for {sample_id} cycle #{cycle_number} deleted")
 
 
 #global methods

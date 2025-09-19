@@ -133,12 +133,13 @@ class KineticsController(QObject):
             self.view.show_error("No cycles to process (input empty and none found).")
             return
         try:
-            series_map = self.dal.fetch_measurements(sample_id, cycles)
-            for cyc in cycles:
-                if cyc in series_map:
-                    s = series_map[cyc]
-                    self.view.plot_measurement(cyc, s)
-                    self._visible_series[float(cyc)] = s              # track it
+            pass
+            #series_map = self.dal.fetch_measurements(sample_id, cycles)
+            #for cyc in cycles:
+            #    if cyc in series_map:
+            #        s = series_map[cyc]
+            #        self.view.plot_measurement(cyc, s)
+            #        self._visible_series[float(cyc)] = s              # track it
         except Exception as e:
             self.view.show_error(f"DB error while preparing curves: {e}")
             return
@@ -147,7 +148,9 @@ class KineticsController(QObject):
         self.view.set_progress(0)
         self.view.set_status("Calculating kinetics…")
 
-        self._worker = KineticsWorker(sample_id, cycles, self.dal)
+        self._worker = KineticsWorker(cycles=cycles,
+                                      sample_id=sample_id,
+                                      config=self.dal.config)
         self._worker.progress.connect(self.view.set_progress)
         self._worker.error.connect(self._on_worker_error)
         self._worker.result.connect(self._on_worker_result)
