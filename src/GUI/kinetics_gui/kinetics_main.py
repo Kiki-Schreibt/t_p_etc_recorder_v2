@@ -53,6 +53,7 @@ class KineticsController(QObject):
         self.view.runRequested.connect(self.on_run_kinetics)
         self.view.clearRequested.connect(self._on_clear_all)
         self.view.exportRequested.connect(self.on_export_to_origin)
+        self.view.deleteRequested.connect(self._on_delete_requested)
         self.view.canvas.mpl_connect('pick_event', self._on_pick)
         self.view.correctionRequested.connect(self._on_correction_requested)
 
@@ -164,6 +165,57 @@ class KineticsController(QObject):
         self._worker.result.connect(self._on_worker_result)
         self._worker.finished.connect(self._on_worker_finished)
         self._worker.start()
+
+    def _on_delete_requested(self) -> None:
+        sample_id = (self.view.sample_edit.text() or "").strip()
+        if not sample_id:
+            self.view.show_error("Please enter a Sample ID before deleting.")
+            return
+
+        # Prefer currently selected cycle(s); otherwise use what's typed in the Cycles field
+        cycles = self.selected_cycle
+        if not cycles:
+            self.view.show_error("No cycles selected or entered to delete.")
+            return
+
+        # Confirm with user
+        cycs_str = ", ".join(str(c) for c in sorted(set(cycles)))
+        if QMessageBox.question(
+            self.view,
+            "Delete kinetics",
+            f"Delete kinetics rows for sample '{sample_id}'\nCycles: {cycs_str} ?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        ) != QMessageBox.Yes:
+            self.view.set_status("Deletion cancelled.")
+            return
+
+        try:
+            # Delegate DB deletion to the DAL
+            deleted = self.dal.delete_kinetics_from_db(sample_id=sample_id, cycles=cycles)
+
+            # Remove visuals & local cache for those cycles
+            for cyc in cycles:
+                # measurement lines (public API)
+                self.view.plot_mgr.remove_measurement(cyc)
+
+                # kinetics lines (access manager storage)
+                arts = self.view.plot_mgr.kinetics_lines.pop(cyc, [])
+                for a in arts:
+                    try:
+                        a.remove()
+                    except Exception:
+                        pass
+
+                # drop from our cache
+                self._visible_series.pop(float(cyc), None)
+
+            self.view.canvas.draw_idle()
+            self.selected_cycle = None
+            self.view.set_status(f"Deleted {deleted} row(s) from kinetics for cycles [{cycs_str}].")
+
+        except Exception as e:
+            self.view.show_error(f"Failed to delete kinetics: {e}")
 
     # ---------- worker callbacks ----------
     @Slot()
@@ -283,7 +335,6 @@ class KineticsController(QObject):
             start_reading = min(dates[cyc].z)
             end_reading = max(dates[cyc].z)
             time_range= [start_reading, end_reading]
-            print(time_range)
         self._open_correction_gui(time_range)
 
     def _open_correction_gui(self, time_range):

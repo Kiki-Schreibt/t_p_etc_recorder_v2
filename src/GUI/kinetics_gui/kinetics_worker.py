@@ -50,6 +50,7 @@ class DataAccess:
         self.tp_table = TableConfig().TPDataTable
         self.kinetics_table = TableConfig().KineticsTable
         self.cycle_data_table = TableConfig().CycleDataTable
+        self.logger = logging.getLogger(__name__)
 
     def list_cycles(self, sample_id: str) -> List[int]:
         query = (
@@ -103,24 +104,22 @@ class DataAccess:
 
         return out
 
+    def delete_kinetics_from_db(self,
+                                sample_id: str,
+                                cycles: Iterable[float]) -> int:
+        cycs = sorted(set(float(c) for c in cycles))  # dedupe; cast if needed
+        if not cycs:
+            return 0
+        query = (
+            f"DELETE FROM {self.kinetics_table.table_name} "
+            f"WHERE {self.kinetics_table.sample_id} = %s "
+            f"AND {self.kinetics_table.cycle_number} = ANY(%s)"
+        )
+        with DatabaseConnection(**self.config.db_conn_params) as db_conn:
+            db_conn.cursor.execute(query, (sample_id, cycs))
+            self.logger.info(f"deleted {db_conn.cursor.rowcount} cycles. Cycle #{"# ".join(str(cyc) for cyc in cycles)}")
+            return db_conn.cursor.rowcount
 
-class DataCreator:
-
-    def __init__(self, config, meta_data):
-        self.config = config
-        self.meta_data = meta_data
-        self.logger = logging.getLogger(__name__)
-        self.calculator = KineticCalculator(config=self.config,
-                                            meta_data=self.meta_data)
-
-    def calculate_kinetics(self, cycle_number, resample_rule='60s', resample_how='mean',
-                            smooth_seconds=None, enforce_monotonic=True):
-
-        self.calculator.run(cycle_number=cycle_number,
-                            resample_rule=resample_rule,
-                            resample_how=resample_how,
-                            smooth_seconds=smooth_seconds,
-                            enforce_monotonic=enforce_monotonic)
 
 # -----------------------------
 # Kinetics calculation (placeholder)
@@ -165,7 +164,7 @@ class KineticsWorker(QThread):
         for cyc in self.cycles:
             try:
                 self._compute_kinetics(cyc)
-                self.progress.emit(int(cyc / max(1, total) * 100))
+                self.progress.emit(int(cyc*2 / max(1, total) * 100))
             except Exception as e:  # noqa: BLE001
                 self.logger.error(str(e))
                 self.progress.emit(int(cyc / max(1, total) * 100))

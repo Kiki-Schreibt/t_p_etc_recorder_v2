@@ -187,7 +187,6 @@ class Plot3DManager:
             self.canvas._init_axes()
         self.canvas.draw_idle()
 
-
     # ---- plotting ----
     def plot_measurement(self, cycle: float, series: Series) -> None:
         (line,) = self.ax.plot(series.x, series.y, series.z,
@@ -251,6 +250,7 @@ class KineticsView(QMainWindow):
     # Signals that the controller can subscribe to
     loadRequested = Signal(str, str, str)   # sample_id, cycles_text
     runRequested = Signal(str, str)    # sample_id, cycles_text
+    deleteRequested = Signal(str, str)    # sample_id, cycles_text
     clearRequested = Signal()
     exportRequested = Signal()
     correctionRequested = Signal()
@@ -268,6 +268,39 @@ class KineticsView(QMainWindow):
         self.canvas.setContextMenuPolicy(Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self._on_canvas_context_menu)
         self.plot_mgr = Plot3DManager(self.canvas)
+
+        ##create top controls
+        left, form = self._build_controls()
+
+        # Build Kinetics options group
+        root = QWidget()
+        hl = QHBoxLayout(root)
+        left_wrap = self._build_kinetic_controls(left, hl)
+
+        hl.addWidget(left_wrap, 0)
+        hl.addWidget(self.canvas, 1)
+        self.setCentralWidget(root)
+
+        # wiring (unchanged signature)
+        self.btn_load.clicked.connect(lambda: self.loadRequested.emit(
+            self.sample_edit.text().strip(),
+            self.cycles_edit.text().strip(),
+            self.combo_box_y_select.currentText().strip()
+        ))
+        self.btn_run.clicked.connect(lambda: self.runRequested.emit(
+            self.sample_edit.text().strip(),
+            self.cycles_edit.text().strip()
+        ))
+
+        self.btn_clear.clicked.connect(self.clearRequested)
+        self.btn_axes_apply.clicked.connect(self._on_axes_apply_clicked)
+        self.btn_axes_sync.clicked.connect(self._on_axes_sync_clicked)
+        self.btn_axes_fit.clicked.connect(self._on_axes_fit_clicked)
+        self.btn_axes_reset.clicked.connect(self._on_axes_reset_clicked)
+
+        self._on_axes_sync_clicked()
+
+    def _build_controls(self):
 
         self.sample_edit = QLineEdit()
         self.sample_edit.setPlaceholderText("e.g., WAE-WA-028")
@@ -288,7 +321,6 @@ class KineticsView(QMainWindow):
         self.combo_box_y_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
 
         self.btn_load = QPushButton("Load Curves")
-        self.btn_run = QPushButton("Run Kinetics")   # ← will be placed in the new group
         self.btn_clear = QPushButton("Clear Plot")
 
         self.btnSendToOrigin = QPushButton("Send to Origin")
@@ -324,73 +356,7 @@ class KineticsView(QMainWindow):
         form.addRow("Status", self.status_label)
         left.setLayout(form)
 
-        # --- NEW: Kinetics options group (Run button moved here) ---
-        kin_box = QGroupBox("Kinetics")
-        kin_form = QFormLayout()
-
-
-        self.reaction_duration_edit = QLineEdit()
-        self.reaction_duration_edit.setPlaceholderText("e.g., 180min")
-
-        self.resample_rule_edit = QLineEdit()
-        self.resample_rule_edit.setPlaceholderText("e.g., 60s")
-        self.resample_rule_edit.setText("60s")
-
-        self.resample_how_combo = QComboBox()
-        self.resample_how_combo.addItems(["mean", "nearest"])
-        self.resample_how_combo.setCurrentText("mean")
-
-        self.smooth_seconds_spin = QDoubleSpinBox()
-        self.smooth_seconds_spin.setRange(0.0, 1e9)
-        self.smooth_seconds_spin.setDecimals(2)
-        self.smooth_seconds_spin.setSingleStep(1.0)
-        self.smooth_seconds_spin.setSpecialValueText("off")  # 0 = off
-        self.smooth_seconds_spin.setValue(0.0)
-
-        self.enforce_monotonic_chk = QCheckBox("Enforce monotonic")
-        self.enforce_monotonic_chk.setChecked(True)
-
-        kin_form.addRow("Reaction duration", self.reaction_duration_edit)
-        kin_form.addRow("Resample rule", self.resample_rule_edit)
-        kin_form.addRow("Resample how", self.resample_how_combo)
-        kin_form.addRow("Smooth seconds", self.smooth_seconds_spin)
-        kin_form.addRow(self.enforce_monotonic_chk)
-        kin_form.addRow(self.btn_run)    # ← Run button placed at the bottom of this group
-        kin_box.setLayout(kin_form)
-
-        axes_box = self._build_axes_control()
-
-        root = QWidget()
-        hl = QHBoxLayout(root)
-
-        left_col = QVBoxLayout()
-        left_col.addWidget(left)
-        left_col.addWidget(kin_box)   # ← place the new group “down” from Controls
-        left_col.addWidget(axes_box)
-        left_col.addStretch(1)
-        left_wrap = QWidget(); left_wrap.setLayout(left_col)
-
-        hl.addWidget(left_wrap, 0)
-        hl.addWidget(self.canvas, 1)
-        self.setCentralWidget(root)
-
-        # wiring (unchanged signature)
-        self.btn_load.clicked.connect(lambda: self.loadRequested.emit(
-            self.sample_edit.text().strip(),
-            self.cycles_edit.text().strip(),
-            self.combo_box_y_select.currentText().strip()
-        ))
-        self.btn_run.clicked.connect(lambda: self.runRequested.emit(
-            self.sample_edit.text().strip(),
-            self.cycles_edit.text().strip()
-        ))
-        self.btn_clear.clicked.connect(self.clearRequested)
-        self.btn_axes_apply.clicked.connect(self._on_axes_apply_clicked)
-        self.btn_axes_sync.clicked.connect(self._on_axes_sync_clicked)
-        self.btn_axes_fit.clicked.connect(self._on_axes_fit_clicked)
-        self.btn_axes_reset.clicked.connect(self._on_axes_reset_clicked)
-
-        self._on_axes_sync_clicked()
+        return left, form
 
     def _build_axes_control(self):
         # --- Axes controls ---
@@ -451,6 +417,53 @@ class KineticsView(QMainWindow):
 
         axes_box.setLayout(axes_form)
         return axes_box
+
+    def _build_kinetic_controls(self, left, hl):
+        kin_box = QGroupBox("Kinetics")
+        kin_form = QFormLayout()
+
+
+        self.reaction_duration_edit = QLineEdit()
+        self.reaction_duration_edit.setPlaceholderText("e.g., 180min")
+
+        self.resample_rule_edit = QLineEdit()
+        self.resample_rule_edit.setPlaceholderText("e.g., 60s")
+        self.resample_rule_edit.setText("60s")
+
+        self.resample_how_combo = QComboBox()
+        self.resample_how_combo.addItems(["mean", "nearest"])
+        self.resample_how_combo.setCurrentText("mean")
+
+        self.smooth_seconds_spin = QDoubleSpinBox()
+        self.smooth_seconds_spin.setRange(0.0, 1e9)
+        self.smooth_seconds_spin.setDecimals(2)
+        self.smooth_seconds_spin.setSingleStep(1.0)
+        self.smooth_seconds_spin.setSpecialValueText("off")  # 0 = off
+        self.smooth_seconds_spin.setValue(0.0)
+
+        self.enforce_monotonic_chk = QCheckBox("Enforce monotonic")
+        self.enforce_monotonic_chk.setChecked(True)
+
+        self.btn_run = QPushButton("Run Kinetics")
+
+
+        kin_form.addRow("Reaction duration", self.reaction_duration_edit)
+        kin_form.addRow("Resample rule", self.resample_rule_edit)
+        kin_form.addRow("Resample how", self.resample_how_combo)
+        kin_form.addRow("Smooth seconds", self.smooth_seconds_spin)
+        kin_form.addRow(self.enforce_monotonic_chk)
+        kin_form.addRow(self.btn_run)    # ← Run button placed at the bottom of this group
+        kin_box.setLayout(kin_form)
+
+        axes_box = self._build_axes_control()
+
+        left_col = QVBoxLayout()
+        left_col.addWidget(left)
+        left_col.addWidget(kin_box)   # ← place the new group “down” from Controls
+        left_col.addWidget(axes_box)
+        left_col.addStretch(1)
+        left_wrap = QWidget(); left_wrap.setLayout(left_col)
+        return left_wrap
 
     # --------- Thin helpers the controller can use ---------
     def set_status(self, text: str) -> None:
@@ -541,6 +554,7 @@ class KineticsView(QMainWindow):
         act_reset = menu.addAction("Reset view")
         act_fit   = menu.addAction("Fit to data")
         act_correction   = menu.addAction("Correct Curve")
+        act_delete = menu.addAction("Delete Curve")
         chosen = menu.exec(global_pos)
         if chosen == act_reset:
             self.plot_mgr.reset_view()
@@ -548,7 +562,9 @@ class KineticsView(QMainWindow):
             self.plot_mgr.fit_to_data()
         elif chosen == act_correction:
             self.correctionRequested.emit()
-
+        elif chosen == act_delete:
+           self.deleteRequested.emit( self.sample_edit.text().strip(),
+                                            [self.selected_cycle])
 
 # -----------------------------
 # Entrypoint
