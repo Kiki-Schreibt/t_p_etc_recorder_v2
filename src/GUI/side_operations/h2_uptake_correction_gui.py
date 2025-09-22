@@ -193,8 +193,6 @@ class UptakeCorrectionUi(QMainWindow):
 
         main_layout.addLayout(btn_layout)
 
-
-
     def _setup_linear_region(self):
         """
         Create a linked LinearRegionItem on both plots for selecting a time window.

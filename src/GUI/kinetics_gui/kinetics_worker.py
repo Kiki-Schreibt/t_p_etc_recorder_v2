@@ -3,14 +3,15 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import sys
 import math
+from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
 import numpy as np
+import pandas as pd
 
 # --- Qt / Matplotlib embedding ---
 from PySide6.QtCore import Qt, QThread, Signal, Slot, QObject
@@ -20,6 +21,10 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — needed for 3D projecti
 from src.infrastructure.connections.connections import DatabaseConnection
 from src.infrastructure.core.table_config import TableConfig
 from src.infrastructure.handler.modbus_handler import KineticCalculator
+try:
+    import src.infrastructure.core.logger as logging
+except ImportError:
+    import logging
 
 
 # -----------------------------
@@ -58,22 +63,19 @@ class DataAccess:
         return [r[0] for r in rows]
 
     def fetch_measurements(
-        self, sample_id: str, cycles: Iterable[float], y_col_name=""
+        self, sample_id: str, cycles: Iterable[float], y_col_name: str = ""
     ) -> Dict[float, Series]:
-        """Return raw measurement curves for each cycle.
-
-        Expected table columns: sample_id, cycle, t_sec, value_y
-        """
         cycles = list(cycles)
         if not cycles:
             return {}
 
         query = (
             f"SELECT {self.kinetics_table.cycle_number}, "
-            f"          {self.kinetics_table.time_delta_min}, "
-            f"          {y_col_name} "
+            f"       {self.kinetics_table.time_delta_min}, "
+            f"       {y_col_name} "
             f"FROM {self.kinetics_table.table_name} "
-            f"WHERE {self.kinetics_table.sample_id} = %s AND {self.kinetics_table.cycle_number} = ANY(%s) "
+            f"WHERE {self.kinetics_table.sample_id} = %s "
+            f"  AND {self.kinetics_table.cycle_number} = ANY(%s) "
             f"ORDER BY {self.kinetics_table.cycle_number}, {self.kinetics_table.time_delta_min}"
         )
 
@@ -81,20 +83,23 @@ class DataAccess:
             db_conn.cursor.execute(query, (sample_id, cycles))
             rows = db_conn.cursor.fetchall()
 
-
         out: Dict[float, Series] = {}
         for cyc, t_list, y_list in rows:
             if t_list is None or y_list is None:
                 continue
-            tx = np.asarray(list(t_list), dtype=float)
-            yz = np.asarray(list(y_list), dtype=float)
-            n = min(len(tx), len(yz))
+
+            x = np.asarray(list(t_list), dtype=float)         # minutes (numeric)
+            z = _as_array_preserve_datetime(y_list)           # keep datetime as datetime
+
+            n = min(len(x), len(z))
             if n == 0:
                 continue
-            x = tx[:n]
-            z = yz[:n]
+
+            x = x[:n]
+            z = z[:n]
             y_axis = np.full(n, float(cyc), dtype=float)
             out[float(cyc)] = Series(x=x, y=y_axis, z=z)
+
         return out
 
 
@@ -164,3 +169,46 @@ class KineticsWorker(QThread):
                 #self.error.emit(str(e))
         self.progress.emit(100)
         #self.result.emit(out)
+
+
+###helper methods
+def _as_array_preserve_datetime(values) -> np.ndarray:
+
+    vals = list(values or [])
+    if not vals:
+        return np.array([], dtype=float)
+
+    first = vals[0]
+    if isinstance(first, datetime):
+        # keep tz-aware datetimes as Python datetime objects
+        return np.array(vals, dtype=object)
+    if isinstance(first, np.datetime64):
+        # keep NumPy datetime64 (tz-naive) as datetime64
+        return np.array(vals, dtype='datetime64[ns]')
+    # numeric
+    return np.asarray(vals, dtype=float)
+
+###testing methods
+def test_grabbing_time_ranges_for_cycle():
+    from src.infrastructure.core.config_reader import config
+
+    cycle_list = [17]
+    sample_id = "WAE-WA-028"
+    dal = DataAccess(config=config)
+
+    dates = dal.fetch_measurements(sample_id=sample_id,
+                                cycles=cycle_list,
+                                y_col_name=TableConfig().KineticsTable.time)
+
+    time_range = {}
+    for cyc in cycle_list:
+        start_reading = min(dates[cyc].z)
+        end_reading = max(dates[cyc].z)
+        time_range[cyc] = [start_reading, end_reading]
+    print(time_range[17])
+
+
+if __name__ == '__main__':
+    test_grabbing_time_ranges_for_cycle()
+
+

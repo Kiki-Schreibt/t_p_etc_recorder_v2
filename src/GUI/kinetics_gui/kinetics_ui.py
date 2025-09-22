@@ -71,7 +71,6 @@ from src.GUI.kinetics_gui.kinetics_worker import DataAccess, Series, KineticsWor
 from src.infrastructure.connections.connections import DatabaseConnection
 
 
-
 # -----------------------------
 # 3D Plot manager
 # -----------------------------

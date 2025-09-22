@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/t_p_etc_recorder_v2.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_worker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;VB7-Strassenkampf&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Kiki-Schreibt/t_p_etc_recorder_v2.git&quot;,
+    &quot;accountId&quot;: &quot;7c794974-71b4-4894-918e-7ea35a70445a&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2iMRmPYjrJnSIgRdvSS35DQTFXE" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Doctest load_ui_file.executor": "Run",
+    "Python tests.Doctests in database_reading_writing (1).executor": "Run",
+    "Python tests.Doctests in database_reading_writing (2).executor": "Run",
+    "Python tests.Doctests in database_reading_writing.executor": "Run",
+    "Python tests.Python tests for tests.TestRecordingMain.test_start_modbus_server.executor": "Run",
+    "Python tests.Python tests for unittest_plotting.TestPlotMainWindow.executor": "Run",
+    "Python tests.Python tests in unittest_plotting.py.executor": "Run",
+    "Python.Circle.executor": "Run",
+    "Python.PlotWidget.executor": "Run",
+    "Python.PlotWindows.executor": "Run",
+    "Python.adsfasdf.executor": "Run",
+    "Python.asdf.executor": "Run",
+    "Python.asdfasdf.executor": "Run",
+    "Python.background_operations.executor": "Run",
+    "Python.code_length.executor": "Run",
+    "Python.config_creator.executor": "Run",
+    "Python.config_creator_ui_main (1).executor": "Run",
+    "Python.config_creator_ui_main.executor": "Run",
+    "Python.config_reader.executor": "Run",
+    "Python.connections.executor": "Run",
+    "Python.connections_and_logger.executor": "Run",
+    "Python.csv_handler.executor": "Run",
+    "Python.data_fitter_gui_main.executor": "Run",
+    "Python.data_fitter_ui_business.executor": "Run",
+    "Python.data_loader.executor": "Run",
+    "Python.database_cleaner.executor": "Run",
+    "Python.database_maintainer.executor": "Run",
+    "Python.database_reading_writing.executor": "Run",
+    "Python.database_reading_writing_v2.executor": "Run",
+    "Python.dicon_simulater.executor": "Run",
+    "Python.dicon_simulator_v2.executor": "Run",
+    "Python.eq_p_calculation.executor": "Run",
+    "Python.excel_data_handler.executor": "Run",
+    "Python.export_methods.executor": "Run",
+    "Python.exporter_business.executor": "Run",
+    "Python.h2_uptake_correction_gui.executor": "Run",
+    "Python.hot_disk_controller.executor": "Run",
+    "Python.hot_disk_handler.executor": "Run",
+    "Python.hydride_handler.executor": "Run",
+    "Python.hydride_worker.executor": "Run",
+    "Python.kinetics_gui.executor": "Run",
+    "Python.kinetics_main.executor": "Run",
+    "Python.kinetics_ui (1).executor": "Run",
+    "Python.kinetics_worker.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.main_fitter_backend.executor": "Run",
+    "Python.manual_csv_xlsx_inserter.executor": "Run",
+    "Python.material_properties.executor": "Run",
+    "Python.meta_data_handler.executor": "Run",
+    "Python.metadata_handler.executor": "Run",
+    "Python.modbus_handler.executor": "Run",
+    "Python.optimization.executor": "Run",
+    "Python.path_utils.executor": "Run",
+    "Python.planner_business.executor": "Debug",
+    "Python.plot_individualizer.executor": "Run",
+    "Python.plot_window_reader_basic (1).executor": "Run",
+    "Python.plot_window_reader_basic.executor": "Run",
+    "Python.plot_windows (1).executor": "Run",
+    "Python.project_plot_graphviz.executor": "Run",
+    "Python.qt_plots.executor": "Run",
+    "Python.query_builder.executor": "Run",
+    "Python.query_builder_v2.executor": "Run",
+    "Python.recording_business_v2.executor": "Run",
+    "Python.recording_business_v3.executor": "Run",
+    "Python.recording_main.executor": "Run",
+    "Python.recording_main_v2.executor": "Run",
+    "Python.recording_main_v3.executor": "Run",
+    "Python.sequenzer.executor": "Run",
+    "Python.sequenzer_temp (1).executor": "Run",
+    "Python.sequenzer_temp.executor": "Run",
+    "Python.server.executor": "Run",
+    "Python.simulatioor_gui.executor": "Run",
+    "Python.simulator_gui (1).executor": "Run",
+    "Python.simulator_gui.executor": "Run",
+    "Python.smaller_stuff.executor": "Run",
+    "Python.standard_paths.executor": "Run",
+    "Python.start_etc_measurement_gui.executor": "Run",
+    "Python.suggestionsgpt.executor": "Run",
+    "Python.suquenzer_gui.executor": "Run",
+    "Python.t_p_simulator.executor": "Run",
+    "Python.table_creator.executor": "Run",
+    "Python.table_data.executor": "Run",
+    "Python.table_partitioner.executor": "Run",
+    "Python.test_planner.executor": "Run",
+    "Python.test_scheduler.executor": "Run",
+    "Python.tests.executor": "Run",
+    "Python.tp_program_simulator.executor": "Run",
+    "Python.unittest_plotting.executor": "Run",
+    "Python.visualize_color_maps.executor": "Run",
+    "Python.write_sql_results_to_txt.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Daten/Kiki/ProgrammingStuff/t_p_etc_recorder_v2",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\side_operations" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\main_gui\ui" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\main_gui" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\old_snippets" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\temp_folder_hot" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\infrastructure\handler" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\database_maintenance" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.kinetics_main">
+    <configuration name="h2_uptake_correction_gui" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/side_operations" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="kinetics_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/kinetics_gui" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="kinetics_worker" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/kinetics_gui" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_worker.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Scripts/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="recording_main_v3" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/recording_gui" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.kinetics_main" />
+        <item itemvalue="Python.h2_uptake_correction_gui" />
+        <item itemvalue="Python.kinetics_worker" />
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.recording_main_v3" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-dfff61a61320-9cdd278e9d02-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.25410.159" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="" />
+      <created>1719298617988</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1719298617988</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="3ef81a11-b309-45e8-8da9-65d800ba514f" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="3ef81a11-b309-45e8-8da9-65d800ba514f">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="false" />
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_ui_business.py</url>
+          <line>470</line>
+          <option name="timeStamp" value="157" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/planner_gui/planner_business.py</url>
+          <line>124</line>
+          <option name="timeStamp" value="231" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py</url>
+          <line>996</line>
+          <option name="timeStamp" value="318" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
+          <line>507</line>
+          <option name="timeStamp" value="416" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/config_connection_reading_management/database_reading_writing.py</url>
+          <line>506</line>
+          <option name="timeStamp" value="417" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py</url>
+          <line>48</line>
+          <option name="timeStamp" value="432" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/data_fitter/main_fitter_backend.py</url>
+          <line>125</line>
+          <option name="timeStamp" value="481" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/tp_program_simulator.py</url>
+          <line>218</line>
+          <option name="timeStamp" value="525" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/side_operations/h2_uptake_correction_gui.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="568" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/hot_disk_sequenzer/suquenzer_gui.py</url>
+          <line>9</line>
+          <option name="timeStamp" value="577" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py</url>
+          <line>16</line>
+          <option name="timeStamp" value="579" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py</url>
+          <line>595</line>
+          <option name="timeStamp" value="581" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/infrastructure/connections/connections.py</url>
+          <line>343</line>
+          <option name="timeStamp" value="582" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py</url>
+          <line>32</line>
+          <option name="timeStamp" value="605" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="x_dehyd" />
+        <watch expression="self.beta_values[0]" />
+        <watch expression="query" />
+        <watch expression="column_names[0]" />
+        <watch expression="update_between_min_list" />
+        <watch expression="&#10;            sample_temperatures=temperatures,&#10;            heating_powers=heating_powers," />
+        <watch expression="meas_times" />
+        <watch expression="&#10;            sample_temperatures=temperatures,&#10;            heating_powers=heating_powers,&#10;        template_file = self.template_file_path.text()&#10;&#10;" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>

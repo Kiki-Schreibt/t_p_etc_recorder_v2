@@ -274,11 +274,35 @@ class KineticsController(QObject):
         from src.infrastructure.core.table_config import TableConfig
 
         dates = self.dal.fetch_measurements(sample_id=self.view.sample_edit.text(),
-                                    cycles=self.selected_cycle,
-                                    y_col_name=TableConfig().KineticsTable.time)
-        print(dates)
-        self.selected_cycle = None
-        #time_range = [dates.min(), dates.max()]
+                                            cycles=self.selected_cycle,
+                                            y_col_name=TableConfig().KineticsTable.time)
+
+        time_range = {}
+        for cyc in self.selected_cycle:
+            start_reading = min(dates[cyc].z)
+            end_reading = max(dates[cyc].z)
+            time_range= [start_reading, end_reading]
+            print(time_range)
+        self._open_correction_gui(time_range)
+
+    def _open_correction_gui(self, time_range):
+        from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
+        from src.infrastructure.handler.metadata_handler import MetaData
+        from src.infrastructure.core.config_reader import config
+        meta_data = MetaData(sample_id=self.view.sample_edit.text(),
+                             db_conn_params=config.db_conn_params)
+
+
+        self.correction_win = UptakeCorrectionWindow(
+            meta_data=meta_data,
+            config=config,
+            time_range_to_read=time_range.copy()
+        )
+        self.correction_win.top_plot.reader.time_range_to_read = time_range
+        self.correction_win.top_plot.reader.reading_mode = "by_time"
+        self.correction_win.top_plot.reader.start()
+
+        self.correction_win.show()
 
 
 def main() -> None:
