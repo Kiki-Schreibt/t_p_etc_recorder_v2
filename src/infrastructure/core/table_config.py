@@ -165,6 +165,8 @@ class TableConfig:
         rate_wt_p_min = 'rate_wt_p_min'
         rate_kg_min = 'rate_kg_min'
         time_delta_min = 'time_delta_min'
+        max_rate_wt_p_min = 'max_rate_wt_p_min'
+        max_rate_kg_min = 'max_rate_kg_min'
 
     def get_table_column_names(self, table_class=None, table_name=None):
         """

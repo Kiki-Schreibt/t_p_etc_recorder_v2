@@ -1128,10 +1128,14 @@ class KineticCalculator:
                                           enforce_monotonic,
                                           reaction_duration=reaction_duration)
         V_res = df[self.tp_table.reservoir_volume].iloc[0]
+        max_rate_wt_p_min = df_kin[self.kinetics_table.rate_wt_p_min].max() or None
+        max_rate_kg_min = df_kin[self.kinetics_table.rate_kg_min].max() or None
         self._write_kinetic_to_database(df=df_kin,
                                         cycle_number=cycle_number,
                                         meta_data=self.meta_data,
-                                        V_res=V_res
+                                        V_res=V_res,
+                                        max_rate_wt_p_min=max_rate_wt_p_min,
+                                        max_rate_kg_min=max_rate_kg_min
                                         )
 
     def _grab_cycle(self, cycle_number):
@@ -1185,7 +1189,10 @@ class KineticCalculator:
         #plt.show()
         return df_kin
 
-    def _write_kinetic_to_database(self, df, cycle_number, meta_data, V_res):
+    def _write_kinetic_to_database(self, df, cycle_number,
+                                        meta_data, V_res,
+                                        max_rate_wt_p_min=None,
+                                        max_rate_kg_min=None):
         kinetics_table = TableConfig().KineticsTable
         #prepare data by creating single row df with list columns
         df_one_row = pd.DataFrame([{
@@ -1194,11 +1201,12 @@ class KineticCalculator:
                                     }])
 
 
-        #df_one_row[kinetics_table.time] = df.index.tolist()
         df_one_row[kinetics_table.sample_id] = meta_data.sample_id
         df_one_row[kinetics_table.cycle_number] = cycle_number
         df_one_row[kinetics_table.V_res] = V_res
         df_one_row[kinetics_table.V_cell] = meta_data.volume_measurement_cell
+        df_one_row[kinetics_table.max_rate_wt_p_min] = max_rate_wt_p_min or None
+        df_one_row[kinetics_table.max_rate_kg_min] = max_rate_kg_min or None
 
         kin_insert_query, kin_values = TableConfig().writing_query_from_df(
             df=df_one_row,
@@ -1217,7 +1225,9 @@ class KineticCalculator:
             self.logger.info(f"Kinetics data for {meta_data.sample_id} cycle #{cycle_number} already exists. "
                              f"Will be overwritten")
             self._delete_kinetic_from_database(cycle_number=cycle_number, sample_id=meta_data.sample_id)
-            self._write_kinetic_to_database(df, cycle_number, meta_data, V_res)
+            self._write_kinetic_to_database(df, cycle_number, meta_data, V_res,
+                                            max_rate_wt_p_min=max_rate_wt_p_min,
+                                            max_rate_kg_min=max_rate_kg_min)
         except Exception as e:
             self.logger.error(f"Error in writing kinetics: %s", e)
 

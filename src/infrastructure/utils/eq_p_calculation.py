@@ -369,7 +369,7 @@ class KineticCalcEquations:
                 self.p_col, self.T_cell_col, self.kinetics_table.temperature_res,
                 self.kinetics_table.m_gas_kg, self.kinetics_table.uptake_kg,
                 self.kinetics_table.uptake_wt_p,
-                self.kinetics_table.uptake_rate_kg_min, self.kinetics_table.uptake_rate_pct_min
+                self.kinetics_table.rate_kg_min, self.kinetics_table.rate_wt_p_min
             ])
 
         out = pd.concat(out_chunks).sort_index()
@@ -379,9 +379,7 @@ class KineticCalcEquations:
             out[self.kinetics_table.uptake_wt_p] *= self.sign
             out[self.kinetics_table.rate_kg_min] *= self.sign
             out[self.kinetics_table.rate_wt_p_min] *= self.sign
-       # out.rename(columns={"p_bar": self.kinetics_table.pressure,
-       #                     "T_cell_C": self.kinetics_table.temperature,
-       #                     "T_res_C": self.kinetics_table.temperature_res}, inplace=True)
+
         return out
 
     # ---- internals ----------------------------------------------------------
@@ -447,14 +445,14 @@ class KineticCalcEquations:
         return df
 
     def _smooth(self, df: pd.DataFrame, seconds: Number) -> pd.DataFrame:
-        window = f"{int(seconds)}S"
+        window = f"{int(seconds)}s"
         out = df.copy()
         out[self.p_col] = df[self.p_col].rolling(window, center=True, min_periods=1).mean()
         out[self.T_cell_col] = df[self.T_cell_col].rolling(window, center=True, min_periods=1).mean()
         return out
 
     def _smooth_series(self, s: pd.Series, seconds: Number) -> pd.Series:
-        window = f"{int(seconds)}S"
+        window = f"{int(seconds)}s"
         return s.rolling(window, center=True, min_periods=1).mean()
 
     def _gas_mass_kg(

@@ -431,7 +431,7 @@ class KineticsView(QMainWindow):
         self.resample_rule_edit.setText("60s")
 
         self.resample_how_combo = QComboBox()
-        self.resample_how_combo.addItems(["mean", "nearest"])
+        self.resample_how_combo.addItems(["mean", "nearest", 'ffill', 'bfill'])
         self.resample_how_combo.setCurrentText("mean")
 
         self.smooth_seconds_spin = QDoubleSpinBox()

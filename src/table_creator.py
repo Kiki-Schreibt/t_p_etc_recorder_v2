@@ -280,6 +280,8 @@ class TableCreator:
                                 'm_gas_kg':            'DOUBLE PRECISION[]',
                                 'v_cell':              'real',
                                 'v_res':               'real',
+                                'max_rate_wt_p_min':   'real',
+                                'max_rate_kg_min':     'real',
                                 '_default':            'TEXT[]'
                             }
             return data_map

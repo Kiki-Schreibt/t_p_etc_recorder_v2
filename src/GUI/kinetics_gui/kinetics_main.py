@@ -52,7 +52,7 @@ class KineticsController(QObject):
         self.view.loadRequested.connect(self.on_load_curves)
         self.view.runRequested.connect(self.on_run_kinetics)
         self.view.clearRequested.connect(self._on_clear_all)
-        self.view.exportRequested.connect(self.on_export_to_origin)
+        self.view.exportRequested.connect(self._on_export_to_origin)
         self.view.deleteRequested.connect(self._on_delete_requested)
         self.view.canvas.mpl_connect('pick_event', self._on_pick)
         self.view.correctionRequested.connect(self._on_correction_requested)
@@ -99,7 +99,6 @@ class KineticsController(QObject):
         # de-dup & sort
         return sorted(set(out))
 
-
     # ---------- slots (invoked by the view) ----------
     @Slot(str, str, str)
     def on_load_curves(self, sample_id: str, cycles_text: str, y_val_text) -> None:
@@ -123,7 +122,6 @@ class KineticsController(QObject):
             self.view.set_status(f"Loaded measurement curves for cycles: {cycles}")
         except Exception as e:
             self.view.show_error(f"DB error while loading curves: {e}")
-
 
     @Slot(str, str)
     def on_run_kinetics(self, sample_id: str, cycles_text: str) -> None:
@@ -245,8 +243,7 @@ class KineticsController(QObject):
 
     # ---------- Origin export ----------
     @Slot()
-    def on_export_to_origin(self) -> None:
-        """Create one Origin worksheet and add X/Y columns per cycle, then plot them all."""
+    def _on_export_to_origin(self) -> None:
         if not self._visible_series:
             self.view.show_error("There are no visible curves to export.")
             return
@@ -261,53 +258,66 @@ class KineticsController(QObject):
             return
 
         try:
-            op.set_show()  # bring up Origin if it isn't visible
+            op.set_show()
 
-            # One worksheet for all curves (safe even if X lengths differ between cycles)
+            # One worksheet for all cycles; use triplets (X,Y,Z) per cycle
             wks = op.new_sheet('w')
             wks.name = "Kinetics_Export"
 
-            # One graph window with a single layer
-            gp = op.new_graph()
+            # Use a 3D graph template / layer
+            # If your Origin has a template name for 3D scatter/line, use it:
+            # gp = op.new_graph(template='3D Scatter')
+            gp = op.new_graph()     # fallback: create default graph
             gl = gp[0]
+            # If needed, switch the layer to 3D via LabTalk (uncomment if your default layer is 2D)
+            # op.lt_exec('layer -d 3;')  # set active layer to 3D
 
             made = 0
-            # We’ll add two columns per cycle: X then Y
             for idx, cyc in enumerate(sorted(self._visible_series.keys())):
                 s = self._visible_series[cyc]
-                xcol = 2 * idx
-                ycol = xcol + 1
 
+                # allocate consecutive triplets: [X,Y,Z] per cycle
+                base = 3 * idx
+                xcol = base
+                ycol = base + 1
+                zcol = base + 2
 
-
-                # Fill columns and set designations/labels
-                # X column
+                # X (time minutes)
                 wks.from_list(
-                    xcol,
-                    s.x.tolist(),
+                    xcol, s.x.tolist(),
                     lname=f"Time_Cyc_{str(cyc).replace('.', '_')}",
-                    units="s",
+                    units="min",
                     axis="X",
                 )
-                # Y column
+                # Y (cycle index, constant vector)
                 wks.from_list(
-                    ycol,
-                    s.z.tolist(),
-                    lname=f"Value_Cyc_{str(cyc).replace('.', '_')}",
+                    ycol, s.y.tolist(),
+                    lname=f"Cycle_{str(cyc).replace('.', '_')}",
                     axis="Y",
                 )
+                # Z (value)  ← write into zcol (not ycol)
+                wks.from_list(
+                    zcol, s.z.tolist(),
+                    lname=f"Value_Cyc_{str(cyc).replace('.', '_')}",
+                    axis="Z",
+                )
 
-                # Add plot for this (X,Y) pair
-                p = gl.add_plot(wks, coly=ycol, colx=xcol, type=202)  # 202 = Line+Symbol
-                p.legend = f"Cycle {cyc}"
-                made += 1
+                # Add an XYZ plot for this triplet.
+                # IMPORTANT: use a 3D plot type. The exact code depends on Origin/OriginPro:
+                # - 3D Scatter is commonly used for XYZ sets.
+                # Replace `PLOT_TYPE_3D_SCATTER` with your actual code/enum for 3D Scatter in originpro.
+              #  p = gl.add_plot(wks, colx=xcol, coly=ycol, colz=zcol, type=op.PLOT_TYPE_3D_SCATTER)
+              #  p.legend = f"Cycle {cyc}"
+              #  made += 1
 
             gl.rescale()
-            self.view.set_status(f"Exported {made} curve(s) to Origin (one worksheet, X/Y pairs).")
-            op.exit()
+            self.view.set_status(f"Exported {made} XYZ curve(s) to Origin.")
+            # Don't close Origin here; let the user inspect the graph
+            # op.exit()
+
         except Exception as e:
             self.view.show_error(f"Failed to export to Origin: {e}")
-            op.exit()
+            # op.exit()
 
     def _on_pick(self, event):
         artist = event.artist
@@ -356,6 +366,12 @@ class KineticsController(QObject):
 
         self.correction_win.show()
 
+    def _stop_all(self):
+        pass
+
+    def closeEvent(self, event):
+        self._stop_all()
+        self.view.closeEvent(event)
 
 def main() -> None:
     # Services
@@ -369,6 +385,7 @@ def main() -> None:
 
     view.show()
     sys.exit(app.exec())
+
 
 if __name__ == '__main__':
     main()
