@@ -152,11 +152,12 @@ class KineticsController(QObject):
         self._worker = KineticsWorker(cycles=cycles,
                                       sample_id=sample_id,
                                       config=self.dal.config)
-        rr, rh, ss, em = self.view.get_kinetics_options()
+        rr, rh, ss, em, rd = self.view.get_kinetics_options()
         self._worker.resample_rule = rr
         self._worker.resample_how = rh
         self._worker.smooth_seconds = ss
         self._worker.enforce_monotonic = em
+        self._worker.reaction_duration = rd
 
         self._worker.progress.connect(self.view.set_progress)
         self._worker.error.connect(self._on_worker_error)

@@ -328,6 +328,10 @@ class KineticsView(QMainWindow):
         kin_box = QGroupBox("Kinetics")
         kin_form = QFormLayout()
 
+
+        self.reaction_duration_edit = QLineEdit()
+        self.reaction_duration_edit.setPlaceholderText("e.g., 180min")
+
         self.resample_rule_edit = QLineEdit()
         self.resample_rule_edit.setPlaceholderText("e.g., 60s")
         self.resample_rule_edit.setText("60s")
@@ -346,6 +350,7 @@ class KineticsView(QMainWindow):
         self.enforce_monotonic_chk = QCheckBox("Enforce monotonic")
         self.enforce_monotonic_chk.setChecked(True)
 
+        kin_form.addRow("Reaction duration", self.reaction_duration_edit)
         kin_form.addRow("Resample rule", self.resample_rule_edit)
         kin_form.addRow("Resample how", self.resample_how_combo)
         kin_form.addRow("Smooth seconds", self.smooth_seconds_spin)
@@ -526,7 +531,8 @@ class KineticsView(QMainWindow):
         smooth_val = float(self.smooth_seconds_spin.value())
         smooth_seconds = None if smooth_val == 0.0 else smooth_val
         enforce_monotonic = self.enforce_monotonic_chk.isChecked()
-        return resample_rule, resample_how, smooth_seconds, enforce_monotonic
+        reaction_duration = self.reaction_duration_edit.text().strip()
+        return resample_rule, resample_how, smooth_seconds, enforce_monotonic, reaction_duration
 
     def _on_canvas_context_menu(self, pos):
         from PySide6.QtWidgets import QMenu

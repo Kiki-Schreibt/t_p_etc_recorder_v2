@@ -6,7 +6,8 @@ from __future__ import annotations
 import os
 import sys
 import math
-from datetime import datetime
+
+from datetime import datetime, timedelta
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
@@ -144,6 +145,7 @@ class KineticsWorker(QThread):
         self.resample_how = 'mean'
         self.smooth_seconds = None
         self.enforce_monotonic = True
+        self.reaction_duration = None
 
     def _compute_kinetics(self, cycle_number):
 
@@ -151,7 +153,8 @@ class KineticsWorker(QThread):
                             resample_rule=self.resample_rule,
                             resample_how=self.resample_how,
                             smooth_seconds=self.smooth_seconds,
-                            enforce_monotonic=self.enforce_monotonic)
+                            enforce_monotonic=self.enforce_monotonic,
+                            reaction_duration = self.reaction_duration)
 
     def run(self) -> None:
         total = len(self.cycles)

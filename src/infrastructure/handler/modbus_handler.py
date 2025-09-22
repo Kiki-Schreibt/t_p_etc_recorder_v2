@@ -1116,7 +1116,7 @@ class KineticCalculator:
         self.logger = logging.getLogger(__name__)
 
     def run(self, cycle_number, resample_rule='60s', resample_how='mean',
-            smooth_seconds=None, enforce_monotonic=True):
+            smooth_seconds=None, enforce_monotonic=True, reaction_duration=None):
         df = self._grab_cycle(cycle_number)
         if cycle_number % 1 == 0.5:
             absorption_sign = 1
@@ -1124,7 +1124,9 @@ class KineticCalculator:
             absorption_sign = -1
 
         df_kin = self._calculate_kinetics(df, absorption_sign, resample_rule,
-                                          resample_how, smooth_seconds, enforce_monotonic)
+                                          resample_how, smooth_seconds,
+                                          enforce_monotonic,
+                                          reaction_duration=reaction_duration)
         V_res = df[self.tp_table.reservoir_volume].iloc[0]
         self._write_kinetic_to_database(df=df_kin,
                                         cycle_number=cycle_number,
@@ -1153,7 +1155,7 @@ class KineticCalculator:
         return df_tp
 
     def _calculate_kinetics(self, df, absorption_sign, resample_rule='60s', resample_how='mean',
-                            smooth_seconds=None, enforce_monotonic=True):
+                            smooth_seconds=None, enforce_monotonic=True, reaction_duration=None):
 
         kin_calc = KineticCalcEquations(
                                         V_cell_mL=self.meta_data.volume_measurement_cell,
@@ -1166,7 +1168,8 @@ class KineticCalculator:
                                     resample_rule=resample_rule,
                                     resample_how=resample_how,
                                     smooth_seconds=smooth_seconds,
-                                    enforce_monotonic=enforce_monotonic
+                                    enforce_monotonic=enforce_monotonic,
+                                    reaction_duration=reaction_duration
                                     )
 
 

@@ -213,10 +213,14 @@ class VantHoffCalcEq:
         p = m * R_H2 * 1e-5 / (((V_res + V_pipes) / T_res) + (V_cell / T_cell))
         return p
 
-
-
 from typing import Optional, Sequence, Tuple, Union
 from zoneinfo import ZoneInfo
+
+try:
+    import src.infrastructure.core.logger as logging
+except ImportError:
+    import logging
+
 
 Number = Union[int, float, np.number]
 TimeLike = Union[pd.Timestamp, str]
@@ -288,6 +292,7 @@ class KineticCalcEquations:
         resample_how: str = "nearest",  # 'ffill'|'bfill'|'nearest'|'mean'
         smooth_seconds: Optional[Number] = None,  # optional rolling mean for noise (seconds)
         enforce_monotonic: bool = True,
+        reaction_duration=None
     ) -> pd.DataFrame:
         """
         Main entry: returns a DataFrame with uptake & kinetics columns.
@@ -313,6 +318,14 @@ class KineticCalcEquations:
         df_in.index = pd.to_datetime(df_in[time_col], errors="raise")
         df_in.drop(columns=[time_col], inplace=True)
         df_in = self._ensure_dt_index(df_in)
+
+        df_in = self._ensure_df_in_reaction_time(df_in, reaction_duration)
+
+        if reaction_duration is not None:
+            df_in = self._ensure_df_in_reaction_time(df_in=df_in,
+                                                     reaction_duration=reaction_duration)
+        if df_in.empty:
+            return df_in
 
         # Basic column checks
         for col in (self.p_col, self.T_cell_col):
@@ -523,6 +536,42 @@ class KineticCalcEquations:
             return df
 
         raise TypeError("Unsupported index type for time axis.")
+
+    def _ensure_df_in_reaction_time(self, df_in, reaction_duration):
+        dur = _to_timedelta(reaction_duration)
+        if dur <= pd.Timedelta(0):
+            return pd.DataFrame()  # or raise ValueError
+        t0 = df_in.index.min()
+        t_end = t0 + dur
+        # inclusive on both ends; adjust if you prefer half-open [t0, t_end)
+        df_in = df_in.loc[(df_in.index >= t0) & (df_in.index <= t_end)]
+        if df_in.empty:
+            return pd.DataFrame(columns=[
+                self.p_col, self.T_cell_col, self.kinetics_table.temperature_res,
+                self.kinetics_table.m_gas_kg, self.kinetics_table.uptake_kg,
+                self.kinetics_table.uptake_wt_p, self.kinetics_table.uptake_rate_kg_min,
+                self.kinetics_table.uptake_rate_pct_min
+            ])
+        return df_in
+
+
+
+###helper methods
+def _to_timedelta(value) -> pd.Timedelta:
+    """Accepts pd.Timedelta, numpy timedelta, strings like '45s','10min','1H',
+       or a number (interpreted as seconds)."""
+    import pandas as pd
+    if isinstance(value, pd.Timedelta):
+        return value
+    try:
+        # numeric -> seconds
+        if isinstance(value, (int, float)):
+            return pd.to_timedelta(value, unit="s")
+        # strings / numpy timedeltas
+        return pd.to_timedelta(value)
+    except Exception as e:
+        raise ValueError(f"Invalid reaction_duration {value!r}: {e}")
+
 # Example test functions to check behavior:
 
 
