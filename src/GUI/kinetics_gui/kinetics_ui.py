@@ -643,8 +643,8 @@ class KineticsView(QMainWindow):
         self.plot_mode_combo.addItems([
             "Auto",             # default: 2D for single cycle, else 3D
             "3D",
-            "2D (single cycle time–value)",
-            "2D (cycle–value summary)",
+            "2D (time-value)",
+            "2D (cycle–value)",
         ])
         self.plot_mode_combo.setCurrentText("Auto")
 
@@ -933,9 +933,9 @@ class KineticsView(QMainWindow):
         mode = self.plot_mode_combo.currentText()
         if mode == "3D":
             self._switch_to_3d()
-        elif mode.startswith("2D (single"):
+        elif mode.startswith("2D (time"):
             self._switch_to_2d_time()
-        elif mode.startswith("2D (cycle–value"):
+        elif mode.startswith("2D (cycle"):
             self._switch_to_2d_cyclevalue()
         else:
             # Auto: leave as-is; controller will toggle based on #cycles
@@ -959,7 +959,7 @@ class KineticsView(QMainWindow):
         # ensure the correct view is active
         if self.plot_mode_combo.currentText() == "Auto":
             self._switch_to_2d_cyclevalue()
-        elif self.plot_mode_combo.currentText() != "2D (cycle–value summary)":
+        elif self.plot_mode_combo.currentText() != "2D (cycle–value)":
             self._switch_to_2d_cyclevalue()
         if not pairs:
             return
