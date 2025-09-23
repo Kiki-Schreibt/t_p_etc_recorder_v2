@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -397,11 +398,6 @@
           <url>file://$PROJECT_DIR$/src/infrastructure/connections/connections.py</url>
           <line>343</line>
           <option name="timeStamp" value="582" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py</url>
-          <line>32</line>
-          <option name="timeStamp" value="605" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

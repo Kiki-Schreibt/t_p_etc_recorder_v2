@@ -36,10 +36,13 @@ from __future__ import annotations
 import os
 import sys
 import math
+from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
 import numpy as np
+
+import matplotlib.dates as mdates
 
 # --- Qt / Matplotlib embedding ---
 from PySide6.QtCore import Qt, QThread, Signal, Slot, QObject
@@ -59,7 +62,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QVBoxLayout,
     QComboBox,
-    QWidget
+    QWidget, QStackedLayout
 )
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -259,6 +262,291 @@ class Plot3DManager:
             self.z_axis_str = "Uptake (wt-%)"
         self.canvas.ax.set_zlabel(self.z_axis_str)
 
+
+# -----------------------------
+# 2D Plot manager
+# -----------------------------
+class Matplotlib2DCanvas(FigureCanvas):
+    def __init__(self) -> None:
+        fig = Figure(figsize=(7, 5), tight_layout=True)
+        self.ax = fig.add_subplot(111)  # 2D
+        super().__init__(fig)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.updateGeometry()
+        self._init_axes()
+
+    def _init_axes(self, y_axis_str='Value') -> None:
+        ax = self.ax
+        ax.clear()
+        ax.set_xlabel("Time (min)")
+        ax.set_ylabel(y_axis_str)
+        ax.grid(True)
+        self.draw_idle()
+
+
+class Plot2DManager:
+    """2D manager: plots X=time(min) vs Y=z(value) and colors per cycle."""
+    def __init__(self, canvas: Matplotlib2DCanvas) -> None:
+        self.canvas = canvas
+        self.ax = canvas.ax
+        self.measurement_lines: Dict[float, List] = {}
+        self.kinetics_lines: Dict[float, List] = {}
+        self._x_min = math.inf; self._x_max = -math.inf
+        self._y_min = math.inf; self._y_max = -math.inf
+        self.y_axis_str = ""
+
+    # --- datetime helpers for Y axis (z series) ---
+    def _is_datetime_array(self, a: np.ndarray) -> bool:
+        if isinstance(a, np.ndarray):
+            if np.issubdtype(a.dtype, np.datetime64): return True
+            return a.dtype == object and a.size and isinstance(a[0], datetime)
+        return False
+
+    def _minmax_y(self, arr: np.ndarray) -> Tuple[float, float]:
+        if self._is_datetime_array(arr):
+            nums = mdates.date2num(list(arr))
+            return float(np.min(nums)), float(np.max(nums))
+        arrf = np.asarray(arr, dtype=float)
+        return float(np.min(arrf)), float(np.max(arrf))
+
+    # ---- bounds helpers ----
+    def _update_bounds(self, x: np.ndarray, y: np.ndarray) -> None:
+        self._x_min = min(self._x_min, float(np.min(x)))
+        self._x_max = max(self._x_max, float(np.max(x)))
+        ymin, ymax = self._minmax_y(y)
+        self._y_min = min(self._y_min, ymin)
+        self._y_max = max(self._y_max, ymax)
+
+    def _apply_bounds(self) -> None:
+        if not all(np.isfinite(v) for v in [self._x_min, self._x_max, self._y_min, self._y_max]):
+            return
+        def _pad(a, b):
+            span = b - a
+            if span <= 0: return a - 0.5, b + 0.5
+            pad = 0.03 * span
+            return a - pad, b + pad
+        x0, x1 = _pad(self._x_min, self._x_max)
+        y0, y1 = _pad(self._y_min, self._y_max)
+        self.ax.set_xlim(x0, x1); self.ax.set_ylim(y0, y1)
+        self.canvas.draw_idle()
+
+    # ---- limits API (mirror 3D signature) ----
+    def get_current_limits(self) -> Tuple[Tuple[float,float], Tuple[float,float], Tuple[float,float]]:
+        # return (xlim, dummy, ylim) so the existing axis panel keeps working
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+        return xlim, (0.0, 1.0), ylim
+
+    def get_data_bounds(self) -> Tuple[Tuple[float,float], Tuple[float,float], Tuple[float,float]] | None:
+        vals = [self._x_min, self._x_max, self._y_min, self._y_max]
+        if not all(np.isfinite(v) for v in vals):
+            return None
+        return (self._x_min, self._x_max), (0.0, 1.0), (self._y_min, self._y_max)
+
+    def set_limits(self, xlim=None, ylim=None, zlim=None, *, draw=True) -> None:
+        # map zlim -> 2D y-limits
+        if xlim is not None: self.ax.set_xlim(*xlim)
+        if zlim is not None: self.ax.set_ylim(*zlim)
+        if draw: self.canvas.draw_idle()
+
+    def fit_to_data(self) -> None:
+        self._apply_bounds()
+
+    def reset_view(self) -> None:
+        self.ax.set_xlabel("Time (min)")
+        self.ax.set_ylabel(self.y_axis_str or "Value")
+        self.ax.grid(True)
+        if self.get_data_bounds() is not None:
+            self._apply_bounds()
+        else:
+            self.canvas._init_axes(y_axis_str=self.y_axis_str)
+        self.canvas.draw_idle()
+
+    # ---- plotting ----
+    def _ensure_y_formatter(self, z: np.ndarray):
+        if self._is_datetime_array(z):
+            loc = mdates.AutoDateLocator()
+            fmt = mdates.ConciseDateFormatter(loc)
+            self.ax.yaxis.set_major_locator(loc)
+            self.ax.yaxis.set_major_formatter(fmt)
+
+    def plot_measurement(self, cycle: float, series: Series, z_axis_type="") -> None:
+        self._set_y_axis(z_axis_type)
+        self._ensure_y_formatter(series.z)
+        (line,) = self.ax.plot(series.x, series.z, linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
+        line.set_picker(True); line.set_pickradius(8)
+        self.measurement_lines.setdefault(float(cycle), []).append(line)
+        self._update_bounds(series.x, series.z); self._apply_bounds()
+
+    def plot_kinetics(self, cycle: float, series: Series) -> None:
+        self._ensure_y_formatter(series.z)
+        (line,) = self.ax.plot(series.x, series.z, linestyle="--", linewidth=2.0, alpha=0.95, label=f"kin c{cycle}")
+        line.set_picker(True); line.set_pickradius(8)
+        self.kinetics_lines.setdefault(float(cycle), []).append(line)
+        self._update_bounds(series.x, series.z); self._apply_bounds()
+
+    def remove_measurement(self, cycle: int | float) -> None:
+        for art in self.measurement_lines.pop(float(cycle), []):
+            try: art.remove()
+            except Exception: pass
+        self.canvas.draw_idle()
+
+    def clear_all(self) -> None:
+        self.ax.cla()
+        self.canvas._init_axes(y_axis_str=self.y_axis_str)
+        self.measurement_lines.clear(); self.kinetics_lines.clear()
+        self._x_min = self._y_min = math.inf
+        self._x_max = self._y_max = -math.inf
+        self.canvas.draw_idle()
+
+    def resolve_artist(self, artist):
+        for cyc, arts in self.measurement_lines.items():
+            if artist in arts: return ("meas", float(cyc))
+        for cyc, arts in self.kinetics_lines.items():
+            if artist in arts: return ("kin", float(cyc))
+        return (None, None)
+
+    def mark_selected(self, artist):
+        for d in (self.measurement_lines, self.kinetics_lines):
+            for arts in d.values():
+                for a in arts:
+                    a.set_linewidth(1.5); a.set_alpha(0.9); a.set_zorder(1)
+        artist.set_linewidth(3.0); artist.set_alpha(1.0); artist.set_zorder(10)
+        self.canvas.draw_idle()
+
+    def _set_y_axis(self, z_axis_type):
+        # mirror your 3D label logic on Y
+        from src.infrastructure.core.table_config import TableConfig
+        table = TableConfig().KineticsTable
+        if z_axis_type == table.pressure:
+            self.y_axis_str = "Pressure (bar)"
+        elif z_axis_type == table.rate_kg_min:
+            self.y_axis_str = "Rate (kg min^-1)"
+        elif z_axis_type == table.rate_wt_p_min:
+            self.y_axis_str = "Rate (wt-% min^-1)"
+        elif z_axis_type == table.uptake_kg:
+            self.y_axis_str = "Uptake (kg)"
+        elif z_axis_type == table.uptake_wt_p:
+            self.y_axis_str = "Uptake (wt-%)"
+        else:
+            self.y_axis_str = "Value"
+        self.canvas.ax.set_ylabel(self.y_axis_str)
+
+
+# -----------------------------
+# 2D Plot manager (Cycle vs Value summary)
+# -----------------------------
+class CycleValue2DCanvas(FigureCanvas):
+    def __init__(self) -> None:
+        fig = Figure(figsize=(7, 5), tight_layout=True)
+        self.ax = fig.add_subplot(111)
+        super().__init__(fig)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.updateGeometry()
+        self._init_axes()
+
+    def _init_axes(self, y_axis_str='Value') -> None:
+        ax = self.ax
+        ax.clear()
+        ax.set_xlabel("Cycle (#)")
+        ax.set_ylabel(y_axis_str)
+        ax.grid(True)
+        self.draw_idle()
+
+
+class CycleValue2DManager:
+    """
+    2D manager for (X = cycle number, Y = float value) plots.
+    Implements the same limits API as the other managers so the existing
+    axis panel keeps working.
+    """
+    def __init__(self, canvas: CycleValue2DCanvas) -> None:
+        self.canvas = canvas
+        self.ax = canvas.ax
+        self.lines: List = []
+        self._x_min = math.inf; self._x_max = -math.inf
+        self._y_min = math.inf; self._y_max = -math.inf
+        self.y_axis_str = "Value"
+
+    # ---- bounds helpers ----
+    def _update_bounds(self, x: np.ndarray, y: np.ndarray) -> None:
+        self._x_min = min(self._x_min, float(np.min(x)))
+        self._x_max = max(self._x_max, float(np.max(x)))
+        self._y_min = min(self._y_min, float(np.min(y)))
+        self._y_max = max(self._y_max, float(np.max(y)))
+
+    def _apply_bounds(self) -> None:
+        if not all(np.isfinite(v) for v in [self._x_min, self._x_max, self._y_min, self._y_max]):
+            return
+        def _pad(a, b):
+            span = b - a
+            if span <= 0: return a - 0.5, b + 0.5
+            pad = 0.03 * span
+            return a - pad, b + pad
+        x0, x1 = _pad(self._x_min, self._x_max)
+        y0, y1 = _pad(self._y_min, self._y_max)
+        self.ax.set_xlim(x0, x1); self.ax.set_ylim(y0, y1)
+        self.canvas.draw_idle()
+
+    # ---- limits API (same shape as others) ----
+    def get_current_limits(self):
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+        return xlim, (0.0, 1.0), ylim
+
+    def get_data_bounds(self):
+        vals = [self._x_min, self._x_max, self._y_min, self._y_max]
+        if not all(np.isfinite(v) for v in vals):
+            return None
+        return (self._x_min, self._x_max), (0.0, 1.0), (self._y_min, self._y_max)
+
+    def set_limits(self, xlim=None, ylim=None, zlim=None, *, draw=True) -> None:
+        if xlim is not None: self.ax.set_xlim(*xlim)
+        if zlim is not None: self.ax.set_ylim(*zlim)
+        if draw: self.canvas.draw_idle()
+
+    def fit_to_data(self) -> None:
+        self._apply_bounds()
+
+    def reset_view(self) -> None:
+        self.ax.set_xlabel("Cycle (#)")
+        self.ax.set_ylabel(self.y_axis_str)
+        self.ax.grid(True)
+        if self.get_data_bounds() is not None:
+            self._apply_bounds()
+        else:
+            self.canvas._init_axes(y_axis_str=self.y_axis_str)
+        self.canvas.draw_idle()
+
+    # ---- plotting ----
+    def plot_xy(self, x: np.ndarray, y: np.ndarray, *, label: str = "") -> None:
+        (line,) = self.ax.plot(x, y, linewidth=2.0, alpha=0.95, label=label or "value")
+        line.set_picker(True); line.set_pickradius(8)
+        self.lines.append(line)
+        self._update_bounds(x, y); self._apply_bounds()
+
+    def clear_all(self) -> None:
+        self.ax.cla()
+        self.canvas._init_axes(y_axis_str=self.y_axis_str)
+        self.lines.clear()
+        self._x_min = self._y_min = math.inf
+        self._x_max = self._y_max = -math.inf
+        self.canvas.draw_idle()
+
+    def resolve_artist(self, artist):
+        for a in self.lines:
+            if artist is a:
+                # cycle isn't encoded per-artist here; return a generic match
+                return ("cv", None)
+        return (None, None)
+
+    def mark_selected(self, artist):
+        for a in self.lines:
+            a.set_linewidth(2.0); a.set_alpha(0.95); a.set_zorder(1)
+        artist.set_linewidth(3.0); artist.set_alpha(1.0); artist.set_zorder(10)
+        self.canvas.draw_idle()
+
+
 # -----------------------------
 # VIEW (UI only)
 # -----------------------------
@@ -274,17 +562,14 @@ class KineticsView(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Kinetics 3D Viewer")
-        self.resize(1200, 720)
+        self.resize(1400, 720)
         self._build_ui()
         self.selected_cycle = 0
 
     # --------- UI creation ---------
     def _build_ui(self) -> None:
-        self.canvas = Matplotlib3DCanvas()
-        self.canvas.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.canvas.customContextMenuRequested.connect(self._on_canvas_context_menu)
-        self.plot_mgr = Plot3DManager(self.canvas)
-
+        # --- canvases + managers ---
+        self._build_canvas()
 
         ##create top controls
         left, form = self._build_controls()
@@ -295,10 +580,10 @@ class KineticsView(QMainWindow):
         left_wrap = self._build_kinetic_controls(left, hl)
 
         hl.addWidget(left_wrap, 0)
-        hl.addWidget(self.canvas, 1)
+        hl.addWidget(self.canvas_holder, 1)
         self.setCentralWidget(root)
 
-        # wiring (unchanged signature)
+         # wiring
         self.btn_load.clicked.connect(lambda: self.loadRequested.emit(
             self.sample_edit.text().strip(),
             self.cycles_edit.text().strip(),
@@ -315,7 +600,36 @@ class KineticsView(QMainWindow):
         self.btn_axes_fit.clicked.connect(self._on_axes_fit_clicked)
         self.btn_axes_reset.clicked.connect(self._on_axes_reset_clicked)
 
+        # plot mode selector reacts to user choice
+        self.plot_mode_combo.currentIndexChanged.connect(self._on_plot_mode_changed)
+
         self._on_axes_sync_clicked()
+
+    def _build_canvas(self):
+        self.canvas3d = Matplotlib3DCanvas()
+        self.canvas2d_time = Matplotlib2DCanvas()
+        self.canvas2d_cv = CycleValue2DCanvas()
+
+        self.plot3d_mgr = Plot3DManager(self.canvas3d)
+        self.plot2d_mgr = Plot2DManager(self.canvas2d_time)
+        self.plotcv_mgr = CycleValue2DManager(self.canvas2d_cv)
+
+        # holder with a stack so we can switch views
+        self.canvas_holder = QWidget()
+        self.canvas_stack = QStackedLayout(self.canvas_holder)
+        self.canvas_stack.addWidget(self.canvas3d)      # index 0
+        self.canvas_stack.addWidget(self.canvas2d_time) # index 1
+        self.canvas_stack.addWidget(self.canvas2d_cv)   # index 2
+        self.canvas_stack.setCurrentIndex(0)
+
+        # keep backward-compat attrs the rest of the code uses
+        self.canvas = self.canvas3d
+        self.plot_mgr = self.plot3d_mgr
+
+        # context menus for all canvases
+        for c in (self.canvas3d, self.canvas2d_time, self.canvas2d_cv):
+            c.setContextMenuPolicy(Qt.CustomContextMenu)
+            c.customContextMenuRequested.connect(self._on_canvas_context_menu)
 
     def _build_controls(self):
 
@@ -324,6 +638,15 @@ class KineticsView(QMainWindow):
 
         self.cycles_edit = QLineEdit()
         self.cycles_edit.setPlaceholderText("Cycles (e.g., 1-3,7,10)")
+
+        self.plot_mode_combo = QComboBox()
+        self.plot_mode_combo.addItems([
+            "Auto",             # default: 2D for single cycle, else 3D
+            "3D",
+            "2D (single cycle time–value)",
+            "2D (cycle–value summary)",
+        ])
+        self.plot_mode_combo.setCurrentText("Auto")
 
         from src.infrastructure.core.table_config import TableConfig
         kinetics_table = TableConfig().KineticsTable
@@ -364,6 +687,7 @@ class KineticsView(QMainWindow):
         form = QFormLayout()
         form.addRow("Sample ID", self.sample_edit)
         form.addRow("Cycles", self.cycles_edit)
+        form.addRow("Plot mode", self.plot_mode_combo)
         form.addRow(self.combo_box_z_select)
         form.addRow(self.btn_load)
         form.addRow(self.btn_clear)
@@ -500,7 +824,7 @@ class KineticsView(QMainWindow):
     def replace_checked(self) -> bool:
         return self.chk_replace.isChecked()
 
-    # Delegate plotting to Plot3DManager
+    # Delegate plotting to the active manager
     def plot_measurement(self, cycle: int, series: Series) -> None:
         z_axis_type = self.combo_box_z_select.currentText().strip()
         self.plot_mgr.plot_measurement(cycle, series, z_axis_type)
@@ -508,11 +832,14 @@ class KineticsView(QMainWindow):
     def plot_kinetics(self, cycle: int, series: Series) -> None:
         self.plot_mgr.plot_kinetics(cycle, series)
 
+    def clear_plot(self) -> None:
+        # clear all managers so switching views doesn't show stale curves
+        self.plot3d_mgr.clear_all()
+        self.plot2d_mgr.clear_all()
+        self.plotcv_mgr.clear_all()
+
     def remove_measurement(self, cycle: int) -> None:
         self.plot_mgr.remove_measurement(cycle)
-
-    def clear_plot(self) -> None:
-        self.plot_mgr.clear_all()
 
         # --------- Axis helpers ---------
 
@@ -567,11 +894,12 @@ class KineticsView(QMainWindow):
 
     def _on_canvas_context_menu(self, pos):
         from PySide6.QtWidgets import QMenu
-        global_pos = self.canvas.mapToGlobal(pos)
+        src = self.sender() if hasattr(self, "sender") else self.canvas
+        global_pos = src.mapToGlobal(pos)
         menu = QMenu(self)
         act_reset = menu.addAction("Reset view")
         act_fit   = menu.addAction("Fit to data")
-        act_correction   = menu.addAction("Correct Curve")
+        act_correction = menu.addAction("Correct Curve")
         act_delete = menu.addAction("Delete Curve")
         chosen = menu.exec(global_pos)
         if chosen == act_reset:
@@ -581,8 +909,83 @@ class KineticsView(QMainWindow):
         elif chosen == act_correction:
             self.correctionRequested.emit()
         elif chosen == act_delete:
-           self.deleteRequested.emit( self.sample_edit.text().strip(),
-                                            [self.selected_cycle])
+            self.deleteRequested.emit(self.sample_edit.text().strip(), [self.selected_cycle])
+
+    def _switch_to_3d(self):
+        self.canvas_stack.setCurrentIndex(0)
+        self.canvas = self.canvas3d
+        self.plot_mgr = self.plot3d_mgr
+        self._on_axes_sync_clicked()
+
+    def _switch_to_2d_time(self):
+        self.canvas_stack.setCurrentIndex(1)
+        self.canvas = self.canvas2d_time
+        self.plot_mgr = self.plot2d_mgr
+        self._on_axes_sync_clicked()
+
+    def _switch_to_2d_cyclevalue(self):
+        self.canvas_stack.setCurrentIndex(2)
+        self.canvas = self.canvas2d_cv
+        self.plot_mgr = self.plotcv_mgr
+        self._on_axes_sync_clicked()
+
+    def _on_plot_mode_changed(self, *_):
+        mode = self.plot_mode_combo.currentText()
+        if mode == "3D":
+            self._switch_to_3d()
+        elif mode.startswith("2D (single"):
+            self._switch_to_2d_time()
+        elif mode.startswith("2D (cycle–value"):
+            self._switch_to_2d_cyclevalue()
+        else:
+            # Auto: leave as-is; controller will toggle based on #cycles
+            pass
+
+    def set_auto_plot_mode(self, single_cycle: bool):
+        """If Plot mode is Auto, pick 2D for one cycle, else 3D."""
+        if self.plot_mode_combo.currentText() != "Auto":
+            return
+        if single_cycle:
+            self._switch_to_2d_time()
+        else:
+            self._switch_to_3d()
+
+    def mpl_connect(self, event_name: str, callback):
+        # connect to all canvases so picks work regardless of the active view
+        for c in (self.canvas3d, self.canvas2d_time, self.canvas2d_cv):
+            c.mpl_connect(event_name, callback)
+
+    def plot_cycle_value_pairs(self, pairs: List[Tuple[float, float]], *, label: str = "value") -> None:
+        # ensure the correct view is active
+        if self.plot_mode_combo.currentText() == "Auto":
+            self._switch_to_2d_cyclevalue()
+        elif self.plot_mode_combo.currentText() != "2D (cycle–value summary)":
+            self._switch_to_2d_cyclevalue()
+        if not pairs:
+            return
+        x, y = np.asarray([p[0] for p in pairs], dtype=float), np.asarray([p[1] for p in pairs], dtype=float)
+        self.plotcv_mgr.plot_xy(x, y, label=label)
+
+def show_manager_canvas_3d():
+    app = QApplication(sys.argv)
+
+    canvas = Matplotlib3DCanvas()
+    manager = Plot3DManager(canvas)
+    manager.canvas.show()
+    sys.exit(app.exec())
+
+
+def show_manager_canvas_2d():
+    app = QApplication(sys.argv)
+
+    canvas = Matplotlib2DCanvas()
+    manager = Plot2DManager(canvas)
+    manager.canvas.show()
+    sys.exit(app.exec())
+
+# -----------------------------
+# Entrypoint
+# -----------------------------
 
 # -----------------------------
 # Entrypoint
@@ -591,11 +994,11 @@ def main() -> None:
     # View
     app = QApplication(sys.argv)
     view = KineticsView()
-
-
     view.show()
     sys.exit(app.exec())
 
 
 if __name__ == "__main__":
-    main()
+    show_manager_canvas_2d()
+   # show_manager_canvas_3d()
+    #main()

@@ -40,6 +40,7 @@ from src.GUI.kinetics_gui.kinetics_ui import KineticsView, DataAccess, KineticsW
 # CONTROLLER (logic only)
 # -----------------------------
 class KineticsController(QObject):
+
     def __init__(self, view: KineticsView, dal: DataAccess):
         super().__init__()
         self.view = view
@@ -54,7 +55,7 @@ class KineticsController(QObject):
         self.view.clearRequested.connect(self._on_clear_all)
         self.view.exportRequested.connect(self._on_export_to_origin)
         self.view.deleteRequested.connect(self._on_delete_requested)
-        self.view.canvas.mpl_connect('pick_event', self._on_pick)
+        self.view.mpl_connect('pick_event', self._on_pick)
         self.view.correctionRequested.connect(self._on_correction_requested)
 
     # ---------- helpers ----------
@@ -109,6 +110,7 @@ class KineticsController(QObject):
         if not cycles:
             self.view.show_error("No cycles to load (input empty and none found).")
             return
+        self.view.set_auto_plot_mode(single_cycle=(len(cycles) == 1))
         try:
             series_map = self.dal.fetch_measurements(sample_id, cycles, y_val_text)
             if not series_map:
@@ -234,6 +236,8 @@ class KineticsController(QObject):
     @Slot(dict)
     def _on_worker_result(self, out: Dict[int, Series]) -> None:
         replace = self.view.replace_checked()
+        # Auto-select view based on number of output cycles
+        self.view.set_auto_plot_mode(single_cycle=(len(out) == 1))
         for cyc, series in out.items():
             if replace:
                 self.view.remove_measurement(cyc)
