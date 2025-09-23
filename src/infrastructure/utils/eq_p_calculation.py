@@ -246,7 +246,7 @@ class KineticCalcEquations:
         A pandas.DataFrame with:
             'p_bar', 'T_cell_C', 'T_res_C', 'm_gas_kg',
             'uptake_kg', 'uptake_wt_pct',
-            'uptake_rate_kg_min', 'uptake_rate_pct_min'
+            'rate_kg_min', 'rate_pct_min'
     """
 
     def __init__(
@@ -318,8 +318,6 @@ class KineticCalcEquations:
         df_in.index = pd.to_datetime(df_in[time_col], errors="raise")
         df_in.drop(columns=[time_col], inplace=True)
         df_in = self._ensure_dt_index(df_in)
-
-        df_in = self._ensure_df_in_reaction_time(df_in, reaction_duration)
 
         if reaction_duration is not None:
             df_in = self._ensure_df_in_reaction_time(df_in=df_in,
@@ -547,8 +545,8 @@ class KineticCalcEquations:
             return pd.DataFrame(columns=[
                 self.p_col, self.T_cell_col, self.kinetics_table.temperature_res,
                 self.kinetics_table.m_gas_kg, self.kinetics_table.uptake_kg,
-                self.kinetics_table.uptake_wt_p, self.kinetics_table.uptake_rate_kg_min,
-                self.kinetics_table.uptake_rate_pct_min
+                self.kinetics_table.uptake_wt_p, self.kinetics_table.rate_kg_min,
+                self.kinetics_table.rate_wt_p_min
             ])
         return df_in
 

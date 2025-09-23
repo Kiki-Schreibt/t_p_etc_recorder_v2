@@ -65,7 +65,7 @@ class DataAccess:
         return [r[0] for r in rows]
 
     def fetch_measurements(
-        self, sample_id: str, cycles: Iterable[float], y_col_name: str = ""
+        self, sample_id: str, cycles: Iterable[float], z_col_name: str = ""
     ) -> Dict[float, Series]:
         cycles = list(cycles)
         if not cycles:
@@ -74,11 +74,12 @@ class DataAccess:
         query = (
             f"SELECT {self.kinetics_table.cycle_number}, "
             f"       {self.kinetics_table.time_delta_min}, "
-            f"       {y_col_name} "
+            f"       {z_col_name} "
             f"FROM {self.kinetics_table.table_name} "
             f"WHERE {self.kinetics_table.sample_id} = %s "
             f"  AND {self.kinetics_table.cycle_number} = ANY(%s) "
-            f"ORDER BY {self.kinetics_table.cycle_number}, {self.kinetics_table.time_delta_min}"
+            f"ORDER BY {self.kinetics_table.cycle_number}, "
+            f"{self.kinetics_table.time_delta_min}"
         )
 
         with DatabaseConnection(**self.config.db_conn_params) as db_conn:
@@ -121,6 +122,61 @@ class DataAccess:
             return db_conn.cursor.rowcount
 
 
+    def fetch_cycle_max_val_pair(self, sample_id: str,
+                                 cycles: Iterable[float],
+                                 y_col_name: str = "",
+                                 reducer: str = "max",   # "max" | "min" | "mean" | "p95"
+                                 ):
+        cycles = list(cycles)
+        if not cycles:
+            return {}
+
+        query = (
+            f"SELECT {self.kinetics_table.cycle_number}, "
+            f"       {y_col_name} "
+            f"FROM {self.kinetics_table.table_name} "
+            f"WHERE {self.kinetics_table.sample_id} = %s "
+            f"  AND {self.kinetics_table.cycle_number} = ANY(%s) "
+            f"ORDER BY {self.kinetics_table.cycle_number}"
+                )
+        with DatabaseConnection(**self.config.db_conn_params) as db_conn:
+            db_conn.cursor.execute(query, (sample_id, cycles))
+            rows = db_conn.cursor.fetchall()
+
+        def _reduce(v):
+            # v could be a scalar, list, tuple, or numpy array (from array column)
+            if v is None:
+                return None
+            if isinstance(v, (list, tuple, np.ndarray)):
+                arr = np.asarray(v, dtype=float)
+                if arr.size == 0:
+                    return None
+                if reducer == "max":
+                    return float(np.nanmax(arr))
+                if reducer == "min":
+                    return float(np.nanmin(arr))
+                if reducer == "mean":
+                    return float(np.nanmean(arr))
+                if reducer == "p95":
+                    return float(np.nanpercentile(arr, 95))
+                raise ValueError(f"Unsupported reducer: {reducer}")
+            # scalar
+            try:
+                return float(v)
+            except Exception:
+                return None
+
+        out: List[Tuple[float, float]] = []
+        for cyc, val in rows:
+            red = _reduce(val)
+            if red is not None and np.isfinite(red):
+                out.append((float(cyc), red))
+
+        # ensure sorted, dedup if needed
+        out.sort(key=lambda t: t[0])
+        return out
+
+
 # -----------------------------
 # Kinetics calculation (placeholder)
 # -----------------------------
@@ -153,7 +209,7 @@ class KineticsWorker(QThread):
                             resample_how=self.resample_how,
                             smooth_seconds=self.smooth_seconds,
                             enforce_monotonic=self.enforce_monotonic,
-                            reaction_duration = self.reaction_duration)
+                            reaction_duration=self.reaction_duration)
 
     def run(self) -> None:
         total = len(self.cycles)
@@ -190,6 +246,7 @@ def _as_array_preserve_datetime(values) -> np.ndarray:
     # numeric
     return np.asarray(vals, dtype=float)
 
+
 ###testing methods
 def test_grabbing_time_ranges_for_cycle():
     from src.infrastructure.core.config_reader import config
@@ -199,8 +256,8 @@ def test_grabbing_time_ranges_for_cycle():
     dal = DataAccess(config=config)
 
     dates = dal.fetch_measurements(sample_id=sample_id,
-                                cycles=cycle_list,
-                                y_col_name=TableConfig().KineticsTable.time)
+                                   cycles=cycle_list,
+                                   z_col_name=TableConfig().KineticsTable.time)
 
     time_range = {}
     for cyc in cycle_list:
@@ -210,7 +267,16 @@ def test_grabbing_time_ranges_for_cycle():
     print(time_range[17])
 
 
+def test_fetching_cycle_max_val_pair():
+    from src.infrastructure.core.config_reader import config
+    y_col=TableConfig().KineticsTable.max_rate_wt_p_min
+    dal = DataAccess(config=config)
+    dal.fetch_cycle_max_val_pair("WAE-WA-028",
+                                 [i/2 for i in range(1,20,1)],
+                                 y_col)
+
+
 if __name__ == '__main__':
-    test_grabbing_time_ranges_for_cycle()
+    test_fetching_cycle_max_val_pair()
 
 

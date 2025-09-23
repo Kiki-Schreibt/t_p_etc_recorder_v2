@@ -102,7 +102,7 @@ class KineticsController(QObject):
 
     # ---------- slots (invoked by the view) ----------
     @Slot(str, str, str)
-    def on_load_curves(self, sample_id: str, cycles_text: str, y_val_text) -> None:
+    def on_load_curves(self, sample_id: str, cycles_text: str, z_val_text) -> None:
         if not sample_id:
             self.view.show_error("Please enter a Sample ID.")
             return
@@ -110,9 +110,22 @@ class KineticsController(QObject):
         if not cycles:
             self.view.show_error("No cycles to load (input empty and none found).")
             return
+
         self.view.set_auto_plot_mode(single_cycle=(len(cycles) == 1))
         try:
-            series_map = self.dal.fetch_measurements(sample_id, cycles, y_val_text)
+            if (z_val_text == self.dal.kinetics_table.max_rate_wt_p_min
+                    or z_val_text == self.dal.kinetics_table.max_rate_wt_p_min):
+                records = self.dal.fetch_cycle_max_val_pair(sample_id=sample_id,
+                                                            cycles=cycles,
+                                                            y_col_name=z_val_text)
+                if z_val_text == self.dal.kinetics_table.max_rate_wt_p_min:
+                    label = "Rate (wt-% min^-1)"
+                else:
+                    label = "Rate (kg min^-1)"
+                self.view.plot_cycle_value_pairs(pairs=records, label=label)
+                return
+
+            series_map = self.dal.fetch_measurements(sample_id, cycles, z_val_text)
             if not series_map:
                 self.view.show_error("No measurement data returned for the requested cycles.")
                 return
@@ -342,7 +355,7 @@ class KineticsController(QObject):
 
         dates = self.dal.fetch_measurements(sample_id=self.view.sample_edit.text(),
                                             cycles=self.selected_cycle,
-                                            y_col_name=TableConfig().KineticsTable.time)
+                                            z_col_name=TableConfig().KineticsTable.time)
 
         time_range = {}
         for cyc in self.selected_cycle:

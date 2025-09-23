@@ -456,24 +456,28 @@ class CycleValue2DCanvas(FigureCanvas):
 
 class CycleValue2DManager:
     """
-    2D manager for (X = cycle number, Y = float value) plots.
+    2D manager for (X = cycle number, Y = float value) scatter plots.
     Implements the same limits API as the other managers so the existing
     axis panel keeps working.
     """
     def __init__(self, canvas: CycleValue2DCanvas) -> None:
         self.canvas = canvas
         self.ax = canvas.ax
-        self.lines: List = []
+        self.scatters: List = []  # PathCollection objects
         self._x_min = math.inf; self._x_max = -math.inf
         self._y_min = math.inf; self._y_max = -math.inf
         self.y_axis_str = "Value"
 
     # ---- bounds helpers ----
     def _update_bounds(self, x: np.ndarray, y: np.ndarray) -> None:
-        self._x_min = min(self._x_min, float(np.min(x)))
-        self._x_max = max(self._x_max, float(np.max(x)))
-        self._y_min = min(self._y_min, float(np.min(y)))
-        self._y_max = max(self._y_max, float(np.max(y)))
+        x = np.asarray(x, dtype=float); y = np.asarray(y, dtype=float)
+        m = np.isfinite(x) & np.isfinite(y)
+        if not m.any():
+            return
+        self._x_min = min(self._x_min, float(np.min(x[m])))
+        self._x_max = max(self._x_max, float(np.max(x[m])))
+        self._y_min = min(self._y_min, float(np.min(y[m])))
+        self._y_max = max(self._y_max, float(np.max(y[m])))
 
     def _apply_bounds(self) -> None:
         if not all(np.isfinite(v) for v in [self._x_min, self._x_max, self._y_min, self._y_max]):
@@ -502,7 +506,7 @@ class CycleValue2DManager:
 
     def set_limits(self, xlim=None, ylim=None, zlim=None, *, draw=True) -> None:
         if xlim is not None: self.ax.set_xlim(*xlim)
-        if zlim is not None: self.ax.set_ylim(*zlim)
+        if zlim is not None: self.ax.set_ylim(*zlim)   # map z->y to match other managers
         if draw: self.canvas.draw_idle()
 
     def fit_to_data(self) -> None:
@@ -518,33 +522,33 @@ class CycleValue2DManager:
             self.canvas._init_axes(y_axis_str=self.y_axis_str)
         self.canvas.draw_idle()
 
-    # ---- plotting ----
+    # ---- plotting (SCATTER) ----
     def plot_xy(self, x: np.ndarray, y: np.ndarray, *, label: str = "") -> None:
-        (line,) = self.ax.plot(x, y, linewidth=2.0, alpha=0.95, label=label or "value")
-        line.set_picker(True); line.set_pickradius(8)
-        self.lines.append(line)
-        self._update_bounds(x, y); self._apply_bounds()
+        x = np.asarray(x, dtype=float); y = np.asarray(y, dtype=float)
+        m = np.isfinite(x) & np.isfinite(y)
+        if not m.any():
+            return
+        sc = self.ax.scatter(x[m], y[m], s=28, alpha=0.9, label=(label or None))
+        self.scatters.append(sc)
+        if label:
+            self.ax.legend(loc="best")
+        self._update_bounds(x[m], y[m]); self._apply_bounds()
 
     def clear_all(self) -> None:
         self.ax.cla()
         self.canvas._init_axes(y_axis_str=self.y_axis_str)
-        self.lines.clear()
+        self.scatters.clear()
         self._x_min = self._y_min = math.inf
         self._x_max = self._y_max = -math.inf
         self.canvas.draw_idle()
 
+    # ---- pick/selection (not used) ----
     def resolve_artist(self, artist):
-        for a in self.lines:
-            if artist is a:
-                # cycle isn't encoded per-artist here; return a generic match
-                return ("cv", None)
         return (None, None)
 
     def mark_selected(self, artist):
-        for a in self.lines:
-            a.set_linewidth(2.0); a.set_alpha(0.95); a.set_zorder(1)
-        artist.set_linewidth(3.0); artist.set_alpha(1.0); artist.set_zorder(10)
-        self.canvas.draw_idle()
+        pass
+
 
 
 # -----------------------------
@@ -656,6 +660,8 @@ class KineticsView(QMainWindow):
             kinetics_table.uptake_kg,
             kinetics_table.rate_kg_min,
             kinetics_table.rate_wt_p_min,
+            kinetics_table.max_rate_kg_min,
+            kinetics_table.max_rate_wt_p_min
         ]
         self.combo_box_z_select = QComboBox()
         self.combo_box_z_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
@@ -889,7 +895,7 @@ class KineticsView(QMainWindow):
         smooth_val = float(self.smooth_seconds_spin.value())
         smooth_seconds = None if smooth_val == 0.0 else smooth_val
         enforce_monotonic = self.enforce_monotonic_chk.isChecked()
-        reaction_duration = self.reaction_duration_edit.text().strip()
+        reaction_duration = self.reaction_duration_edit.text().strip() or None
         return resample_rule, resample_how, smooth_seconds, enforce_monotonic, reaction_duration
 
     def _on_canvas_context_menu(self, pos):
@@ -923,7 +929,7 @@ class KineticsView(QMainWindow):
         self.plot_mgr = self.plot2d_mgr
         self._on_axes_sync_clicked()
 
-    def _switch_to_2d_cyclevalue(self):
+    def _switch_to_2d_cycle_value(self):
         self.canvas_stack.setCurrentIndex(2)
         self.canvas = self.canvas2d_cv
         self.plot_mgr = self.plotcv_mgr
@@ -936,7 +942,7 @@ class KineticsView(QMainWindow):
         elif mode.startswith("2D (time"):
             self._switch_to_2d_time()
         elif mode.startswith("2D (cycle"):
-            self._switch_to_2d_cyclevalue()
+            self._switch_to_2d_cycle_value()
         else:
             # Auto: leave as-is; controller will toggle based on #cycles
             pass
@@ -958,13 +964,14 @@ class KineticsView(QMainWindow):
     def plot_cycle_value_pairs(self, pairs: List[Tuple[float, float]], *, label: str = "value") -> None:
         # ensure the correct view is active
         if self.plot_mode_combo.currentText() == "Auto":
-            self._switch_to_2d_cyclevalue()
+            self._switch_to_2d_cycle_value()
         elif self.plot_mode_combo.currentText() != "2D (cycle–value)":
-            self._switch_to_2d_cyclevalue()
+            self._switch_to_2d_cycle_value()
         if not pairs:
             return
         x, y = np.asarray([p[0] for p in pairs], dtype=float), np.asarray([p[1] for p in pairs], dtype=float)
         self.plotcv_mgr.plot_xy(x, y, label=label)
+
 
 def show_manager_canvas_3d():
     app = QApplication(sys.argv)

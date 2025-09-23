@@ -1127,9 +1127,22 @@ class KineticCalculator:
                                           resample_how, smooth_seconds,
                                           enforce_monotonic,
                                           reaction_duration=reaction_duration)
+
         V_res = df[self.tp_table.reservoir_volume].iloc[0]
-        max_rate_wt_p_min = df_kin[self.kinetics_table.rate_wt_p_min].max() or None
-        max_rate_kg_min = df_kin[self.kinetics_table.rate_kg_min].max() or None
+
+        s1 = df_kin[self.kinetics_table.rate_wt_p_min]
+        s2 = df_kin[self.kinetics_table.rate_kg_min]
+
+        def max_by_abs(s):
+            s = pd.to_numeric(s, errors='coerce')
+            if not s.notna().any():
+                return None  # nothing valid
+            idx = s.abs().idxmax()
+            return s.loc[idx]  # signed value at the max-abs position
+
+        max_rate_wt_p_min = max_by_abs(s1)
+        max_rate_kg_min   = max_by_abs(s2)
+
         self._write_kinetic_to_database(df=df_kin,
                                         cycle_number=cycle_number,
                                         meta_data=self.meta_data,
