@@ -550,7 +550,6 @@ class CycleValue2DManager:
         pass
 
 
-
 # -----------------------------
 # VIEW (UI only)
 # -----------------------------
@@ -676,11 +675,6 @@ class KineticsView(QMainWindow):
         self.chk_replace = QCheckBox("Replace measurement with kinetics after calc")
         self.chk_replace.setChecked(True)
 
-        self.progress = QProgressBar()
-        self.progress.setRange(0, 100)
-        self.progress.setValue(0)
-        self.progress.setTextVisible(True)
-
         self.status_label = QLabel("Ready")
         self.status_label.setWordWrap(True)
         self.status_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
@@ -699,7 +693,7 @@ class KineticsView(QMainWindow):
         form.addRow(self.btn_clear)
         form.addRow(self.chk_replace)
         form.addRow(self.btnSendToOrigin)
-        form.addRow("Progress", self.progress)
+
         form.addRow("Status", self.status_label)
         left.setLayout(form)
 
@@ -793,6 +787,11 @@ class KineticsView(QMainWindow):
 
         self.btn_run = QPushButton("Run Kinetics")
 
+        self.progress = QProgressBar()
+        self.progress.setRange(0, 100)
+        self.progress.setValue(0)
+        self.progress.setTextVisible(True)
+
 
         kin_form.addRow("Reaction duration", self.reaction_duration_edit)
         kin_form.addRow("Resample rule", self.resample_rule_edit)
@@ -800,6 +799,7 @@ class KineticsView(QMainWindow):
         kin_form.addRow("Smooth seconds", self.smooth_seconds_spin)
         kin_form.addRow(self.enforce_monotonic_chk)
         kin_form.addRow(self.btn_run)    # ← Run button placed at the bottom of this group
+        kin_form.addRow("Progress", self.progress)
         kin_box.setLayout(kin_form)
 
         axes_box = self._build_axes_control()

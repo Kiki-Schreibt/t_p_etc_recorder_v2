@@ -217,14 +217,15 @@ class KineticsWorker(QThread):
             self.result.emit({})
             return
         out: Dict[int, Series] = {}
-        for cyc in self.cycles:
+        for i, cyc in enumerate(self.cycles, start=1):
             try:
                 self._compute_kinetics(cyc)
-                self.progress.emit(int(cyc*2 / max(1, total) * 100))
             except Exception as e:  # noqa: BLE001
                 self.logger.error(str(e))
-                self.progress.emit(int(cyc / max(1, total) * 100))
                 #self.error.emit(str(e))
+            finally:
+                pct = int(i / total * 100)
+                self.progress.emit(pct)
         self.progress.emit(100)
         #self.result.emit(out)
 
