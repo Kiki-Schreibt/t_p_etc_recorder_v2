@@ -971,6 +971,7 @@ class KineticsView(QMainWindow):
             return
         x, y = np.asarray([p[0] for p in pairs], dtype=float), np.asarray([p[1] for p in pairs], dtype=float)
         self.plotcv_mgr.plot_xy(x, y, label=label)
+        self.plotcv_mgr.ax.set_ylabel(label)
 
 
 def show_manager_canvas_3d():
