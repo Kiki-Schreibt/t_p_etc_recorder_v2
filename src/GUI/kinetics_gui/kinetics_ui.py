@@ -83,12 +83,12 @@ class Matplotlib3DCanvas(FigureCanvas):
         self.updateGeometry()
         self._init_axes()
 
-    def _init_axes(self) -> None:
+    def _init_axes(self, z_axis_str='Value') -> None:
         ax = self.ax
         ax.clear()
         ax.set_xlabel("Time (min)")
-        ax.set_ylabel("Cycle")
-        ax.set_zlabel("Value")
+        ax.set_ylabel("Cycle (#)")
+        ax.set_zlabel(z_axis_str)
         ax.view_init(elev=22, azim=-60)
         ax.grid(True)
         self.draw_idle()
@@ -109,6 +109,7 @@ class Plot3DManager:
         self._y_max = -math.inf
         self._z_min = math.inf
         self._z_max = -math.inf
+        self.z_axis_str = ""
 
     # ---- bounds helpers ----
     def _update_bounds(self, series: Series) -> None:
@@ -184,11 +185,12 @@ class Plot3DManager:
             self._apply_bounds()
         else:
             # no data yet; restore the vanilla axes
-            self.canvas._init_axes()
+            self.canvas._init_axes(z_axis_str=self.z_axis_str)
         self.canvas.draw_idle()
 
     # ---- plotting ----
-    def plot_measurement(self, cycle: float, series: Series) -> None:
+    def plot_measurement(self, cycle: float, series: Series, z_axis_type="") -> None:
+        self._set_z_axis(z_axis_type)
         (line,) = self.ax.plot(series.x, series.y, series.z,
                                linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
         line.set_picker(True)          # enable picking
@@ -216,7 +218,7 @@ class Plot3DManager:
 
     def clear_all(self) -> None:
         self.ax.cla()
-        self.canvas._init_axes()
+        self.canvas._init_axes(z_axis_str=self.z_axis_str)
         self.measurement_lines.clear()
         self.kinetics_lines.clear()
         self._x_min = self._y_min = self._z_min = math.inf
@@ -242,6 +244,20 @@ class Plot3DManager:
         artist.set_linewidth(3.0); artist.set_alpha(1.0); artist.set_zorder(10)
         self.canvas.draw_idle()
 
+    def _set_z_axis(self, z_axis_type):
+        from src.infrastructure.core.table_config import TableConfig
+        table = TableConfig().KineticsTable
+        if z_axis_type == table.pressure:
+            self.z_axis_str = "Pressure (bar)"
+        if z_axis_type == table.rate_kg_min:
+            self.z_axis_str = "Rate (kg min^-1)"
+        if z_axis_type == table.rate_wt_p_min:
+            self.z_axis_str = "Rate (wt-% min^-1)"
+        if z_axis_type == table.uptake_kg:
+            self.z_axis_str = "Uptake (kg)"
+        if z_axis_type == table.uptake_wt_p:
+            self.z_axis_str = "Uptake (wt-%)"
+        self.canvas.ax.set_zlabel(self.z_axis_str)
 
 # -----------------------------
 # VIEW (UI only)
@@ -269,6 +285,7 @@ class KineticsView(QMainWindow):
         self.canvas.customContextMenuRequested.connect(self._on_canvas_context_menu)
         self.plot_mgr = Plot3DManager(self.canvas)
 
+
         ##create top controls
         left, form = self._build_controls()
 
@@ -285,7 +302,7 @@ class KineticsView(QMainWindow):
         self.btn_load.clicked.connect(lambda: self.loadRequested.emit(
             self.sample_edit.text().strip(),
             self.cycles_edit.text().strip(),
-            self.combo_box_y_select.currentText().strip()
+            self.combo_box_z_select.currentText().strip()
         ))
         self.btn_run.clicked.connect(lambda: self.runRequested.emit(
             self.sample_edit.text().strip(),
@@ -317,8 +334,8 @@ class KineticsView(QMainWindow):
             kinetics_table.rate_kg_min,
             kinetics_table.rate_wt_p_min,
         ]
-        self.combo_box_y_select = QComboBox()
-        self.combo_box_y_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
+        self.combo_box_z_select = QComboBox()
+        self.combo_box_z_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
 
         self.btn_load = QPushButton("Load Curves")
         self.btn_clear = QPushButton("Clear Plot")
@@ -347,7 +364,7 @@ class KineticsView(QMainWindow):
         form = QFormLayout()
         form.addRow("Sample ID", self.sample_edit)
         form.addRow("Cycles", self.cycles_edit)
-        form.addRow(self.combo_box_y_select)
+        form.addRow(self.combo_box_z_select)
         form.addRow(self.btn_load)
         form.addRow(self.btn_clear)
         form.addRow(self.chk_replace)
@@ -485,7 +502,8 @@ class KineticsView(QMainWindow):
 
     # Delegate plotting to Plot3DManager
     def plot_measurement(self, cycle: int, series: Series) -> None:
-        self.plot_mgr.plot_measurement(cycle, series)
+        z_axis_type = self.combo_box_z_select.currentText().strip()
+        self.plot_mgr.plot_measurement(cycle, series, z_axis_type)
 
     def plot_kinetics(self, cycle: int, series: Series) -> None:
         self.plot_mgr.plot_kinetics(cycle, series)

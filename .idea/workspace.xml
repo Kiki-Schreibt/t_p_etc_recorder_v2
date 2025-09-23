@@ -6,12 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -283,9 +278,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.kinetics_main" />
+        <item itemvalue="Python.kinetics_ui" />
         <item itemvalue="Python.table_partitioner" />
         <item itemvalue="Python.table_creator" />
-        <item itemvalue="Python.kinetics_ui" />
         <item itemvalue="Python.recording_main_v3" />
       </list>
     </recent_temporary>
