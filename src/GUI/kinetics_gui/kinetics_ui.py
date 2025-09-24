@@ -194,7 +194,7 @@ class Plot3DManager:
         self.canvas.draw_idle()
 
     # ---- plotting ----
-    def plot_measurement(self, cycle: float, series: Series, z_axis_type="") -> None:
+    def plot_measurement(self, cycle: float, series: Series, z_axis_type="", sample_id="") -> None:
         self._set_z_axis(z_axis_type)
         (line,) = self.ax.plot(series.x, series.y, series.z,
                                linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
@@ -374,7 +374,8 @@ class Plot2DManager:
             self.ax.yaxis.set_major_locator(loc)
             self.ax.yaxis.set_major_formatter(fmt)
 
-    def plot_measurement(self, cycle: float, series: Series, z_axis_type="") -> None:
+    def plot_measurement(self, cycle: float, series: Series, z_axis_type="", sample_id="") -> None:
+
         self._set_y_axis(z_axis_type)
         self._ensure_y_formatter(series.z)
         (line,) = self.ax.plot(series.x, series.z, linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
@@ -839,6 +840,7 @@ class KineticsView(QMainWindow):
     # Delegate plotting to the active manager
     def plot_measurement(self, cycle: int, series: Series) -> None:
         z_axis_type = self.combo_box_z_select.currentText().strip()
+        sample_id = self.sample_edit.text().strip()
         self.plot_mgr.plot_measurement(cycle, series, z_axis_type)
 
     def plot_kinetics(self, cycle: int, series: Series) -> None:
@@ -980,7 +982,7 @@ class KineticsView(QMainWindow):
         if not pairs:
             return
         x, y = np.asarray([p[0] for p in pairs], dtype=float), np.asarray([p[1] for p in pairs], dtype=float)
-        self.plotcv_mgr.plot_xy(x, y, label=label)
+        self.plotcv_mgr.plot_xy(x, y, label=None)
         self.plotcv_mgr.ax.set_ylabel(label)
 
     #-----------
