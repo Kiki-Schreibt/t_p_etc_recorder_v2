@@ -973,7 +973,7 @@ class KineticsView(QMainWindow):
         for c in (self.canvas3d, self.canvas2d_time, self.canvas2d_cv):
             c.mpl_connect(event_name, callback)
 
-    def plot_cycle_value_pairs(self, pairs: List[Tuple[float, float]], *, label: str = "value") -> None:
+    def plot_cycle_value_pairs(self, pairs: List[Tuple[float, float]], *, label: str = "value", sample_id="") -> None:
         # ensure the correct view is active
         if self.plot_mode_combo.currentText() == "Auto":
             self._switch_to_2d_cycle_value()
@@ -982,7 +982,7 @@ class KineticsView(QMainWindow):
         if not pairs:
             return
         x, y = np.asarray([p[0] for p in pairs], dtype=float), np.asarray([p[1] for p in pairs], dtype=float)
-        self.plotcv_mgr.plot_xy(x, y, label=None)
+        self.plotcv_mgr.plot_xy(x, y, label=sample_id or None)
         self.plotcv_mgr.ax.set_ylabel(label)
 
     #-----------

@@ -122,7 +122,7 @@ class KineticsController(QObject):
                     label = "Rate (wt-% min^-1)"
                 else:
                     label = "Rate (kg min^-1)"
-                self.view.plot_cycle_value_pairs(pairs=records, label=label)
+                self.view.plot_cycle_value_pairs(pairs=records, label=label, sample_id=sample_id)
                 return
 
             series_map = self.dal.fetch_measurements(sample_id, cycles, z_val_text)

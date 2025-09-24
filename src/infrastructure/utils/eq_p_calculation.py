@@ -4,6 +4,18 @@ import logging
 from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 from src.infrastructure.core import global_vars
 
+from pandas.api.types import (
+    is_integer_dtype, is_float_dtype, is_string_dtype, is_object_dtype
+)
+from typing import Optional, Sequence, Tuple, Union
+from zoneinfo import ZoneInfo
+
+try:
+    import src.infrastructure.core.logger as logging
+except ImportError:
+    import logging
+
+
 # Constants
 R_H2 = global_vars.R_H2      # [J/(kg·K)] Specific gas constant for hydrogen
 R_universal = global_vars.R_universal    # [J/(mol·K)] Universal gas constant
@@ -213,13 +225,6 @@ class VantHoffCalcEq:
         p = m * R_H2 * 1e-5 / (((V_res + V_pipes) / T_res) + (V_cell / T_cell))
         return p
 
-from typing import Optional, Sequence, Tuple, Union
-from zoneinfo import ZoneInfo
-
-try:
-    import src.infrastructure.core.logger as logging
-except ImportError:
-    import logging
 
 
 Number = Union[int, float, np.number]
@@ -549,8 +554,6 @@ class KineticCalcEquations:
                 self.kinetics_table.rate_wt_p_min
             ])
         return df_in
-
-
 
 ###helper methods
 def _to_timedelta(value) -> pd.Timedelta:

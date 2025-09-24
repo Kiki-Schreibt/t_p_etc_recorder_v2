@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_ui.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -164,7 +165,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.kinetics_ui">
+  <component name="RunManager" selected="Python.kinetics_main">
     <configuration name="kinetics_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -277,8 +278,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.kinetics_ui" />
         <item itemvalue="Python.kinetics_main" />
+        <item itemvalue="Python.kinetics_ui" />
         <item itemvalue="Python.modbus_handler" />
         <item itemvalue="Python.kinetics_worker" />
         <item itemvalue="Python.table_partitioner" />
