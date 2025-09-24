@@ -1206,6 +1206,7 @@ class KineticCalculator:
                                         meta_data, V_res,
                                         max_rate_wt_p_min=None,
                                         max_rate_kg_min=None):
+
         kinetics_table = TableConfig().KineticsTable
         #prepare data by creating single row df with list columns
         df_one_row = pd.DataFrame([{

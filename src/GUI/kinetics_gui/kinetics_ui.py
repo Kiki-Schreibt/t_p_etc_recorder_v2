@@ -62,7 +62,9 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QVBoxLayout,
     QComboBox,
-    QWidget, QStackedLayout
+    QWidget,
+    QStackedLayout,
+    QFileDialog
 )
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -252,6 +254,8 @@ class Plot3DManager:
         table = TableConfig().KineticsTable
         if z_axis_type == table.pressure:
             self.z_axis_str = "Pressure (bar)"
+        if z_axis_type == table.temperature_res or z_axis_type == table.temperature:
+            self.z_axis_str = "Temperature (°C)"
         if z_axis_type == table.rate_kg_min:
             self.z_axis_str = "Rate (kg min^-1)"
         if z_axis_type == table.rate_wt_p_min:
@@ -655,6 +659,8 @@ class KineticsView(QMainWindow):
         kinetics_table = TableConfig().KineticsTable
         kinetics_selectables = [
             kinetics_table.pressure,
+            kinetics_table.temperature,
+            kinetics_table.temperature_res,
             kinetics_table.uptake_wt_p,
             kinetics_table.uptake_kg,
             kinetics_table.rate_kg_min,
@@ -903,10 +909,12 @@ class KineticsView(QMainWindow):
         src = self.sender() if hasattr(self, "sender") else self.canvas
         global_pos = src.mapToGlobal(pos)
         menu = QMenu(self)
+
         act_reset = menu.addAction("Reset view")
         act_fit   = menu.addAction("Fit to data")
         act_correction = menu.addAction("Correct Curve")
         act_delete = menu.addAction("Delete Curve")
+        act_export = menu.addAction("Export graph")
         chosen = menu.exec(global_pos)
         if chosen == act_reset:
             self.plot_mgr.reset_view()
@@ -916,6 +924,8 @@ class KineticsView(QMainWindow):
             self.correctionRequested.emit()
         elif chosen == act_delete:
             self.deleteRequested.emit(self.sample_edit.text().strip(), [self.selected_cycle])
+        elif chosen == act_export:
+            self._on_plot_export_clicked()
 
     def _switch_to_3d(self):
         self.canvas_stack.setCurrentIndex(0)
@@ -973,6 +983,86 @@ class KineticsView(QMainWindow):
         self.plotcv_mgr.plot_xy(x, y, label=label)
         self.plotcv_mgr.ax.set_ylabel(label)
 
+    #-----------
+    #plot export
+    #------------
+    def _on_plot_export_clicked(self):
+        """Open a file dialog and save the active canvas as an image."""
+        # suggest a name from sample + mode
+        sample = (self.sample_edit.text() or "plot").strip().replace(os.sep, "_")
+        mode = self.plot_mode_combo.currentText().replace(" ", "_").replace("(", "").replace(")", "").replace("–", "-")
+        default_name = f"{sample}_{mode}.png"
+
+        path, selected_filter = QFileDialog.getSaveFileName(
+            self,
+            "Save Plot Image",
+            default_name,
+            "PNG (*.png);;JPEG (*.jpg *.jpeg);;SVG (*.svg);;PDF (*.pdf)"
+        )
+        if not path:
+            return
+
+        # infer format from extension; append if user omitted it
+        ext_map = {
+            ".png": "png",
+            ".jpg": "jpg",
+            ".jpeg": "jpg",
+            ".svg": "svg",
+            ".pdf": "pdf",
+        }
+        root, ext = os.path.splitext(path)
+        if ext.lower() not in ext_map:
+            # pick from the selected filter if possible, else default to .png
+            if "JPEG" in selected_filter:
+                ext = ".jpg"
+            elif "SVG" in selected_filter:
+                ext = ".svg"
+            elif "PDF" in selected_filter:
+                ext = ".pdf"
+            else:
+                ext = ".png"
+            path = root + ext
+
+        try:
+            # you can tweak dpi/transparent as you like
+            self.save_current_plot(path, dpi=300, transparent=False, bbox_tight=True)
+            self.set_status(f"Saved image: {path}")
+        except Exception as e:
+            self.show_error(f"Failed to save image: {e}")
+
+    def save_current_plot(self, path: str, *, dpi: int = 300, transparent: bool = False, bbox_tight: bool = True,
+                          width_in: float | None = None, height_in: float | None = None) -> None:
+        """
+        Programmatic export of the active canvas to an image file.
+        Supports png/jpg/svg/pdf via the filename extension.
+        Optionally override size in inches; restores original size afterwards.
+        """
+        fig = self.canvas.figure  # active canvas (3D or either 2D)
+        orig_size = fig.get_size_inches()
+        try:
+            if width_in or height_in:
+                w = width_in or orig_size[0]
+                h = height_in or orig_size[1]
+                fig.set_size_inches(w, h, forward=True)
+                self.canvas.draw_idle(); self.canvas.flush_events()
+
+            save_kwargs = {
+                "dpi": dpi,
+                "transparent": transparent,
+                "facecolor": fig.get_facecolor(),   # keep current bg
+            }
+            if bbox_tight:
+                save_kwargs["bbox_inches"] = "tight"
+                save_kwargs["pad_inches"] = 0.05
+
+            fig.savefig(path, **save_kwargs)
+        finally:
+            # put the figure back how it was
+            if width_in or height_in:
+                fig.set_size_inches(orig_size, forward=True)
+                self.canvas.draw_idle()
+
+
 
 def show_manager_canvas_3d():
     app = QApplication(sys.argv)
@@ -1007,6 +1097,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    show_manager_canvas_2d()
-   # show_manager_canvas_3d()
-    #main()
+    #show_manager_canvas_2d()
+    #show_manager_canvas_3d()
+    main()
