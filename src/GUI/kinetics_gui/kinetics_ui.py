@@ -46,15 +46,8 @@ import matplotlib.dates as mdates
 from matplotlib.collections import LineCollection
 from matplotlib.colors import Normalize
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
-try:
-    # Matplotlib ≥ 3.6 (and v4)
-    from matplotlib import colormaps as _cmaps
-    def _get_cmap(name: str):
-        return _cmaps.get_cmap(name)
-except Exception:  # Matplotlib ≤ 3.x fallback
-    import matplotlib.cm as _cm
-    def _get_cmap(name: str):
-        return _cm.get_cmap(name)
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from matplotlib.cm import ScalarMappable
 
@@ -88,6 +81,18 @@ from scipy.interpolate import krogh_interpolate
 
 from src.GUI.kinetics_gui.kinetics_worker import DataAccess, Series, KineticsWorker
 from src.infrastructure.connections.connections import DatabaseConnection
+
+try:
+    # Matplotlib ≥ 3.6 (and v4)
+    from matplotlib import colormaps as _cmaps
+    def _get_cmap(name: str):
+        return _cmaps.get_cmap(name)
+except Exception:  # Matplotlib ≤ 3.x fallback
+    import matplotlib.cm as _cm
+    def _get_cmap(name: str):
+        return _cm.get_cmap(name)
+
+C_MAP_NAME = "inferno"  # "autumn", "YlOrRd_r", "afmhot", 'viridis'
 
 
 # -----------------------------
@@ -127,12 +132,13 @@ class Plot3DManager:
         self._z_min = math.inf; self._z_max = -math.inf
         # color mapping
         self._cmin = math.inf; self._cmax = -math.inf
-        self._cmap = _get_cmap('viridis')
+        self._cmap = _get_cmap(C_MAP_NAME)
         self._norm: Normalize | None = None
         self._cbar = None
         self._color_label = "Color"
         self._cdata: Dict[float, np.ndarray] = {}  # cycle -> c-array
         self.z_axis_str = ""
+        self._cax = None
 
     # ---- bounds helpers ----
     def _update_bounds(self, series: Series) -> None:
@@ -186,14 +192,13 @@ class Plot3DManager:
     ) -> None:
         """Set any subset of axis limits."""
         ax = self.ax
-        if xlim is not None:
-            ax.set_xlim(*xlim)
-        if ylim is not None:
-            ax.set_ylim(*ylim)
+        if xlim is not None: ax.set_xlim(*xlim)
+        if ylim is not None: ax.set_ylim(*ylim)
         if zlim is not None:
-            ax.set_zlim(*zlim)
-        if draw:
-            self.canvas.draw_idle()
+            # 3D: zlim is Z; 2D manager maps zlim -> y
+            ax.set_zlim(*zlim) if hasattr(ax, "set_zlim") else ax.set_ylim(*zlim)
+        ax.set_autoscale_on(False)  # 🔒
+        if draw: self.canvas.draw_idle()
 
     def fit_to_data(self) -> None:
         """Apply the tracked data bounds (with padding) like autoscale."""
@@ -224,12 +229,24 @@ class Plot3DManager:
             self._norm = Normalize(vmin=self._cmin, vmax=self._cmax)
         return changed
 
+
     def _ensure_colorbar(self):
         if self._norm is None:
             return
         if self._cbar is None:
-            sm = ScalarMappable(norm=self._norm, cmap=self._cmap)
-            self._cbar = self.canvas.figure.colorbar(sm, ax=self.ax, pad=0.01)
+            # create (or recreate) slim cbar outside the axes on the right
+            self._cax = inset_axes(
+                self.ax,
+                width="3%", height="85%",
+                loc="upper left",
+                bbox_to_anchor=(1.02, 0.05, 1, 1),   # push to the right
+                bbox_transform=self.ax.transAxes,
+                borderpad=0
+            )
+            self._cbar = self.canvas.figure.colorbar(
+                ScalarMappable(norm=self._norm, cmap=self._cmap),
+                cax=self._cax
+            )
             self._cbar.set_label(self._color_label)
         else:
             self._cbar.mappable.set_norm(self._norm)
@@ -341,6 +358,28 @@ class Plot3DManager:
             self.z_axis_str = "Uptake (wt-%)"
         self.canvas.ax.set_zlabel(self.z_axis_str)
 
+    def _apply_bounds(self) -> None:
+        if not all(np.isfinite(v) for v in [self._x_min, self._x_max, self._y_min, self._y_max, self._z_min, self._z_max]):
+            return
+        def _pad(a, b):
+            span = b - a
+            if span <= 0: return a - 0.5, b + 0.5
+            pad = 0.03 * span
+            return a - pad, b + pad
+
+        ax = self.ax
+        x0, x1 = _pad(self._x_min, self._x_max)
+        y0, y1 = _pad(self._y_min, self._y_max)
+        z0, z1 = _pad(self._z_min, self._z_max)
+        ax.set_xlim(x0, x1)
+        ax.set_ylim(y0, y1)
+        ax.set_zlim(z0, z1)
+
+        # 🔒 prevent later artists/colorbar from re-autoscaling
+        ax.set_autoscale_on(False)
+
+        self.canvas.draw_idle()
+
     def clear_all(self) -> None:
         self.ax.cla()
         self.canvas._init_axes(z_axis_str=self.z_axis_str)
@@ -354,6 +393,10 @@ class Plot3DManager:
             try: self._cbar.remove()
             except Exception: pass
             self._cbar = None
+        if self._cax is not None:
+            try: self.canvas.figure.delaxes(self._cax)
+            except Exception: pass
+            self._cax = None
         self.canvas.draw_idle()
 
 
@@ -388,8 +431,10 @@ class Plot2DManager:
         self._x_min = math.inf; self._x_max = -math.inf
         self._y_min = math.inf; self._y_max = -math.inf
         self.y_axis_str = ""
+        self._cax = None
 
     # --- datetime helpers for Y axis (z series) ---
+
     def _is_datetime_array(self, a: np.ndarray) -> bool:
         if isinstance(a, np.ndarray):
             if np.issubdtype(a.dtype, np.datetime64): return True
@@ -439,21 +484,25 @@ class Plot2DManager:
 
     def set_limits(self, xlim=None, ylim=None, zlim=None, *, draw=True) -> None:
         # map zlim -> 2D y-limits
-        if xlim is not None: self.ax.set_xlim(*xlim)
-        if zlim is not None: self.ax.set_ylim(*zlim)
+        ax = self.ax
+        if xlim is not None: ax.set_xlim(*xlim)
+        if ylim is not None: ax.set_ylim(*ylim)
+        if zlim is not None:
+            # 3D: zlim is Z; 2D manager maps zlim -> y
+            ax.set_zlim(*zlim) if hasattr(ax, "set_zlim") else ax.set_ylim(*zlim)
+        ax.set_autoscale_on(False)  # 🔒
         if draw: self.canvas.draw_idle()
 
     def fit_to_data(self) -> None:
         self._apply_bounds()
 
     def reset_view(self) -> None:
-        self.ax.set_xlabel("Time (min)")
-        self.ax.set_ylabel(self.y_axis_str or "Value")
-        self.ax.grid(True)
+        self.ax.view_init(elev=22, azim=-60)  # 3D only
+        self.ax.set_autoscale_on(True)        # 🟢 allow fit
         if self.get_data_bounds() is not None:
             self._apply_bounds()
         else:
-            self.canvas._init_axes(y_axis_str=self.y_axis_str)
+            self.canvas._init_axes(z_axis_str=self.z_axis_str)
         self.canvas.draw_idle()
 
     # ---- plotting ----
@@ -480,7 +529,7 @@ class Plot2DManager:
     # --- helpers
     _cmin = math.inf; _cmax = -math.inf
     _norm: Normalize | None = None
-    _cmap = _get_cmap('viridis')
+    _cmap = _get_cmap(C_MAP_NAME)
     _cbar = None
     _color_label = "Color"
     _cdata: Dict[float, np.ndarray] = {}
@@ -495,15 +544,27 @@ class Plot2DManager:
         return changed
 
     def _ensure_colorbar(self):
-        if self._norm is None: return
+        if self._norm is None:
+            return
         if self._cbar is None:
-            sm = ScalarMappable(norm=self._norm, cmap=self._cmap)
-            self._cbar = self.canvas.figure.colorbar(sm, ax=self.ax, pad=0.01)
+            # create (or recreate) slim cbar outside the axes on the right
+            self._cax = inset_axes(
+                self.ax,
+                width="3%", height="85%",
+                loc="upper left",
+                bbox_to_anchor=(1.02, 0.05, 1, 1),   # push to the right
+                bbox_transform=self.ax.transAxes,
+                borderpad=0
+            )
+            self._cbar = self.canvas.figure.colorbar(
+                ScalarMappable(norm=self._norm, cmap=self._cmap),
+                cax=self._cax
+            )
             self._cbar.set_label(self._color_label)
         else:
             self._cbar.mappable.set_norm(self._norm)
             self._cbar.mappable.set_cmap(self._cmap)
-
+            self._cbar.set_label(self._color_label)
     def _recolor_all(self):
         if self._norm is None: return
         for arts in {**self.measurement_lines, **self.kinetics_lines}.values():
@@ -575,6 +636,28 @@ class Plot2DManager:
             self.y_axis_str = "Value"
         self.canvas.ax.set_ylabel(self.y_axis_str)
 
+    def _apply_bounds(self) -> None:
+        if not all(np.isfinite(v) for v in [self._x_min, self._x_max, self._y_min, self._y_max, self._z_min, self._z_max]):
+            return
+        def _pad(a, b):
+            span = b - a
+            if span <= 0: return a - 0.5, b + 0.5
+            pad = 0.03 * span
+            return a - pad, b + pad
+
+        ax = self.ax
+        x0, x1 = _pad(self._x_min, self._x_max)
+        y0, y1 = _pad(self._y_min, self._y_max)
+        z0, z1 = _pad(self._z_min, self._z_max)
+        ax.set_xlim(x0, x1)
+        ax.set_ylim(y0, y1)
+        ax.set_zlim(z0, z1)
+
+        # 🔒 prevent later artists/colorbar from re-autoscaling
+        ax.set_autoscale_on(False)
+
+        self.canvas.draw_idle()
+
     def clear_all(self) -> None:
         self.ax.cla()
         self.canvas._init_axes(y_axis_str=self.y_axis_str)
@@ -585,6 +668,10 @@ class Plot2DManager:
             try: self._cbar.remove()
             except Exception: pass
             self._cbar = None
+        if self._cax is not None:
+            try: self.canvas.figure.delaxes(self._cax)
+            except Exception: pass
+            self._cax = None
         self.canvas.draw_idle()
 
 # -----------------------------
