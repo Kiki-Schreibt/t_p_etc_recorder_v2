@@ -38,11 +38,25 @@ import sys
 import math
 from datetime import datetime
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Tuple, Optional
 
 import numpy as np
 
 import matplotlib.dates as mdates
+from matplotlib.collections import LineCollection
+from matplotlib.colors import Normalize
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
+try:
+    # Matplotlib ≥ 3.6 (and v4)
+    from matplotlib import colormaps as _cmaps
+    def _get_cmap(name: str):
+        return _cmaps.get_cmap(name)
+except Exception:  # Matplotlib ≤ 3.x fallback
+    import matplotlib.cm as _cm
+    def _get_cmap(name: str):
+        return _cm.get_cmap(name)
+
+from matplotlib.cm import ScalarMappable
 
 # --- Qt / Matplotlib embedding ---
 from PySide6.QtCore import Qt, QThread, Signal, Slot, QObject
@@ -105,15 +119,19 @@ class Plot3DManager:
     def __init__(self, canvas: Matplotlib3DCanvas) -> None:
         self.canvas = canvas
         self.ax = canvas.ax
-        self.measurement_lines: Dict[int, List] = {}
-        self.kinetics_lines: Dict[int, List] = {}
-        # Track bounds for manual autoscaling in 3D
-        self._x_min = math.inf
-        self._x_max = -math.inf
-        self._y_min = math.inf
-        self._y_max = -math.inf
-        self._z_min = math.inf
-        self._z_max = -math.inf
+        self.measurement_lines: Dict[float, List] = {}
+        self.kinetics_lines: Dict[float, List] = {}
+        # data bounds
+        self._x_min = math.inf; self._x_max = -math.inf
+        self._y_min = math.inf; self._y_max = -math.inf
+        self._z_min = math.inf; self._z_max = -math.inf
+        # color mapping
+        self._cmin = math.inf; self._cmax = -math.inf
+        self._cmap = _get_cmap('viridis')
+        self._norm: Normalize | None = None
+        self._cbar = None
+        self._color_label = "Color"
+        self._cdata: Dict[float, np.ndarray] = {}  # cycle -> c-array
         self.z_axis_str = ""
 
     # ---- bounds helpers ----
@@ -193,25 +211,87 @@ class Plot3DManager:
             self.canvas._init_axes(z_axis_str=self.z_axis_str)
         self.canvas.draw_idle()
 
-    # ---- plotting ----
-    def plot_measurement(self, cycle: float, series: Series, z_axis_type="", sample_id="") -> None:
-        self._set_z_axis(z_axis_type)
-        (line,) = self.ax.plot(series.x, series.y, series.z,
-                               linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
-        line.set_picker(True)          # enable picking
-        line.set_pickradius(8)         # easier to click in 3D
-        self.measurement_lines.setdefault(float(cycle), []).append(line)
-        self._update_bounds(series)
-        self._apply_bounds()
+     # ---- color helpers ----
+    def _update_color_range(self, c: np.ndarray | None) -> bool:
+        """Return True if range changed (requiring recolor)."""
+        if c is None or c.size == 0 or not np.isfinite(c).any():
+            return False
+        changed = False
+        cmin = float(np.nanmin(c)); cmax = float(np.nanmax(c))
+        if cmin < self._cmin: self._cmin = cmin; changed = True
+        if cmax > self._cmax: self._cmax = cmax; changed = True
+        if changed:
+            self._norm = Normalize(vmin=self._cmin, vmax=self._cmax)
+        return changed
 
-    def plot_kinetics(self, cycle: float, series: Series) -> None:
-        (line,) = self.ax.plot(series.x, series.y, series.z,
-                               linestyle="--", linewidth=2.0, alpha=0.95, label=f"kin c{cycle}")
-        line.set_picker(True)
-        line.set_pickradius(8)
-        self.kinetics_lines.setdefault(float(cycle), []).append(line)
-        self._update_bounds(series)
-        self._apply_bounds()
+    def _ensure_colorbar(self):
+        if self._norm is None:
+            return
+        if self._cbar is None:
+            sm = ScalarMappable(norm=self._norm, cmap=self._cmap)
+            self._cbar = self.canvas.figure.colorbar(sm, ax=self.ax, pad=0.01)
+            self._cbar.set_label(self._color_label)
+        else:
+            self._cbar.mappable.set_norm(self._norm)
+            self._cbar.mappable.set_cmap(self._cmap)
+            self._cbar.set_label(self._color_label)
+
+    def _recolor_all(self):
+        """Recompute segment colors for all collections after range grows."""
+        if self._norm is None:
+            return
+        for cyc, arts in {**self.measurement_lines, **self.kinetics_lines}.items():
+            for art in arts:
+                if isinstance(art, Line3DCollection) and cyc in self._cdata:
+                    cvals = self._cdata[cyc]
+                    if cvals is None or cvals.size < 2: continue
+                    colors = self._cmap(self._norm(cvals[:-1]))
+                    art.set_colors(colors)
+
+    def _color_label_from_param(self, color_label):
+        if color_label:
+            self._color_label = color_label
+
+    # ---- plotting ----
+    def plot_measurement(self, cycle: float, series: Series, z_axis_type="", color_label=None) -> None:
+        self._set_z_axis(z_axis_type)
+        self._color_label_from_param(color_label)
+        artist = self._plot_series(cycle, series)
+        self.measurement_lines.setdefault(float(cycle), []).append(artist)
+        self._update_bounds(series); self._apply_bounds()
+
+    def plot_kinetics(self, cycle: float, series: Series, color_label=None) -> None:
+        self._color_label_from_param(color_label)
+        artist = self._plot_series(cycle, series, linestyle="--", linewidth=2.0)
+        self.kinetics_lines.setdefault(float(cycle), []).append(artist)
+        self._update_bounds(series); self._apply_bounds()
+
+    def _plot_series(self, cycle: float, s: Series, **line_kwargs):
+        if s.c is None or s.c.size < 2 or not np.isfinite(s.c).any():
+            # Solid line fallback
+            (line,) = self.ax.plot(s.x, s.y, s.z, alpha=0.95, **({"linewidth":1.8}|line_kwargs))
+            line.set_picker(True); line.set_pickradius(8)
+            return line
+
+        # Gradient line: build segments
+        n = len(s.x)
+        segs = [np.array([[s.x[i], s.y[i], s.z[i]],
+                          [s.x[i+1], s.y[i+1], s.z[i+1]]]) for i in range(n-1)]
+
+        lc = Line3DCollection(segs, linewidths=line_kwargs.get("linewidth", 1.8), alpha=0.95)
+        lc.set_picker(True)
+        self.ax.add_collection3d(lc)
+
+        # update color range & colorbar
+        changed = self._update_color_range(s.c)
+        if self._norm is not None:
+            lc.set_colors(self._cmap(self._norm(s.c[:-1])))
+        self._cdata[float(cycle)] = s.c
+        if changed:
+            self._recolor_all()
+        self._ensure_colorbar()
+        self.canvas.draw_idle()
+        return lc
 
     def remove_measurement(self, cycle: int) -> None:
         for art in self.measurement_lines.pop(cycle, []):
@@ -219,15 +299,6 @@ class Plot3DManager:
                 art.remove()
             except Exception:
                 pass
-        self.canvas.draw_idle()
-
-    def clear_all(self) -> None:
-        self.ax.cla()
-        self.canvas._init_axes(z_axis_str=self.z_axis_str)
-        self.measurement_lines.clear()
-        self.kinetics_lines.clear()
-        self._x_min = self._y_min = self._z_min = math.inf
-        self._x_max = self._y_max = self._z_max = -math.inf
         self.canvas.draw_idle()
 
     def resolve_artist(self, artist):
@@ -240,13 +311,17 @@ class Plot3DManager:
         return (None, None)
 
     def mark_selected(self, artist):
-        # reset all
+        # reset
         for d in (self.measurement_lines, self.kinetics_lines):
             for arts in d.values():
                 for a in arts:
-                    a.set_linewidth(1.5); a.set_alpha(0.9); a.set_zorder(1)
-        # emphasize selected
-        artist.set_linewidth(3.0); artist.set_alpha(1.0); artist.set_zorder(10)
+                    if hasattr(a, "set_linewidth"): a.set_linewidth(1.8)
+                    if hasattr(a, "set_linewidths"): a.set_linewidths(1.8)
+                    a.set_alpha(0.95); a.set_zorder(1)
+        # emphasize
+        if hasattr(artist, "set_linewidth"): artist.set_linewidth(3.0)
+        if hasattr(artist, "set_linewidths"): artist.set_linewidths(3.0)
+        artist.set_alpha(1.0); artist.set_zorder(10)
         self.canvas.draw_idle()
 
     def _set_z_axis(self, z_axis_type):
@@ -265,6 +340,21 @@ class Plot3DManager:
         if z_axis_type == table.uptake_wt_p:
             self.z_axis_str = "Uptake (wt-%)"
         self.canvas.ax.set_zlabel(self.z_axis_str)
+
+    def clear_all(self) -> None:
+        self.ax.cla()
+        self.canvas._init_axes(z_axis_str=self.z_axis_str)
+        self.measurement_lines.clear(); self.kinetics_lines.clear()
+        self._x_min = self._y_min = self._z_min = math.inf
+        self._x_max = self._y_max = self._z_max = -math.inf
+        # reset color mapping
+        self._cmin = math.inf; self._cmax = -math.inf
+        self._norm = None; self._cdata.clear()
+        if self._cbar:
+            try: self._cbar.remove()
+            except Exception: pass
+            self._cbar = None
+        self.canvas.draw_idle()
 
 
 # -----------------------------
@@ -374,34 +464,82 @@ class Plot2DManager:
             self.ax.yaxis.set_major_locator(loc)
             self.ax.yaxis.set_major_formatter(fmt)
 
-    def plot_measurement(self, cycle: float, series: Series, z_axis_type="", sample_id="") -> None:
-
+    def plot_measurement(self, cycle: float, series: Series, z_axis_type="", color_label=None) -> None:
         self._set_y_axis(z_axis_type)
         self._ensure_y_formatter(series.z)
-        (line,) = self.ax.plot(series.x, series.z, linewidth=1.5, alpha=0.9, label=f"meas c{cycle}")
-        line.set_picker(True); line.set_pickradius(8)
-        self.measurement_lines.setdefault(float(cycle), []).append(line)
+        artist = self._plot_series(series, linestyle=None)
+        self.measurement_lines.setdefault(float(cycle), []).append(artist)
         self._update_bounds(series.x, series.z); self._apply_bounds()
 
-    def plot_kinetics(self, cycle: float, series: Series) -> None:
+    def plot_kinetics(self, cycle: float, series: Series, color_label=None) -> None:
         self._ensure_y_formatter(series.z)
-        (line,) = self.ax.plot(series.x, series.z, linestyle="--", linewidth=2.0, alpha=0.95, label=f"kin c{cycle}")
-        line.set_picker(True); line.set_pickradius(8)
-        self.kinetics_lines.setdefault(float(cycle), []).append(line)
+        artist = self._plot_series(series, linestyle="--")
+        self.kinetics_lines.setdefault(float(cycle), []).append(artist)
         self._update_bounds(series.x, series.z); self._apply_bounds()
+
+    # --- helpers
+    _cmin = math.inf; _cmax = -math.inf
+    _norm: Normalize | None = None
+    _cmap = _get_cmap('viridis')
+    _cbar = None
+    _color_label = "Color"
+    _cdata: Dict[float, np.ndarray] = {}
+
+    def _update_color_range(self, c):
+        if c is None or c.size == 0 or not np.isfinite(c).any(): return False
+        changed = False
+        cmin = float(np.nanmin(c)); cmax = float(np.nanmax(c))
+        if cmin < self._cmin: self._cmin = cmin; changed = True
+        if cmax > self._cmax: self._cmax = cmax; changed = True
+        if changed: self._norm = Normalize(vmin=self._cmin, vmax=self._cmax)
+        return changed
+
+    def _ensure_colorbar(self):
+        if self._norm is None: return
+        if self._cbar is None:
+            sm = ScalarMappable(norm=self._norm, cmap=self._cmap)
+            self._cbar = self.canvas.figure.colorbar(sm, ax=self.ax, pad=0.01)
+            self._cbar.set_label(self._color_label)
+        else:
+            self._cbar.mappable.set_norm(self._norm)
+            self._cbar.mappable.set_cmap(self._cmap)
+
+    def _recolor_all(self):
+        if self._norm is None: return
+        for arts in {**self.measurement_lines, **self.kinetics_lines}.values():
+            for art in arts:
+                if isinstance(art, LineCollection):
+                    cvals = getattr(art, "_cvals", None)
+                    if cvals is None or cvals.size < 2: continue
+                    art.set_colors(self._cmap(self._norm(cvals[:-1])))
+
+    def _plot_series(self, s: Series, linestyle=None):
+        if s.c is None or s.c.size < 2 or not np.isfinite(s.c).any():
+            # Solid line
+            (line,) = self.ax.plot(s.x, s.z, linestyle=(linestyle or "-"), linewidth=1.8, alpha=0.95)
+            line.set_picker(True); line.set_pickradius(8)
+            return line
+
+        n = len(s.x)
+        segs = [np.array([[s.x[i], s.z[i]], [s.x[i+1], s.z[i+1]]]) for i in range(n-1)]
+        lc = LineCollection(segs, linewidths=1.8, alpha=0.95)
+        lc.set_picker(True)
+        self.ax.add_collection(lc)
+
+        changed = self._update_color_range(s.c)
+        if self._norm is not None:
+            lc.set_colors(self._cmap(self._norm(s.c[:-1])))
+            lc._cvals = s.c  # stash so we can recolor later
+        if changed:
+            self._recolor_all()
+        self._ensure_colorbar()
+        self.canvas.draw_idle()
+        return lc
 
     def remove_measurement(self, cycle: int | float) -> None:
         for art in self.measurement_lines.pop(float(cycle), []):
             try: art.remove()
             except Exception: pass
-        self.canvas.draw_idle()
-
-    def clear_all(self) -> None:
-        self.ax.cla()
-        self.canvas._init_axes(y_axis_str=self.y_axis_str)
-        self.measurement_lines.clear(); self.kinetics_lines.clear()
-        self._x_min = self._y_min = math.inf
-        self._x_max = self._y_max = -math.inf
         self.canvas.draw_idle()
 
     def resolve_artist(self, artist):
@@ -437,6 +575,17 @@ class Plot2DManager:
             self.y_axis_str = "Value"
         self.canvas.ax.set_ylabel(self.y_axis_str)
 
+    def clear_all(self) -> None:
+        self.ax.cla()
+        self.canvas._init_axes(y_axis_str=self.y_axis_str)
+        self.measurement_lines.clear(); self.kinetics_lines.clear()
+        self._x_min = self._y_min = math.inf; self._x_max = self._y_max = -math.inf
+        self._cmin = math.inf; self._cmax = -math.inf; self._norm = None; self._cdata.clear()
+        if self._cbar:
+            try: self._cbar.remove()
+            except Exception: pass
+            self._cbar = None
+        self.canvas.draw_idle()
 
 # -----------------------------
 # 2D Plot manager (Cycle vs Value summary)
@@ -672,6 +821,14 @@ class KineticsView(QMainWindow):
         self.combo_box_z_select = QComboBox()
         self.combo_box_z_select.addItems([str(kin_select) for kin_select in kinetics_selectables])
 
+        self.color_by_combo = QComboBox()
+        self.color_by_combo.addItems([
+            "Solid color",                           # no gradient
+            kinetics_table.temperature,              # profile drives the colormap
+            kinetics_table.temperature_res,
+            kinetics_table.pressure,
+        ])
+
         self.btn_load = QPushButton("Load Curves")
         self.btn_clear = QPushButton("Clear Plot")
 
@@ -695,6 +852,7 @@ class KineticsView(QMainWindow):
         form.addRow("Sample ID", self.sample_edit)
         form.addRow("Cycles", self.cycles_edit)
         form.addRow("Plot mode", self.plot_mode_combo)
+        form.addRow("Color by", self.color_by_combo)
         form.addRow(self.combo_box_z_select)
         form.addRow(self.btn_load)
         form.addRow(self.btn_clear)
@@ -841,10 +999,12 @@ class KineticsView(QMainWindow):
     def plot_measurement(self, cycle: int, series: Series) -> None:
         z_axis_type = self.combo_box_z_select.currentText().strip()
         sample_id = self.sample_edit.text().strip()
-        self.plot_mgr.plot_measurement(cycle, series, z_axis_type)
+        color_label = self.get_color_by_label()
+        self.plot_mgr.plot_measurement(cycle, series, z_axis_type, color_label=color_label)
 
     def plot_kinetics(self, cycle: int, series: Series) -> None:
-        self.plot_mgr.plot_kinetics(cycle, series)
+        color_label = self.get_color_by_label()
+        self.plot_mgr.plot_kinetics(cycle, series, color_label=color_label)
 
     def clear_plot(self) -> None:
         # clear all managers so switching views doesn't show stale curves
@@ -1064,6 +1224,19 @@ class KineticsView(QMainWindow):
                 fig.set_size_inches(orig_size, forward=True)
                 self.canvas.draw_idle()
 
+    def get_color_by_column(self) -> Optional[str]:
+        val = self.color_by_combo.currentText().strip()
+        return None if val == "Solid color" else val
+
+    def get_color_by_label(self) -> str:
+        txt = self.color_by_combo.currentText().strip()
+        if txt == "Solid color": return "Color"
+        # pretty labels (optional)
+        from src.infrastructure.core.table_config import TableConfig
+        t = TableConfig().KineticsTable
+        if txt in (t.temperature, t.temperature_res): return "Temperature (°C)"
+        if txt == t.pressure: return "Pressure (bar)"
+        return txt or "Color"
 
 
 def show_manager_canvas_3d():

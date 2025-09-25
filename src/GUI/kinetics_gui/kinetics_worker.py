@@ -37,6 +37,7 @@ class Series:
     x: np.ndarray
     y: np.ndarray
     z: np.ndarray
+    c: np.ndarray | None = None
 
 
 class DataAccess:
@@ -65,21 +66,31 @@ class DataAccess:
         return [r[0] for r in rows]
 
     def fetch_measurements(
-        self, sample_id: str, cycles: Iterable[float], z_col_name: str = ""
+        self,
+        sample_id: str,
+        cycles: Iterable[float],
+        z_col_name: str = "",
+        color_by_col_name: str | None = None,   # NEW
     ) -> Dict[float, Series]:
         cycles = list(cycles)
         if not cycles:
             return {}
 
+        # Build select list dynamically
+        select_cols = [
+            self.kinetics_table.cycle_number,
+            self.kinetics_table.time_delta_min,
+            z_col_name,
+        ]
+        if color_by_col_name:
+            select_cols.append(color_by_col_name)
+
         query = (
-            f"SELECT {self.kinetics_table.cycle_number}, "
-            f"       {self.kinetics_table.time_delta_min}, "
-            f"       {z_col_name} "
+            "SELECT " + ", ".join(select_cols) + " "
             f"FROM {self.kinetics_table.table_name} "
             f"WHERE {self.kinetics_table.sample_id} = %s "
             f"  AND {self.kinetics_table.cycle_number} = ANY(%s) "
-            f"ORDER BY {self.kinetics_table.cycle_number}, "
-            f"{self.kinetics_table.time_delta_min}"
+            f"ORDER BY {self.kinetics_table.cycle_number}, {self.kinetics_table.time_delta_min}"
         )
 
         with DatabaseConnection(**self.config.db_conn_params) as db_conn:
@@ -87,21 +98,34 @@ class DataAccess:
             rows = db_conn.cursor.fetchall()
 
         out: Dict[float, Series] = {}
-        for cyc, t_list, y_list in rows:
+        for row in rows:
+            if color_by_col_name:
+                cyc, t_list, y_list, c_list = row
+            else:
+                cyc, t_list, y_list = row
+                c_list = None
+
             if t_list is None or y_list is None:
                 continue
 
-            x = np.asarray(list(t_list), dtype=float)         # minutes (numeric)
-            z = _as_array_preserve_datetime(y_list)           # keep datetime as datetime
+            x = np.asarray(list(t_list), dtype=float)
+            z = _as_array_preserve_datetime(y_list)
 
             n = min(len(x), len(z))
             if n == 0:
                 continue
-
             x = x[:n]
             z = z[:n]
             y_axis = np.full(n, float(cyc), dtype=float)
-            out[float(cyc)] = Series(x=x, y=y_axis, z=z)
+
+            c_arr = None
+            if c_list is not None:
+                c_arr = np.asarray(list(c_list), dtype=float)[:n]
+                # guard for NaNs only arrays
+                if c_arr.size == 0 or not np.isfinite(c_arr).any():
+                    c_arr = None
+
+            out[float(cyc)] = Series(x=x, y=y_axis, z=z, c=c_arr)
 
         return out
 

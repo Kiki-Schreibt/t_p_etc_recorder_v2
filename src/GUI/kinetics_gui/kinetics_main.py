@@ -113,6 +113,7 @@ class KineticsController(QObject):
 
         self.view.set_auto_plot_mode(single_cycle=(len(cycles) == 1))
         try:
+            color_by = self.view.get_color_by_column()
             if (z_val_text == self.dal.kinetics_table.max_rate_wt_p_min
                     or z_val_text == self.dal.kinetics_table.max_rate_wt_p_min):
                 records = self.dal.fetch_cycle_max_val_pair(sample_id=sample_id,
@@ -125,7 +126,7 @@ class KineticsController(QObject):
                 self.view.plot_cycle_value_pairs(pairs=records, label=label, sample_id=sample_id)
                 return
 
-            series_map = self.dal.fetch_measurements(sample_id, cycles, z_val_text)
+            series_map = self.dal.fetch_measurements(sample_id, cycles, z_val_text, color_by_col_name=color_by)
             if not series_map:
                 self.view.show_error("No measurement data returned for the requested cycles.")
                 return
