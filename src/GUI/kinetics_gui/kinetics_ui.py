@@ -229,7 +229,6 @@ class Plot3DManager:
             self._norm = Normalize(vmin=self._cmin, vmax=self._cmax)
         return changed
 
-
     def _ensure_colorbar(self):
         if self._norm is None:
             return
@@ -297,6 +296,8 @@ class Plot3DManager:
 
         lc = Line3DCollection(segs, linewidths=line_kwargs.get("linewidth", 1.8), alpha=0.95)
         lc.set_picker(True)
+        lc.set_antialiased(False)
+        lc.set_rasterized(True)
         self.ax.add_collection3d(lc)
 
         # update color range & colorbar
@@ -307,7 +308,43 @@ class Plot3DManager:
         if changed:
             self._recolor_all()
         self._ensure_colorbar()
-        self.canvas.draw_idle()
+        #self.canvas.draw_idle()
+        return lc
+
+    def _plot_series_batch(self, series_map: Dict[float, Series], *, linestyle=None, linewidth=1.8):
+        # Build one big segment array and one big color array
+        segs = []
+        cols = []
+        use_color = (self._norm is not None)
+        for cyc, s in series_map.items():
+            x, y, z = s.x, s.y, s.z
+            if len(x) < 2: continue
+            # optional decimate (see §2)
+            # x, y, z, c = decimate_series(x, y, z, s.c, max_pts=600)
+
+            segs.extend(
+                np.array([[ [x[i], y[i], z[i]], [x[i+1], y[i+1], z[i+1]] ]])
+                for i in range(len(x)-1)
+            )
+            if use_color and s.c is not None and s.c.size >= 2 and np.isfinite(s.c).any():
+                cols.extend(self._cmap(self._norm(s.c[:-1])))
+            else:
+                cols.extend([ (0,0,0,1) ]*(len(x)-1))  # fallback
+
+        if not segs:
+            return None
+
+        segs = np.vstack(segs)  # (N, 2, 3)
+        lc = Line3DCollection(segs, linewidths=linewidth, alpha=0.95)
+        if cols: lc.set_colors(np.asarray(cols))
+
+        # SPEED FLAGS
+        lc.set_rasterized(True)
+        lc.set_antialiased(False)
+        try: lc.set_zsort('none')
+        except Exception: pass
+
+        self.ax.add_collection3d(lc)
         return lc
 
     def remove_measurement(self, cycle: int) -> None:

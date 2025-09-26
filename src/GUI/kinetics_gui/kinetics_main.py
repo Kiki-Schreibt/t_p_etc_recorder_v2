@@ -138,6 +138,8 @@ class KineticsController(QObject):
             self.view.set_status(f"Loaded measurement curves for cycles: {cycles}")
         except Exception as e:
             self.view.show_error(f"DB error while loading curves: {e}")
+        finally:
+            self.view.canvas.draw_idle()
 
     @Slot(str, str)
     def on_run_kinetics(self, sample_id: str, cycles_text: str) -> None:
