@@ -72,6 +72,9 @@ colors = [
     "#6495ED"   # Cornflower Blue
 ]
 
+STANDARD_TCR_FOLDER_PATH = r"C:\HotDiskTPS_7\Data\Config\Tcr"
+
+
 
 
 

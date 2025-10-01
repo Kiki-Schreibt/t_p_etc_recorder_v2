@@ -1,6 +1,9 @@
 import pandas as pd
 import os
 import numpy as np
+
+import global_vars
+
 try:
     import src.infrastructure.core.logger as logging
 except ImportError:
@@ -259,9 +262,13 @@ if __name__ == '__main__':
 
     from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import config
+    #standard_constraints = global_vars.STANDARD_CONSTRAINTS
+    #standard_constraints['min_TotalCharTime'] = 0.25
+    #print(standard_constraints)
     for sample_id in sample_ids:
         meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
         exporter = QuickExport(meta_data=meta_data, db_conn_params=config.db_conn_params)
+
         exporter.export_all(constraints_etc={})
     #5344,289444522186 origin
     #5345,30476 python

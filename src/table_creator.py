@@ -32,8 +32,6 @@ PARTITIONING_KEYS = {
 
 class TableCreator:
 
-
-
     def __init__(self, db_conn_params):
         self.db_conn_params = db_conn_params
         self.logger = logging.getLogger(__name__)
