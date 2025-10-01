@@ -316,12 +316,13 @@ class TableCreator:
         self.logger.info(f"Table deleted: {table_name}")
 
 
-def create_database(config):
+def create_database(db_conn_params):
 
-    query = f"CREATE DATABASE {config.db_conn_params["DB_DATABASE"]} WITH OWNER = {config.db_conn_params["DB_USERNAME"]}"
+    query = (f"CREATE DATABASE {db_conn_params["DB_DATABASE"]} "
+             f"WITH OWNER = {db_conn_params["DB_USERNAME"]}")
     #config.db_conn_params['DB_DATABASE'] = 'test'
     try:
-        with DatabaseConnection(**config.db_conn_params) as db_conn:
+        with DatabaseConnection(**db_conn_params) as db_conn:
             db_conn.conn.autocommit = True
             db_conn.cursor.execute(query)
             db_conn.conn.autocommit = False
@@ -341,7 +342,7 @@ def test_create_table_from_class():
 
 if __name__ == "__main__":
     from src.infrastructure.core.config_reader import config
-    create_database(config)
+    create_database(config.db_conn_params)
     creator = TableCreator(db_conn_params=config.db_conn_params)
     #creator.__delete_table__(table_name="thermal_conductivity_xy_data")
     #creator.__delete_table__(table_name="thermal_conductivity_data")

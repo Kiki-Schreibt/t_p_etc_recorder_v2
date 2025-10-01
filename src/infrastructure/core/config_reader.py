@@ -220,3 +220,4 @@ if __name__ == "__main__":
     # For testing whether the configuration reader works.
     print("LOG_FILE from configuration:", config.db_conn_params)
     print(config.mb_reading_params)
+    print(config.db_conn_params)

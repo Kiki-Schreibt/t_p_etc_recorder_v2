@@ -286,7 +286,7 @@ def plot_tcr_from_df(
 
     # --- plot ---
     plt.figure(figsize=(7, 4.5))
-    plt.plot(df[t_col].to_numpy(), df["alpha"].to_numpy(), marker=None)
+    plt.scatter(df[t_col].to_numpy(), df["alpha"].to_numpy(), marker=None)
     plt.xlabel("Temperature (°C)")
     plt.ylabel("TCR α (1/°C)")
     plt.title("TCR vs Temperature")
@@ -295,7 +295,7 @@ def plot_tcr_from_df(
         plt.axvline(float(curie_temp), linestyle="--", alpha=0.8)
     plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=150, bbox_inches="tight")
+       plt.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.show()
 
 
@@ -336,5 +336,4 @@ if __name__ == '__main__':
     alpha_355 = calc.tcr_at(df, T_query=355)
     plot_tcr_from_df(df=tcr_series)
 
-    import matplotlib.pyplot as plt
 

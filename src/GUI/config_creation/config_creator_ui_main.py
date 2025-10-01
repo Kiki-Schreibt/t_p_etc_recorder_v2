@@ -160,7 +160,12 @@ class ConfigWindow(QWidget):
             with open(standard_config_file_path, "w") as config_file:
                 json.dump(self.config_values, config_file, indent=4)
             QMessageBox.information(self, "Success", "Configuration saved successfully.")
-            self._create_tables()
+            db_conn_params = {'DB_SERVER': self.inputs['DB_SERVER'].text(),
+                              'DB_DATABASE':   self.inputs['DB_DATABASE'].text(),
+                              'DB_USERNAME':   self.inputs['DB_USERNAME'].text(),
+                              'DB_PASSWORD':   self.inputs['DB_PASSWORD'].text(),
+                              'DB_PORT':       self.inputs['DB_PORT'].text()}
+            self._create_db_and_tables(db_conn_params)
             self.config_saved_sig.emit()
 
         except Exception as e:
@@ -261,10 +266,10 @@ class ConfigWindow(QWidget):
                 return value
 
     @staticmethod
-    def _create_tables():
-        from src.table_creator import TableCreator
-        from src.infrastructure.core.config_reader import config
-        db_conn_params = config.db_conn_params
+    def _create_db_and_tables(db_conn_params):
+        from src.table_creator import TableCreator, create_database
+        
+        create_database(db_conn_params=db_conn_params)
         TableCreator(db_conn_params=db_conn_params).create_all_tables()
 
 
