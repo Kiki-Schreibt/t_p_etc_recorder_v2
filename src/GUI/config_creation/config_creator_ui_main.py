@@ -268,7 +268,7 @@ class ConfigWindow(QWidget):
     @staticmethod
     def _create_db_and_tables(db_conn_params):
         from src.table_creator import TableCreator, create_database
-        
+
         create_database(db_conn_params=db_conn_params)
         TableCreator(db_conn_params=db_conn_params).create_all_tables()
 

@@ -67,7 +67,7 @@ class TableCreator:
 
             # If the table_class has a primary_key attribute, use it
             pk = PRIMARY_KEYS.get(table_name)
-            partitioning_key = PARTITIONING_KEYS.get(table_name) or None
+            partitioning_key = PARTITIONING_KEYS.get(table_name) or "None"
             if pk:
                 if isinstance(pk, (list, tuple)):
                     pk_cols = ", ".join(pk)
@@ -75,7 +75,9 @@ class TableCreator:
                     pk_cols = pk
                 columns_sql.append(f"    PRIMARY KEY ({pk_cols})")
 
-            if 'time' in partitioning_key:
+            if partitioning_key is "None":
+                query_part_partition = " "
+            elif 'time' in partitioning_key:
                 query_part_partition = f"PARTITION BY RANGE ({partitioning_key})"
             elif 'sample' in partitioning_key:
                 query_part_partition = f"PARTITION BY LIST ({partitioning_key})"
