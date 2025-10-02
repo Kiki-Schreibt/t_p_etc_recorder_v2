@@ -67,7 +67,7 @@ class TableCreator:
 
             # If the table_class has a primary_key attribute, use it
             pk = PRIMARY_KEYS.get(table_name)
-            partitioning_key = PARTITIONING_KEYS.get(table_name) or "None"
+            partitioning_key = PARTITIONING_KEYS.get(table_name) or None
             if pk:
                 if isinstance(pk, (list, tuple)):
                     pk_cols = ", ".join(pk)
@@ -75,7 +75,7 @@ class TableCreator:
                     pk_cols = pk
                 columns_sql.append(f"    PRIMARY KEY ({pk_cols})")
 
-            if partitioning_key is "None":
+            if partitioning_key is None:
                 query_part_partition = " "
             elif 'time' in partitioning_key:
                 query_part_partition = f"PARTITION BY RANGE ({partitioning_key})"
@@ -320,16 +320,40 @@ class TableCreator:
 
 def create_database(db_conn_params):
 
-    query = (f"CREATE DATABASE {db_conn_params["DB_DATABASE"]} "
-             f"WITH OWNER = {db_conn_params["DB_USERNAME"]}")
-    #config.db_conn_params['DB_DATABASE'] = 'test'
+    """
+    Create the target database if it doesn't exist.
+
+    db_conn_params keys expected:
+      DB_SERVER, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE
+    """
+    import psycopg2
+    from psycopg2 import errors, sql
+    target_db = db_conn_params["DB_DATABASE"]
+    owner = db_conn_params["DB_USERNAME"]
+    maintenance_db = "postgres"
+
+
+    # Connect to a maintenance database (NOT the target database)
+    conn = psycopg2.connect(
+        host=db_conn_params["DB_SERVER"],
+        port=int(db_conn_params["DB_PORT"]),
+        database=maintenance_db,
+        user=db_conn_params["DB_USERNAME"],
+        password=db_conn_params["DB_PASSWORD"],
+    )
     try:
-        with DatabaseConnection(**db_conn_params) as db_conn:
-            db_conn.conn.autocommit = True
-            db_conn.cursor.execute(query)
-            db_conn.conn.autocommit = False
+        conn.autocommit = True  # CREATE DATABASE cannot run inside a transaction
+        with conn.cursor() as cur:
+            query = sql.SQL("CREATE DATABASE {} WITH OWNER {};").format(
+                sql.Identifier(target_db),
+                sql.Identifier(owner),
+            )
+            cur.execute(query)
     except errors.DuplicateDatabase:
-        print("DataBase already exists. Skipping creation")
+        # Database already exists — fine to skip
+        pass
+    finally:
+        conn.close()
 
 
 def test_create_table_from_class():
