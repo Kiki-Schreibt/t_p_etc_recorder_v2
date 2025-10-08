@@ -7,6 +7,7 @@ import os
 import traceback
 from dataclasses import dataclass
 from typing import Callable, Optional, List, Tuple
+from datetime import timedelta
 
 from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool, QSize, Qt
 from PySide6.QtWidgets import (
@@ -227,6 +228,8 @@ class TPETCImporterWindow(QWidget):
         self.dte_first_hyd = QDateTimeEdit(); self.dte_first_hyd.setDisplayFormat("yyyy-MM-dd HH:mm:ss"); self.dte_first_hyd.setCalendarPopup(True)
         self.dsb_pmax = QDoubleSpinBox(); self.dsb_pmax.setRange(0, 1e6)
         self.dsb_tmin = QDoubleSpinBox(); self.dsb_tmin.setRange(-273, 2_000); self.dsb_tmin.setSuffix(" °C")
+        self.avg_cycle_duration_edit = QLineEdit()
+
 
         row = 0
         meta_layout.addWidget(QLabel("Sample ID*"), row, 0); meta_layout.addWidget(self.le_sample, row, 1)
@@ -238,6 +241,7 @@ class TPETCImporterWindow(QWidget):
         meta_layout.addWidget(QLabel("First Hydrogenation"), row, 2); meta_layout.addWidget(self.dte_first_hyd, row, 3); row += 1
         meta_layout.addWidget(QLabel("Max Pressure Cycling"), row, 0); meta_layout.addWidget(self.dsb_pmax, row, 1)
         meta_layout.addWidget(QLabel("Min Temperature Cycling"), row, 2); meta_layout.addWidget(self.dsb_tmin, row, 3); row += 1
+        meta_layout.addWidget(QLabel("Avg Duration Cycling"), row, 0); meta_layout.addWidget(self.avg_cycle_duration_edit, row, 1); row += 1
 
         layout.addWidget(meta_group)
 
@@ -343,6 +347,7 @@ class TPETCImporterWindow(QWidget):
                 self.dte_first_hyd.setDateTime(dt)
             self.dsb_pmax.setValue(md.max_pressure_cycling or 0.0)
             self.dsb_tmin.setValue(md.min_temperature_cycling or 0.0)
+            self.avg_cycle_duration_edit.setText(str(md.average_cycle_duration) or "")
             progress("Meta fields populated.")
 
         self._with_worker(_load)
@@ -358,6 +363,12 @@ class TPETCImporterWindow(QWidget):
 
         def _save(progress: Callable[[str], None]):
             md = self.backend.load_metadata(sid, progress)
+            dur_str = self.avg_cycle_duration_edit.text().strip() or None
+            if dur_str:
+                hours, minutes, seconds = map(int, dur_str.split(':'))
+                avg_dur = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+            else:
+                avg_dur = None
             updates = {
                 "sample_material": self.le_material.text().strip() or None,
                 "sample_mass": float(self.dsb_mass.value()) or None,
@@ -366,6 +377,7 @@ class TPETCImporterWindow(QWidget):
                 "first_hydrogenation": self.dte_first_hyd.dateTime().toPython() if self.dte_first_hyd.dateTime().isValid() else None,
                 "max_pressure_cycling": float(self.dsb_pmax.value()) or None,
                 "min_temperature_cycling": float(self.dsb_tmin.value()) or None,
+                "average_cycle_duration": avg_dur or None
             }
             self.backend.update_metadata(md, updates, progress)
 
@@ -373,7 +385,13 @@ class TPETCImporterWindow(QWidget):
 
     # ---- Pickers
     def _pick_tp_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select T/P CSV Folder")
+
+        default_dir = os.path.expanduser(r"C:\Daten\Kiki\TCR-Bestimmung-TypF2\MeasFiles_Hyd-Nach-WAE-WA-019\Hyd-Nach-WAE-WA-019-TundP-Verläufe")  # or any fixed path you like
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "Select T/P CSV Folder",
+            default_dir,  # <-- initial directory
+        )
         if folder:
             self.le_tp_folder.setText(folder)
             self.backend.set_tp_folder(folder)

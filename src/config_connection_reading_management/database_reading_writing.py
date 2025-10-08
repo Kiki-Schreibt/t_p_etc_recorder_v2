@@ -546,6 +546,95 @@ class DataBaseManipulator:
         update_between_min_list: Optional[pd.Series] = None,
         update_between_max_list: Optional[pd.Series] = None
     ) -> None:
+        """
+        Batch-update rows in a partitioned (or plain) table over multiple time ranges.
+
+        Builds a single parameterized `UPDATE` statement of the form:
+
+            UPDATE <table>
+            SET col1 = %s, col2 = %s, ...
+            WHERE <table>.sample_id = %s
+              AND <col_to_match> BETWEEN %s AND %s
+              [AND <other_col_to_match> = %s]
+
+        and executes it repeatedly with one parameter tuple per range. This is useful
+        when you need to set the same set of columns for many non-overlapping time
+        windows (e.g., assign cycle numbers or flags between `time_start` and
+        `time_end` for a given `sample_id`, optionally conditioned on an additional
+        column like `de_hyd_state`).
+
+        Args:
+            sample_id: Value for the table's `sample_id` column used in the WHERE
+                clause. Must not be `None`.
+            table: A `TableConfig` object for the target table. Must provide
+                `.table_name` and `.sample_id`.
+            df_vals_to_update: DataFrame whose columns are the target columns to
+                update and whose rows hold the new values. Each row corresponds
+                1:1 to the time range at the same position in
+                `update_between_min_list` / `update_between_max_list`, and (if
+                provided) to `other_col_to_match_values`.
+            col_to_match: Column name used for the BETWEEN filter (typically a
+                timestamp column such as `time`). The BETWEEN is **inclusive** on
+                both ends.
+            other_col_to_match: Optional additional column to include as an equality
+                filter in the WHERE clause (e.g., `de_hyd_state`). Only added if
+                `other_col_to_match_values` is provided and non-empty.
+            other_col_to_match_values: Optional Series of values for
+                `other_col_to_match`. Must align by position with the rows in
+                `df_vals_to_update` and the time ranges.
+            update_between_min_list: Series of lower bounds for the BETWEEN filter
+                (one per row). Values should be of the appropriate dtype for
+                `col_to_match` (e.g., timezone-aware timestamps if the column is
+                `timestamptz`).
+            update_between_max_list: Series of upper bounds for the BETWEEN filter
+                (one per row).
+
+        Behavior:
+            - Validates minimal inputs; on missing essentials it logs an error and
+              returns without performing updates.
+            - Constructs a parameterized UPDATE with placeholders for values; table
+              and column identifiers come from `TableConfig`/arguments and are
+              interpolated into the SQL string (assumed trusted).
+            - Converts the min/max Series to Python lists and zips them together
+              with each row of `df_vals_to_update` to build the parameter tuples.
+            - If `other_col_to_match` and a non-empty `other_col_to_match_values`
+              are provided, appends an equality predicate and the corresponding
+              value to each parameter tuple.
+            - Executes the updates via `self.execute_updating(query, values)`, where
+              `values` is a list of tuples (i.e., an executemany-style batch).
+            - Logs the number of rows/ranges attempted.
+
+        Returns:
+            None. Side effect is updating rows in the database.
+
+        Requirements & Notes:
+            - The lengths of `df_vals_to_update`, `update_between_min_list`,
+              `update_between_max_list`, and (if provided) `other_col_to_match_values`
+              must match; otherwise indexing/zipping will misalign or raise.
+            - The `BETWEEN` predicate is inclusive (`min <= col_to_match <= max`).
+            - For performance, ensure indexes exist on `(sample_id, col_to_match)`
+              and, if used, on `(sample_id, other_col_to_match, col_to_match)`.
+            - Column and table names are not quoted here; they should be safe,
+              canonical identifiers from `TableConfig`.
+
+        Example:
+            >>> t = TableConfig().TPDataTable
+            >>> updates = pd.DataFrame({"cycle_number": [0.5, 1.0]})
+            >>> mins = pd.Series([ts1, ts2])   # e.g., pandas Timestamps
+            >>> maxs = pd.Series([te1, te2])
+            >>> states = pd.Series(["Dehydrogenated", "Hydrogenated"])
+            >>> dbm.batch_update_data(
+            ...     sample_id="WAE-WA-030",
+            ...     table=t,
+            ...     df_vals_to_update=updates,
+            ...     col_to_match=t.time,
+            ...     other_col_to_match=t.de_hyd_state,
+            ...     other_col_to_match_values=states,
+            ...     update_between_min_list=mins,
+            ...     update_between_max_list=maxs,
+            ... )
+        """
+
         if table is None or df_vals_to_update is None or update_between_min_list is None or update_between_max_list is None:
             self.logger.error("Insufficient data provided for batch update.")
             return
@@ -578,42 +667,68 @@ class DataBaseManipulator:
         update_between_vals: Optional[Union[Tuple, List]] = None,
     ) -> bool:
         """
-        Update one or more columns in a database table for rows matching a sample ID
-        and a value range on another column.
+        Update one or more columns for rows matching a sample and a value/range filter.
 
-        :param sample_id: The sample identifier to match in `table.sample_id` column.
-        :type sample_id: Optional[str]
-        :param table:      A table‐metadata object exposing `table_name` and `sample_id`
-                           attributes. e.g. `TableConfig().TPDataTable`.
-        :type table:       object
-        :param update_df:  A single‐row pandas DataFrame or pandas Series. Its columns
-                           (or index) name the columns to update; its values are the new
-                           values to write.
-        :type update_df:   Optional[Union[pd.DataFrame, pd.Series]]
-        :param col_to_match: Name of a second column in the WHERE clause. Only rows where
-                             this column is BETWEEN the two values in `update_between_vals`
-                             will be updated.
-        :type col_to_match: Optional[str]
-        :param update_between_vals: A 2‐element tuple or list giving the inclusive lower
-                                    and upper bounds for `col_to_match`. e.g. (`start_ts`, `end_ts`).
-        :type update_between_vals: Optional[Union[Tuple, List]]
+        Constructs and executes a parameterized UPDATE on ``table.table_name`` that
+        targets rows with a given ``sample_id`` and a constraint on ``col_to_match``.
+        The new values come from a **single-row** pandas DataFrame or a pandas Series.
+        If an ETC table is passed, ``table.sample_id_small`` is used instead of
+        ``table.sample_id``.
 
-        :returns: True if the UPDATE executed and committed successfully; False otherwise.
-        :rtype: bool
+        The WHERE predicate is either:
+          * equality: ``col_to_match = %s`` when ``update_between_vals`` has length 1, or
+          * inclusive range: ``col_to_match BETWEEN %s AND %s`` when length is 2.
 
-        :example:
-        >>> df = pd.DataFrame([{'pressure': 1.23, 'temperature': 300.0}])
-        >>> success = updater.update_data(
-        ...     sample_id="WAE-WA-028",
-        ...     table=TableConfig().TPDataTable,
-        ...     update_df=df,
-        ...     col_to_match='timestamp',
-        ...     update_between_vals=(1600000000, 1600003600)
-        ... )
-        >>> if success:
-        ...     print("Rows updated")
-        ... else:
-        ...     print("Update failed")
+        Args:
+            sample_id: Sample identifier compared against the table's sample-id column.
+                Must not be ``None``.
+            table: Table metadata object exposing ``table_name`` and the appropriate
+                sample-id attribute (``sample_id`` or, for ETC tables, ``sample_id_small``).
+                Example: ``TableConfig().TPDataTable``.
+            update_df: A single-row ``pd.DataFrame`` **or** a ``pd.Series`` providing
+                the columns to update and their new values.
+                - DataFrame: column names are used; the **first row** (``.iloc[0]``) supplies values.
+                - Series: index labels are used as column names; values come from the Series.
+            col_to_match: Name of the additional column used in the WHERE clause (e.g. a
+                timestamp column).
+            update_between_vals: One value (equality) **or** two values (inclusive BETWEEN)
+                to filter ``col_to_match``. A list is accepted and will be converted to a tuple.
+
+        Returns:
+            True if the UPDATE executed and committed; False if validation failed or an
+            exception occurred (the transaction is rolled back and an error is logged).
+
+        Notes:
+            - The ``BETWEEN`` predicate is **inclusive** on both bounds.
+            - Table/column identifiers are interpolated from trusted metadata; values
+              are passed as bind parameters (``%s``).
+            - Ensure suitable indexes (e.g. on ``(sample_id, col_to_match)``) for performance.
+            - If ``update_df`` is a DataFrame with more than one row, only the **first**
+              row is used.
+
+        Examples:
+            Update by equality:
+                >>> s = pd.Series({'pressure': 1.23, 'temperature': 300.0})
+                >>> ok = updater.update_data(
+                ...     sample_id="WAE-WA-028",
+                ...     table=TableConfig().TPDataTable,
+                ...     update_df=s,
+                ...     col_to_match=TableConfig().TPDataTable.time,
+                ...     update_between_vals=[pd.Timestamp('2023-11-01T12:00:00Z')]
+                ... )
+
+            Update by inclusive range:
+                >>> df = pd.DataFrame([{'cycle_number': 0.5}])
+                >>> ok = updater.update_data(
+                ...     sample_id="WAE-WA-030",
+                ...     table=TableConfig().TPDataTable,
+                ...     update_df=df,
+                ...     col_to_match=TableConfig().TPDataTable.time,
+                ...     update_between_vals=(
+                ...         pd.Timestamp('2023-11-01T10:00:00Z'),
+                ...         pd.Timestamp('2023-11-01T11:00:00Z'),
+                ...     ),
+                ... )
         """
 
         if table is None or update_df is None or col_to_match is None or update_between_vals is None:

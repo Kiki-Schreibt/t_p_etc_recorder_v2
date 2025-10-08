@@ -634,14 +634,16 @@ class CSVCounter:
             sample_id (str): The sample identifier.
             init_state (str): The initial state for cycle counting.
         """
-        df_all_cycles = self._preallocate_cycles_by_sample_id(sample_id=sample_id)
+        df_all_cycles = self._preallocate_cycles_by_sample_id(sample_id=sample_id, init_state=init_state)
         # Initial counting
+        if df_all_cycles.empty:
+            return
         self._initial_counting(df=df_all_cycles, init_state=init_state) #comment to check preallocation
         self._update_tp_table_with_cycle_data(df_all_cycles, sample_id=sample_id)
         # Final counting
         self._count_cycles_calc_uptake(df=df_all_cycles, sample_id=sample_id) #comment to check initial counting
 
-    def _preallocate_cycles_by_sample_id(self, sample_id: str) -> pd.DataFrame:
+    def _preallocate_cycles_by_sample_id(self, sample_id: str, init_state) -> pd.DataFrame:
         """
         Pre-determines cycles based on state changes and returns a DataFrame of cycles.
 
@@ -698,6 +700,7 @@ class CSVCounter:
 
             if len(df_cycles) <= 1:
                 self.logger.info("No Cycles found")
+                self._treat_no_cycles(sample_id, init_state)
                 return pd.DataFrame()
             else:
                 return df_cycles
@@ -719,6 +722,7 @@ class CSVCounter:
         if init_state == STATE_DEHYD:
             df[self.tp_table.cycle_number] = df[self.tp_table.cycle_number] / 2 - 0.5
         else:
+            df, is_increasing_by_one = self._treat_init_state_hyd(df)
             df[self.tp_table.cycle_number] = df[self.tp_table.cycle_number] / 2
 
     def _update_tp_table_with_cycle_data(self, df: pd.DataFrame, sample_id: str) -> None:
@@ -753,7 +757,9 @@ class CSVCounter:
         self.logger.info(f"Start precise cycle count and uptake calculation for {sample_id}")
 
         total_number_cycles = df[self.tp_table.cycle_number].max()
-
+        if total_number_cycles == 0:
+            self.logger.info("No cycles to count")
+            return
         cycles_counted = already_counted
         cycle_number_checker = already_counted
         cycle_counter = CycleCounter(meta_data=MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params),
@@ -782,6 +788,49 @@ class CSVCounter:
         number_last_cycle = df_cycle[table.cycle_number].max()
         meta_data.total_number_cycles = float(number_last_cycle)
         meta_data.write()
+
+    def _treat_init_state_hyd(self, df):
+        if df.empty:
+            return df
+        s = df[self.tp_table.cycle_number]
+        inc = s.diff().gt(0)
+        if inc.any():
+            first_inc_label = inc.idxmax()  # label of first True
+            # label-based slice is inclusive on the right
+            df.loc[:first_inc_label, self.tp_table.de_hyd_state] = STATE_HYD
+            time_start = df.loc[0, self.tp_table.time]
+            time_end = df.loc[first_inc_label, self.tp_table.time]
+        else:
+            # no increase at all → set all to Hydrogenated
+            df[self.tp_table.de_hyd_state] = STATE_HYD
+            time_start = df.loc[0, self.tp_table.time]
+            time_end = df.loc[-1, self.tp_table.time]
+        #update_database t_p_table
+        sample_id = df.loc[-1, self.tp_table.sample_id]
+        db_manipulator = DataBaseManipulator(db_conn_params=self.db_conn_params)
+        self.logger.info(f"Updating initial dehyd state for {sample_id} in {self.tp_table.table_name}")
+        db_manipulator.update_data(
+                        sample_id = sample_id,
+                        table = self.tp_table,
+                        update_df= pd.Series({ self.tp_table.de_hyd_state: STATE_HYD }),
+                        col_to_match = self.tp_table.time,
+                        update_between_vals = [time_start, time_end],
+        )
+        df = self._preallocate_cycles_by_sample_id(sample_id=sample_id, init_state=STATE_HYD)
+        is_increasing_by_one = (df[self.tp_table.cycle_number].diff().fillna(1) == 1).all()
+
+        return df, is_increasing_by_one
+
+    def _treat_no_cycles(self, sample_id, init_state):
+        meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
+        db_manipulator = DataBaseManipulator(db_conn_params=self.db_conn_params)
+        db_manipulator.update_data(
+                        sample_id = sample_id,
+                        table = self.tp_table,
+                        update_df= pd.Series({ self.tp_table.de_hyd_state: init_state }),
+                        col_to_match = self.tp_table.time,
+                        update_between_vals = [meta_data.start_time, meta_data.end_time],
+        )
 
 
 #Global methods
