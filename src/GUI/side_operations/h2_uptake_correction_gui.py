@@ -936,7 +936,7 @@ def main():
     from src.infrastructure.handler.metadata_handler import MetaData
 
     app = QApplication([])
-    meta_data = MetaData(sample_id="WAE-WA-030", db_conn_params=config.db_conn_params)
+    meta_data = MetaData(sample_id="WAE-WA-040", db_conn_params=config.db_conn_params)
     from datetime import datetime
     time_range = [meta_data.start_time, meta_data.end_time]
     win = UptakeCorrectionWindow(
