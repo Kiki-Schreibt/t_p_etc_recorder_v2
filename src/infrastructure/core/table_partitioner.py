@@ -331,6 +331,7 @@ class SamplePartitioner:
 
         with DatabaseConnection(**self.db_conn_params) as conn:
             # does a child named <schema>.<part_name> already exist and belong to <schema>.<table>?
+
             conn.cursor.execute("""
                 SELECT EXISTS (
                   SELECT 1

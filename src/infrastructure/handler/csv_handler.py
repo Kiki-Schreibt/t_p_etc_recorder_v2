@@ -90,7 +90,7 @@ class CSVProcessor:
 
         self.logger.info(f"Start importing temperature and pressure data for {self.meta_data.sample_id}")
         # Initialize the file count and a thread-safe lock
-
+        self._create_partition_sample_id()
         if self.full_file_path:
             self._read_process_write(full_file_path=self.full_file_path)
             files_processed = 1
@@ -199,6 +199,11 @@ class CSVProcessor:
         """
         csv_counter = CSVCounter(config=self.config)
         csv_counter.count(sample_id=sample_id, init_state=init_state)
+
+    def _create_partition_sample_id(self):
+        from src.infrastructure.core.table_partitioner import SamplePartitioner
+        partitioner = SamplePartitioner(db_conn_params=self.db_conn_params)
+        partitioner.create_partition_for_sample_all_tables(sample_id=self.meta_data.sample_id)
 
 
 class CSVImporter:
@@ -556,7 +561,6 @@ class CSVWriter:
             raise
         self.writer = ModbusDBWriter(meta_data=meta_data, db_conn_params=self.db_conn_params)
         self.tp_table = TableConfig().TPDataTable
-
 
     def write_to_database(self, df: pd.DataFrame, file_name: str = '', after_deletion: str = '') -> None:
         """
