@@ -851,8 +851,8 @@ class CycleCounter:
         end_time_cycle = max(time_range_to_update)
         query_update_rest_of_table = (f"UPDATE {self.tp_table.table_name} SET "
                                       f"{self.tp_table.cycle_number} = {self.tp_table.cycle_number} - 1 "
-                                      f"WHERE {self.tp_table.time} > %s")
-        values = (end_time_cycle,)
+                                      f"WHERE {self.tp_table.time} > %s AND {self.tp_table.sample_id} = %s")
+        values = (end_time_cycle, self.meta_data.sample_id)
         DataBaseManipulator(db_conn_params=self.db_conn_params).execute_updating(query=query_update_rest_of_table,
                                                values=values,
                                                many_bool=False)
