@@ -308,7 +308,7 @@ __all__ = ["TCRCalculator"]
 if __name__ == '__main__':
     from src.infrastructure.core.config_reader import config
 
-    time_range = ["2023-05-10", '2024-01-28']
+    time_range = ["2025-10-09", '2025-10-20']
     table = TableConfig().ETCDataTable
     data_loader = DataLoaderTCR(config=config, sensor_type="F1")
     df = data_loader.load_resistance_values(time_range=time_range)
@@ -324,12 +324,12 @@ if __name__ == '__main__':
     tcr_series = calc.pointwise_tcr(df, sg_window=5)   # returns DataFrame with T, R, dR_dT, alpha
 
     # 2) Interval TCR below/above Curie (default ±5 °C windows)
-    below, above = calc.split_by_curie(df, delta=10, ref='Tmid')
+    below, above = calc.split_by_curie(df, delta=2, ref='Tmid')
 
     print(below['alpha'], above['alpha'])
 
     # 3) Interval TCR on a custom range, using midpoint as R_ref
-    stats = calc.interval_tcr(df, Tmin=100, Tmax=400, ref='Tmid')
+    stats = calc.interval_tcr(df, Tmin=280, Tmax=370, ref='Tmid')
     print(stats['alpha'])
 
     # 4) Pointwise alpha at an exact temperature (interpolated)
