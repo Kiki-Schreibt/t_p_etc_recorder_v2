@@ -1296,25 +1296,25 @@ def test_mb_reading_writing(sample_id):
 
 
 if __name__ == "__main__":
-    #test_mb_reading_writing("test")
-    from src.infrastructure.core.config_reader import config
-    from src.infrastructure.handler.metadata_handler import MetaData
-    sample_id = 'WAE-WA-028'
-    meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
-    end = float(meta_data.total_number_cycles)   # e.g. 207.5
-    steps = int(round(end * 2))                  # 415
+    test_mb_reading_writing("test")
+    #from src.infrastructure.core.config_reader import config
+    #from src.infrastructure.handler.metadata_handler import MetaData
+    #sample_id = 'WAE-WA-028'
+    #meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
+    #end = float(meta_data.total_number_cycles)   # e.g. 207.5
+    #steps = int(round(end * 2))                  # 415
    # cycles = [1.5]
-    cycles = [i * 0.5 for i in range(steps + 1)]
-    calc = KineticCalculator(meta_data=meta_data, config=config)
-    failures = []
-    for c in cycles:
-        try:
-            print(f"Running cycle {c}")
-            calc.run(c)
-        except Exception as e:
-            print(f"Cycle {c} failed")
-            failures.append((c, repr(e)))
+    #cycles = [i * 0.5 for i in range(steps + 1)]
+    #calc = KineticCalculator(meta_data=meta_data, config=config)
+    #failures = []
+    #for c in cycles:
+    #    try:
+    #        print(f"Running cycle {c}")
+    #        calc.run(c)
+    #    except Exception as e:
+    #        print(f"Cycle {c} failed")
+    #        failures.append((c, repr(e)))
 
-    print(failures)
+    #print(failures)
 
 

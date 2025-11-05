@@ -6,7 +6,8 @@
         "Density": {"Hydrogenated": "1.45",
                     "Dehydrogenated": "1.738"
                     },
-        "Conductivity_Bulk": {
+        "Conductivity_Bulk":
+        {
             "Hydrogenated": "",
             "Dehydrogenated": ""
         }
@@ -18,7 +19,8 @@
         "Density": {"Hydrogenated": "1.45",
                     "Dehydrogenated": "1.738"
                     },
-        "Conductivity_Bulk": {
+        "Conductivity_Bulk":
+        {
             "Hydrogenated": 31,
             "Dehydrogenated": 156
         }
@@ -30,7 +32,8 @@
         "Density": {"Hydrogenated": "1.45",
                     "Dehydrogenated": "1.738"
                     },
-        "Conductivity_Bulk": {
+        "Conductivity_Bulk":
+        {
             "Hydrogenated": "",
             "Dehydrogenated": ""
         }
@@ -42,7 +45,8 @@
         "Density": {"Hydrogenated": "1.45",
                     "Dehydrogenated": "1.738"
                     },
-        "Conductivity_Bulk": {
+        "Conductivity_Bulk":
+        {
             "Hydrogenated": "",
             "Dehydrogenated": ""
         }
@@ -54,9 +58,23 @@
         "Density": {"Hydrogenated": "1.45",
                     "Dehydrogenated": "1.738"
                     },
-        "Conductivity_Bulk": {
+        "Conductivity_Bulk":
+        {
             "Hydrogenated": "",
             "Dehydrogenated": ""
+        }
+    },
+    {
+	"Hydride": "La1Ni0.85Al0.15H6",
+        "Enthalpy": "30546",
+        "Entropy": "105",
+        "Density": {"Hydrogenated": "NaN",
+                    "Dehydrogenated": "NaN"
+                    },
+        "Conductivity_Bulk":
+        {
+            "Hydrogenated": "NaN",
+            "Dehydrogenated": "NaN"
         }
     }
 ]

@@ -591,7 +591,7 @@ class TCRWindow(QMainWindow):
 
             if T.size == 0:
                 raise ValueError("No valid numeric rows after parsing.")
-    
+
             label = os.path.basename(path)
             self.canvas.add_overlay(SeriesOverlay(label, T, alpha))
 

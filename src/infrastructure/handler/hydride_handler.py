@@ -20,20 +20,28 @@ try:
 except ImportError:
     import logging
 
-
-def parse_chemical_formula(formula: str) -> dict:
+def parse_chemical_formula(formula: str) -> dict[str, float | int]:
     """
-    Parse a chemical formula string into its constituent elements and their counts.
+    Parse a chemical formula string into element counts.
+    Supports fractional stoichiometries like 0.85 and 1.5 (and scientific notation).
 
-    Parameters:
-        formula (str): Chemical formula (e.g., "MgH2").
-
-    Returns:
-        dict: A dictionary with element symbols as keys and their counts as values.
+    Examples:
+        "MgH2"            -> {"Mg": 1, "H": 2}
+        "LaNi0.85Al0.15"  -> {"La": 1, "Ni": 0.85, "Al": 0.15}
     """
-    pattern = r"([A-Z][a-z]*)(\d*)"
+    number = r"(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+    pattern = rf"([A-Z][a-z]*)(?:({number}))?"
     parts = re.findall(pattern, formula)
-    return {element: int(quantity) if quantity else 1 for element, quantity in parts}
+
+    counts: dict[str, float | int] = {}
+    for element, qty in parts:
+        value = float(qty) if qty else 1.0
+        # Convert to int if it's a whole number (e.g. 2.0 → 2)
+        if value.is_integer():
+            value = int(value)
+        counts[element] = counts.get(element, 0) + value
+    return counts
+
 
 
 class MetalHydrideDatabase:
@@ -274,19 +282,31 @@ class MetalHydrideDatabase:
         return ""
 
     @staticmethod
-    def extract_elements(formula: str) -> dict:
+    def extract_elements(formula: str) -> dict[str, float | int]:
         """
         Extract elements and their counts from a chemical formula.
 
+        Supports fractional stoichiometries (e.g., 0.85, 1.5) and integers.
+
         Parameters:
-            formula (str): Chemical formula (e.g., "MgH2").
+            formula (str): Chemical formula (e.g., "MgH2" or "LaNi0.85Al0.15").
 
         Returns:
-            dict: Dictionary mapping element symbols to counts.
+            dict: Dictionary mapping element symbols to counts (ints or floats).
         """
-        pattern = r"([A-Z][a-z]*)(\d*)"
-        elements = re.findall(pattern, formula)
-        return {elem: int(count) if count else 1 for elem, count in elements}
+        # Match element symbol + optional number (integer, decimal, or scientific notation)
+        number_pattern = r"(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+        pattern = rf"([A-Z][a-z]*)(?:({number_pattern}))?"
+        parts = re.findall(pattern, formula)
+
+        elements: dict[str, float | int] = {}
+        for elem, qty in parts:
+            value = float(qty) if qty else 1.0
+            # convert to int if the number is whole (e.g., 2.0 → 2)
+            if value.is_integer():
+                value = int(value)
+            elements[elem] = elements.get(elem, 0) + value
+        return elements
 
     def _save_database(self) -> None:
         """Save the current hydride database to the JSON file and reload it."""
@@ -418,7 +438,9 @@ if __name__ == "__main__":
     # test_metal_hydride_database_and_periodic_table()
 
     # Example usage:
-    hydride_str = "Mg2NiH4"
+    hydride_str = "LaNi0.85Al0.15H6"
+    hydride_str = "MgH2"
+
     mh_database = MetalHydrideDatabase()
     density = mh_database.get_density(hydride_str)
     conductivity = mh_database.get_bulk_conductivity(hydride_str)
@@ -428,23 +450,23 @@ if __name__ == "__main__":
     print(f"Bulk Conductivity: {conductivity}")
     print(f"Capacity: {capacity}")
     print(f"enthalpy, entropy {mh_database.get_enthalpy_entropy(hydride_str)}")
-    periodic_table = PeriodicTableOfElements()
-    m_Mg = periodic_table.atomic_mass_grabber("Mg")
-    m_Ni = periodic_table.atomic_mass_grabber("Ni")
-    m_H = periodic_table.atomic_mass_grabber("H")
-    print(f"M_Mg = {m_Mg}")
-    print(f"M_Ni = {m_Ni}")
-    print(f"M_H = {m_H}")
-    m_Mg2NiH4 = 2 * m_Mg + m_Ni + 4 * m_H
-    wt_Mg2NiH4 = 400 * m_H / m_Mg2NiH4
+    #periodic_table = PeriodicTableOfElements()
+    #m_Mg = periodic_table.atomic_mass_grabber("Mg")
+    #m_Ni = periodic_table.atomic_mass_grabber("Ni")
+    #m_H = periodic_table.atomic_mass_grabber("H")
+    #print(f"M_Mg = {m_Mg}")
+    #print(f"M_Ni = {m_Ni}")
+    #print(f"M_H = {m_H}")
+    #m_Mg2NiH4 = 2 * m_Mg + m_Ni + 4 * m_H
+    #wt_Mg2NiH4 = 400 * m_H / m_Mg2NiH4
 
-    print (f"M_Mg2NiH4 = {m_Mg2NiH4}")
-    print(f"4*M_H/M_Mg2NiH4 *100 = {wt_Mg2NiH4} ")
+    #print (f"M_Mg2NiH4 = {m_Mg2NiH4}")
+    #print(f"4*M_H/M_Mg2NiH4 *100 = {wt_Mg2NiH4} ")
 
-    m_MgH2 = m_Mg + 2*m_H
-    wt_MgH2 = 200*m_H/m_MgH2
-    print (f"M_MgH2 = {m_MgH2} u")
-    print(f"2*M_H/M_MgH2 *100 = {wt_MgH2} wt-%")
+    #m_MgH2 = m_Mg + 2*m_H
+    #wt_MgH2 = 200*m_H/m_MgH2
+    #print (f"M_MgH2 = {m_MgH2} u")
+    #print(f"2*M_H/M_MgH2 *100 = {wt_MgH2} wt-%")
 
 
 
