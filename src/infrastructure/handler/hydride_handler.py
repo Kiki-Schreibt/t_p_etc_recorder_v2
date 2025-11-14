@@ -20,6 +20,7 @@ try:
 except ImportError:
     import logging
 
+
 def parse_chemical_formula(formula: str) -> dict[str, float | int]:
     """
     Parse a chemical formula string into element counts.
@@ -41,7 +42,6 @@ def parse_chemical_formula(formula: str) -> dict[str, float | int]:
             value = int(value)
         counts[element] = counts.get(element, 0) + value
     return counts
-
 
 
 class MetalHydrideDatabase:

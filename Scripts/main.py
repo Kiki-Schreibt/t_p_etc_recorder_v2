@@ -18,6 +18,7 @@ from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWin
 from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
 from src.GUI.etc_measurement_starter.start_etc_measurement_gui import StartETCMeasurementGUI
 from src.GUI.plot_individualizer.plot_individualizer import PlotIndividualizerMainWindow
+from src.GUI.hydride_handler_gui.hydride_handler_main import HydrideHandlerMainWindow
 
 try:
     import src.infrastructure.core.logger as logging
@@ -96,6 +97,7 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionDatabase_Maintenance.triggered.connect(self._open_database_maintainer)
         self.ui.actionETC_Measurement_Starter.triggered.connect(self._open_etc_measurement_performer)
         self.ui.actionPlot_Individualizer.triggered.connect(self._open_plot_individualizer)
+        self.ui.actionHydride_Handler.triggered.connect(self._open_hydride_handler)
 
     def open_test_planner(self):
         """
@@ -203,6 +205,14 @@ class MainProgram(RecordingMainWindow):
         except Exception as e:
             self.logger.error(f"Error opening plot individualizer: {e}")
 
+    def _open_hydride_handler(self):
+        try:
+            self.hydride_handler = HydrideHandlerMainWindow()
+            self.hydride_handler.show()
+
+        except Exception as e:
+            self.logger.error(f"Error opening hydride handler {e}")
+
     def closeEvent(self, event):
         """
         Clean up any running simulators before the main window closes.
@@ -213,7 +223,6 @@ class MainProgram(RecordingMainWindow):
             self.change_modbus_host_ip(switch_off=True)  #switch host and ip back to standard
             self.dicon_simulator.business.stop_server()
         super().closeEvent(event)
-
 
 
 def main():

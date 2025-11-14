@@ -28,6 +28,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src/GUI/exporter_gui" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/GUI/kinetics_gui" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/GUI/tcr_estimator" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/GUI/hydride_handler_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/GUI/post_processor_t_p_etc" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
     <orderEntry type="inheritedJdk" />
