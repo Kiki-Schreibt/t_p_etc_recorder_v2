@@ -19,6 +19,7 @@ from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
 from src.GUI.etc_measurement_starter.start_etc_measurement_gui import StartETCMeasurementGUI
 from src.GUI.plot_individualizer.plot_individualizer import PlotIndividualizerMainWindow
 from src.GUI.hydride_handler_gui.hydride_handler_main import HydrideHandlerMainWindow
+from src.GUI.meta_data_gui.meta_data_gui import MetaDataGUI
 
 try:
     import src.infrastructure.core.logger as logging
@@ -98,6 +99,8 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionETC_Measurement_Starter.triggered.connect(self._open_etc_measurement_performer)
         self.ui.actionPlot_Individualizer.triggered.connect(self._open_plot_individualizer)
         self.ui.actionHydride_Handler.triggered.connect(self._open_hydride_handler)
+        self.ui.actionMeta_Data.triggered.connect(self._open_meta_data_handler)
+
 
     def open_test_planner(self):
         """
@@ -119,7 +122,7 @@ class MainProgram(RecordingMainWindow):
         """
         from src.export_methods import QuickExport
         exporter = QuickExport(meta_data=self.meta_data, db_conn_params=self.config.db_conn_params)
-        constraints = self.controller.constraints_dict
+        constraints = self.controller.constraints
         export_thread = threading.Thread(target=exporter.export_all, args=(constraints), daemon=True)
         self.logger.info(f"Start exporting {self.meta_data.sample_id}")
         export_thread.start()
@@ -212,6 +215,14 @@ class MainProgram(RecordingMainWindow):
 
         except Exception as e:
             self.logger.error(f"Error opening hydride handler {e}")
+
+    def _open_meta_data_handler(self):
+        try:
+            self.meta_gui = MetaDataGUI()
+            self.meta_gui.show()
+
+        except Exception as e:
+            self.logger.error(f"Error opening meta data GUI {e}")
 
     def closeEvent(self, event):
         """

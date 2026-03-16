@@ -5,13 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/GUI/hydride_handler_gui/hydride_handler_main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/GUI/meta_data_gui/meta_data_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/t_p_etc_recorder_v2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/t_p_etc_recorder_v2.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Scripts/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/hydride_data_base.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/hydride_data_base.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/recording_gui/ui/recording_ui_design.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/recording_gui/ui/recording_ui_design.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/export_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/export_methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/metadata_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/metadata_handler.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,6 +105,7 @@
     "Python.main_fitter_backend.executor": "Run",
     "Python.manual_csv_xlsx_inserter.executor": "Run",
     "Python.material_properties.executor": "Run",
+    "Python.meta_data_gui.executor": "Run",
     "Python.meta_data_handler.executor": "Run",
     "Python.metadata_handler.executor": "Run",
     "Python.modbus_handler.executor": "Run",
@@ -174,8 +175,8 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
-    <configuration name="data_fitter_gui_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.meta_data_gui">
+    <configuration name="code_length" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -184,11 +185,33 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/data_fitter" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Desktop" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$USER_HOME$/Desktop/code_length.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="export_methods" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/data_fitter/data_fitter_gui_main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/export_methods.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -219,28 +242,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="kinetics_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="t_p_etc_recorder_v2" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/kinetics_gui" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/kinetics_gui/kinetics_main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -263,7 +264,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="recording_main_v3" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="meta_data_gui" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -272,11 +273,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/recording_gui" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/meta_data_gui" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/recording_gui/recording_main_v3.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/meta_data_gui/meta_data_gui.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -287,11 +288,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.meta_data_gui" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.code_length" />
         <item itemvalue="Python.hydride_handler_main" />
-        <item itemvalue="Python.recording_main_v3" />
-        <item itemvalue="Python.kinetics_main" />
-        <item itemvalue="Python.data_fitter_gui_main" />
+        <item itemvalue="Python.export_methods" />
       </list>
     </recent_temporary>
   </component>

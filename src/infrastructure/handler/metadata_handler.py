@@ -338,7 +338,7 @@ class MetaData:
         if self._sample_id_exists():
             query = f"DELETE from {meta_table.table_name} WHERE {meta_table.sample_id} = %s"
             values = (self.sample_id,)
-            with DatabaseConnection() as db_conn:
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
                 db_conn.cursor.execute(query, values)
                 self.logger.info(f"{self.sample_id} removed from database")
 

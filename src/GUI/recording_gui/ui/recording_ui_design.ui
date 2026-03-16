@@ -684,6 +684,7 @@
     <addaction name="actionETC_Measurement_Starter"/>
     <addaction name="actionPlot_Individualizer"/>
     <addaction name="actionHydride_Handler"/>
+    <addaction name="actionMeta_Data"/>
    </widget>
    <addaction name="menuView"/>
   </widget>
@@ -736,6 +737,11 @@
   <action name="actionHydride_Handler">
    <property name="text">
     <string>Hydride Handler</string>
+   </property>
+  </action>
+  <action name="actionMeta_Data">
+   <property name="text">
+    <string>Meta Data</string>
    </property>
   </action>
  </widget>

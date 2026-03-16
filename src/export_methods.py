@@ -114,6 +114,10 @@ class QuickExport:
         data_to_export = self.db_retriever.fetch_data_by_sample_id_2(table_name=self.cycle_table.table_name,
                                                                      column_names=cols_to_export,
                                                                      sample_id=self.meta_data.sample_id)
+        if data_to_export.empty:
+            self.logger.info("No capacity data found. No cycles driven? Than thats ok")
+            return pd.DataFrame(), "_Capacity_Data"
+
         min_value = data_to_export[self.cycle_table.cycle_number].min()
         max_value = data_to_export[self.cycle_table.cycle_number].max()
         expected_values = np.arange(min_value, max_value + 0.1, 0.5)
@@ -255,15 +259,20 @@ class QuickExport:
         return export_filter_struct, export_filter_string
 
 
+
 if __name__ == '__main__':
     #sample_id = '028-test-simulator_2'
    # sample_ids = ['WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040']
-    sample_ids = ['WAE-WA-040']
+    sample_ids = ['WAE-WJ-001']
 
     from src.infrastructure.handler.metadata_handler import MetaData
     from src.infrastructure.core.config_reader import config
-    #standard_constraints = global_vars.STANDARD_CONSTRAINTS
-    #standard_constraints['min_TotalCharTime'] = 0.25
+    standard_constraints = global_vars.STANDARD_CONSTRAINTS
+
+    standard_constraints['max_TotalCharTime'] =  1.2
+    standard_constraints['max_TotalTempIncr'] = 5.8
+    standard_constraints['min_TotalCharTime'] =  0.25
+    standard_constraints['min_TotalTempIncr'] = 1.5
     #print(standard_constraints)
     for sample_id in sample_ids:
         meta_data = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)
