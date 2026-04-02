@@ -130,6 +130,7 @@ class TableConfig:
         entropy = "entropy"
         total_number_cycles = "total_number_cycles"
         last_de_hyd_state = "last_de_hyd_state"
+        volume_measurement_cell = "volume_measurement_cell"
 
     class CycleDataTable:
         table_name = 'cycle_data'

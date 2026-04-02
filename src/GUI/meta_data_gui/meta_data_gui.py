@@ -108,6 +108,17 @@ class SampleTableModel(QAbstractTableModel):
 
 class MetadataForm(QWidget):
 
+    UNIT_MAPPING = {
+        "mass": "g",
+        "pressure": "bar",
+        "temperature": "K",
+        "volume": "L",
+        "reservoir_volume": "L",
+        "cell_volume": "mL",
+        "enthalpy": "kJ/mol",
+        "entropy": "kJ/(mol·K)"
+    }
+
     def __init__(self):
         super().__init__()
 
@@ -116,25 +127,54 @@ class MetadataForm(QWidget):
 
         for column, attr in MetaData.column_attribute_mapping.items():
 
-            if attr == "average_cycle_duration":
+            # ------------------------
+            # Widget selection
+            # ------------------------
 
+            if attr == "average_cycle_duration":
                 widget = DurationWidget()
 
-            elif any(x in attr for x in ["mass", "pressure", "volume", "enthalpy", "entropy"]):
-
+            elif any(x in attr for x in [
+                "mass", "pressure", "volume",
+                "enthalpy", "entropy", "temperature"
+            ]):
                 widget = QDoubleSpinBox()
                 widget.setMaximum(1e9)
                 widget.setDecimals(6)
 
             else:
-
                 widget = QLineEdit()
 
             self.widgets[attr] = widget
 
+            # ------------------------
+            # Label with units
+            # ------------------------
+
             label = attr.replace("_", " ").title()
 
+            unit = self.get_unit(attr)
+            if unit:
+                label += f" ({unit})"
+
             self.layout.addRow(label, widget)
+
+    # ------------------------
+
+    def get_unit(self, attr):
+
+        # direct match first
+        if attr in self.UNIT_MAPPING:
+            return self.UNIT_MAPPING[attr]
+
+        # fallback: substring match
+        for key, unit in self.UNIT_MAPPING.items():
+            if key in attr:
+                return unit
+
+        return None
+
+    # ------------------------
 
     def set_metadata(self, meta):
 
@@ -143,33 +183,29 @@ class MetadataForm(QWidget):
             value = getattr(meta, attr, None)
 
             if isinstance(widget, QLineEdit):
-
                 widget.setText("" if value is None else str(value))
 
             elif isinstance(widget, QDoubleSpinBox):
-
                 widget.setValue(value if value else 0)
 
             elif isinstance(widget, DurationWidget):
-
                 widget.setValue(value)
+
+    # ------------------------
 
     def apply_to_metadata(self, meta):
 
         for attr, widget in self.widgets.items():
 
             if isinstance(widget, QLineEdit):
-
                 text = widget.text().strip()
                 setattr(meta, attr, text if text else None)
 
             elif isinstance(widget, QDoubleSpinBox):
-
                 val = widget.value()
                 setattr(meta, attr, val if val != 0 else None)
 
             elif isinstance(widget, DurationWidget):
-
                 setattr(meta, attr, widget.value())
 
 

@@ -48,7 +48,8 @@ class MetaData:
         meta_table.average_cycle_duration: 'average_cycle_duration',
         meta_table.reservoir_volume: 'reservoir_volume',
         meta_table.total_number_cycles: 'total_number_cycles',
-        meta_table.last_de_hyd_state: 'last_de_hyd_state'
+        meta_table.last_de_hyd_state: 'last_de_hyd_state',
+        meta_table.volume_measurement_cell: 'volume_measurement_cell'
     }
 
     def __init__(self, db_conn_params, sample_id=None):
@@ -213,6 +214,10 @@ class MetaData:
                     if "3" in self.measurement_cell:
                         self.volume_measurement_cell = 44.37  #[ml]
 
+            if "cell" in col_name.lower() and "volume" in col_name.lower()and self.volume_measurement_cell == None:
+                self.volume_measurement_cell = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None #[l]
+
+
             if "material" in col_name.lower():
                 self.sample_material = df[col_name].iloc[0]
 
@@ -303,7 +308,7 @@ class MetaData:
         print("Measurement Cell:", self.measurement_cell)
         print("Sample Material:", self.sample_material)
         print("Measurement Time:", self.measurement_time)
-        print("Volume Measurement Cell:", self.volume_measurement_cell*1e6, "ml") if self.volume_measurement_cell else print("No cell volume")
+        print("Volume Measurement Cell:", self.volume_measurement_cell, "ml") if self.volume_measurement_cell else print("No cell volume")
         print("Enthalpy:", self.enthalpy*1e-3, " kJ/mol") if self.enthalpy else print("No Enthalpy")
         print("Entropy:", self.entropy*1e-3, " kJ/mol/K")if self.entropy else print("No Entropy")
         print("Theoretical uptake:", self.theoretical_uptake, ' wt-%') if self.theoretical_uptake else print("No uptake")
@@ -401,7 +406,7 @@ def test_meta_data_handler(sample_id):
     from src.infrastructure.core.config_reader import config
     meta_data_instance = MetaData(sample_id=sample_id,
                                   db_conn_params=config.db_conn_params)
-    #meta_data_instance.print()
+    meta_data_instance.print()
     #meta_data_instance._create_new_line_meta_data()
 
 
@@ -409,7 +414,7 @@ if __name__ == "__main__":
     #test_meta_data_handler()
     from datetime import datetime
     start = datetime.now()
-    test_meta_data_handler(sample_id="WAE-WA-040")
+    test_meta_data_handler(sample_id="RobertTest")
     first_finished = (datetime.now()-start).total_seconds()
     print(f"WAE-WA-040 took: {first_finished} s")
     test_meta_data_handler(sample_id="WAE-WA-060")
