@@ -1,7 +1,7 @@
 import sys
 from datetime import timedelta
 
-from PySide6.QtCore import Qt, QAbstractTableModel, QSortFilterProxyModel
+from PySide6.QtCore import Qt, QAbstractTableModel, QSortFilterProxyModel, QRegularExpression
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
     QPushButton, QLineEdit, QTableView, QMessageBox, QLabel,
@@ -112,9 +112,9 @@ class MetadataForm(QWidget):
         "mass": "g",
         "pressure": "bar",
         "temperature": "K",
-        "volume_measurement_cell": "mL",
         "volume": "L",
         "reservoir_volume": "L",
+        "volume_measurement_cell": "mL",
         "enthalpy": "kJ/mol",
         "entropy": "kJ/(mol·K)"
     }
@@ -283,29 +283,38 @@ class MetaDataGUI(QWidget):
 
         table = TableConfig().MetaDataTable
 
-        query = f'SELECT "{table.sample_id}" FROM "{table.table_name}" ORDER BY "{table.sample_id}"'
+        query = f'''
+            SELECT 
+                "{table.sample_id}",
+                "{table.material}",
+                "{table.measurement_cell}"
+            FROM "{table.table_name}"
+            ORDER BY "{table.sample_id}"
+        '''
 
         with DatabaseConnection(**self.db_params) as conn:
-
             conn.cursor.execute(query)
             rows = conn.cursor.fetchall()
 
-        data = [[r[0]] for r in rows]
+        data = [list(r) for r in rows]
 
-        self.model = SampleTableModel(data, ["Sample ID"])
+        headers = ["Sample ID", "Material", "Measurement Cell"]
+
+        self.model = SampleTableModel(data, headers)
 
         self.proxy = QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         self.proxy.setFilterCaseSensitivity(Qt.CaseInsensitive)
 
-        self.table.setModel(self.proxy)
+        # 🔥 important: filter all columns
+        self.proxy.setFilterKeyColumn(-1)
 
+        self.table.setModel(self.proxy)
     # --------------------------------------------------
 
     def filter_samples(self, text):
-
-        self.proxy.setFilterKeyColumn(0)
-        self.proxy.setFilterFixedString(text)
+        regex = QRegularExpression(text, QRegularExpression.CaseInsensitiveOption)
+        self.proxy.setFilterRegularExpression(regex)
 
     # --------------------------------------------------
 
@@ -389,7 +398,7 @@ class MetaDataGUI(QWidget):
 
         try:
 
-            self.current_meta.remove_sample_id()
+            self.current_meta.remove_whole_test_from_db()
 
             self.current_meta = None
 

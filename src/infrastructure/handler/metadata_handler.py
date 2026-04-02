@@ -346,6 +346,39 @@ class MetaData:
                 db_conn.cursor.execute(query, values)
                 self.logger.info(f"{self.sample_id} removed from database")
 
+    def remove_whole_test_from_db(self):
+        if self._sample_id_exists():
+
+            values = (self.sample_id,)
+            query = f"DELETE from {TableConfig.CycleDataTable.table_name} WHERE {meta_table.sample_id} = %s"
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
+                db_conn.cursor.execute(query, values)
+                self.logger.info(f"Cycle data for {self.sample_id} removed from database")
+
+            query = f"DELETE from {TableConfig.ETCDataTable.table_name} WHERE {meta_table.sample_id} = %s"
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
+                db_conn.cursor.execute(query, values)
+                self.logger.info(f"Thermal conductivity data for {self.sample_id} removed from database")
+
+            query = f"DELETE from {TableConfig.ThermalConductivityXyDataTable.table_name} WHERE {meta_table.sample_id} = %s"
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
+                db_conn.cursor.execute(query, values)
+                self.logger.info(f"Kinetic data for {self.sample_id} removed from database")
+
+            query = f"DELETE from {TableConfig.KineticsTable.table_name} WHERE {meta_table.sample_id} = %s"
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
+                db_conn.cursor.execute(query, values)
+                self.logger.info(f"Kinetic data for {self.sample_id} removed from database")
+
+            query = f"DELETE from {TableConfig.TPDataTable.table_name} WHERE {meta_table.sample_id} = %s"
+            with DatabaseConnection(**self.db_conn_params) as db_conn:
+                db_conn.cursor.execute(query, values)
+                self.logger.info(f"Temperature and pressure data for {self.sample_id} removed from database")
+
+        self.remove_sample_id()
+        self.logger.info(f"{self.sample_id} removed completely from database")
+
+
     def _make_tz_aware(self, value):
         """Return timezone-aware version of ``value`` if possible."""
         if not pd.isna(value):  # Make sure it's not NaN
