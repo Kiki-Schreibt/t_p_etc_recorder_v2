@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/infrastructure/handler/hydride_json_db_importer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GUI/hydride_handler_gui/hydride_handler_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/hydride_handler_gui/hydride_handler_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/core/table_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -442,13 +438,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py</url>
-          <line>357</line>
+          <line>435</line>
           <option name="timeStamp" value="717" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py</url>
-          <line>50</line>
-          <option name="timeStamp" value="718" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

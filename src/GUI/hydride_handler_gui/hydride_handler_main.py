@@ -60,11 +60,13 @@ except Exception as e:
 
 from src.infrastructure.core.global_vars import style as STYLE_SHEET
 
+
 # ---- Small helpers -----------------------------------------------------------
 def j_to_kj(value_j: float | None) -> float | None:
     if value_j is None:
         return None
     return value_j / 1000.0
+
 
 def safe_float(x: Any, default: float | None = None) -> float | None:
     try:
@@ -72,9 +74,11 @@ def safe_float(x: Any, default: float | None = None) -> float | None:
     except Exception:
         return default
 
+
 def show_error(parent, title: str, err: Exception):
     tb = traceback.format_exc()
     QMessageBox.critical(parent, title, f"{err}\n\n{tb}")
+
 
 def yesno(parent, title: str, text: str) -> bool:
     return QMessageBox.question(parent, title, text, QMessageBox.Yes | QMessageBox.No) == QMessageBox.Yes
@@ -505,7 +509,6 @@ class HydrideHandlerMainWindow(QMainWindow):
         )
 
 
-# ---- Entrypoint --------------------------------------------------------------
 def main():
     app = QApplication(sys.argv)
     # Optional: allow passing a custom database json path as an argument
