@@ -169,6 +169,19 @@ class TableConfig:
         max_rate_wt_p_min = 'max_rate_wt_p_min'
         max_rate_kg_min = 'max_rate_kg_min'
 
+    class HydrideTable:
+        table_name = "hydrides"
+
+        hydride = "hydride"
+        enthalpy = "enthalpy"
+        entropy = "entropy"
+
+        density_h = "density_hydrogenated"
+        density_dh = "density_dehydrogenated"
+
+        conductivity_h = "conductivity_hydrogenated"
+        conductivity_dh = "conductivity_dehydrogenated"
+
     def get_table_column_names(self, table_class=None, table_name=None):
         """
         Returns a list of all column names in the table class.

@@ -290,8 +290,8 @@ class DatabaseTab(QWidget):
         self.btn_demo = QPushButton("Rebuild Demo DB")
         self.btn_demo.clicked.connect(self.rebuild_demo)
 
-        path_lbl = QLabel(f"DB file: {self.db.hydride_data_base_path}")
-        path_lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        #path_lbl = QLabel(f"DB file: {self.db.hydride_data_base_path}")
+        #path_lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
         top = QHBoxLayout()
         top.addWidget(self.btn_refresh)
@@ -302,7 +302,7 @@ class DatabaseTab(QWidget):
         layout = QVBoxLayout()
         layout.addLayout(top)
         layout.addWidget(self.table)
-        layout.addWidget(path_lbl)
+        #layout.addWidget(path_lbl)
         self.setLayout(layout)
 
         self.populate()
@@ -511,6 +511,7 @@ def main():
     # Optional: allow passing a custom database json path as an argument
     db_path = sys.argv[1] if len(sys.argv) > 1 else None
     w = HydrideHandlerMainWindow(db_path=db_path)
+    #w = HydrideHandlerMainWindow()
     w.show()
     sys.exit(app.exec())
 

@@ -11,6 +11,7 @@ etc_table = TableConfig().ETCDataTable
 etc_xy_table = TableConfig().ThermalConductivityXyDataTable
 meta_table = TableConfig().MetaDataTable
 kinetics_table = TableConfig().KineticsTable
+hydrides_table = TableConfig().HydrideTable
 
 PRIMARY_KEYS = {
                         t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id, t_p_table.cycle_number],
@@ -18,7 +19,8 @@ PRIMARY_KEYS = {
                         meta_table.table_name:   meta_table.sample_id,
                         etc_table.table_name:    [etc_table.time, etc_table.sample_id_small, etc_table.cycle_number],
                         etc_xy_table.table_name: [etc_xy_table.time, etc_xy_table.sample_id],
-                        kinetics_table.table_name: [kinetics_table.sample_id, kinetics_table.cycle_number]
+                        kinetics_table.table_name: [kinetics_table.sample_id, kinetics_table.cycle_number],
+                        hydrides_table.table_name: hydrides_table.hydride
                     }
 
 PARTITIONING_KEYS = {
@@ -26,7 +28,8 @@ PARTITIONING_KEYS = {
                     cycle_table.table_name:  cycle_table.sample_id,
                     etc_table.table_name:    etc_table.sample_id_small,
                     etc_xy_table.table_name: etc_xy_table.sample_id,
-                    kinetics_table.table_name: kinetics_table.sample_id
+                    kinetics_table.table_name: kinetics_table.sample_id,
+                    hydrides_table.table_name: None
                     }
 
 
@@ -284,6 +287,19 @@ class TableCreator:
                                 'max_rate_kg_min':     'real',
                                 '_default':            'TEXT[]'
                             }
+
+            if "hydride" in table_name:
+                data_map = {
+                    'hydride': 'TEXT',
+                    'enthalpy': 'DOUBLE PRECISION',
+                    'entropy': 'DOUBLE PRECISION',
+                    'density_hydrogenated': 'DOUBLE PRECISION',
+                    'density_dehydrogenated': 'DOUBLE PRECISION',
+                    'conductivity_hydrogenated': 'DOUBLE PRECISION',
+                    'conductivity_dehydrogenated': 'DOUBLE PRECISION',
+                    '_default': 'TEXT'
+                }
+
             return data_map
 
         # Initial mappings of column name fragments to data types
