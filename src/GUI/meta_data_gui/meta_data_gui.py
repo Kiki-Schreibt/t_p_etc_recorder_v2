@@ -112,9 +112,9 @@ class MetadataForm(QWidget):
         "mass": "g",
         "pressure": "bar",
         "temperature": "K",
+        "volume_measurement_cell": "mL",
         "volume": "L",
         "reservoir_volume": "L",
-        "cell_volume": "mL",
         "enthalpy": "kJ/mol",
         "entropy": "kJ/(mol·K)"
     }

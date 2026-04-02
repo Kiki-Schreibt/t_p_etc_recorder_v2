@@ -174,7 +174,7 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.metadata_handler">
+  <component name="RunManager" selected="Python.meta_data_gui">
     <configuration name="code_length" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -287,8 +287,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.metadata_handler" />
         <item itemvalue="Python.meta_data_gui" />
+        <item itemvalue="Python.metadata_handler" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.hydride_handler_main" />
         <item itemvalue="Python.code_length" />

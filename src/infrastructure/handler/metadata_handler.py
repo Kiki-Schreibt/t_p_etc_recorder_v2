@@ -217,7 +217,6 @@ class MetaData:
             if "cell" in col_name.lower() and "volume" in col_name.lower()and self.volume_measurement_cell == None:
                 self.volume_measurement_cell = float(df[col_name].iloc[0]) if df[col_name].iloc[0] else None #[l]
 
-
             if "material" in col_name.lower():
                 self.sample_material = df[col_name].iloc[0]
 
