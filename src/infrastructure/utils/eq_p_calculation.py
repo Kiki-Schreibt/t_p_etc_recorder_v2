@@ -47,9 +47,9 @@ class VantHoffCalcEq:
            and hasattr(self.meta_data, 'entropy') and self.meta_data.entropy is not None:
             return self.meta_data.enthalpy, self.meta_data.entropy
         elif getattr(self.meta_data, 'sample_material', None):
-            return MetalHydrideDatabase().get_enthalpy_entropy(self.meta_data.sample_material)
+            return MetalHydrideDatabase(self.db_conn_params).get_enthalpy_entropy(self.meta_data.sample_material)
         elif hydride:
-            return MetalHydrideDatabase().get_enthalpy_entropy(hydride)
+            return MetalHydrideDatabase(self.db_conn_params).get_enthalpy_entropy(hydride)
         elif enthalpy is not None and entropy is not None:
             return enthalpy, entropy
         else:

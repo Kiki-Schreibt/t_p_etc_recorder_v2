@@ -12,7 +12,7 @@ STYLE_SHEET = global_vars.style
 
 class TestPlannerMain(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, db_conn_params):
         super().__init__()
         ui_file_path = planner_ui_file_path
         self.setWindowTitle("Test planner")
@@ -20,7 +20,7 @@ class TestPlannerMain(QMainWindow):
         self.setStyleSheet(STYLE_SHEET)
         self.setCentralWidget(self.ui)
         self.setMinimumSize(800, 650)
-        self.plot = VantHoffPlot(self.ui.test_plot_window)
+        self.plot = VantHoffPlot(self.ui.test_plot_window, db_conn_params=db_conn_params )
         self.plot.p_calc_sig.connect(lambda p_hyd, p_dehyd: self._update_pressure_edit_fields(p_hyd, p_dehyd))
         self.plot.wt_p_sig.connect(lambda wt: self.ui.capacity_edit_field.setText(str(round(wt, 3))))
         self._init_text_box_connections()
@@ -138,7 +138,8 @@ def main():
     # Create the Qt Application
     app = QApplication([])
     # Create and show the main application window
-    main_window = TestPlannerMain()
+    from src.infrastructure.core.config_reader import config
+    main_window = TestPlannerMain(db_conn_params=config.db_conn_params)
     main_window.show()
     # Run the event loop
     app.exec()

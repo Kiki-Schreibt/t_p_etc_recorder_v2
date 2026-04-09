@@ -321,7 +321,7 @@ class MetaData:
         if self.enthalpy is not None and self.entropy is not None and self.theoretical_uptake is not None:
             return self.enthalpy, self.entropy, self.theoretical_uptake
 
-        mh_database = MetalHydrideDatabase()
+        mh_database = MetalHydrideDatabase(self.db_conn_params)
         (enthalpy, entropy) = mh_database.get_enthalpy_entropy(self.sample_material)
         wt_theoretical = mh_database.get_capacity(self.sample_material)
 

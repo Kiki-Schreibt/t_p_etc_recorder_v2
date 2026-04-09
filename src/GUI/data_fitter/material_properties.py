@@ -1,6 +1,8 @@
 #material_properties.py
 import numpy as np
 import logging
+
+import src.infrastructure.core.config_reader
 from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 
 class MaterialProperties:
@@ -12,7 +14,7 @@ class MaterialProperties:
         if not material:
             return  # No material specified; nothing to do.
         self.logger = logging.getLogger(__name__)
-        self.hydride_worker = MetalHydrideDatabase()
+        self.hydride_worker = MetalHydrideDatabase(db_conn_params=src.infrastructure.core.config_reader.config.db_conn_params)
         self.material = material  # e.g., "MgH2"
         self.particle_diameter = particle_diameter
 

@@ -1014,7 +1014,7 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
 
 def import_all(compress_data=False):
     sample_ids = ('WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040')
-    #sample_ids = ('WAE-WA-028',)
+    sample_ids = ('WAE-WA-040',)
     #sample_ids = ()
     if not sample_ids:
         return

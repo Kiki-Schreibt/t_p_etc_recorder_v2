@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit, differential_evolution, brute
 
+import src.infrastructure.core.config_reader
 from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 try:
     import src.infrastructure.core.logger as logging
@@ -124,7 +125,7 @@ class MaterialProperties:
         if not material:
             return
         self.logger = logging.getLogger(__name__)
-        self.hydride_worker = MetalHydrideDatabase()
+        self.hydride_worker = MetalHydrideDatabase(db_conn_params=src.infrastructure.core.config_reader.config.db_conn_params)
         self.material = material # material name MgH2
         self.particle_diameter = particle_diameter
 

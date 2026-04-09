@@ -14,7 +14,7 @@ kinetics_table = TableConfig().KineticsTable
 hydrides_table = TableConfig().HydrideTable
 
 PRIMARY_KEYS = {
-                        t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id, t_p_table.cycle_number],
+                        t_p_table.table_name:    [t_p_table.time, t_p_table.sample_id],
                         cycle_table.table_name:  [cycle_table.time_start, cycle_table.sample_id],
                         meta_table.table_name:   meta_table.sample_id,
                         etc_table.table_name:    [etc_table.time, etc_table.sample_id_small, etc_table.cycle_number],
@@ -46,31 +46,37 @@ class TableCreator:
                 self.create_table(attr_value)
 
     def create_table(self, table_class, table_name=None):
-        # Check if the table already exists
         if not table_name:
             table_name = table_class.table_name
 
-        check_table_exists_query = f"""
-        SELECT EXISTS (
-            SELECT FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_name = '{table_name}'
-        );
-        """
+        partitioning_key = PARTITIONING_KEYS.get(table_name) or None
+        pk = PRIMARY_KEYS.get(table_name)
 
         with DatabaseConnection(**self.db_conn_params) as db_conn:
-            db_conn.cursor.execute(check_table_exists_query)
+            # Check if table exists
+            db_conn.cursor.execute(f"""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    AND table_name = '{table_name}'
+                );
+            """)
             table_exists = db_conn.cursor.fetchone()[0]
 
+            # Check if table is partitioned
+            is_partitioned = False
+            if table_exists:
+                db_conn.cursor.execute(f"""
+                    SELECT partrelid 
+                    FROM pg_partitioned_table 
+                    WHERE partrelid = '{table_name}'::regclass
+                """)
+                is_partitioned = db_conn.cursor.fetchone() is not None
+
         if not table_exists:
+            # Table doesn't exist, create normally
             columns_data_types = self._extract_columns_and_assign_data_types(table_class)
-
-           # Build the column definitions list
             columns_sql = [f"    {col} {dtype}" for col, dtype in columns_data_types.items()]
-
-            # If the table_class has a primary_key attribute, use it
-            pk = PRIMARY_KEYS.get(table_name)
-            partitioning_key = PARTITIONING_KEYS.get(table_name) or None
             if pk:
                 if isinstance(pk, (list, tuple)):
                     pk_cols = ", ".join(pk)
@@ -78,26 +84,44 @@ class TableCreator:
                     pk_cols = pk
                 columns_sql.append(f"    PRIMARY KEY ({pk_cols})")
 
-            if partitioning_key is None:
-                query_part_partition = " "
-            elif 'time' in partitioning_key:
-                query_part_partition = f"PARTITION BY RANGE ({partitioning_key})"
-            elif 'sample' in partitioning_key:
-                query_part_partition = f"PARTITION BY LIST ({partitioning_key})"
+            if partitioning_key:
+                if 'time' in partitioning_key:
+                    query_part_partition = f"PARTITION BY RANGE ({partitioning_key})"
+                elif 'sample' in partitioning_key:
+                    query_part_partition = f"PARTITION BY LIST ({partitioning_key})"
+                else:
+                    query_part_partition = ""
             else:
                 query_part_partition = ""
-            create_table_sql = (
-            f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
-            + ",\n".join(columns_sql)
-            + f"\n) {query_part_partition} ;"
-            )
 
+            create_table_sql = (
+                f"CREATE TABLE {table_name} (\n"
+                + ",\n".join(columns_sql)
+                + f"\n) {query_part_partition} ;"
+            )
             self._execute(create_table_sql)
             self.logger.info(f"New Table Created: {table_name} with primary key {pk_cols}")
             self.create_index(table_name, pk_cols)
 
+        elif table_exists and not is_partitioned and partitioning_key:
+            # Table exists but is not partitioned: ALTER it
+            self.logger.info(f"{table_name} exists but is not partitioned. Applying partitioning...")
+            if 'time' in partitioning_key:
+                partition_sql = f"ALTER TABLE {table_name} PARTITION BY RANGE ({partitioning_key});"
+            elif 'sample' in partitioning_key:
+                partition_sql = f"ALTER TABLE {table_name} PARTITION BY LIST ({partitioning_key});"
+            else:
+                partition_sql = ""
+
+            if partition_sql:
+                try:
+                    self._execute(partition_sql)
+                    self.logger.info(f"Partitioning applied on {table_name} by {partitioning_key}")
+                except Exception as e:
+                    self.logger.error(f"Failed to partition {table_name}: {e}")
+
         else:
-            self.logger.info(f"{table_name} table exists in database. All good")
+            self.logger.info(f"{table_name} table exists in database and is already partitioned.")
 
     def create_index(self, table_name, pk_cols):
         #tp_table = TableConfig().TPDataTable

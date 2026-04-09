@@ -106,7 +106,7 @@ class MainProgram(RecordingMainWindow):
         """
         Launch the Test Planner module in its own window.
         """
-        self.planner = TestPlannerMain()
+        self.planner = TestPlannerMain(db_conn_params=self.config.db_conn_params)
         self.planner.show()
 
     def open_config_settings(self):
@@ -210,7 +210,7 @@ class MainProgram(RecordingMainWindow):
 
     def _open_hydride_handler(self):
         try:
-            self.hydride_handler = HydrideHandlerMainWindow()
+            self.hydride_handler = HydrideHandlerMainWindow(db_conn_params=self.db_conn_params)
             self.hydride_handler.show()
 
         except Exception as e:
@@ -267,12 +267,35 @@ def launch_main_program(app):
     Args:
         app (QApplication): The running QApplication instance.
     """
+
     try:
         from src.infrastructure.core.config_reader import config
+
+        create_database_and_tables_if_not_exists(config)
+        populate_hydride_database(config)
+
         main_program = MainProgram(config=config)
         main_program.show()
     except Exception as e:
         logger.error(f"Uhpsi daisy: {e}")
+
+
+def create_database_and_tables_if_not_exists(config):
+    from src.table_creator import create_database, TableCreator
+    create_database(db_conn_params=config.db_conn_params)
+    creator = TableCreator(db_conn_params=config.db_conn_params)
+    creator.create_all_tables()
+
+
+def populate_hydride_database(config):
+    from src.infrastructure.handler.hydride_json_db_importer import HydrideJsonImporter
+    from src.infrastructure.utils.standard_paths import standard_hydride_data_base_path
+
+    importer = HydrideJsonImporter(
+        db_conn_params=config.db_conn_params,
+        json_path=standard_hydride_data_base_path
+    )
+    importer.run()
 
 
 if __name__ == '__main__':

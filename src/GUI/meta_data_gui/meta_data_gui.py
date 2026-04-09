@@ -115,8 +115,8 @@ class MetadataForm(QWidget):
         "volume": "L",
         "reservoir_volume": "L",
         "volume_measurement_cell": "mL",
-        "enthalpy": "kJ/mol",
-        "entropy": "kJ/(mol·K)"
+        "enthalpy": "J/mol",
+        "entropy": "J/(mol·K)"
     }
 
     def __init__(self):

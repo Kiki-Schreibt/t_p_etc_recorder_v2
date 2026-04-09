@@ -1,4 +1,6 @@
 {
+    "LOG_DIRECTORY": "Log",
+    "LOG_FILE": "Application_Log.log",
     "DB_SERVER": "localhost",
     "DB_DATABASE": "postgres",
     "DB_USERNAME": "postgres",
@@ -16,8 +18,6 @@
     "START_REG": 4585,
     "END_REG": 4672,
     "SLEEP_INTERVAL": 0.5,
-    "LOG_DIRECTORY": "Log",
-    "LOG_FILE": "Application_Log.log",
     "HOT_DISK_LOG_FILE_PATH": "C:\\HotDiskTPS_7\\data\\Log",
     "MINIMUM_TEMPERATURE_INCREASE": 2,
     "MAXIMUM_TEMPERATURE_INCREASE": 5,

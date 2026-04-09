@@ -13,9 +13,9 @@ class VantHoffPlot(pg.PlotWidget):
     p_calc_sig = Signal(float, float) #p_hyd, p_dehyd
     wt_p_sig = Signal(float)
 
-    def __init__(self, parent=None):
+    def __init__(self,db_conn_params, parent=None):
         super().__init__(parent)
-
+        self.db_conn_params = db_conn_params
         self.hydride = None
         self.mass = None
         self.temp_hyd = None
@@ -50,7 +50,7 @@ class VantHoffPlot(pg.PlotWidget):
         if hydride.lower() == "clear":
             self.clear_plot()
             return
-        mh_database = MetalHydrideDatabase()
+        mh_database = MetalHydrideDatabase(db_conn_params=self.db_conn_params)
         self.wt_p_sig.emit(mh_database.get_capacity(hydride_name=hydride))
         vant_hoff_calculator = VantHoffCalcEq(hydride=hydride)
         y_data = vant_hoff_calculator.calc_vant_hoff_lin(temperature_range)
@@ -83,7 +83,7 @@ class VantHoffPlot(pg.PlotWidget):
             if not cell_volume:
                 return None, None
             if hydride and not wt_p:
-                mh_database = MetalHydrideDatabase()
+                mh_database = MetalHydrideDatabase(db_conn_params=self.db_conn_params)
                 wt_p = mh_database.get_capacity(hydride_name=hydride)
                 self.wt_p_sig.emit(wt_p)
             elif not wt_p:
@@ -178,7 +178,8 @@ def main():
 
     # Create an instance of VantHoffCalcEq
     # Create an instance of VantHoffPlot and plot the data
-    vant_hoff_plot = VantHoffPlot()
+    from src.infrastructure.core.config_reader import config
+    vant_hoff_plot = VantHoffPlot(db_conn_params=config.db_conn_params)
     vant_hoff_plot.plot_vant_hoff()
     vant_hoff_plot.show()
 
