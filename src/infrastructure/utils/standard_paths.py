@@ -40,7 +40,7 @@ standard_config_file_path = get_config_path('config_logging_modbus_database.json
 standard_hydride_data_base_path = get_config_path('hydride_data_base.json')
 standard_periodic_table_path = get_config_path('periodic_table_of_elements.json')
 
-standard_t_p_test_data_folder_path = os.path.join(get_base_dir(),  "test_data", "full_test_028")
+#standard_t_p_test_data_folder_path = os.path.join(get_base_dir(),  "test_data", "full_test_028")
 standard_log_dir = os.path.join(get_base_dir(), '..', 'Log')
 
 standard_export_path = get_user_home_path(os.path.join("T_p_ETC_recorder", "Exports"))
