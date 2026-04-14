@@ -1,7 +1,31 @@
  #T/P ETC Recorder v2
+## Disclaimer
+
+I am not a professional programmer. I developed this program during my time as a doctoral student
+because I was faced with not manageable amounts of data when recording temperature, pressure and effective thermal conductivity 
+of metal hydrides under long-term operational cycles. The main tasks of the software are
+recording temperature, pressure into a database (PostgreSQL) and performing life calculations during recording
+(e.g. equilibrium pressure at current temperature to define if the material is in hydrogenated or dehydrogenated state).
+The life calculations also include automated determination of the performed de-/hydrogenation cycles and calculation of the released/absorbed amount of hydrogen in weight percent (wt-%).
+Another part is combining temperature, pressure and cycle number with the effective thermal conductivity values measured during the cycling to simplify plotting and analysis. 
+I might give a detailed user manual later, but the main purpose of this repository is to make the project accessible for people  reading my thesis.
+However, if you are faced with similar measurements and the resulting problems I hope i wrote this all detailed enough to get you started and hopefully it will simplify your workflow a little.
+At least it helped me to maximize data output of my setup with accuracy that would not have been possible otherwise.
+Once set up, you might to click a bit around. This software is capable of a lot which might not all be explained in detail here (finished and unfinished stuff).
+Feel free to extend functionality for your own purposes but please dont be a ** and sell it as your own. 
+I put a lot of work in the code. If you are a professional programmer however, this all might look a bit messy to you. I am sorry for that. I did what I could while learning how to do it. 
+If you have any questions feel free to contact me under Christian.Wagner.420@gmail.com and I'll try my best to help. 
+I'll add a more detailed user manual later in the process but currently I don't have the time as I need to focus on other stuff.
+
+Enjoy!
 
 ## Overview
 T/P ETC Recorder v2 is a desktop application for planning, executing, and analyzing thermal-program (T/P) and effective thermal conductivity (ETC) experiments. The project couples a PySide6-based GUI with infrastructure modules for database access, Modbus-connected hardware control, schedule planning, and data post-processing. It is designed to streamline experimental setup, automate data collection, and provide tooling for exporting and correcting measurements.
+It was tested with a JUMO DICON touch and a TPS2500 s (Hot Disk AB) with the Thermal Constants Analyzer 7.6. (You might need to make adjustments if using other hard- or software)
+
+All recorded data are stored in a PostgreSQL database so you need a PostgreSQL installation. The recorded data is browsable via the Plotwindows in the Main Application.
+To access the underlying thermal conductivity measurements you can select "Residual, Drift, Calculation or Transient" on the right hand side and just need to click on the measurement in the left top plotwindow to display the according data (Multiple clicks allowed to compare measurements).
+
 
 The repository bundles several companion utilities:
 
@@ -22,7 +46,10 @@ The repository bundles several companion utilities:
 ├── config/                   # Deployment-specific configuration files
 ├── tests/                    # Pytest-based unit tests and utilities
 ├── requirements.txt          # Python dependencies
-└── README.md
+├── README.md
+├── LICENSE.txt               # License agreement
+└── ...
+
 ```
 
 Additional assets such as schedule templates, log files, and exported data are created at runtime (see [Standard Paths](#standard-paths)).
@@ -77,13 +104,16 @@ Many infrastructure utilities rely on conventional locations that are created or
 - Logs are written to `Log/Application_Log.log` relative to the project root unless configured otherwise.
 
 Ensure these locations exist or adjust them via configuration files to avoid runtime errors.
+Ensure the registers read from the dicon defined in "REGS_OF_INTEREST" are representing the temperature and pressure cols on your modbus device: 
+REGS_OF_INTEREST = [pressure,
+                   temperature_sample,
+                   setpoint_sample,
+                   temperature_heater,
+                   setpoint_heater]
+Also ensure they are in between the bounds of all read registers
+Standard is :   "START_REG": 4585, "END_REG": 4672
+as long as all addresses in REGS_OF_INTEREST are in between you do not need to adjust
 
-## Testing
-Unit tests use `pytest` and primarily cover scheduling utilities. To run the suite:
-```bash
-pytest
-```
-Create additional fixtures for hardware interactions by mocking Modbus connections and database layers to expand coverage.
 
 ## Packaging
 The codebase includes helper functions for PyInstaller bundles (see `src/infrastructure/utils/standard_paths.py`). When packaging:
@@ -96,6 +126,7 @@ The codebase includes helper functions for PyInstaller bundles (see `src/infrast
 - **Database errors:** Verify PostgreSQL credentials and network access. Use a connection string tester before launching the GUI.
 
 ## Contributing
+
 1. Fork the repository and create a feature branch.
 2. Ensure changes are covered with tests where practical.
 3. Run `pytest` locally before submitting a pull request.
