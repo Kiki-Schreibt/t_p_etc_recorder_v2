@@ -16,7 +16,7 @@ This software is capable of a lot which might not all be explained in detail her
 Feel free to extend functionality for your own purposes but please don't be rude and sell it as your own. 
 I put a lot of work in the code. If you are a professional programmer however, this all might look a bit messy to you. I am sorry for that. I did what I could while learning how to do it. 
 If you have any questions feel free to contact me under Christian.Wagner.420@gmail.com and I'll try my best to help. 
-I'll add a more detailed user manual later in the process but currently I don't have the time as I need to focus on other stuff.
+I'll add a more detailed user manual later in the process and a custom database backup with some example data to play around with but currently I don't have the time as I need to focus on other stuff.
 
 Enjoy!
 
