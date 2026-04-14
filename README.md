@@ -11,8 +11,9 @@ Another part is combining temperature, pressure and cycle number with the effect
 I might give a detailed user manual later, but the main purpose of this repository is to make the project accessible for people  reading my thesis.
 However, if you are faced with similar measurements and the resulting problems I hope i wrote this all detailed enough to get you started and hopefully it will simplify your workflow a little.
 At least it helped me to maximize data output of my setup with accuracy that would not have been possible otherwise.
-Once set up, you might to click a bit around. This software is capable of a lot which might not all be explained in detail here (finished and unfinished stuff).
-Feel free to extend functionality for your own purposes but please dont be a ** and sell it as your own. 
+Once set up, you might to click a bit around. 
+This software is capable of a lot which might not all be explained in detail here (finished and unfinished stuff).
+Feel free to extend functionality for your own purposes but please don't be rude and sell it as your own. 
 I put a lot of work in the code. If you are a professional programmer however, this all might look a bit messy to you. I am sorry for that. I did what I could while learning how to do it. 
 If you have any questions feel free to contact me under Christian.Wagner.420@gmail.com and I'll try my best to help. 
 I'll add a more detailed user manual later in the process but currently I don't have the time as I need to focus on other stuff.
