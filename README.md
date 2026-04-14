@@ -101,5 +101,19 @@ The codebase includes helper functions for PyInstaller bundles (see `src/infrast
 3. Run `pytest` locally before submitting a pull request.
 4. Submit a PR describing the change, testing performed, and any environment considerations.
 
+#
 ## License
-This project is licensed under the terms described in `LICENSE`.
+
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
+
+That means you may use, modify, and redistribute this software only for permitted noncommercial purposes under that license.
+
+Commercial use is not granted under this repository license.
+If you want to use this software commercially, you must obtain a separate written commercial license from the copyright holder.
+
+For commercial licensing inquiries, contact:
+
+Christian Wagner  
+Christian.Wagner.420@gmail.com
+
+For further information see LICENSE.txt, COMMERCIAL-LICENSE.txt and NOTICE.txt

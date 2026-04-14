@@ -1,0 +1,1 @@
+Required Notice: Copyright (c) 2025 Christian Wagner (Christian.Wagner.420☺@gmail.com)
