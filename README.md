@@ -18,7 +18,7 @@ If you are a professional programmer, parts of the implementation may appear unp
 If you have any questions, feel free to contact me at Christian.Wagner.420@gmail.com
 , and I will do my best to help.
 
-A more detailed user manual and a sample database with example data will be added in the future. At the moment, I am focusing on other priorities.
+A more detailed user manual and a sample database with example data will be added in the future. At the moment, I am focusing on other priorities. A basic manual is available under Manual.md
 
 Enjoy!
 

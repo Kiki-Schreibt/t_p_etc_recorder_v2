@@ -1,24 +1,3 @@
-diff --git a/README.md b/README.md
-index d12e60990745e2b48005c2e5b3cdfe8893374651..42048965c2d936abb71ec3b32b7972ea505d2d50 100644
---- a/README.md
-+++ b/README.md
-@@ -1,37 +1,41 @@
-  #T/P ETC Recorder v2
- 
- ## Overview
- T/P ETC Recorder v2 is a desktop application for planning, executing, and analyzing thermal-program (T/P) and effective thermal conductivity (ETC) experiments. The project couples a PySide6-based GUI with infrastructure modules for database access, Modbus-connected hardware control, schedule planning, and data post-processing. It is designed to streamline experimental setup, automate data collection, and provide tooling for exporting and correcting measurements.
- 
- The repository bundles several companion utilities:
- 
- - **Recording GUI** for live acquisition, constraint management, and quick exports.
- - **Test planner & schedule sequencer** to organize Hot Disk measurement sequences.
- - **Simulation tooling** (DICON Modbus simulator) to test setups without live hardware.
- - **Side operations** such as hydrogen uptake correction, ETC measurement launching, and plot individualization.
- 
-+
-+## User Manual
-+A full end-user manual is available in [`USER_MANUAL.md`](USER_MANUAL.md).
-+
  ## Project Structure
  ```
  .
