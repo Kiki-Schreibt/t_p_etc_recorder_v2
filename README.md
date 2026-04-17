@@ -26,7 +26,7 @@ Enjoy!
 T/P ETC Recorder v2 is a desktop application for planning, executing, and analyzing thermal-program (T/P) and effective thermal conductivity (ETC) experiments. The project couples a PySide6-based GUI with infrastructure modules for database access, Modbus-connected hardware control, schedule planning, and data post-processing. It is designed to streamline experimental setup, automate data collection, and provide tooling for exporting and correcting measurements.
 It was tested with a JUMO DICON touch and a TPS2500 s (Hot Disk AB) with the Thermal Constants Analyzer 7.6. (You might need to make adjustments if using other hard- or software)
 
-All recorded data are stored in a PostgreSQL database so you need a PostgreSQL installation. The recorded data is browsable via the Plotwindows in the Main Application.
+All recorded data are stored in a PostgreSQL database so you need a PostgreSQL (PostgreSQL 15) installation . The recorded data is browsable via the Plotwindows in the Main Application.
 To access the underlying thermal conductivity measurements you can select "Residual, Drift, Calculation or Transient" on the right hand side and just need to click on the measurement in the left top plotwindow to display the according data (Multiple clicks allowed to compare measurements).
 
 
@@ -58,15 +58,15 @@ The repository bundles several companion utilities:
 Additional assets such as schedule templates, log files, and exported data are created at runtime (see [Standard Paths](#standard-paths)).
 
 ## Prerequisites
-- **Python 3.10+** (PySide6 6.7 requires modern Python builds).
+- **Python 3.12:** (PySide6 6.7 requires modern Python builds).
 - **Operating system:** Developed for Windows (default paths target `C:\...`), but most functionality runs cross-platform when compatible drivers are available.
-- **PostgreSQL database** reachable with credentials defined in the configuration file, when using the live recording workflow.
+- **PostgreSQL 15 database** reachable with credentials defined in the configuration file, when using the live recording workflow.
 - **Modbus-capable equipment** or the bundled simulator when testing without hardware.
 
 ## Setup
 1. **Clone the repository**
    ```bash
-   git clone <repo-url>
+   git clone <https://github.com/Kiki-Schreibt/t_p_etc_recorder_v2>
    cd t_p_etc_recorder_v2
    ```
 2. **Create and activate a virtual environment**
