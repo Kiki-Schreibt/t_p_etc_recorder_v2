@@ -6,11 +6,12 @@ import json
 import csv
 from typing import Any, Dict
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QTabWidget, QVBoxLayout,
+    QApplication, QMainWindow, QWidget, QTabWidget, QVBoxLayout, QTableView,
     QFormLayout, QLineEdit, QComboBox, QPushButton, QLabel, QGroupBox,
-    QHBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QTextEdit, QDoubleSpinBox, QFileDialog
+    QHBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox,
+    QTextEdit, QDoubleSpinBox, QFileDialog
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QAbstractTableModel
 
 import src.infrastructure.core.config_reader
 
@@ -107,7 +108,8 @@ class LookupTab(QWidget):
             self.out_entropy.setText(entropy_str)
             self.out_density.setText("—" if density is None else f"{density}")
             self.out_cond.setText("—" if conductivity is None else f"{conductivity}")
-            self.out_capacity.setText("—" if capacity is None else f"{capacity:.3f} wt-%")
+
+            self.out_capacity.setText("—" if capacity is None else f"{float(capacity):.3f} wt-%")
             self.out_molar.setText("—" if total_m is None else f"{total_m:.6f} u")
             self.out_hmass.setText("—" if h_m is None else f"{h_m:.6f} u")
 
@@ -183,69 +185,183 @@ class EditTab(QWidget):
 
 
 # ---- Database Table Tab ------------------------------------------------------
+class HydrideTableModel(QAbstractTableModel):
+    def __init__(self, mh_db: MetalHydrideDatabase):
+        super().__init__()
+        self.mh_db = mh_db
+        self.headers = [
+            "Hydride",
+            "Enthalpy (J/mol)",
+            "Entropy (J/(mol·K))",
+            "Density (DH)",
+            "Density (H)",
+            "Capacity (wt-%)",
+            "Conductivity (DH)",
+            "Conductivity (H)"
+        ]
+        self._data = []
+        self.load_data()
+
+    # -------------------------------
+    def load_data(self):
+        self.beginResetModel()
+        self._data.clear()
+
+        hydrides = self.mh_db.get_all_hydrides()
+        for h in hydrides:
+            enthalpy, entropy = self.mh_db.get_enthalpy_entropy(h)
+
+            density_dh = self.mh_db.get_density(h, "Dehydrogenated")
+            density_h = self.mh_db.get_density(h, "Hydrogenated")
+
+            cond_dh = self.mh_db.get_bulk_conductivity(h, "Dehydrogenated")
+            cond_h = self.mh_db.get_bulk_conductivity(h, "Hydrogenated")
+
+            capacity = round(self.mh_db.get_capacity(h), 3)
+
+            self._data.append([
+                h,
+                enthalpy,
+                entropy,
+                density_dh,
+                density_h,
+                capacity,
+                cond_dh,
+                cond_h
+            ])
+
+        self.endResetModel()
+
+    # -------------------------------
+    def rowCount(self, parent=None):
+        return len(self._data)
+
+    def columnCount(self, parent=None):
+        return len(self.headers)
+
+    # -------------------------------
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return None
+
+        value = self._data[index.row()][index.column()]
+
+        if role in (Qt.DisplayRole, Qt.EditRole):
+            return "—" if value is None else str(value)
+
+        return None
+
+    # -------------------------------
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self.headers[section]
+        return None
+
+    # -------------------------------
+    def flags(self, index):
+        if not index.isValid():
+            return Qt.ItemIsEnabled
+
+        if index.column() == 0:
+            return Qt.ItemIsSelectable | Qt.ItemIsEnabled  # Hydride name locked
+
+        return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
+
+    # -------------------------------
+    def setData(self, index, value, role=Qt.EditRole):
+        if role != Qt.EditRole:
+            return False
+
+        row = index.row()
+        col = index.column()
+
+        try:
+            if value in ("", "—"):
+                new_val = None
+            else:
+                new_val = float(value)
+        except ValueError:
+            return False
+
+        self._data[row][col] = new_val
+
+        hydride = self._data[row][0]
+
+        update_dict = {}
+
+        table = self.mh_db.table
+
+        if col == 1:
+            update_dict[table.enthalpy] = new_val
+        elif col == 2:
+            update_dict[table.entropy] = new_val
+        elif col == 3:
+            update_dict[table.density_dh] = new_val
+        elif col == 4:
+            update_dict[table.density_h] = new_val
+        elif col == 6:
+            update_dict[table.conductivity_dh] = new_val
+        elif col == 7:
+            update_dict[table.conductivity_h] = new_val
+
+        # capacity is derived → ignore edits
+        if update_dict:
+            self.mh_db.update_hydride_info(hydride, update_dict)
+
+        self.dataChanged.emit(index, index, [Qt.DisplayRole])
+        return True
+
+
 class TableTab(QWidget):
     def __init__(self, mh_db: MetalHydrideDatabase, parent=None):
         super().__init__(parent)
         self.mh_db = mh_db
 
-        self.table = QTableWidget()
-        self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels([
-            "Hydride", "Enthalpy (J/mol)", "Entropy (J/(mol·K))", "Density", "Capacity (wt-%)", "Bulk Conductivity"
-        ])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.model = HydrideTableModel(self.mh_db)
 
-        self.refresh_btn = QPushButton("Refresh Table")
-        self.refresh_btn.clicked.connect(self.load_table)
+        self.view = QTableView()
+        self.view.setModel(self.model)
+        self.view.horizontalHeader().setStretchLastSection(True)
+        self.view.setSortingEnabled(True)
+
+        # Buttons
+        self.refresh_btn = QPushButton("Refresh")
+        self.refresh_btn.clicked.connect(self.model.load_data)
+
         self.export_btn = QPushButton("Export CSV")
         self.export_btn.clicked.connect(self.export_csv)
 
-        buttons = QHBoxLayout()
-        buttons.addWidget(self.refresh_btn)
-        buttons.addWidget(self.export_btn)
-        buttons.addStretch(1)
-
         layout = QVBoxLayout()
-        layout.addLayout(buttons)
-        layout.addWidget(self.table)
+        btns = QHBoxLayout()
+        btns.addWidget(self.refresh_btn)
+        btns.addWidget(self.export_btn)
+        btns.addStretch()
+
+        layout.addLayout(btns)
+        layout.addWidget(self.view)
         self.setLayout(layout)
 
-        self.load_table()
-
-    def load_table(self):
-        self.table.setRowCount(0)
-        try:
-            all_hydrides = self.mh_db.get_all_hydrides()
-            for row_idx, h in enumerate(all_hydrides):
-                self.table.insertRow(row_idx)
-                self.table.setItem(row_idx, 0, QTableWidgetItem(str(h)))
-                enthalpy, entropy = self.mh_db.get_enthalpy_entropy(h)
-                self.table.setItem(row_idx, 1, QTableWidgetItem(str(enthalpy or "—")))
-                self.table.setItem(row_idx, 2, QTableWidgetItem(str(entropy or "—")))
-                density = self.mh_db.get_density(h)
-                self.table.setItem(row_idx, 3, QTableWidgetItem(str(density or "—")))
-                capacity = self.mh_db.get_capacity(h)
-                self.table.setItem(row_idx, 4, QTableWidgetItem(f"{capacity:.3f}" if capacity else "—"))
-                conductivity = self.mh_db.get_bulk_conductivity(h)
-                self.table.setItem(row_idx, 5, QTableWidgetItem(str(conductivity or "—")))
-        except Exception as e:
-            show_error(self, "Load Table Failed", e)
-
+    # ---------------------------------
     def export_csv(self):
         path, _ = QFileDialog.getSaveFileName(self, "Save CSV", filter="CSV Files (*.csv)")
         if not path:
             return
+
         try:
             with open(path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                headers = [self.table.horizontalHeaderItem(i).text() for i in range(self.table.columnCount())]
-                writer.writerow(headers)
-                for row in range(self.table.rowCount()):
-                    row_data = [self.table.item(row, col).text() if self.table.item(row, col) else "" for col in range(self.table.columnCount())]
-                    writer.writerow(row_data)
-            QMessageBox.information(self, "Exported", f"Table exported to {path}")
+                writer.writerow(self.model.headers)
+
+                for row in self.model._data:
+                    writer.writerow([
+                        "" if v is None else v for v in row
+                    ])
+
+            QMessageBox.information(self, "Exported", f"Saved to {path}")
+
         except Exception as e:
-            show_error(self, "CSV Export Failed", e)
+            show_error(self, "Export Failed", e)
 
 
 # ---- Main Window ------------------------------------------------------------
