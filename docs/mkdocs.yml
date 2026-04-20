@@ -1,0 +1,10 @@
+site_name: Temperature, Pressure and Effective Thermal Conductivity Recorder Manual
+
+nav:
+  - index.md
+  - User Manual:
+      - Installation: User_Manual/Installation.md
+      - Main Window: User_Manual/General.md
+      - Create New Test: User_Manual/Create New Test.md
+theme:
+  name: material
