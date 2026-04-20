@@ -3,8 +3,10 @@ import numpy as np
 
 from PySide6.QtWidgets import QApplication
 import pyqtgraph as pg
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt, QTimer
 
+
+import global_vars
 from src.infrastructure.utils.eq_p_calculation import VantHoffCalcEq
 from src.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 
@@ -25,8 +27,10 @@ class VantHoffPlot(pg.PlotWidget):
         self.V_cell = None
         self.V_res = None
         self.V_pipes = 1e-7
+        self.curves = []
         self.color_index = 0
-        self.colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+        self.colors = global_vars.colors
+        self.styles = [Qt.SolidLine, Qt.DashLine, Qt.DotLine, Qt.DashDotLine]
         self.init_ui()
         if parent:
             self.adjust_plot_size()
@@ -59,8 +63,9 @@ class VantHoffPlot(pg.PlotWidget):
             return
 
         x_data = np.array(temperature_range)
-        self.plotItem.plot(x_data, y_data, pen=pg.mkPen(color=self.colors[self.color_index],
+        curve = self.plotItem.plot(x_data, y_data, pen=pg.mkPen(color=self.colors[self.color_index],
                                                         width=2), name=hydride)
+        self.curves.append(curve)
         if not keep_color:
             if self.color_index < len(self.colors):
                 self.color_index += 1
@@ -153,24 +158,60 @@ class VantHoffPlot(pg.PlotWidget):
         if not p_hyd or not p_dehyd:
             return
 
-        self.plotItem.plot(x=[temp_hyd, temp_dehyd],
-                           y=[p_hyd, p_dehyd],
-                           pen=pg.mkPen(color=self.colors[self.color_index],
-                            width=2), name=f"Route {self.color_index}")
+        style_idx = (self.color_index // len(self.colors)) % len(self.styles)
 
-        if self.color_index < len(self.colors):
-            self.color_index += 1
-        else:
-            self.color_index = 0
+        curve = self.plotItem.plot(x=[temp_hyd, temp_dehyd],
+                           y=[p_hyd, p_dehyd],
+                           pen=pg.mkPen(color=self.colors[self.color_index % len(self.colors)],
+                            width=2),
+                            style=self.styles[style_idx % len(self.styles)],
+                           name=f"Route {self.color_index}",
+                           clickable=True)
+
+        self.curves.append(curve)
+        self.color_index += 1
+        curve.sigClicked.connect(self._on_curve_clicked)
         self.p_calc_sig.emit(p_hyd, p_dehyd)
 
     def clear_plot(self):
-        self.plotItem.clear()
+        for curve in self.curves:
+            self.plotItem.removeItem(curve)
+
+        self.curves.clear()
         self.color_index = 0
+
+    def remove_last_curve(self):
+        if not self.curves:
+            return
+
+        curve = self.curves.pop()
+        self.plotItem.removeItem(curve)
+        self.color_index -= 1
+
+    def remove_curve_by_name(self, name: str):
+        for curve in self.curves:
+            if curve.name() == name:
+                self.plotItem.removeItem(curve)
+                self.curves.remove(curve)
+                break
+
+    def remove_curve_by_idx(self, idx: int):
+        if 0 <= idx < len(self.curves):
+            self.plotItem.removeItem(self.curves[idx])
+            self.curves.pop(idx)
 
     def adjust_plot_size(self):
         # Adjust the plot size as needed when the parent widget is resized
         self.setGeometry(self.parent().rect())
+
+    def _on_curve_clicked(self, curve):
+        self.selected_curve = curve
+        QTimer.singleShot(0, lambda: self._delete_curve(curve))
+
+    def _delete_curve(self, curve):
+        if curve in self.curves:
+            self.plotItem.removeItem(curve)
+            self.curves.remove(curve)
 
 
 def main():
