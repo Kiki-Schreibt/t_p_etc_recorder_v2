@@ -52,7 +52,7 @@ class VantHoffPlot(pg.PlotWidget):
             return
         mh_database = MetalHydrideDatabase(db_conn_params=self.db_conn_params)
         self.wt_p_sig.emit(mh_database.get_capacity(hydride_name=hydride))
-        vant_hoff_calculator = VantHoffCalcEq(hydride=hydride)
+        vant_hoff_calculator = VantHoffCalcEq(hydride=hydride, db_conn_params=self.db_conn_params)
         y_data = vant_hoff_calculator.calc_vant_hoff_lin(temperature_range)
 
         if not y_data.any():
@@ -89,10 +89,10 @@ class VantHoffPlot(pg.PlotWidget):
             elif not wt_p:
                 return None, None
 
-            vant_hoff_calculator = VantHoffCalcEq()
+            vant_hoff_calculator = VantHoffCalcEq(db_conn_params=self.db_conn_params)
 
             if p_hyd or p_dehyd:
-                p_hyd, p_dehyd = vant_hoff_calculator.calc_delta_p(wt_p=wt_p,
+                p_hyd, p_dehyd = vant_hoff_calculator.calc_delta_p_full(wt_p=wt_p,
                                                             m_sample=mass,
                                                             p_hyd=p_hyd,
                                                             p_dehyd=p_dehyd,

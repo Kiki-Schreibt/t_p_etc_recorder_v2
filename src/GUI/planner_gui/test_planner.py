@@ -20,7 +20,7 @@ class TestPlannerMain(QMainWindow):
         self.setStyleSheet(STYLE_SHEET)
         self.setCentralWidget(self.ui)
         self.setMinimumSize(800, 650)
-        self.plot = VantHoffPlot(self.ui.test_plot_window, db_conn_params=db_conn_params )
+        self.plot = VantHoffPlot(parent=self.ui.test_plot_window, db_conn_params=db_conn_params )
         self.plot.p_calc_sig.connect(lambda p_hyd, p_dehyd: self._update_pressure_edit_fields(p_hyd, p_dehyd))
         self.plot.wt_p_sig.connect(lambda wt: self.ui.capacity_edit_field.setText(str(round(wt, 3))))
         self._init_text_box_connections()

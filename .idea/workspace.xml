@@ -5,7 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/handler/hydride_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/planner_gui/planner_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/planner_gui/planner_business.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI/planner_gui/test_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI/planner_gui/test_planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -171,8 +174,8 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.hydride_handler_main">
-    <configuration name="csv_handler" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.test_planner">
+    <configuration name="eq_p_calculation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -181,11 +184,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/infrastructure/handler" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/infrastructure/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/infrastructure/handler/csv_handler.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -238,7 +241,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="meta_data_gui" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="planner_business" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -247,11 +250,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/meta_data_gui" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/planner_gui" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/meta_data_gui/meta_data_gui.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/planner_gui/planner_business.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -260,7 +263,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="post_processor" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="test_planner" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -269,11 +272,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/post_processor_t_p_etc" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/GUI/planner_gui" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/post_processor_t_p_etc/post_processor.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/GUI/planner_gui/test_planner.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -284,11 +287,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.hydride_handler_main" />
+        <item itemvalue="Python.test_planner" />
+        <item itemvalue="Python.planner_business" />
+        <item itemvalue="Python.eq_p_calculation" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.meta_data_gui" />
-        <item itemvalue="Python.post_processor" />
-        <item itemvalue="Python.csv_handler" />
+        <item itemvalue="Python.hydride_handler_main" />
       </list>
     </recent_temporary>
   </component>
@@ -439,6 +442,11 @@
           <url>file://$PROJECT_DIR$/src/infrastructure/handler/modbus_handler.py</url>
           <line>964</line>
           <option name="timeStamp" value="726" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/infrastructure/utils/eq_p_calculation.py</url>
+          <line>168</line>
+          <option name="timeStamp" value="734" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

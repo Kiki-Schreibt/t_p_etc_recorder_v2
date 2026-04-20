@@ -163,7 +163,10 @@ class VantHoffCalcEq:
             return float(np.atleast_1d(result)[0])
         return result
 
-    def calc_delta_p(self, wt_p, m_sample, p_hyd, p_dehyd, T_hyd, T_dehyd, V_res, V_cell, T_reservoir: float = 30):
+    def calc_delta_p(self, wt_p, m_sample,
+                             p_hyd, p_dehyd, T_hyd,
+                             T_dehyd, V_res, V_cell,
+                             T_reservoir: float = 30):
         """
         Reverse the calculation to find the pressure change from a given weight percentage.
         This version has been updated to work with scalar, array, or pandas Series inputs.
@@ -199,10 +202,10 @@ class VantHoffCalcEq:
         # Compute the missing pressure if needed.
         if p_hyd_arr is not None and p_dehyd_arr is None:
             # Calculate p_dehyd elementwise from p_hyd.
-            p_dehyd_arr = p_hyd_arr + reverse_H2_mass_fun(T_hyd_K)
+            p_dehyd_arr = p_hyd_arr + reverse_H2_mass_fun(T_dehyd_K)
         elif p_dehyd_arr is not None and p_hyd_arr is None:
             # Calculate p_hyd elementwise from p_dehyd.
-            p_hyd_arr = p_dehyd_arr - reverse_H2_mass_fun(T_dehyd_K)
+            p_hyd_arr = p_dehyd_arr - reverse_H2_mass_fun(T_hyd_K)
 
         # Prepare outputs. If the resulting arrays have one element, return a scalar.
         def maybe_return(x):
@@ -216,6 +219,50 @@ class VantHoffCalcEq:
             p_hyd_final = pd.Series(p_hyd_final, index=series_index) if isinstance(p_hyd_final, np.ndarray) else pd.Series([p_hyd_final], index=series_index)
             p_dehyd_final = pd.Series(p_dehyd_final, index=series_index) if isinstance(p_dehyd_final, np.ndarray) else pd.Series([p_dehyd_final], index=series_index)
         return p_hyd_final, p_dehyd_final
+
+    def calc_delta_p_full(self, wt_p, m_sample,
+                            p_hyd, p_dehyd,
+                            T_hyd, T_dehyd, V_res,
+                            V_cell, T_reservoir=30):
+
+        # --- Unit conversions ---
+        m_sample = m_sample * 1e-3
+        V_res = V_res * 1e-3
+        V_cell = V_cell * 1e-6
+
+        T_hyd_K = T_hyd + 273.15
+        T_dehyd_K = T_dehyd + 273.15
+        T_res_K = T_reservoir + 273.15
+
+        # --- Gas coefficient ---
+        def gas_coeff(T_cell):
+            return ((V_res + V_pipes) / T_res_K) + (V_cell / T_cell)
+
+        C_hyd = gas_coeff(T_hyd_K)
+        C_dehyd = gas_coeff(T_dehyd_K)
+
+        # --- Hydrogen mass from wt% ---
+        if wt_p is not None:
+            wt_frac = wt_p / 100
+            m_H2 = wt_frac * m_sample / (1 - wt_frac)
+        else:
+            m_H2 = 0.0
+
+        # --- Solve pressure relation ---
+        # m_gas = p * C / R
+        # total mass change = m_H2
+
+        if p_hyd is not None and p_dehyd is None:
+            m_gas_hyd = p_hyd * 1e5 * C_hyd / R_H2
+            m_gas_dehyd = m_gas_hyd + m_H2
+            p_dehyd = (m_gas_dehyd * R_H2) / (1e5 * C_dehyd)
+
+        elif p_dehyd is not None and p_hyd is None:
+            m_gas_dehyd = p_dehyd * 1e5 * C_dehyd / R_H2
+            m_gas_hyd = m_gas_dehyd - m_H2
+            p_hyd = (m_gas_hyd * R_H2) / (1e5 * C_hyd)
+
+        return p_hyd, p_dehyd
 
     def _reverse_H2_mass_fun(self, m: float, T_cell: float, V_res: float, V_cell: float, T_res: float) -> float:
         """
