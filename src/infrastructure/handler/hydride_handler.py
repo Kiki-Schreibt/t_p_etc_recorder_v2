@@ -83,7 +83,7 @@ class MetalHydrideDatabase:
 
         enthalpy *= 1e3
         entropy *= 1e3
-
+        hydride_name = self._normalize_hydride_string(hydride_name)
         query = f"""
             INSERT INTO {self.table.table_name} (
                 {self.table.hydride},
@@ -102,6 +102,7 @@ class MetalHydrideDatabase:
 
     def hydride_remover(self, hydride_name: str) -> None:
 
+        hydride_name = self._normalize_hydride_string(hydride_name)
         query = f"""
             DELETE FROM {self.table.table_name}
             WHERE {self.table.hydride} = %s
@@ -241,6 +242,7 @@ class MetalHydrideDatabase:
     @staticmethod
     def extract_elements(formula: str) -> dict[str, float | int]:
         return parse_chemical_formula(formula)
+
 
     def get_all_hydrides(self) -> list[str]:
         """
