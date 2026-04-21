@@ -50,7 +50,7 @@ The repository bundles several companion utilities:
 ├── tests/                    # Pytest-based unit tests and utilities
 ├── requirements.txt          # Python dependencies
 ├── README.md
-├── LICENSE.txt               # License agreement
+├── LICENSE.md               # License agreement
 └── ...
 
 ```
@@ -150,4 +150,4 @@ For commercial licensing inquiries, contact:
 Christian Wagner  
 Christian.Wagner.420@gmail.com
 
-For further information see LICENSE.txt, COMMERCIAL-LICENSE.txt and NOTICE.txt
+For further information see LICENSE.md, COMMERCIAL-LICENSE.md and NOTICE.md
