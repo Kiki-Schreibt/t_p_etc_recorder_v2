@@ -4,9 +4,9 @@ site_url: https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/
 nav:
   - index.md
   - User Manual:
-      - Installation: User_Manual/Installation.md
-      - Main_Window: User_Manual/General.md
-      - Create_New_Test: User_Manual/Create_New_Test.md
+      - Installation: user_manual/installation.md
+      - Main_Window: user_manual/general.md
+      - Create_New_Test: user_manual/create_new_test.md
 theme:
   name: material
 
