@@ -1,4 +1,5 @@
 site_name: Temperature, Pressure and Effective Thermal Conductivity Recorder Manual
+site_url: https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/
 
 nav:
   - index.md
