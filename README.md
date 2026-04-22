@@ -42,15 +42,15 @@ The repository bundles several companion utilities:
 .
 ├── Scripts/main.py           # Primary GUI entry point
 ├── src/
-│   ├── GUI/                  # PySide6 widgets and windows (recording, planning, simulation, etc.)
-│   ├── infrastructure/       # Hardware handlers, utilities, logging, and data abstractions
-│   ├── config/               # Default configuration templates
-│   └── ...
+│    └──│  
+│       ├── GUI/                  # PySide6 widgets and windows (recording, planning, simulation, etc.)
+│       ├── infrastructure/       # Hardware handlers, utilities, logging, and data abstractions
+│       └── ...
 ├── config/                   # Deployment-specific configuration files
-├── tests/                    # Pytest-based unit tests and utilities
+├── tests/                    # 
 ├── requirements.txt          # Python dependencies
 ├── README.md
-├── LICENSE.md               # License agreement
+├── LICENSE.md                # License agreement
 └── ...
 
 ```
