@@ -7,8 +7,23 @@ nav:
       - Installation: user_manual/installation.md
       - Main_Window: user_manual/general.md
       - Create_New_Test: user_manual/create_new_test.md
+  - API:
+      - Core:
+          - Core Functions: api/core/core.md
+          - Connections: api/core/connections.md
+          - Handler: api/core/handler.md
+      - GUI:
+          - Recording_GUI: api/gui/recording_gui.md
+
 theme:
   name: material
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
 
 
 
