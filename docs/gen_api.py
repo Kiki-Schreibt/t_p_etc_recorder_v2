@@ -19,7 +19,7 @@ for root, dirs, files in os.walk(SRC_DIR):
     rel_path = os.path.relpath(root, SRC_DIR)
     rel_path = "" if rel_path == "." else rel_path
 
-    doc_path = os.path.join(API_DIR, rel_path)
+    doc_path = os.path.join(API_DIR, rel_path).lower()
     module_path = rel_path.replace(os.sep, ".")
 
     # --- .pages file für Navigation ---
@@ -34,8 +34,7 @@ for root, dirs, files in os.walk(SRC_DIR):
         if module_path:
             f.write(f"# {prettify(module_path.split('.')[-1])}\n\n")
             f.write(f"::: {module_path}\n")
-            f.write("    options:\n")
-            f.write("      show_submodules: true\n")
+
 
     # --- einzelne Module ---
     for file in files:

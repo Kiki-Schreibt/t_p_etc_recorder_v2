@@ -5,20 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/GUI/etc_measurement_starter/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/exporter_gui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/exporter_gui/ui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/hydride_handler_gui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/kinetics_gui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/meta_data_gui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/planner_gui/ui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/plot_individualizer/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/post_processor_t_p_etc/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/recording_gui/ui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI/tcr_estimator/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Log/2025-04-30_10_Application_Log.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/gen_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/docs/gen_api.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
