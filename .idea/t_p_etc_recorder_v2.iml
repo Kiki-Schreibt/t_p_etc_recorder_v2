@@ -2,35 +2,36 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/etc_data_explorer_gui" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Scripts/Trash/general_stuff_for_plots" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/config_creation" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/data_fitter" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/hot_disk_sequenzer" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/main_gui" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/planner_gui" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/recording_gui" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/side_operations" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/simulation" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/config_connection_reading_management" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/infrastructure" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/infrastructure/connections" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/infrastructure/core" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/infrastructure/handler" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/infrastructure/meta_data" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/infrastructure/utils" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/utils" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/database_maintenance" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/plot_individualizer" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/etc_measurement_starter" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/exporter_gui" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/kinetics_gui" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/tcr_estimator" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/hydride_handler_gui" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/post_processor_t_p_etc" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/GUI/meta_data_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/config_connection_reading_management" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/config_creation" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/data_fitter" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/database_maintenance" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/etc_data_explorer_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/etc_measurement_starter" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/exporter_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/hot_disk_sequenzer" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/hydride_handler_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/kinetics_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/main_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/meta_data_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/planner_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/plot_individualizer" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/post_processor_t_p_etc" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/recording_gui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/side_operations" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/simulation" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/gui/tcr_estimator" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/infrastructure" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/infrastructure/connections" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/infrastructure/core" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/infrastructure/handler" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/infrastructure/meta_data" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/recorder_app/infrastructure/utils" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
     <orderEntry type="inheritedJdk" />

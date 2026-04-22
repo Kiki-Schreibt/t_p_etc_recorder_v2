@@ -9,20 +9,20 @@ from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 
 import global_vars
-from src.GUI.config_creation.config_creator_ui_main import ConfigWindow
-from src.infrastructure.utils.standard_paths import standard_config_file_path
-from src.GUI.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
-from src.GUI.simulation.simulator_gui import ModbusServerControlGUI
-from src.GUI.planner_gui.test_planner import TestPlannerMain
-from src.GUI.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
-from src.GUI.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
-from src.GUI.etc_measurement_starter.start_etc_measurement_gui import StartETCMeasurementGUI
-from src.GUI.plot_individualizer.plot_individualizer import PlotIndividualizerMainWindow
-from src.GUI.hydride_handler_gui.hydride_handler_main import HydrideHandlerMainWindow
-from src.GUI.meta_data_gui.meta_data_gui import MetaDataGUI
+from config_creator_ui_main import ConfigWindow
+from standard_paths import standard_config_file_path
+from recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
+from simulator_gui import ModbusServerControlGUI
+from test_planner import TestPlannerMain
+from h2_uptake_correction_gui import UptakeCorrectionWindow
+from suquenzer_gui import SequenzerMainWindow
+from start_etc_measurement_gui import StartETCMeasurementGUI
+from plot_individualizer import PlotIndividualizerMainWindow
+from hydride_handler_main import HydrideHandlerMainWindow
+from meta_data_gui import MetaDataGUI
 
 try:
-    import src.infrastructure.core.logger as logging
+    import logger as logging
 except ImportError:
     import logging
 
@@ -120,7 +120,7 @@ class MainProgram(RecordingMainWindow):
         """
         Perform a quick export using the current constraints, in a background thread.
         """
-        from src.export_methods import QuickExport
+        from recorder_app import QuickExport
         exporter = QuickExport(meta_data=self.meta_data, db_conn_params=self.config.db_conn_params)
         constraints = self.controller.constraints
         export_thread = threading.Thread(target=exporter.export_all, args=(constraints,), daemon=True)
@@ -185,7 +185,7 @@ class MainProgram(RecordingMainWindow):
             self._connect_set_state_signals()
 
     def _open_database_maintainer(self):
-        from src.GUI.database_maintenance.database_maintainer import MaintenanceWindow
+        from database_maintainer import MaintenanceWindow
         self.db_maintainer = MaintenanceWindow(db_conn_params=self.db_conn_params)
         self.db_maintainer.show()
         self.db_maintainer.started.connect(self.controller.stop_t_p_recording)
@@ -193,8 +193,8 @@ class MainProgram(RecordingMainWindow):
     def _open_etc_measurement_performer(self):
         try:
             self.etc_ms = StartETCMeasurementGUI(config=self.config,
-                                            standard_etc_folder_path=global_vars.standard_etc_folder_path,
-                                            meta_data=self.meta_data)
+                                                 standard_etc_folder_path=global_vars.standard_etc_folder_path,
+                                                 meta_data=self.meta_data)
             self.etc_ms.show()
         except Exception as e:
             self.logger.error(f"Error opening measurement performer: {e}")
@@ -269,7 +269,7 @@ def launch_main_program(app):
     """
 
     try:
-        from src.infrastructure.core.config_reader import config
+        from config_reader import config
 
         create_database_and_tables_if_not_exists(config)
         populate_hydride_database(config)
@@ -281,15 +281,15 @@ def launch_main_program(app):
 
 
 def create_database_and_tables_if_not_exists(config):
-    from src.table_creator import create_database, TableCreator
+    from recorder_app import create_database, TableCreator
     create_database(db_conn_params=config.db_conn_params)
     creator = TableCreator(db_conn_params=config.db_conn_params)
     creator.create_all_tables()
 
 
 def populate_hydride_database(config):
-    from src.infrastructure.handler.hydride_json_db_importer import HydrideJsonImporter
-    from src.infrastructure.utils.standard_paths import standard_hydride_data_base_path
+    from hydride_json_db_importer import HydrideJsonImporter
+    from standard_paths import standard_hydride_data_base_path
 
     importer = HydrideJsonImporter(
         db_conn_params=config.db_conn_params,

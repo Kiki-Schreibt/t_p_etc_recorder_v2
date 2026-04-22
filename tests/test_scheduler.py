@@ -1,8 +1,6 @@
-
-import os
 from datetime import datetime
 
-from src.infrastructure.handler.hot_disk_handler import HotDiskScheduleGrabber
+from hot_disk_handler import HotDiskScheduleGrabber
 
 
 def tmp_schedule_dir(tmp_path):
