@@ -1,14 +1,6 @@
 site_name: Temperature, Pressure and Effective Thermal Conductivity Recorder Manual
 site_url: https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/
 
-nav:
-  - index.md
-  - User Manual:
-      - Installation: user_manual/installation.md
-      - Main_Window: user_manual/general.md
-      - Create_New_Test: user_manual/create_new_test.md
-  - API: api/index.md
-
 
 theme:
   name: material
@@ -26,4 +18,10 @@ plugins:
   - awesome-pages
 
 
-
+nav:
+  - index.md
+  - User Manual:
+      - Installation: user_manual/installation.md
+      - Main_Window: user_manual/general.md
+      - Create_New_Test: user_manual/create_new_test.md
+  - API: api/index.md

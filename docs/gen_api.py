@@ -7,7 +7,7 @@ sys.path.insert(0, "src")
 
 SRC_DIR = "src"
 API_DIR = "api"
-
+print("GEN FILES RUNNING")
 def prettify(name: str) -> str:
     return name.replace("_", " ").title()
 
