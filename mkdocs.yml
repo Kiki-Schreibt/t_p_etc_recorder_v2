@@ -16,9 +16,9 @@ plugins:
               show_submodules: false
             paths:
               - src
-  - gen-files:
-      scripts:
-        - docs/gen_api_v2.py
+ # - gen-files:
+ #     scripts:
+ #       - docs/gen_api_v2.py
   - awesome-pages
 
 
@@ -26,8 +26,12 @@ nav:
   - index.md
   - User Manual:
       - Overview: user_manual/overview.md
-      - Installation: user_manual/installation.md
-      - Configuration Creation: user_manual/config_creation.md
-      - Main_Window: user_manual/general.md
-      - Create_New_Test: user_manual/create_new_test.md
+
+      - Getting Started:
+        - Installation: user_manual/getting_started/installation.md
+        - Configuration Creation: user_manual/getting_started/config_creation.md
+        - Start New Test: user_manual/getting_started/create_new_test.md
+      - Main Window: user_manual/main_window.md
+      - Database: user_manual/database/database_tables.md
+
   - API: api/index.md

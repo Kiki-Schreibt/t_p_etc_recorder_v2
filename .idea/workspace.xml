@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/create_new_test.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/installation.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/Create_New_Test.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/Installation.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/config_creation.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,11 +173,11 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\user_manual\getting_started" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\infrastructure\handler" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
     </key>
   </component>
   <component name="RunManager" selected="Python.config_creator_ui_main">

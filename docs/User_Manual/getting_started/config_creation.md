@@ -5,7 +5,7 @@ site_name: Configuration Creation
 On first startup of ``Scripts/main.py`` the configuration creator 
 opens:
 
-![ConfigCreator.PNG](../assets/pics/config_window/ConfigCreator.PNG)
+![ConfigCreator.PNG](../../assets/pics/config_window/ConfigCreator.PNG)
 
 1. **Database Settings:**
     - All inputs here can be edited later in the main window by opening the config creator over the view menu.
@@ -44,8 +44,10 @@ opens:
 
 7. **Main Window**
     - After saving your configuration the necessary database tables should be created automatically and the main window should open"
-    - Good. Everything seems ready now to start. To start a test continue with 
-      [Create New Test](create_new_test.md)
+      ![Main-Overview.PNG](../../assets/pics/main_window/Main-Overview.PNG)
+    - Nice. Everything works.
+    - To start a test continue with 
+      [Start New Test](../../user_manual/getting_started/create_new_test.md)
 
 
 
