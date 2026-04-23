@@ -1,13 +1,17 @@
-site-name: Overview
+site_name: Overview
 
 # Overview  
 ## Recording and Evaluation of Long-Term Cycle Tests
 
-Investigating metal–hydrogen systems for heat and hydrogen storage applications (e.g., metal hydrides) under real operating conditions typically involves continuous testing over extended periods—ranging from several months to a year or more.  
+Investigating metal-hydrogen systems for heat and hydrogen storage applications (e.g., metal hydrides) under real operating conditions typically involves continuous 
+testing over extended periods, ranging from several months to a year or more.  
 
-Throughout these long-term experiments, key parameters such as sample temperature, hydrogen pressure, and the hydrogenation/dehydrogenation state of the material must be monitored closely. These variables are essential for determining the number of completed cycles, as well as the quantities of hydrogen absorbed and released over time.
+Throughout these long-term experiments, key parameters such as sample temperature, hydrogen pressure, and the hydrogenation/dehydrogenation state of the material must be monitored closely. 
+These variables are essential for determining the number of completed cycles, as well as the quantities of hydrogen absorbed and released over time.
 
-In addition, evaluating the effective thermal conductivity (**ETC**) of such systems requires specialized experimental setups capable of withstanding elevated temperatures and hydrogen pressures. While these systems enable comprehensive data acquisition, the subsequent analysis often becomes a significant bottleneck.
+In addition, evaluating the effective thermal conductivity (**ETC**) of such systems requires specialized experimental 
+setups capable of withstanding elevated temperatures and hydrogen pressures. While these systems enable comprehensive data acquisition, the subsequent analysis often becomes 
+a significant bottleneck.
 
 In practice, data evaluation can involve:
 
@@ -26,8 +30,9 @@ This software is designed to address these challenges directly. Its core functio
 - Structured storage of results in a database for easy access and traceability  
 - Real-time data visualization to support monitoring during experiments  
 
-Live plotting capabilities also allow users to detect irregularities—such as leakage or hardware malfunctions—while tests are still in progress, enabling faster intervention.
+Live plotting capabilities also allow users to detect irregularities, such as leakage or hardware malfunctions, while tests are still in progress, enabling faster intervention.
 
-Although the study of ETC in metal–hydrogen systems remains a specialized field, this software significantly streamlines the planning, execution, and evaluation of such experiments. It is intended to reduce manual workload and improve the overall efficiency of long-term testing.
+Although the study of ETC in metal-hydrogen systems remains a specialized field, this software significantly streamlines the planning, execution,
+and evaluation of such experiments. It is intended to reduce manual workload and improve the overall efficiency of long-term testing.
 
 This user manual will be expanded over time. The initial sections focus on installation and the core features required to get started.
