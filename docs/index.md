@@ -1,13 +1,11 @@
-# Welcome to MkDocs
+# Temperature, Pressure and Effective Thermal Conductivity Recorder 
 
 
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
-		
 	    
+Getting Started:
+-
+- [User Manual Overview](user_manual/overview.md)
 
+Documentation:
+-
+- [API](api/index.md)

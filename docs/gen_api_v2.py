@@ -85,5 +85,12 @@ with mkdocs_gen_files.open(API_INDEX, "w") as f:
         f.write(f"## {group}\n\n")
 
         for mod in items:
-            f.write(f"### `{mod}`\n\n")
-            f.write(f"::: {mod}\n\n")
+            doc_path = f"api/{mod.replace('.', '/')}.md"
+
+            # write individual page
+            with mkdocs_gen_files.open(doc_path, "w") as mf:
+                mf.write(f"# {mod}\n\n")
+                mf.write(f"::: {mod}\n")
+
+            # link from index
+            f.write(f"### [{mod}]({mod.replace('.', '/')}.md)\n\n")

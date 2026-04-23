@@ -10,11 +10,15 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths:
-            - src
+            options:
+              show_source: true
+              show_root_heading: true
+              show_submodules: false
+            paths:
+              - src
   - gen-files:
       scripts:
-        - docs/gen_api.py
+        - docs/gen_api_v2.py
   - awesome-pages
 
 
@@ -23,6 +27,7 @@ nav:
   - User Manual:
       - Overview: user_manual/overview.md
       - Installation: user_manual/installation.md
+      - Configuration Creation: user_manual/config_creation.md
       - Main_Window: user_manual/general.md
       - Create_New_Test: user_manual/create_new_test.md
   - API: api/index.md

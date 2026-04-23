@@ -6,6 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/ConfigCreator.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-DependencySelection.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-MeasurementDataSelection.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-Overview.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-StaticPlot.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-TransientPlot.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-UPtake overcyc.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-View-Menu.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/gen_api_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/docs/gen_api_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -174,7 +184,29 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.config_creator_ui_main">
+    <configuration name="config_creator_ui_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/recorder_app/gui/config_creation" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/recorder_app/gui/config_creation/config_creator_ui_main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="config_reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -241,28 +273,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="plot_individualizer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="t_p_etc_recorder_v2" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/recorder_app/GUI/plot_individualizer" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/recorder_app/GUI/plot_individualizer/plot_individualizer.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="standard_paths" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -287,11 +297,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.config_creator_ui_main" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.exporter_main" />
         <item itemvalue="Python.config_reader" />
         <item itemvalue="Python.standard_paths" />
-        <item itemvalue="Python.plot_individualizer" />
       </list>
     </recent_temporary>
   </component>
