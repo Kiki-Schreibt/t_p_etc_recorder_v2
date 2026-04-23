@@ -20,6 +20,7 @@ If you have any questions, feel free to contact me at Christian.Wagner.420@gmail
 
 A more detailed user manual and a sample database with example data will be added in the future. At the moment, I am focusing on other priorities. A basic manual is available under Manual.md
 The manual can be found on gh-pages [t_p_etc_recorder](https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/)
+
 Enjoy!
 
 ## Overview

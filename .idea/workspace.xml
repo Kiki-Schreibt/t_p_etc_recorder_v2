@@ -6,17 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/ConfigCreator.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-DependencySelection.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-MeasurementDataSelection.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-Overview.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-StaticPlot.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-TransientPlot.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-UPtake overcyc.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Main-View-Menu.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/gen_api_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/docs/gen_api_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
