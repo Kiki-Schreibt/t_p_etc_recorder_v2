@@ -21,6 +21,7 @@ plugins:
 nav:
   - index.md
   - User Manual:
+      - Overview: user_manual/overview.md
       - Installation: user_manual/installation.md
       - Main_Window: user_manual/general.md
       - Create_New_Test: user_manual/create_new_test.md
