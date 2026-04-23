@@ -5,13 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/create_new_test.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/installation.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/Create_New_Test.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/Installation.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/config_creation.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
