@@ -4,7 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="" />
+    <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/DatabaseMaintanance.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/DiconSimulatorCSVMode.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/DiconSimulatorManualMode.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/DiconSimulatorProgramMode.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Hydride Handler-Edit.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Hydride Handler-Main.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Hydride Handler-Table.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Meta-Data-GUI.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Plot Individualizer.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/Schedule Creator.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/UPtake-Correction.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/config_window/ConfigCreator.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/main_window/Main-DependencySelection.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/main_window/Main-MeasurementDataSelection.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/main_window/Main-Overview.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/main_window/Main-StaticPlot.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/main_window/Main-TransientPlot.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/main_window/Main-UPtake overcyc.PNG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/main_window/Main-View-Menu.PNG" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

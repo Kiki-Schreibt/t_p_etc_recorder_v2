@@ -3,7 +3,7 @@ site_name: Write New Sample Meta Data into Database
 
 1. **Open the Meta Data Handler GUI**
     - Click **view** and select **Meta Data**
-![Main-View-Menu.PNG](../../assets/pics/main_window/Main-View-Menu.PNG)
+![Main View Menu](../../assets/pics/main_window/main_view_menu.PNG)
 
 2. **Click New**
 
@@ -21,8 +21,8 @@ site_name: Write New Sample Meta Data into Database
     - **Leave all other input fields empty!**. Their value will be determined automatically while recording. They are just editable in case you want to make changes on the meta data later in the test without querying the database
  4. **Click Safe**
     - Your tests' meta data is then stored in the [Meta Data Table](../../user_manual/database/database_tables.md)
-    - You can close the Meta Data GUI and continue in the [Main Window]()
-   ![View Menu](../../assets/pics/Meta-Data-GUI.PNG)
+    - You can close the Meta Data GUI and continue in the [Main Window](../main_window.md)
+   ![View Menu](../../assets/pics/meta_data_gui.PNG)
 
 
 

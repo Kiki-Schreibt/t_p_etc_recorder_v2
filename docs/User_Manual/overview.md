@@ -36,3 +36,13 @@ Although the study of ETC in metal-hydrogen systems remains a specialized field,
 and evaluation of such experiments. It is intended to reduce manual workload and improve the overall efficiency of long-term testing.
 
 This user manual will be expanded over time. The initial sections focus on installation and the core features required to get started.
+
+# Content:
+- Getting Started:
+
+    - [Installation](getting_started/installation.md)
+    - [Configuration Settings](getting_started/config_creation.md)
+    - [Start New Test](getting_started/create_new_test.md)
+
+- Main Window:
+  - [Main Window](main_window.md)
