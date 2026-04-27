@@ -8,7 +8,7 @@ try:
 except ImportError:
     import logging
 
-
+#todo: reimports all hydrides from .json every start of main.py. Fix to only do that when database is empty
 class HydrideJsonImporter:
     """
     Imports hydride data from a JSON file into the PostgreSQL hydrides table.

@@ -16,11 +16,14 @@ plugins:
               show_submodules: false
             paths:
               - src
-  - gen-files:
-      scripts:
-        - docs/gen_api_v2.py
+ # - gen-files:
+ #     scripts:
+ #       - docs/gen_api_v2.py
   - awesome-pages
-
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 
 nav:
   - index.md

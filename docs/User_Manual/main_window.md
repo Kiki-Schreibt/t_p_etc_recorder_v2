@@ -5,12 +5,14 @@ This window opens when you run:
 ``` bash 
 python Scripts/main.py
 ```
+![Das ist ein Bild](../../assets/pics/main_window/main_overview.PNG)
 
 It serves as the main user interface from which all functionalities of the software can be accessed. Tests can be selected by entering their sample id in the *Sample ID* edit field.  
+
+
 Once done the sample's meta data will be loaded from the database and 
-filled into the text edit fields. 
-    - 
-![Das ist ein Bild](../../assets/pics/main_window/main_overview.PNG)
+filled into the text edit fields:
+![main_meta_data_filled_in.PNG](../assets/pics/main_window/main_meta_data_filled_in.PNG)
 
 The user now has the following options:
 
@@ -22,4 +24,47 @@ The user now has the following options:
       defined in [configuration](getting_started/config_creation.md) will be tracked for changes. 
       Whenever a .xlsx file is exported from the **Thermal Constants Analyzer** the software will notice it and import all content from the .xlsx file into the 
       [Thermal Conductivity Tables](database/database_tables.md) in the database. Once done the thermal conductivity values will be included in the live plots on the left side.
-    - 
+      Generally speaking: when this is activated everytime you export thermal conductivity data from the **Thermal Constants Analyzer 7.6** in .xlsx format this data will be 
+      automatically imported into your **PostgreSQL** database. Quite a handy feature one might say.
+
+2. **Start Static Plot**
+    - Loads the temperature, pressure and thermal conductivity 
+      data from the corresponding [database tables](database/database_tables.md) and visualizes them in the left plot windows (*top temperature, bottom pressure, ETC in both plots right y-axis*)
+   
+!!! info 
+    In both modes the plots are interactive, but database reloads and selection (via clicks) is only performed if you interact with the top plot. There are several reasons for this but to conclude I was a lazy programmer. Maybe in the future I will enable interactivity for the bottom plot as well. 
+    However, you can zoom in the bottom plot or click on points, but it will do nothing. This is not a bug, it is intended. If you want data to reload zoom in the top plot please.
+
+- For the conductivity data a minimum/maximum total temperature increase and 
+total to characteristic time can be set via the edit boxes on the right side.
+ You will only see data in the plots that are within those limits. 
+(I assume you know what these values are. If not just leave as is)
+
+
+!!! info
+    In the following I will describe all functionalities that the main window offers (without including the other windows available via the view menu).
+    Those work for both modes (Tp Recording / ETC Data Recording and Static Plot) with one exception. 
+    The checkboxes *Is Uptake*, *Is Isotherm* and *Cycle Test* as well as the edit field *Additional Test Info* only affect data while recording, not data in static plot
+
+## Checkboxes, Interactivity, Plotting
+###Checkboxes
+
+We will start with the features that are exclusive for the recording mode. They will affect the data you are measuring directly like described: 
+
+- While recording it is important to understand what happens when you mark the following checkboxes located under the left plot windows:
+
+- ![main_checkboxes.PNG](../assets/pics/main_window/main_checkboxes.PNG)
+
+  - **Additional Test Info** can be an arbitrary combination of characters. All data recorded will have this string in the corresponding database tables in the column "test_info".
+  - **Is Uptake**:
+    - When **Is Uptake** is checked the all the data recorded will be respected for calculation of the released/absorbed amount of hydrogen.
+      For test performance this means you should uncheck this always when you perform manual alterations of the pressure and check it otherwise. 
+    - **Cycle Test**: when checked the cycle counting detection is active. When the software realizes that the pressure crosses the equilibrium pressure it will start to alter 
+      the cycle number by 0.5 and calculates the released/absorbed amount of hydrogen of the last half cycle. 
+    - **Is Isotherm**: when checked the program labels the currently collected data as isothermal measurements. This is important for the visualization and export of the data. 
+    
+    - !!! info
+          - For all checkboxes blue means checked and white means unchecked    
+          - In the corresponding database tables the checkboxes are represented by boolean values where 
+            true means checked and false means unchecked. For plotting and exporting they are used as identifiers.
+    
