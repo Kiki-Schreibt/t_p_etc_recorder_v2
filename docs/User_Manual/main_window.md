@@ -92,7 +92,8 @@ When exploring your data your window might looks like this:
 ![main_measuement_data_selection.PNG](../assets/pics/main_window/main_measuement_data_selection.PNG)
 
 As you see the thermal conductivity measurement results are plotted as white dots and their average value of all measurements in the same state are plotted as red dots.
-As you might know those dots are not the actual measurements but their results. Sometimes it can become useful to look at the underlying measurements, their fit, residual or the drift measurement taken before the measurement. 
+As you might know those dots are not the actual measurements but their results. Sometimes it can become useful to look at the underlying measurements, their fit, residual or the drift measurement taken before the measurement.  
+
 If you want to do that, you can choose the type from the right dropdown menu. When chosen you can click on a measurement result in the left top plot window and the data for that measurement will be plotted on the right side (in the same color the dot changes to).
 Selection of multiple conductivity measurements is allowed by just clicking on another point. 
 The data will be visualized like in the following example for the transient readings:
@@ -104,3 +105,35 @@ To clear the right plot just choose another data type from the right drop down m
 #### Common Plots
 
 ##### Pressure dependent / Isotherms
+
+The ETC of porous media (e.g. metal hydride powder beds) shows a pressure dependency according 
+to the Smoluchowski effect. To visualize the pressure dependency you have to options.  
+On the left drop down menu you can select *Pressure Dependent* or *Isotherms*. 
+With both options the currently visible ETC data (in the left plot windows) will be plotted over the pressure at measurement time
+in the right plot window. The main difference is the following: 
+
+- *Pressure Dependent*: This will respect all conductivity values that are visible in the left plot window
+- *Isotherms*: This will only respect those conductivity values that are marked as isothermal measurements during the recording by activating the 
+   **Is Isotherm** checkbox 
+
+For better imagination here is an example of the resulting plot:
+![main_example_isothermal_plot.PNG](../assets/pics/main_window/main_example_isothermal_plot.PNG)
+
+
+The result is pretty basic. 
+!!! info
+    I usually only use those plots for orientation. 
+    In the future I would like to add features like proper 
+    labeling of the temperature for each isotherm and exporting 
+    the data to origin to receive proper publication-ready 
+    plots without extracting the data from an extra export. 
+
+The other available options to plot thermal conductivity are: 
+
+- **Temperature Dependent**: Plots the ETC data temperature dependent.
+- **Cycle Dependent**: Plots the ETC data (only which is labeled via *Cycle Test* checkbox) over the de-/hydrogenation cycles
+
+Via *Uptake* you can plot the hydrogen uptake/release of the currently visible data (left plot) over the cycles in the right plot window
+
+
+
