@@ -7,7 +7,7 @@ python Scripts/main.py
 ```
 ![Das ist ein Bild](../../assets/pics/main_window/main_overview.PNG)
 
-It serves as the main user interface from which all functionalities of the software can be accessed. Tests can be selected by entering their sample id in the *Sample ID* edit field.  
+It serves as the main user interface from which all (finished) functionalities of the software can be accessed. Tests can be selected by entering their sample id in the *Sample ID* edit field.  
 
 
 Once done the sample's meta data will be loaded from the database and 
@@ -68,3 +68,39 @@ We will start with the features that are exclusive for the recording mode. They 
           - In the corresponding database tables the checkboxes are represented by boolean values where 
             true means checked and false means unchecked. For plotting and exporting they are used as identifiers.
     
+
+### Interactivity
+#### Zooming
+By default every second 2 data points will be recorded evaluated and stored in the database. 
+At the same time once a second data will be read from the database for the visualization. 
+To prevent flooding the memory the visualization is limited to
+a maximum of 5000 data points. The same is true for the static plot mode. 
+When a complete test is loaded from the database this can lead to poor resolution. So every time
+you hover about the x-axis of the top plot and zoom in or out 5000 data 
+points in the currently visible time period will be fetched from the database
+and the plot updates. Though the database is partitioned by the sample id you might realize after recording/deleting a large amount of data
+that the zooming feels sluggish. This is an issue with the loading speed that can be fixed by running 
+the database maintenance available via the view menu of the main window:
+
+![database maintenance](../assets/pics/database_maintenance_gui/database_maintenance.PNG)
+
+Just click *Run VACUUM/ANALYZE/REINDEX* and wait for it to finish (can take several minutes)
+
+#### Accessing the measurements behind the conductivity data
+
+When exploring your data your window might looks like this: 
+![main_measuement_data_selection.PNG](../assets/pics/main_window/main_measuement_data_selection.PNG)
+
+As you see the thermal conductivity measurement results are plotted as white dots and their average value of all measurements in the same state are plotted as red dots.
+As you might know those dots are not the actual measurements but their results. Sometimes it can become useful to look at the underlying measurements, their fit, residual or the drift measurement taken before the measurement. 
+If you want to do that, you can choose the type from the right dropdown menu. When chosen you can click on a measurement result in the left top plot window and the data for that measurement will be plotted on the right side (in the same color the dot changes to).
+Selection of multiple conductivity measurements is allowed by just clicking on another point. 
+The data will be visualized like in the following example for the transient readings:
+
+![main_transient_plot.PNG](../assets/pics/main_window/main_transient_plot.PNG)
+
+To clear the right plot just choose another data type from the right drop down menu.
+
+#### Common Plots
+
+##### Pressure dependent / Isotherms
