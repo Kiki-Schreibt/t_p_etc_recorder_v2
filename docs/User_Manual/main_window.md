@@ -26,7 +26,9 @@ The user now has the following options:
       [Thermal Conductivity Tables](database/database_tables.md) in the database. Once done the thermal conductivity values will be included in the live plots on the left side.
       Generally speaking: when this is activated everytime you export thermal conductivity data from the **Thermal Constants Analyzer 7.6** in .xlsx format this data will be 
       automatically imported into your **PostgreSQL** database. Quite a handy feature one might say.
-
+    - During the recording whenever a cycle is detected the text edit fields on the left side show the current de-/hydrogenation state, cycle number and the uptake of the last half cycle.
+    - One cycle is always considered to be a full hydrogenation and a full dehydrogenation. So hydrogenated states will always be labeled as increments of 0.5 + n where n is full number. Dehydrogenated states will be n where n is a full number. So in example after filling dehydrogenated powder cycle # will be 0. After the first hydrogenation 0.5 and after first dehydrogenation 1 and so on.
+    - When you finished recording either press **Stop TP Recording** and **Stop Log File Tracking** or just close the main window.
 2. **Start Static Plot**
     - Loads the temperature, pressure and thermal conductivity 
       data from the corresponding [database tables](database/database_tables.md) and visualizes them in the left plot windows (*top temperature, bottom pressure, ETC in both plots right y-axis*)
