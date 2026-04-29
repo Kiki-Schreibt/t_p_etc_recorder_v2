@@ -31,12 +31,16 @@ You have the following options to simulate temperature and pressure data:
      - !!! info
          - Your .csv file should have the following structure to work with the simulator:
          -  Column names should be (!in this order): 'SampleTemp',
-           ,'HeaterTemp', 'Pressure', 'TShouldSample'
+             'HeaterTemp', 'Pressure', 'TShouldSample'
          - Please dig through the code at the bottom of this page for deeper inside
      - ![dicon_simulator_csv_mode.PNG](../../assets/pics/dicon_simulator/dicon_simulator_csv_mode.PNG)
 
 ``` python
 
+
+
+#Snippet of CSVReaderForProgramSimulation 
+#located at src/recorder_app/gui/simulation/dicon_simulator_v2.py
 def read_and_process_csv(self):
         df = pd.DataFrame()
         file_path = os.path.join(self.csv_file_path, self.file_name)

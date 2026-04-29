@@ -5,15 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/dicon_simulator.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/quick_export.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/all_windows/test_planner.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/test_planner.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/schedule_creator.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/all_windows/dicon_simulator.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/dicon_simulator.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/User_Manual/main_window.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/main_window.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/dicon_simulator_csv_mode.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/dicon_simulator/dicon_simulator_csv_mode.PNG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/dicon_simulator_manual_mode.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/dicon_simulator/dicon_simulator_manual_mode.PNG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/pics/dicon_simulator_program_mode.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/dicon_simulator/dicon_simulator_program_mode.PNG" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
