@@ -1,5 +1,5 @@
-from table_config import TableConfig
-from connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.connections import DatabaseConnection
 try:
     import core.logger as logging
 except ImportError:
