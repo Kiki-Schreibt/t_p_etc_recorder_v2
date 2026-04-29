@@ -5,9 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/schedule_creator.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/all_windows/dicon_simulator.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/dicon_simulator.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/database_maintenance.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/etc_measurement_starter.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/hydride_handler.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/meta_data_handler.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/plot_individualizer.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/uptake_correction.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/all_windows/schedule_creator.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/schedule_creator.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/all_windows/test_planner.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/test_planner.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/User_Manual/main_window.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/main_window.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

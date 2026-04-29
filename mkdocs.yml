@@ -31,10 +31,22 @@ nav:
       - Overview: user_manual/overview.md
 
       - Getting Started:
-        - Installation: user_manual/getting_started/installation.md
-        - Configuration Creation: user_manual/getting_started/config_creation.md
-        - Start New Test: user_manual/getting_started/create_new_test.md
-      - Main Window: user_manual/main_window.md
+         - Installation: user_manual/getting_started/installation.md
+         - Configuration Creation: user_manual/getting_started/config_creation.md
+         - Start New Test: user_manual/getting_started/create_new_test.md
+      - Windows:
+         - Main Window: user_manual/main_window.md
+         - Test Planner: user_manual/all_windows/test_planner.md
+         - Config Settings: user_manual/getting_started/config_creation.md
+         - Quick Export: user_manual/all_windows/quick_export.md
+         - Dicon Simulator: user_manual/all_windows/dicon_simulator.md
+         - Schedule Creator: user_manual/all_windows/schedule_creator.md
+         - Uptake Correction: user_manual/all_windows/uptake_correction.md
+         - Database Maintenance: user_manual/all_windows/database_maintenance.md
+         - ETC Measurement Starter: user_manual/all_windows/etc_measurement_starter.md
+         - Plot Individualizer: user_manual/all_windows/plot_individualizer.md
+         - Hydride Handler: user_manual/all_windows/hydride_handler.md
+         - Meta Data: user_manual/all_windows/meta_data_handler.md
       - Database: user_manual/database/database_tables.md
 
   - API: api/index.md

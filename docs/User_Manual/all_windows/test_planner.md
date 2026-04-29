@@ -25,7 +25,7 @@ It comes with the following features:
         and the plot will update with the according route. 
       - Now you can directly see relative to the equilibrium pressure if your cycling conditions would work. 
       - If you want to test different conditions make sure to delete the calculated pressure before plotting the next route. If both pressure edit fields are filled with values the program will calculate the hydrogen capacity based on the pressure difference and display it in the *Capacity* edit field.
-      - **Some examples:**
+      - **Some examples:
         - **Calculation of pressure drop due to hydrogenation:**
           - ![test_planner_hydrogenation_calculation.PNG](../../assets/pics/test_planner/test_planner_hydrogenation_calculation.PNG)
           - ![test_planner_hydrogenation_calculated.PNG](../../assets/pics/test_planner/test_planner_hydrogenation_calculated.PNG)

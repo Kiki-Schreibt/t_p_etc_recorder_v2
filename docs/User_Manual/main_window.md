@@ -147,9 +147,9 @@ Via the view menu you have access to multiple windows:
 3. **[Quick Export](all_windows/quick_export.md)**
 4. **[Dicon Simulator](all_windows/dicon_simulator.md)**
 5. **[Schedule Creator](all_windows/schedule_creator.md)**
-6. **[Uptake Correction]()**
-7. **[Database Maintenance]()**
-8. **[ETC Measurement Starter]()**
-9. **[Plot Individualizer]()**
-10. **[Hydride Handler]()**
-11. **[Meta Data]()**
+6. **[Uptake Correction](all_windows/uptake_correction.md)**
+7. **[Database Maintenance](all_windows/database_maintenance.md)**
+8. **[ETC Measurement Starter](all_windows/etc_measurement_starter.md)**
+9. **[Plot Individualizer](all_windows/plot_individualizer.md)**
+10. **[Hydride Handler](all_windows/hydride_handler.md)**
+11. **[Meta Data](all_windows/meta_data_handler.md)**
