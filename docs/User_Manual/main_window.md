@@ -143,9 +143,9 @@ Via the view menu you have access to multiple windows:
 
 
 1. **[Test Planner](all_windows/test_planner.md)**
-2. **[Config Settings]()**
-3. **[Quick Export]()**
-4. **[Dicon Simulator]()**
+2. **[Config Settings](getting_started/config_creation.md)**
+3. **[Quick Export](all_windows/quick_export.md)**
+4. **[Dicon Simulator](all_windows/dicon_simulator.md)**
 5. **[Schedule Creator]()**
 6. **[Uptake Correction]()**
 7. **[Database Maintenance]()**

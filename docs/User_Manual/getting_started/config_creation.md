@@ -2,7 +2,7 @@ site_name: Configuration Creation
 
 ## Configuration
 
-On first startup of ``Scripts/main.py`` the configuration creator 
+On first startup of ``Scripts/main.py`` or when clicking *Config Settings* on the view menu of the [main window](../main_window.md) the configuration creator 
 opens:
 
 ![ConfigCreator.PNG](../../assets/pics/config_window/config_creator.PNG)
