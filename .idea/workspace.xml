@@ -5,7 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/docs/User_Manual/all_windows/test_planner.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/getting_started/installation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/installation.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/User_Manual/main_window.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/main_window.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/test_planner_capacity_calculated.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/test_planner/test_planner_capacity_calculated.PNG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/test_planner_dehydrogenation_calculated.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/test_planner/test_planner_dehydrogenation_calculated.PNG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/test_planner_dehydrogenation_calculation.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/test_planner/test_planner_dehydrogenation_calculation.PNG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/test_planner_hydrogenation_calculated.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/test_planner/test_planner_hydrogenation_calculated.PNG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/pics/test_planner_hydrogenation_calculation.PNG" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/pics/test_planner/test_planner_hydrogenation_calculation.PNG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,6 +165,11 @@
     "last_opened_file_path": "C:/Daten/Kiki/ProgrammingStuff/t_p_etc_recorder_v2/src/GUI/tcr_estimator",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  },
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "Markdown"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
@@ -166,11 +181,11 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\assets\pics\test_planner" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\user_manual\getting_started" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\infrastructure\handler" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui" />
     </key>
   </component>
   <component name="RunManager" selected="Python.main">

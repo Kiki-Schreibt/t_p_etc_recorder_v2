@@ -26,7 +26,7 @@ opens:
     - Note: For the Jumo DICON touch, data is stored in the selected register and the following register.
 
     - Conversion happens like:
-       [See Code Block Below](#conversion)
+      (See Code Block at bottom of the page)
 
 3. **Logging Settings**
     - Define a folder and file nam to store the application logs. The file name will be extended by date and time

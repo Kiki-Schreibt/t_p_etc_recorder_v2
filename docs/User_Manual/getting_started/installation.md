@@ -74,5 +74,5 @@ planners and recorders simultaneously.
 On first start, this will open the Configuration Creator. Here you enter
 IDs and ports for database and device connections.
 
-For a detailed explanation see:\
+For a detailed explanation see:
 **[Configuration Creation](config_creation.md)**

@@ -5,8 +5,8 @@ This window opens when you run:
 ``` bash 
 python Scripts/main.py
 ```
-![Das ist ein Bild](../../assets/pics/main_window/main_overview.PNG)
 
+![main_overview.PNG](../assets/pics/main_window/main_overview.PNG)
 It serves as the main user interface from which all (finished) functionalities of the software can be accessed. Tests can be selected by entering their sample id in the *Sample ID* edit field.  
 
 
@@ -137,5 +137,19 @@ The other available options to plot thermal conductivity are:
 
 Via *Uptake* you can plot the hydrogen uptake/release of the currently visible data (left plot) over the cycles in the right plot window
 
+### Overview about other windows
+Via the view menu you have access to multiple windows: 
+![main_view_menu.PNG](../assets/pics/main_window/main_view_menu.PNG)
 
 
+1. **[Test Planner](all_windows/test_planner.md)**
+2. **[Config Settings]()**
+3. **[Quick Export]()**
+4. **[Dicon Simulator]()**
+5. **[Schedule Creator]()**
+6. **[Uptake Correction]()**
+7. **[Database Maintenance]()**
+8. **[ETC Measurement Starter]()**
+9. **[Plot Individualizer]()**
+10. **[Hydride Handler]()**
+11. **[Meta Data]()**
