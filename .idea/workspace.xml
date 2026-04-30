@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/user_manual/getting_started/installation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/user_manual/getting_started/installation.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/user_manual/main_window.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/user_manual/main_window.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -460,6 +456,11 @@
           <url>file://$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py</url>
           <line>1</line>
           <option name="timeStamp" value="737" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py</url>
+          <line>321</line>
+          <option name="timeStamp" value="740" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

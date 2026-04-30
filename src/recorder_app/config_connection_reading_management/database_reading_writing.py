@@ -15,6 +15,7 @@ except ImportError:
 from recorder_app.config_connection_reading_management.query_builder import QueryBuilder
 from recorder_app.infrastructure.core.table_config import TableConfig
 from recorder_app.infrastructure.core.global_vars import data_point_reading_limit
+from recorder_app.infrastructure.core import global_vars
 
 local_tz = ZoneInfo("Europe/Berlin")
 LIMIT_DATA_POINTS = data_point_reading_limit
@@ -22,7 +23,90 @@ LIMIT_DATA_POINTS = data_point_reading_limit
 
 class DataRetriever:
     """
-    Class for retrieving data from the database.
+    Centralized data access layer for retrieving and preprocessing experimental
+    and thermal conductivity-related datasets from a relational database.
+
+    This class provides a high-level interface for executing SQL queries against
+    multiple domain-specific tables (e.g., TP data, ETC data, XY data), while
+    abstracting query construction, execution, and post-processing of results
+    into pandas DataFrames.
+
+    It supports flexible querying by:
+    - sample identifiers
+    - time ranges
+    - cycle numbers
+    - combined filtering with joins and constraints
+    - streaming/continuous cursor-based retrieval
+
+    Additionally, it performs standardized post-processing on retrieved data,
+    including:
+    - timezone normalization for datetime columns
+    - boolean conversion for flag-like fields
+    - flattening and cleaning of structured or array-like database outputs
+
+    Attributes
+    ----------
+    xy_table : TableConfig.Table
+        Configuration object for the thermal conductivity XY data table.
+
+    etc_table : TableConfig.Table
+        Configuration object for the ETC (Effective Thermal Conductivity) table.
+
+    etc_column_attribute_mapping : dict
+        Mapping between database column identifiers and human-readable attribute
+        names used for downstream processing or UI representation.
+
+    db_conn_params : dict
+        Database connection parameters used to initialize connections.
+
+    qb : QueryBuilder
+        Internal query builder responsible for generating SQL statements.
+
+    logger : logging.Logger
+        Logger instance used for error reporting and debugging.
+
+    limit_datapoints : int
+        Maximum number of datapoints returned by bounded queries.
+
+    Key Responsibilities
+    ---------------------
+    - Construction and execution of SQL queries via `QueryBuilder`
+    - Retrieval of dataset slices based on:
+        * sample_id
+        * time_range
+        * cycle_number
+    - Joining and filtering across multiple tables
+    - Standardization of returned data into pandas DataFrames
+    - Post-processing of database output (types, timezones, flags)
+
+    Notes
+    -----
+    - All database access is performed through `DatabaseConnection` or
+      externally provided cursors for continuous fetching.
+    - Time columns are automatically localized and converted to a configured
+      local timezone.
+    - Flag columns are heuristically interpreted based on naming conventions.
+    - The class assumes a relational schema defined by `TableConfig`.
+    - Query generation logic is delegated to `QueryBuilder`.
+
+    Error Handling
+    --------------
+    Most methods catch database and execution errors internally, logging them
+    and returning empty DataFrames or None where appropriate. Exceptions are
+    generally not propagated.
+
+    Thread Safety
+    -------------
+    Instances are not guaranteed to be thread-safe due to shared state such
+    as connection parameters and logging configuration.
+
+    Examples
+    --------
+    >>> retriever = DataRetriever(db_conn_params)
+    >>> df = retriever.fetch_data_by_sample_id_2(
+    ...     sample_id="S123",
+    ...     table_name="t_p_data"
+    ... )
     """
     xy_table = TableConfig().ThermalConductivityXyDataTable
     etc_table = TableConfig().ETCDataTable
@@ -236,6 +320,61 @@ class DataRetriever:
         join_on: list[tuple[str,str]] = None,
         join_constraints: dict = None
     ) -> pd.DataFrame:
+        """
+        Retrieve records from a database table filtered by a given sample ID,
+        with optional column selection, constraints, and join operations.
+
+        This method constructs a SQL query via the internal query builder and
+        executes it using the configured database connection. It supports
+        filtering, limiting, and joining additional tables.
+
+        Parameters
+        ----------
+        sample_id : str
+            Identifier used to filter the primary dataset. Typically corresponds
+            to a column such as `sample_id` in the target table.
+
+        table_name : str
+            Name of the primary database table to query.
+
+        column_names : list of str or tuple of str, optional
+            Specific columns to retrieve. If None, all columns are selected.
+
+        constraints : dict, optional
+            Additional filtering conditions applied to the primary table.
+            Expected format depends on the query builder implementation
+            (e.g., {"column": value} or more complex expressions).
+
+        join_table : str, optional
+            Name of an additional table to join with the primary table.
+
+        join_on : list of tuple of (str, str), optional
+            Join conditions between the primary and join table.
+            Each tuple represents a pair of columns:
+            (primary_table_column, join_table_column).
+
+        join_constraints : dict, optional
+            Additional filtering conditions applied to the joined table.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing the query results. Column names correspond
+            to the selected or inferred schema.
+
+        Notes
+        -----
+        - The actual SQL query is generated by `self.qb.create_reading_query`.
+        - Result size may be limited by `self.limit_datapoints`.
+        - Behavior of constraints and joins depends on the query builder logic.
+
+        Raises
+        ------
+        Exception
+            Propagates any database or query execution errors raised by
+            `execute_fetching`.
+        """
+
         query, values = self.qb.create_reading_query(
             sample_id=sample_id,
             table_name=table_name,
@@ -266,6 +405,61 @@ class DataRetriever:
         join_on: list[tuple[str,str]] = None,
         join_constraints: dict = None
     ) -> pd.DataFrame:
+        """
+        Retrieve records from a database table within a specified time range,
+        with optional filtering, column selection, and join operations.
+
+        This method constructs a SQL query via the internal query builder using
+        a time window constraint and executes it against the configured database.
+
+        Parameters
+        ----------
+        time_range : tuple of datetime
+            Start and end timestamps defining the time window (inclusive or exclusive
+            depends on the query builder implementation).
+
+        table_name : str
+            Name of the primary database table to query.
+
+        column_names : list of str or tuple of str, optional
+            Specific columns to retrieve. If None, all columns are selected.
+
+        constraints : dict, optional
+            Additional filtering conditions applied to the primary table.
+            Format depends on the query builder implementation.
+
+        sample_id : str, optional
+            Optional sample identifier used as an additional filter condition.
+
+        join_table : str, optional
+            Name of an additional table to join with the primary table.
+
+        join_on : list of tuple of (str, str), optional
+            Join conditions between the primary and join table.
+            Each tuple represents a pair of columns:
+            (primary_table_column, join_table_column).
+
+        join_constraints : dict, optional
+            Additional filtering conditions applied to the joined table.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing the query results.
+
+        Notes
+        -----
+        - The SQL query is generated by `self.qb.create_reading_query`.
+        - The number of returned rows may be limited by `self.limit_datapoints`.
+        - Time filtering behavior depends on the query builder implementation.
+
+        Raises
+        ------
+        Exception
+            Propagates any database or query execution errors raised by
+            `execute_fetching`.
+        """
+
         query, values = self.qb.create_reading_query(
             table_name=table_name,
             time_window=time_range,
@@ -292,7 +486,56 @@ class DataRetriever:
         row_package_name: str = 'Transient'
     ) -> pd.DataFrame:
         """
-        Fetch ETC_XY data by time value. Returns 200 lines and 2 rows.
+        Retrieve XY data for a specific timestamp from the thermal conductivity
+        dataset, returning paired x–y values as a flattened DataFrame.
+
+        The method queries the `ThermalConductivityXyDataTable` for a given
+        timestamp and extracts one of several predefined data series
+        ("row packages"), such as transient, drift, calculated, or residual data.
+        Retrieved array-like columns are expanded into individual rows.
+
+        Parameters
+        ----------
+        time_value : str or datetime.datetime
+            Timestamp used to filter the dataset. If a string is provided, it must
+            be in ISO format and will be converted to a `datetime` object.
+            Naive datetime objects are automatically assigned the local timezone.
+
+        row_package_name : str, optional
+            Specifies which XY data series to retrieve. Supported values are:
+            - "transient"
+            - "drift"
+            - "calculated"
+            - "residual"
+
+            Case-insensitive. Defaults to "Transient".
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing two columns (x and y values) and the associated
+            timestamp. Array-like database fields are expanded such that each row
+            represents a single (x, y) data point. The DataFrame is sorted by the
+            x-values.
+
+            Returns an empty DataFrame if:
+            - no matching data is found,
+            - an invalid `row_package_name` is provided,
+            - or a database/query error occurs.
+
+        Notes
+        -----
+        - Column mappings are defined via `TableConfig().ThermalConductivityXyDataTable`.
+        - The query filters by exact timestamp equality (`WHERE time_column = %s`).
+        - Retrieved array-like columns are expanded using `pandas.DataFrame.explode`.
+        - Missing values are removed after expansion.
+        - Sorting is applied to ensure monotonic x-axis ordering.
+
+        Raises
+        ------
+        None
+            All exceptions are caught internally, logged, and result in an empty
+            DataFrame being returned.
         """
         table = TableConfig().ThermalConductivityXyDataTable
         table_name = table.table_name
@@ -339,6 +582,36 @@ class DataRetriever:
             return pd.DataFrame()
 
     def fetch_last_state_and_cycle(self, meta_data) -> Tuple:
+        """
+        Retrieve the last hydrogenation/dehydrogenation state and total cycle count
+        from metadata, with fallback defaults if values are missing.
+
+        Parameters
+        ----------
+        meta_data : object
+            Metadata object expected to provide the attributes:
+            - `last_de_hyd_state` : str or None
+            - `total_number_cycles` : int or None
+
+        Returns
+        -------
+        tuple
+            A tuple of the form (state, cycle_count), where:
+            - state : str
+                The last known hydrogenation/dehydrogenation state.
+            - cycle_count : float
+                The total number of completed cycles.
+
+            If either attribute is missing or evaluates to False, defaults are returned:
+            ("Dehydrogenated", 0).
+
+        Notes
+        -----
+        - The method relies on truthiness checks (`if meta_data.last_de_hyd_state and ...`),
+          meaning values like `0` or empty strings will trigger the fallback even if
+          they may be semantically valid.
+        """
+
         if meta_data.last_de_hyd_state and meta_data.total_number_cycles:
             return meta_data.last_de_hyd_state, meta_data.total_number_cycles
         else:
@@ -357,7 +630,86 @@ class DataRetriever:
         asc_desc: bool = False,
         avg_cycle_dur: int = None
     ) -> pd.DataFrame:
+        """
+        Retrieve data for one or multiple cycle numbers associated with a given sample,
+        with optional support for partial cycle extraction (ascending/descending windows).
 
+        This method builds and executes SQL queries to fetch data filtered by cycle number(s).
+        It supports querying a single cycle, multiple cycles, or extracting boundary segments
+        (start and end) of two cycles for comparative analysis.
+
+        Parameters
+        ----------
+        cycle_numbers : int, float, or list of (int or float)
+            Cycle identifier(s) to query. Can be:
+            - a single cycle number
+            - a list/tuple of cycle numbers (used in an SQL IN clause)
+            - a list of exactly two cycle numbers when `asc_desc=True`, interpreted as
+              [previous_cycle, current_cycle]
+
+        sample_id : str
+            Identifier used to filter the dataset.
+
+        column_names : list of str or tuple of str, optional
+            Columns to retrieve. If None, all columns for the given table are used.
+
+        constraints : dict, optional
+            Additional filtering constraints (currently not applied in this method,
+            but kept for interface consistency).
+
+        table : TableConfig, optional
+            Table configuration object defining table and column names.
+            Defaults to `TableConfig().TPDataTable`.
+
+        join_table : str, optional
+            Name of an additional table to join (currently unused in this method).
+
+        join_on : list of tuple of (str, str), optional
+            Join conditions (currently unused).
+
+        join_constraints : dict, optional
+            Additional constraints for joined tables (currently unused).
+
+        asc_desc : bool, optional
+            If False (default):
+                Standard query mode retrieving full cycle data.
+
+            If True:
+                Special mode that extracts limited ascending (start) and descending (end)
+                segments from two cycles (requires exactly two cycle numbers).
+
+        avg_cycle_dur : int, optional
+            Average cycle duration used to estimate the number of rows to fetch
+            in `asc_desc=True` mode. Required when `asc_desc=True`.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing the requested data.
+
+            - In standard mode:
+                Full data for the specified cycle(s), ordered by time.
+            - In `asc_desc=True` mode:
+                Concatenated subset of start and end segments from two cycles.
+
+            Returns an empty DataFrame if column resolution fails.
+
+        Notes
+        -----
+        - Cycle numbers are cast to float before querying.
+        - For multiple cycles, an SQL IN clause is used.
+        - In `asc_desc=True` mode:
+            - Data is fetched separately for ascending and descending order.
+            - Results are concatenated and duplicates (based on time) are dropped.
+            - The number of rows fetched is estimated via:
+              `avg_cycle_dur * 3 / global_vars.sleep_interval`.
+        - The method relies on `self.execute_fetching` for query execution.
+
+        Raises
+        ------
+        Exception
+            Propagates database/query execution errors raised by `execute_fetching`.
+        """
 
         if not table:
             table = TableConfig().TPDataTable
@@ -424,6 +776,49 @@ class DataRetriever:
     def fetch_data_by_time_no_limit(self, table: TableConfig,
                                     time_range: Tuple[datetime, datetime],
                                     col_names: Optional[List[str]] = None) -> pd.DataFrame:
+        """
+        Retrieve all records from a given table within a specified time range
+        without applying any row limit.
+
+        This method constructs and executes a SQL query filtering data by a
+        time interval using a BETWEEN clause and returns the full result set.
+
+        Parameters
+        ----------
+        table : TableConfig
+            Table configuration object containing the table name and column
+            definitions (including the time column).
+
+        time_range : tuple of datetime
+            Start and end timestamps defining the time window for the query.
+            The interval is inclusive, as defined by the SQL BETWEEN operator.
+
+        col_names : list of str, optional
+            List of column names to retrieve. If None, all columns defined
+            in the table configuration are selected.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing all rows within the specified time range,
+            ordered by the table's time column in ascending order.
+
+        Notes
+        -----
+        - No row limiting is applied, in contrast to other query methods in
+          this class that may use `self.limit_datapoints`.
+        - Column names are resolved via `TableConfig.get_table_column_names`
+          if not explicitly provided.
+        - The query relies on the `time` attribute of the provided table
+          configuration.
+
+        Raises
+        ------
+        Exception
+            Propagates any database or query execution errors raised by
+            `execute_fetching`.
+        """
+
         if not col_names:
             col_names = TableConfig().get_table_column_names(table_class=table)
         col_name_str = ", ".join(col_names)
@@ -438,6 +833,59 @@ class DataRetriever:
         table_name: Optional[str] = None,
         values: Optional[Union[tuple, list]] = None
     ) -> pd.DataFrame:
+        """
+        Execute a SQL SELECT query and return the results as a pandas DataFrame.
+
+        This method handles query execution, optional column name resolution,
+        result transformation, and basic error handling. If column names are not
+        provided, they are inferred from the table configuration and injected
+        into the query when possible.
+
+        Parameters
+        ----------
+        query : str
+            SQL query string to execute. May contain parameter placeholders
+            (e.g., `%s`) for safe substitution via `values`.
+
+        column_names : list of str or tuple of str, optional
+            Column names corresponding to the expected query result.
+            If None, column names are resolved using `TableConfig` based on
+            `table_name`, and any occurrence of `SELECT *` in the query is
+            replaced with explicit column names.
+
+        table_name : str, optional
+            Name of the database table. Required if `column_names` is None,
+            as it is used to resolve column names via `TableConfig`.
+
+        values : tuple or list, optional
+            Parameters to bind to the SQL query placeholders.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing the query results.
+
+            - If records are returned:
+                Data is converted into a DataFrame and post-processed via
+                `_adjust_df_types_and_times`.
+            - If no records are found or an error occurs:
+                An empty DataFrame is returned.
+
+        Notes
+        -----
+        - If `column_names` is None, the method attempts to replace `SELECT *`
+          in the query with explicit column names derived from `TableConfig`.
+        - Column names are cleaned by removing double quotes (`"`).
+        - Database interaction is handled via `DatabaseConnection` context manager.
+        - All exceptions are caught, logged, and result in an empty DataFrame.
+
+        Raises
+        ------
+        None
+            Exceptions are handled internally; errors are logged and an empty
+            DataFrame is returned.
+        """
+
         if column_names is None:
             column_names = TableConfig().get_table_column_names(table_name=table_name)
             column_names_str = ', '.join(column_names)
@@ -467,6 +915,60 @@ class DataRetriever:
         table_name: Optional[str] = None,
         values: Optional[Union[tuple, list]] = None
     ) -> Optional[pd.DataFrame]:
+        """
+        Execute a SQL query using an existing database cursor and return the
+        results as a pandas DataFrame.
+
+        This method is intended for continuous or streaming-like data access
+        scenarios where a persistent cursor is reused across multiple queries,
+        avoiding repeated connection setup overhead.
+
+        Parameters
+        ----------
+        query : str
+            SQL query string to execute. May contain parameter placeholders
+            (e.g., `%s`) for safe substitution via `values`.
+
+        cursor : database cursor
+            An active database cursor object used to execute the query.
+            The cursor must already be associated with an open connection.
+
+        column_names : list of str or tuple of str, optional
+            Column names corresponding to the expected query result.
+            If None, column names are resolved using `TableConfig` based on
+            `table_name`.
+
+        table_name : str, optional
+            Name of the database table. Required if `column_names` is None,
+            as it is used to resolve column names via `TableConfig`.
+
+        values : tuple or list, optional
+            Parameters to bind to the SQL query placeholders.
+
+        Returns
+        -------
+        pandas.DataFrame or None
+            - pandas.DataFrame:
+                Returned if the query executes successfully. May be empty if
+                no records are found.
+            - None:
+                Returned if an exception occurs during query execution.
+
+        Notes
+        -----
+        - Unlike `execute_fetching`, this method does not manage database
+          connections and assumes the caller controls the cursor lifecycle.
+        - Column names are cleaned by removing double quotes (`"`).
+        - Retrieved data is post-processed using `_adjust_df_types_and_times`.
+        - Errors are logged and suppressed; no exception is raised.
+
+        Raises
+        ------
+        None
+            Exceptions are handled internally; errors are logged and result
+            in `None` being returned.
+        """
+
         if column_names is None:
             column_names = TableConfig().get_table_column_names(table_name=table_name)
         try:
@@ -486,8 +988,52 @@ class DataRetriever:
 
     def _adjust_df_types_and_times(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Adjust DataFrame columns for flags and timezones.
+        Normalize DataFrame column types by converting flag-like values to booleans
+        and ensuring consistent timezone-aware datetime columns.
+
+        This method inspects column names heuristically to identify:
+        - flag columns (containing "_flag")
+        - time-related columns (containing "time")
+
+        It then applies appropriate type conversions in-place.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            Input DataFrame whose columns will be inspected and transformed.
+
+        Returns
+        -------
+        pandas.DataFrame
+            The transformed DataFrame with:
+            - flag columns converted to boolean dtype
+            - time columns converted to timezone-aware datetime (localized to UTC
+              and converted to the configured local timezone)
+
+        Notes
+        -----
+        - Flag detection is based on column names containing "_flag" (case-insensitive).
+          Values are interpreted as True if they match one of:
+          ('t', '1', 'true') after string normalization.
+
+        - Time detection is based on column names containing "time" (case-insensitive).
+          Conversion steps:
+            1. String/object columns are parsed via `pandas.to_datetime` with
+               `utc=True` and `errors='coerce'`.
+            2. Naive datetime columns are localized to UTC.
+            3. All datetime columns are converted to `local_tz`.
+
+        - Invalid or unparsable datetime values are converted to `NaT`.
+
+        - Transformations are applied in-place on the provided DataFrame.
+
+        Raises
+        ------
+        None
+            This method does not raise exceptions; conversion errors result in
+            `NaT` (for datetime) or False (for flags).
         """
+
         for col in df.columns:
             if "_flag" in col.lower():
                 df[col] = df[col].apply(lambda x: str(x).lower() in ('t', '1', 'true'))
@@ -503,6 +1049,7 @@ class DataRetriever:
 
     @staticmethod
     def remove_timezone(df: pd.DataFrame) -> pd.DataFrame:
+        """removes the time zone info from a timezone aware pd.series"""
         for col in df.columns:
             if pd.api.types.is_datetime64_any_dtype(df[col]):
                 df[col] = df[col].dt.tz_localize(None)
@@ -514,8 +1061,78 @@ class DataRetriever:
 
 class DataBaseManipulator:
     """
-    Handles batch updates and manipulations of the database.
+    Database write-layer utility for executing parameterized updates and batch
+    modifications on relational tables.
+
+    This class provides a structured interface for performing controlled data
+    mutations (UPDATE operations) on experiment-related database tables using
+    safe SQL execution patterns and transaction management.
+
+    It supports both single-row updates and large-scale batch updates over
+    time ranges or grouped conditions, typically used for:
+    - assigning computed values (e.g., cycle numbers, derived metrics)
+    - correcting or enriching experimental metadata
+    - updating time-window-based segments of data
+    - applying post-processing results back into persistent storage
+
+    Core Responsibilities
+    ---------------------
+    - Execution of parameterized UPDATE statements
+    - Batch updates across multiple time windows or conditions
+    - Single-record updates using flexible filtering logic
+    - Transaction management (commit/rollback safety)
+    - Logging of update operations and error conditions
+
+    Key Features
+    ------------
+    - Supports executemany-based batch updates for efficiency
+    - Supports conditional updates using:
+        * sample_id filtering
+        * equality or BETWEEN range filters
+        * optional secondary match constraints
+    - Handles both pandas DataFrame and Series inputs for update payloads
+    - Automatic type-safe parameter binding to prevent SQL injection
+    - Integrated logging of executed modifications for traceability
+
+    Attributes
+    ----------
+    tp_table : TableConfig.Table
+        Default TP (transient/processing) table configuration reference.
+
+    db_conn_params : dict
+        Database connection parameters used to initialize connections.
+
+    logger : logging.Logger
+        Logger instance used for operational and error logging.
+
+    Notes
+    -----
+    - All SQL statements are parameterized; values are never interpolated
+      directly into queries.
+    - Column and table identifiers are assumed to originate from trusted
+      `TableConfig` metadata.
+    - Transactions are explicitly committed on success and rolled back on failure.
+    - Batch operations assume aligned input lengths across all vectorized arguments.
+
+    Error Handling
+    --------------
+    - Errors during update execution are caught internally.
+    - Failed operations are rolled back automatically.
+    - Errors are logged but not propagated to the caller.
+
+    Thread Safety
+    -------------
+    Instances are not guaranteed to be thread-safe due to shared connection
+    parameters and logger usage.
+
+    Example Use Cases
+    -----------------
+    - Update cycle numbers over time windows
+    - Apply computed thermal properties back into TP/ETC tables
+    - Bulk correction of metadata fields
+    - Post-processing enrichment of experimental datasets
     """
+
     tp_table = TableConfig().TPDataTable
 
     def __init__(self, db_conn_params=None):
@@ -524,6 +1141,52 @@ class DataBaseManipulator:
         self.db_conn_params = db_conn_params or {}
 
     def execute_updating(self, query: str, values: list, many_bool: bool = True) -> None:
+        """
+        Execute a SQL data-modification query (INSERT, UPDATE, DELETE) with optional
+        support for bulk operations.
+
+        This method manages database transaction control (commit/rollback) and ensures
+        safe execution of parameterized SQL statements using a managed database connection.
+
+        Parameters
+        ----------
+        query : str
+            SQL query string to execute. Must be compatible with the underlying database
+            driver (e.g., placeholders such as %s for parameter substitution).
+
+        values : list
+            Parameter values to bind to the SQL query.
+            - If `many_bool` is False: a single sequence of parameters is expected.
+            - If `many_bool` is True: a list of parameter sequences is expected for bulk
+              execution via `executemany`.
+
+        many_bool : bool, optional
+            Determines whether to execute the query in bulk mode.
+            - True (default): uses `cursor.executemany()` for batch execution.
+            - False: uses `cursor.execute()` for a single statement.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        - A database transaction is explicitly committed on success.
+        - If an exception occurs, the transaction is rolled back to preserve consistency.
+        - Errors are logged but not propagated to the caller.
+
+        Error Handling
+        --------------
+        Any exception raised during query execution results in:
+        - rollback of the current transaction
+        - logging of the error via `self.logger`
+        - silent failure (no exception is re-raised)
+
+        Raises
+        ------
+        None
+            All exceptions are handled internally.
+        """
         with DatabaseConnection(**self.db_conn_params) as db_conn:
             try:
                 if many_bool:
