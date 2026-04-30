@@ -1,0 +1,1427 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/user_manual/main_window/">
+      
+      
+        <link rel="prev" href="../getting_started/create_new_test/">
+      
+      
+        <link rel="next" href="../all_windows/test_planner/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Main Window - Temperature, Pressure and Effective Thermal Conductivity Recorder Manual</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-main-window" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" class="md-header__button md-logo" aria-label="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Temperature, Pressure and Effective Thermal Conductivity Recorder Manual
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Main Window
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" class="md-nav__button md-logo" aria-label="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Temperature, Pressure and Effective Thermal Conductivity Recorder Manual
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Temperature, Pressure and Effective Thermal Conductivity Recorder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Manual
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Manual
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/config_creation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Creation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/create_new_test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start New Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Windows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main Window
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main Window
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-main-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Main Window
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checkboxes-interactivity-plotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checkboxes, Interactivity, Plotting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Checkboxes, Interactivity, Plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checkboxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checkboxes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactivity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interactivity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zooming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zooming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accessing-the-measurements-behind-the-conductivity-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing the measurements behind the conductivity data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-plots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Plots
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Plots">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pressure-dependent-isotherms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pressure dependent / Isotherms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overview-about-other-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview about other windows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/test_planner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Planner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/config_creation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Creation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/quick_export/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/dicon_simulator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dicon Simulator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/schedule_creator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schedule Creator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/uptake_correction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uptake Correction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/database_maintenance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Maintenance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/etc_measurement_starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ETC Measurement Starter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/plot_individualizer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plot Individualizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/hydride_handler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hydride Handler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../all_windows/meta_data_handler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/database_tables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-main-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Main Window
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checkboxes-interactivity-plotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checkboxes, Interactivity, Plotting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Checkboxes, Interactivity, Plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checkboxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checkboxes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactivity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interactivity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zooming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zooming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accessing-the-measurements-behind-the-conductivity-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing the measurements behind the conductivity data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-plots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Plots
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Plots">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pressure-dependent-isotherms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pressure dependent / Isotherms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overview-about-other-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview about other windows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Main Window</h1>
+
+<h2 id="the-main-window">The Main Window</h2>
+<p>This window opens when you run:
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>src/main.py
+</code></pre></div></p>
+<p><img alt="main_overview.PNG" src="../../assets/pics/main_window/main_overview.PNG" />
+It serves as the main user interface from which all (finished) functionalities of the software can be accessed. Tests can be selected by entering their sample id in the <em>Sample ID</em> edit field.  </p>
+<p>Once done the sample's meta data will be loaded from the database and 
+filled into the text edit fields:
+<img alt="main_meta_data_filled_in.PNG" src="../../assets/pics/main_window/main_meta_data_filled_in.PNG" /></p>
+<p>The user now has the following options:</p>
+<ol>
+<li><strong>Start Tp Recording / ETC Data Recording</strong><ul>
+<li>When clicking on <em>Start Tp Recording</em> connection to the configured modbus device will be established using the host and port defined in the 
+  <a href="../getting_started/config_creation/">configuration</a>. Data will be read from the device, the equilibrium pressure at the current temperature and the setpoint temperature calculated and all data written into the temperature and pressure data table in the database. 
+  The plot windows on the left side will display this data live</li>
+<li>When clicking on <em>Start Log File Tracker</em> the log file of the <strong>Thermal Constants Analyzer</strong> 
+  defined in <a href="../getting_started/config_creation/">configuration</a> will be tracked for changes. 
+  Whenever a .xlsx file is exported from the <strong>Thermal Constants Analyzer</strong> the software will notice it and import all content from the .xlsx file into the 
+  <a href="../database/database_tables/">Thermal Conductivity Tables</a> in the database. Once done the thermal conductivity values will be included in the live plots on the left side.
+  Generally speaking: when this is activated everytime you export thermal conductivity data from the <strong>Thermal Constants Analyzer 7.6</strong> in .xlsx format this data will be 
+  automatically imported into your <strong>PostgreSQL</strong> database. Quite a handy feature one might say.</li>
+<li>During the recording whenever a cycle is detected the text edit fields on the left side show the current de-/hydrogenation state, cycle number and the uptake of the last half cycle.</li>
+<li>One cycle is always considered to be a full hydrogenation and a full dehydrogenation. So hydrogenated states will always be labeled as increments of 0.5 + n where n is full number. Dehydrogenated states will be n where n is a full number. So in example after filling dehydrogenated powder cycle # will be 0. After the first hydrogenation 0.5 and after first dehydrogenation 1 and so on.</li>
+<li>When you finished recording either press <strong>Stop TP Recording</strong> and <strong>Stop Log File Tracking</strong> or just close the main window.</li>
+</ul>
+</li>
+<li><strong>Start Static Plot</strong><ul>
+<li>Loads the temperature, pressure and thermal conductivity 
+  data from the corresponding <a href="../database/database_tables/">database tables</a> and visualizes them in the left plot windows (<em>top temperature, bottom pressure, ETC in both plots right y-axis</em>)</li>
+</ul>
+</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>In both modes the plots are interactive, but database reloads and selection (via clicks) is only performed if you interact with the top plot. There are several reasons for this but to conclude I was a lazy programmer. Maybe in the future I will enable interactivity for the bottom plot as well. 
+However, you can zoom in the bottom plot or click on points, but it will do nothing. This is not a bug, it is intended. If you want data to reload zoom in the top plot please.</p>
+</div>
+<ul>
+<li>For the conductivity data a minimum/maximum total temperature increase and 
+total to characteristic time can be set via the edit boxes on the right side.
+ You will only see data in the plots that are within those limits. 
+(I assume you know what these values are. If not just leave as is)</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>In the following I will describe all functionalities that the main window offers (without including the other windows available via the view menu).
+Those work for both modes (Tp Recording / ETC Data Recording and Static Plot) with one exception. 
+The checkboxes <em>Is Uptake</em>, <em>Is Isotherm</em> and <em>Cycle Test</em> as well as the edit field <em>Additional Test Info</em> only affect data while recording, not data in static plot</p>
+</div>
+<h2 id="checkboxes-interactivity-plotting">Checkboxes, Interactivity, Plotting</h2>
+<h3 id="checkboxes">Checkboxes</h3>
+<p>We will start with the features that are exclusive for the recording mode. They will affect the data you are measuring directly like described: </p>
+<ul>
+<li>
+<p>While recording it is important to understand what happens when you mark the following checkboxes located under the left plot windows:</p>
+</li>
+<li>
+<p><img alt="main_checkboxes.PNG" src="../../assets/pics/main_window/main_checkboxes.PNG" /></p>
+</li>
+<li>
+<p><strong>Additional Test Info</strong> can be an arbitrary combination of characters. All data recorded will have this string in the corresponding database tables in the column "test_info".</p>
+</li>
+<li>
+<p><strong>Is Uptake</strong>:</p>
+<ul>
+<li>When <strong>Is Uptake</strong> is checked the all the data recorded will be respected for calculation of the released/absorbed amount of hydrogen.
+  For test performance this means you should uncheck this always when you perform manual alterations of the pressure and check it otherwise. </li>
+<li><strong>Cycle Test</strong>: when checked the cycle counting detection is active. When the software realizes that the pressure crosses the equilibrium pressure it will start to alter 
+  the cycle number by 0.5 and calculates the released/absorbed amount of hydrogen of the last half cycle. </li>
+<li>
+<p><strong>Is Isotherm</strong>: when checked the program labels the currently collected data as isothermal measurements. This is important for the visualization and export of the data. </p>
+</li>
+<li>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<ul>
+<li>For all checkboxes blue means checked and white means unchecked    </li>
+<li>In the corresponding database tables the checkboxes are represented by boolean values where 
+    true means checked and false means unchecked. For plotting and exporting they are used as identifiers.</li>
+</ul>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="interactivity">Interactivity</h3>
+<h4 id="zooming">Zooming</h4>
+<p>By default every second 2 data points will be recorded evaluated and stored in the database. 
+At the same time once a second data will be read from the database for the visualization. 
+To prevent flooding the memory the visualization is limited to
+a maximum of 5000 data points. The same is true for the static plot mode. 
+When a complete test is loaded from the database this can lead to poor resolution. So every time
+you hover about the x-axis of the top plot and zoom in or out 5000 data 
+points in the currently visible time period will be fetched from the database
+and the plot updates. Though the database is partitioned by the sample id you might realize after recording/deleting a large amount of data
+that the zooming feels sluggish. This is an issue with the loading speed that can be fixed by running 
+the database maintenance available via the view menu of the main window:</p>
+<p><img alt="database maintenance" src="../../assets/pics/database_maintenance_gui/database_maintenance.PNG" /></p>
+<p>Just click <em>Run VACUUM/ANALYZE/REINDEX</em> and wait for it to finish (can take several minutes)</p>
+<h4 id="accessing-the-measurements-behind-the-conductivity-data">Accessing the measurements behind the conductivity data</h4>
+<p>When exploring your data your window might looks like this: 
+<img alt="main_measuement_data_selection.PNG" src="../../assets/pics/main_window/main_measuement_data_selection.PNG" /></p>
+<p>As you see the thermal conductivity measurement results are plotted as white dots and their average value of all measurements in the same state are plotted as red dots.
+As you might know those dots are not the actual measurements but their results. Sometimes it can become useful to look at the underlying measurements, their fit, residual or the drift measurement taken before the measurement.  </p>
+<p>If you want to do that, you can choose the type from the right dropdown menu. When chosen you can click on a measurement result in the left top plot window and the data for that measurement will be plotted on the right side (in the same color the dot changes to).
+Selection of multiple conductivity measurements is allowed by just clicking on another point. 
+The data will be visualized like in the following example for the transient readings:</p>
+<p><img alt="main_transient_plot.PNG" src="../../assets/pics/main_window/main_transient_plot.PNG" /></p>
+<p>To clear the right plot just choose another data type from the right drop down menu.</p>
+<h4 id="common-plots">Common Plots</h4>
+<h5 id="pressure-dependent-isotherms">Pressure dependent / Isotherms</h5>
+<p>The ETC of porous media (e.g. metal hydride powder beds) shows a pressure dependency according 
+to the Smoluchowski effect. To visualize the pressure dependency you have to options.<br />
+On the left drop down menu you can select <em>Pressure Dependent</em> or <em>Isotherms</em>. 
+With both options the currently visible ETC data (in the left plot windows) will be plotted over the pressure at measurement time
+in the right plot window. The main difference is the following: </p>
+<ul>
+<li><em>Pressure Dependent</em>: This will respect all conductivity values that are visible in the left plot window</li>
+<li><em>Isotherms</em>: This will only respect those conductivity values that are marked as isothermal measurements during the recording by activating the 
+   <strong>Is Isotherm</strong> checkbox </li>
+</ul>
+<p>For better imagination here is an example of the resulting plot:
+<img alt="main_example_isothermal_plot.PNG" src="../../assets/pics/main_window/main_example_isothermal_plot.PNG" /></p>
+<p>The result is pretty basic. </p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>I usually only use those plots for orientation. 
+In the future I would like to add features like proper 
+labeling of the temperature for each isotherm and exporting 
+the data to origin to receive proper publication-ready 
+plots without extracting the data from an extra export. </p>
+</div>
+<p>The other available options to plot thermal conductivity are: </p>
+<ul>
+<li><strong>Temperature Dependent</strong>: Plots the ETC data temperature dependent.</li>
+<li><strong>Cycle Dependent</strong>: Plots the ETC data (only which is labeled via <em>Cycle Test</em> checkbox) over the de-/hydrogenation cycles</li>
+</ul>
+<p>Via <em>Uptake</em> you can plot the hydrogen uptake/release of the currently visible data (left plot) over the cycles in the right plot window</p>
+<h3 id="overview-about-other-windows">Overview about other windows</h3>
+<p>Via the view menu you have access to multiple windows: 
+<img alt="main_view_menu.PNG" src="../../assets/pics/main_window/main_view_menu.PNG" /></p>
+<ol>
+<li><strong><a href="../all_windows/test_planner/">Test Planner</a></strong></li>
+<li><strong><a href="../getting_started/config_creation/">Config Settings</a></strong></li>
+<li><strong><a href="../all_windows/quick_export/">Quick Export</a></strong></li>
+<li><strong><a href="../all_windows/dicon_simulator/">Dicon Simulator</a></strong></li>
+<li><strong><a href="../all_windows/schedule_creator/">Schedule Creator</a></strong></li>
+<li><strong><a href="../all_windows/uptake_correction/">Uptake Correction</a></strong></li>
+<li><strong><a href="../all_windows/database_maintenance/">Database Maintenance</a></strong></li>
+<li><strong><a href="../all_windows/etc_measurement_starter/">ETC Measurement Starter</a></strong></li>
+<li><strong><a href="../all_windows/plot_individualizer/">Plot Individualizer</a></strong></li>
+<li><strong><a href="../all_windows/hydride_handler/">Hydride Handler</a></strong></li>
+<li><strong><a href="../all_windows/meta_data_handler/">Meta Data</a></strong></li>
+</ol>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

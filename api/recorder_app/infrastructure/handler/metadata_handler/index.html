@@ -1,0 +1,2486 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/api/recorder_app/infrastructure/handler/metadata_handler/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>recorder_app.infrastructure.handler.metadata_handler - Temperature, Pressure and Effective Thermal Conductivity Recorder Manual</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#recorder_appinfrastructurehandlermetadata_handler" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../.." title="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" class="md-header__button md-logo" aria-label="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Temperature, Pressure and Effective Thermal Conductivity Recorder Manual
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              recorder_app.infrastructure.handler.metadata_handler
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../.." title="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" class="md-nav__button md-logo" aria-label="Temperature, Pressure and Effective Thermal Conductivity Recorder Manual" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Temperature, Pressure and Effective Thermal Conductivity Recorder Manual
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Temperature, Pressure and Effective Thermal Conductivity Recorder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Manual
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Manual
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/getting_started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/getting_started/config_creation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Creation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/getting_started/create_new_test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start New Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Windows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/main_window/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main Window
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/test_planner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Planner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/getting_started/config_creation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Creation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/quick_export/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/dicon_simulator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dicon Simulator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/schedule_creator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schedule Creator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/uptake_correction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uptake Correction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/database_maintenance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Maintenance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/etc_measurement_starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ETC Measurement Starter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/plot_individualizer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plot Individualizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/hydride_handler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hydride Handler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/all_windows/meta_data_handler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../user_manual/database/database_tables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata_handler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="metadata_handler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MetaData
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MetaData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.fetch_last_state_and_cycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_last_state_and_cycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.print" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.read" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="read">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.read--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.reading_thread" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reading_thread
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="reading_thread">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.reading_thread--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.remove_sample_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove_sample_id
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.write" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        write
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="write">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recorder_app.infrastructure.handler.metadata_handler.MetaData.write--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="recorder_appinfrastructurehandlermetadata_handler">recorder_app.infrastructure.handler.metadata_handler</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="recorder_app.infrastructure.handler.metadata_handler" class="doc doc-heading">
+            <code>recorder_app.infrastructure.handler.metadata_handler</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Utilities for managing experimental metadata.</p>
+<p>This module defines :class:<code>MetaData</code>, a helper that synchronises
+information about a measurement with the metadata stored in the
+database.  It provides convenience methods to read, update and create
+metadata entries for a given sample.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="recorder_app.infrastructure.handler.metadata_handler.MetaData" class="doc doc-heading">
+            <code>MetaData</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\recorder_app\infrastructure\handler\metadata_handler.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MetaData</span><span class="p">:</span>
+
+    <span class="n">column_attribute_mapping</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="p">:</span> <span class="s1">&#39;sample_id&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">material</span><span class="p">:</span> <span class="s1">&#39;sample_material&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">mass</span><span class="p">:</span> <span class="s1">&#39;sample_mass&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">measurement_cell</span><span class="p">:</span> <span class="s1">&#39;measurement_cell&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">time_start</span><span class="p">:</span> <span class="s1">&#39;start_time&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">time_end</span><span class="p">:</span> <span class="s1">&#39;end_time&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">time_first_hydrogenation</span><span class="p">:</span> <span class="s1">&#39;first_hydrogenation&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">max_pressure_cycling</span><span class="p">:</span> <span class="s1">&#39;max_pressure_cycling&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">min_temperature_cycling</span><span class="p">:</span> <span class="s1">&#39;min_temperature_cycling&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">:</span> <span class="s1">&#39;enthalpy&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">entropy</span><span class="p">:</span> <span class="s1">&#39;entropy&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">average_cycle_duration</span><span class="p">:</span> <span class="s1">&#39;average_cycle_duration&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">reservoir_volume</span><span class="p">:</span> <span class="s1">&#39;reservoir_volume&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">total_number_cycles</span><span class="p">:</span> <span class="s1">&#39;total_number_cycles&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">last_de_hyd_state</span><span class="p">:</span> <span class="s1">&#39;last_de_hyd_state&#39;</span><span class="p">,</span>
+        <span class="n">meta_table</span><span class="o">.</span><span class="n">volume_measurement_cell</span><span class="p">:</span> <span class="s1">&#39;volume_measurement_cell&#39;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_conn_params</span><span class="p">,</span> <span class="n">sample_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span> <span class="o">=</span> <span class="n">db_conn_params</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qb</span> <span class="o">=</span> <span class="n">QueryBuilder</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">MetaDataTable</span><span class="o">.</span><span class="n">table_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">=</span> <span class="n">sample_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_mass</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reservoir_volume</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurement_cell</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_material</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurement_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_hydrogenation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_pressure_cycling</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_temperature_cycling</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">average_cycle_duration</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_de_hyd_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensor_radius</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensor_insulation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensor_coil</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retry_counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">reading_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load metadata for ``sample_id`` and populate attributes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column_names : sequence or None</span>
+<span class="sd">            Specific column names to fetch.  All available columns are</span>
+<span class="sd">            requested when ``None``.</span>
+<span class="sd">        mode : {&quot;read&quot;, &quot;create&quot;}</span>
+<span class="sd">            When set to ``&quot;create&quot;`` a new metadata row will be created if</span>
+<span class="sd">            ``sample_id`` is missing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">column_names</span><span class="p">:</span>
+                <span class="n">column_names</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">get_table_column_names</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+                <span class="n">query</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">create_reading_query</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span>
+                                                             <span class="n">sample_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
+                                                             <span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+
+                <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                   <span class="c1"># print(f&quot;meta_data query = {query} meta_data values = {values}&quot;)</span>
+                    <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                    <span class="n">records</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">column_names_for_df</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">column_names_for_df</span> <span class="o">=</span> <span class="p">[</span><span class="n">column_names</span><span class="p">]</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names_for_df</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_assign_column_names_and_values</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;create&#39;</span><span class="p">:</span>  <span class="c1"># If no records are returned, sample_id does not exist</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> does not exist yet. Will be created&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_new_line_meta_data</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;read&#39;</span><span class="p">:</span>  <span class="c1"># If no records are returned, sample_id does not exist</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> does not exist yet. You may want to create a new test&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience wrapper around :meth:`reading_thread`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column_names : sequence or None</span>
+<span class="sd">            Names of columns to read from the metadata table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#time_start_reading = time.time()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reading_thread</span><span class="p">(</span><span class="n">column_names</span><span class="p">)</span>
+        <span class="c1">#thread = threading.Thread(target=self.reading_thread, args=(column_names,))</span>
+        <span class="c1">#thread.start()</span>
+        <span class="c1">#thread.join()</span>
+        <span class="c1">#time_passed = time.time()-time_start_reading</span>
+        <span class="c1">#if time_passed &gt; 1:</span>
+        <span class="c1">#    print(f&quot;Reading meta data took longer than 1 s: {time_passed} s&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Persist current metadata values to the database.</span>
+
+<span class="sd">        If no row exists for ``sample_id`` a new one is created.  Only</span>
+<span class="sd">        attributes with non ``None`` values are written.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        quiet : bool, optional</span>
+<span class="sd">            Suppress log messages when ``True``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_new_line_meta_data</span><span class="p">()</span>
+        <span class="c1"># Build a mapping from column names to attribute values</span>
+        <span class="n">column_value_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">attribute_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_attribute_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">column_value_mapping</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># Remove &#39;sample_id&#39; from the mapping if it&#39;s the primary key and shouldn&#39;t be updated</span>
+        <span class="k">if</span> <span class="s1">&#39;sample_id&#39;</span> <span class="ow">in</span> <span class="n">column_value_mapping</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">column_value_mapping</span><span class="p">[</span><span class="s1">&#39;sample_id&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Optionally, filter out None values if you don&#39;t want to update columns to None</span>
+        <span class="n">column_value_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">column_value_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                <span class="c1"># Construct the SET clause</span>
+                <span class="n">set_clauses</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; = %s&#39;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">column_value_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">column_value_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">)</span>  <span class="c1"># For the WHERE clause</span>
+
+                <span class="c1"># Build the UPDATE query</span>
+                <span class="n">update_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;UPDATE &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s1">&quot; SET </span><span class="si">{</span><span class="n">set_clauses</span><span class="si">}</span><span class="s1"> WHERE &quot;sample_id&quot; = %s&#39;</span>
+                <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">update_query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meta data updated for sample_id: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assign_column_names_and_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set object attributes using values read from the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column_names : sequence</span>
+<span class="sd">            Names of the columns that were fetched.</span>
+<span class="sd">        df : pandas.DataFrame</span>
+<span class="sd">            DataFrame containing the corresponding values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">updated_using_tp_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;sample_id&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;start&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;end&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;mass&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample_mass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="s2">&quot;cell&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;volume&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">measurement_cell</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_cell</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;2&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_cell</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span> <span class="o">=</span> <span class="mf">30.24</span>  <span class="c1">#[ml]</span>
+                    <span class="k">if</span> <span class="s2">&quot;3&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_cell</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span> <span class="o">=</span> <span class="mf">44.37</span>  <span class="c1">#[ml]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;cell&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;volume&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1">#[l]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;material&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample_material</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;hydrogenation&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_hydrogenation</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1">#self.first_hydrogenation = self._make_tz_aware(value=self.first_hydrogenation)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;max&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;pressure&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_pressure_cycling</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="s2">&quot;min&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;temperature&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">min_temperature_cycling</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="s2">&quot;duration&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">):</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                        <span class="c1"># Assuming the string format is hours:minutes:seconds</span>
+                        <span class="c1"># Split the string by &quot;:&quot;</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">):</span>
+                        <span class="c1"># It&#39;s a Timedelta, extract components directly</span>
+                        <span class="n">hours</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">hours</span>
+                        <span class="n">minutes</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">minutes</span>
+                        <span class="n">seconds</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">seconds</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="c1"># It&#39;s a string, proceed with split</span>
+                        <span class="n">hours</span><span class="p">,</span> <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">))</span>
+
+                    <span class="c1"># Calculate the duration in hours</span>
+                    <span class="n">duration_in_hours</span> <span class="o">=</span> <span class="n">hours</span> <span class="o">+</span> <span class="p">(</span><span class="n">minutes</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
+                    <span class="n">avg_dur</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">duration_in_hours</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">average_cycle_duration</span> <span class="o">=</span> <span class="n">avg_dur</span>
+
+            <span class="k">if</span> <span class="s2">&quot;reservoir&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reservoir_volume</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span> <span class="c1">#[l]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;number_cycles&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1">#</span>
+                <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry_counter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">updated_using_tp_data</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_de_hyd_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_last_state_and_cycle</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">retry_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="s2">&quot;de_hyd_state&quot;</span> <span class="ow">in</span> <span class="n">col_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">updated_using_tp_data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_de_hyd_state</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1">#</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_material</span><span class="p">:</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_enthalpy_entropy_wt_theoretical</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">updated_using_tp_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_new_line_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Insert a new metadata row for the current ``sample_id``.&quot;&quot;&quot;</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">MetaDataTable</span><span class="o">.</span><span class="n">table_name</span>
+        <span class="n">column_name</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">MetaDataTable</span><span class="o">.</span><span class="n">sample_id</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;INSERT INTO </span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">) VALUES (%s)&quot;</span>
+        <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sample ID does not exist. New entry was created for: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sample_id_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return ``True`` if a row exists for the current ``sample_id``.&quot;&quot;&quot;</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span>
+        <span class="n">column_name</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">MetaDataTable</span><span class="o">.</span><span class="n">sample_id</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT 1 FROM </span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2"> = &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+
+            <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">record</span>
+
+    <span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the current attribute values of the MetaDataBusiness instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample ID:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start Time:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End Time:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample Mass:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_mass</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reservoir Volume:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reservoir_volume</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reservoir_volume</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Reservoir&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Measurement Cell:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_cell</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample Material:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_material</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Measurement Time:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_time</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Volume Measurement Cell:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span><span class="p">,</span> <span class="s2">&quot;ml&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No cell volume&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Enthalpy:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="s2">&quot; kJ/mol&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Enthalpy&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Entropy:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="s2">&quot; kJ/mol/K&quot;</span><span class="p">)</span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Entropy&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Theoretical uptake:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span><span class="p">,</span> <span class="s1">&#39; wt-%&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No uptake&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Average Cycle Duration:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_cycle_duration</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_cycle_duration</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No average cycle duration&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total number cycle:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No cycles yet&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Last de_hyd state:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_de_hyd_state</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_de_hyd_state</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No defined de_hyd state&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_enthalpy_entropy_wt_theoretical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve thermodynamic properties for the sample material.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">recorder_app.infrastructure.handler.hydride_handler</span> <span class="kn">import</span> <span class="n">MetalHydrideDatabase</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span>
+
+        <span class="n">mh_database</span> <span class="o">=</span> <span class="n">MetalHydrideDatabase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">enthalpy</span><span class="p">,</span> <span class="n">entropy</span><span class="p">)</span> <span class="o">=</span> <span class="n">mh_database</span><span class="o">.</span><span class="n">get_enthalpy_entropy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_material</span><span class="p">)</span>
+        <span class="n">wt_theoretical</span> <span class="o">=</span> <span class="n">mh_database</span><span class="o">.</span><span class="n">get_capacity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_material</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">enthalpy</span> <span class="ow">and</span> <span class="n">entropy</span> <span class="ow">and</span> <span class="n">wt_theoretical</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span> <span class="o">=</span> <span class="n">enthalpy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span> <span class="o">=</span> <span class="n">entropy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span> <span class="o">=</span> <span class="n">wt_theoretical</span>
+            <span class="c1">#self.write()</span>
+            <span class="k">return</span> <span class="n">enthalpy</span><span class="p">,</span> <span class="n">entropy</span><span class="p">,</span> <span class="n">wt_theoretical</span>
+
+        <span class="k">elif</span> <span class="n">wt_theoretical</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">wt_theoretical</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">remove_sample_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove the current ``sample_id`` from the metadata table.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DELETE from </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> = %s&quot;</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,)</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_conn</span><span class="p">:</span>
+                <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed from database&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">remove_whole_test_from_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+
+            <span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,)</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DELETE from </span><span class="si">{</span><span class="n">TableConfig</span><span class="o">.</span><span class="n">CycleDataTable</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> = %s&quot;</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_conn</span><span class="p">:</span>
+                <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cycle data for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed from database&quot;</span><span class="p">)</span>
+
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DELETE from </span><span class="si">{</span><span class="n">TableConfig</span><span class="o">.</span><span class="n">ETCDataTable</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> = %s&quot;</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_conn</span><span class="p">:</span>
+                <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Thermal conductivity data for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed from database&quot;</span><span class="p">)</span>
+
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DELETE from </span><span class="si">{</span><span class="n">TableConfig</span><span class="o">.</span><span class="n">ThermalConductivityXyDataTable</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> = %s&quot;</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_conn</span><span class="p">:</span>
+                <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Kinetic data for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed from database&quot;</span><span class="p">)</span>
+
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DELETE from </span><span class="si">{</span><span class="n">TableConfig</span><span class="o">.</span><span class="n">KineticsTable</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> = %s&quot;</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_conn</span><span class="p">:</span>
+                <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Kinetic data for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed from database&quot;</span><span class="p">)</span>
+
+            <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DELETE from </span><span class="si">{</span><span class="n">TableConfig</span><span class="o">.</span><span class="n">TPDataTable</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> = %s&quot;</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_conn</span><span class="p">:</span>
+                <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Temperature and pressure data for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed from database&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_sample_id</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed completely from database&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_make_tz_aware</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return timezone-aware version of ``value`` if possible.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>  <span class="c1"># Make sure it&#39;s not NaN</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">):</span>
+                <span class="c1"># Convert to Timestamp if not already</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_hydrogenation</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_hydrogenation</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># If no timezone info, localize to a specific timezone, e.g., UTC</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_hydrogenation</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="n">LOCAL_TZ</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If already timezone-aware, you may want to convert to another timezone</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_hydrogenation</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">tz_convert</span><span class="p">(</span><span class="n">LOCAL_TZ</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">fetch_last_state_and_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the last recorded de/hydration state and cycle number.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">recorder_app.infrastructure.core.table_config</span> <span class="kn">import</span> <span class="n">TableConfig</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">TPDataTable</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">table_name</span>
+        <span class="n">sample_id_column</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">sample_id</span>
+        <span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span>
+        <span class="c1"># query = f&quot;SELECT de_hyd_state, cycle_number FROM {table_name} WHERE {sample_id_column} = %s ORDER BY cycle_number DESC LIMIT 1&quot;</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                    SELECT de_hyd_state, cycle_number</span>
+<span class="s2">                    FROM </span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span>
+<span class="s2">                    WHERE </span><span class="si">{</span><span class="n">sample_id_column</span><span class="si">}</span><span class="s2"> = %s</span>
+<span class="s2">                      AND cycle_number IS NOT NULL</span>
+<span class="s2">                    ORDER BY</span>
+<span class="s2">                      CASE WHEN de_hyd_state IS NOT NULL THEN 0 ELSE 1 END,</span>
+<span class="s2">                      cycle_number DESC</span>
+<span class="s2">                    LIMIT 1</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+                <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_id</span><span class="p">,))</span>
+                <span class="n">record</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+         <span class="c1"># print(f&quot;Executing reading query took: {time.time()-time_start_query_exec}s&quot;)</span>
+            <span class="k">if</span> <span class="n">record</span><span class="p">:</span>
+                <span class="n">de_hyd_state</span><span class="p">,</span> <span class="n">cycle_number</span> <span class="o">=</span> <span class="n">record</span>
+                <span class="k">if</span> <span class="n">de_hyd_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Both values are not None</span>
+                    <span class="k">return</span> <span class="n">de_hyd_state</span><span class="p">,</span> <span class="n">cycle_number</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># de_hyd_state is None, cycle_number is not None</span>
+                    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cycle_number</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># Default values if no records found</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error occurred while fetching last state and cycle: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.fetch_last_state_and_cycle" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fetch_last_state_and_cycle</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fetch the last recorded de/hydration state and cycle number.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\recorder_app\infrastructure\handler\metadata_handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fetch_last_state_and_cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch the last recorded de/hydration state and cycle number.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">recorder_app.infrastructure.core.table_config</span> <span class="kn">import</span> <span class="n">TableConfig</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">TPDataTable</span>
+    <span class="n">table_name</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">table_name</span>
+    <span class="n">sample_id_column</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">sample_id</span>
+    <span class="n">sample_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span>
+    <span class="c1"># query = f&quot;SELECT de_hyd_state, cycle_number FROM {table_name} WHERE {sample_id_column} = %s ORDER BY cycle_number DESC LIMIT 1&quot;</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT de_hyd_state, cycle_number</span>
+<span class="s2">                FROM </span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span>
+<span class="s2">                WHERE </span><span class="si">{</span><span class="n">sample_id_column</span><span class="si">}</span><span class="s2"> = %s</span>
+<span class="s2">                  AND cycle_number IS NOT NULL</span>
+<span class="s2">                ORDER BY</span>
+<span class="s2">                  CASE WHEN de_hyd_state IS NOT NULL THEN 0 ELSE 1 END,</span>
+<span class="s2">                  cycle_number DESC</span>
+<span class="s2">                LIMIT 1</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="n">sample_id</span><span class="p">,))</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+     <span class="c1"># print(f&quot;Executing reading query took: {time.time()-time_start_query_exec}s&quot;)</span>
+        <span class="k">if</span> <span class="n">record</span><span class="p">:</span>
+            <span class="n">de_hyd_state</span><span class="p">,</span> <span class="n">cycle_number</span> <span class="o">=</span> <span class="n">record</span>
+            <span class="k">if</span> <span class="n">de_hyd_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Both values are not None</span>
+                <span class="k">return</span> <span class="n">de_hyd_state</span><span class="p">,</span> <span class="n">cycle_number</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># de_hyd_state is None, cycle_number is not None</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cycle_number</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># Default values if no records found</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error occurred while fetching last state and cycle: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.print" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">print</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Print the current attribute values of the MetaDataBusiness instance.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\recorder_app\infrastructure\handler\metadata_handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print the current attribute values of the MetaDataBusiness instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample ID:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start Time:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End Time:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample Mass:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_mass</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reservoir Volume:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reservoir_volume</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reservoir_volume</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Reservoir&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Measurement Cell:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_cell</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample Material:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_material</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Measurement Time:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Volume Measurement Cell:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span><span class="p">,</span> <span class="s2">&quot;ml&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_measurement_cell</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No cell volume&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Enthalpy:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="s2">&quot; kJ/mol&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Enthalpy&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Entropy:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="s2">&quot; kJ/mol/K&quot;</span><span class="p">)</span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Entropy&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Theoretical uptake:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span><span class="p">,</span> <span class="s1">&#39; wt-%&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theoretical_uptake</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No uptake&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Average Cycle Duration:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_cycle_duration</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_cycle_duration</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No average cycle duration&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total number cycle:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_cycles</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No cycles yet&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Last de_hyd state:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_de_hyd_state</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_de_hyd_state</span> <span class="k">else</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No defined de_hyd state&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.read" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convenience wrapper around :meth:<code>reading_thread</code>.</p>
+<h6 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.read--parameters">Parameters</h6>
+<p>column_names : sequence or None
+    Names of columns to read from the metadata table.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\recorder_app\infrastructure\handler\metadata_handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper around :meth:`reading_thread`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    column_names : sequence or None</span>
+<span class="sd">        Names of columns to read from the metadata table.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#time_start_reading = time.time()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reading_thread</span><span class="p">(</span><span class="n">column_names</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.reading_thread" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">reading_thread</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;read&#39;</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Load metadata for <code>sample_id</code> and populate attributes.</p>
+<h6 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.reading_thread--parameters">Parameters</h6>
+<p>column_names : sequence or None
+    Specific column names to fetch.  All available columns are
+    requested when <code>None</code>.
+mode : {"read", "create"}
+    When set to <code>"create"</code> a new metadata row will be created if
+    <code>sample_id</code> is missing.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\recorder_app\infrastructure\handler\metadata_handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reading_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load metadata for ``sample_id`` and populate attributes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    column_names : sequence or None</span>
+<span class="sd">        Specific column names to fetch.  All available columns are</span>
+<span class="sd">        requested when ``None``.</span>
+<span class="sd">    mode : {&quot;read&quot;, &quot;create&quot;}</span>
+<span class="sd">        When set to ``&quot;create&quot;`` a new metadata row will be created if</span>
+<span class="sd">        ``sample_id`` is missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">column_names</span><span class="p">:</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="n">TableConfig</span><span class="p">()</span><span class="o">.</span><span class="n">get_table_column_names</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qb</span><span class="o">.</span><span class="n">create_reading_query</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span>
+                                                         <span class="n">sample_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,</span>
+                                                         <span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+               <span class="c1"># print(f&quot;meta_data query = {query} meta_data values = {values}&quot;)</span>
+                <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="n">records</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">column_names_for_df</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">column_names_for_df</span> <span class="o">=</span> <span class="p">[</span><span class="n">column_names</span><span class="p">]</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names_for_df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assign_column_names_and_values</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="n">column_names</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;create&#39;</span><span class="p">:</span>  <span class="c1"># If no records are returned, sample_id does not exist</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> does not exist yet. Will be created&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_new_line_meta_data</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;read&#39;</span><span class="p">:</span>  <span class="c1"># If no records are returned, sample_id does not exist</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> does not exist yet. You may want to create a new test&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span> <span class="o">=</span> <span class="kc">None</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.remove_sample_id" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_sample_id</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Remove the current <code>sample_id</code> from the metadata table.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\recorder_app\infrastructure\handler\metadata_handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_sample_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the current ``sample_id`` from the metadata table.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DELETE from </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> WHERE </span><span class="si">{</span><span class="n">meta_table</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> = %s&quot;</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">,)</span>
+        <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">db_conn</span><span class="p">:</span>
+            <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2"> removed from database&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.write" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Persist current metadata values to the database.</p>
+<p>If no row exists for <code>sample_id</code> a new one is created.  Only
+attributes with non <code>None</code> values are written.</p>
+<h6 id="recorder_app.infrastructure.handler.metadata_handler.MetaData.write--parameters">Parameters</h6>
+<p>quiet : bool, optional
+    Suppress log messages when <code>True</code>.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\recorder_app\infrastructure\handler\metadata_handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Persist current metadata values to the database.</span>
+
+<span class="sd">    If no row exists for ``sample_id`` a new one is created.  Only</span>
+<span class="sd">    attributes with non ``None`` values are written.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quiet : bool, optional</span>
+<span class="sd">        Suppress log messages when ``True``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_new_line_meta_data</span><span class="p">()</span>
+    <span class="c1"># Build a mapping from column names to attribute values</span>
+    <span class="n">column_value_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">attribute_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_attribute_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">column_value_mapping</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># Remove &#39;sample_id&#39; from the mapping if it&#39;s the primary key and shouldn&#39;t be updated</span>
+    <span class="k">if</span> <span class="s1">&#39;sample_id&#39;</span> <span class="ow">in</span> <span class="n">column_value_mapping</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">column_value_mapping</span><span class="p">[</span><span class="s1">&#39;sample_id&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Optionally, filter out None values if you don&#39;t want to update columns to None</span>
+    <span class="n">column_value_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">column_value_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_id_exists</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">DatabaseConnection</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn_params</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="c1"># Construct the SET clause</span>
+            <span class="n">set_clauses</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; = %s&#39;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">column_value_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">column_value_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="p">)</span>  <span class="c1"># For the WHERE clause</span>
+
+            <span class="c1"># Build the UPDATE query</span>
+            <span class="n">update_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;UPDATE &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="si">}</span><span class="s1">&quot; SET </span><span class="si">{</span><span class="n">set_clauses</span><span class="si">}</span><span class="s1"> WHERE &quot;sample_id&quot; = %s&#39;</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">update_query</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meta data updated for sample_id: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../..", "features": [], "search": "../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
