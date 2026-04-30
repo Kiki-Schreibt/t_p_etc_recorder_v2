@@ -14,11 +14,11 @@ from PySide6.QtCore import QThread, Signal
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — needed for 3D projection
 
-from connections import DatabaseConnection
-from table_config import TableConfig
-from modbus_handler import KineticCalculator
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.handler.modbus_handler import KineticCalculator
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -209,7 +209,7 @@ class KineticsWorker(QThread):
         self.sample_id = sample_id
         self.cycles = cycles
         self.config = config
-        from metadata_handler import MetaData
+        from recorder_app.infrastructure.handler.metadata_handler import MetaData
         self.meta_data = MetaData(sample_id=self.sample_id,
                                   db_conn_params=self.config.db_conn_params)
         self.logger = logging.getLogger(__name__)
@@ -269,7 +269,7 @@ def _as_array_preserve_datetime(values) -> np.ndarray:
 
 ###testing methods
 def test_grabbing_time_ranges_for_cycle():
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     cycle_list = [17]
     sample_id = "WAE-WA-028"
@@ -288,7 +288,7 @@ def test_grabbing_time_ranges_for_cycle():
 
 
 def test_fetching_cycle_max_val_pair():
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     y_col=TableConfig().KineticsTable.max_rate_wt_p_min
     dal = DataAccess(config=config)
     dal.fetch_cycle_max_val_pair("WAE-WA-028",

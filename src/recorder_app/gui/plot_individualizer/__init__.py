@@ -1,1 +1,1 @@
-from .plot_individualizer import PlotIndividualizerMainWindow
+from recorder_app.gui.plot_individualizer.plot_individualizer import PlotIndividualizerMainWindow

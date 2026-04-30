@@ -10,16 +10,16 @@ import re
 import csv
 import json
 
-from connections import DatabaseConnection
-from table_config import TableConfig
-from standard_paths import (
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.utils.standard_paths import (
     standard_periodic_table_path,
     standard_periodic_table_txt,
 )
 
 # Logging
 try:
-    import core.logger as custom_logging
+    import recorder_app.infrastructure.core.logger as custom_logging
     logging = custom_logging
 except ImportError:
     import logging

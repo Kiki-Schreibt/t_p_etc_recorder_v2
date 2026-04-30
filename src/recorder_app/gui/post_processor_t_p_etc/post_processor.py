@@ -17,20 +17,20 @@ from PySide6.QtWidgets import (
 
 # ---- bring in your backend ---------------------------------------------
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from excel_data_handler import write_ETC_folder
-from metadata_handler import MetaData  # the MetaData you posted
-from core import global_vars
-from config_reader import config
+from recorder_app.infrastructure.handler.excel_data_handler import write_ETC_folder
+from recorder_app.infrastructure.handler.metadata_handler import MetaData  # the MetaData you posted
+from recorder_app.infrastructure.core import global_vars
+from recorder_app.infrastructure.core.config_reader import config
 
 from connections import DatabaseConnection
 
 # CSV pipeline
 # (Assumes your CSVProcessor and helpers are importable where this module lives)
-from csv_handler import CSVProcessor, CSVCounter  # if running inside one file with your post
+from recorder_app.infrastructure.handler.csv_handler import CSVProcessor, CSVCounter  # if running inside one file with your post
 # If this file is separate in your project, replace the line above with:
 # from src.your_module.csv_pipeline import CSVProcessor, CSVCounter
 

@@ -41,13 +41,13 @@ data_point_reading_limit = 500
 standard_etc_folder_path = r"C:\Daten\Kiki"
 ###pyside related
 try:
-    from qt_styles import gpt_light as style
+    from recorder_app.gui.qt_styles import gpt_light as style
     from PySide6.QtGui import QFont
     FONT = QFont("Arial", 8)
     from PySide6.QtCore import QTimeZone
     local_tz_qt = QTimeZone(b'Europe/Berlin')
 except:
-    pass
+    print("Couldn't import stylesheets")
 ###for plots
 colors = [
     "#FF0000",  # Red

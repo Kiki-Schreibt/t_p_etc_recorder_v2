@@ -76,8 +76,8 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — needed for 3D projection
 
-from kinetics_worker import Series
-from connections import DatabaseConnection
+from recorder_app.gui.kinetics_gui.kinetics_worker import Series, DataAccess, KineticsWorker
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
 
 try:
     # Matplotlib ≥ 3.6 (and v4)
@@ -376,7 +376,7 @@ class Plot3DManager:
         self.canvas.draw_idle()
 
     def _set_z_axis(self, z_axis_type):
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
         table = TableConfig().KineticsTable
         if z_axis_type == table.pressure:
             self.z_axis_str = "Pressure (bar)"
@@ -654,7 +654,7 @@ class Plot2DManager:
 
     def _set_y_axis(self, z_axis_type):
         # mirror your 3D label logic on Y
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
         table = TableConfig().KineticsTable
         if z_axis_type == table.pressure:
             self.y_axis_str = "Pressure (bar)"
@@ -926,7 +926,7 @@ class KineticsView(QMainWindow):
         ])
         self.plot_mode_combo.setCurrentText("Auto")
 
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
         kinetics_table = TableConfig().KineticsTable
         kinetics_selectables = [
             kinetics_table.pressure,
@@ -1353,7 +1353,7 @@ class KineticsView(QMainWindow):
         txt = self.color_by_combo.currentText().strip()
         if txt == "Solid color": return "Color"
         # pretty labels (optional)
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
         t = TableConfig().KineticsTable
         if txt in (t.temperature, t.temperature_res): return "Temperature (°C)"
         if txt == t.pressure: return "Pressure (bar)"

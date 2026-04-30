@@ -9,11 +9,11 @@ from PySide6.QtCore import Signal, QObject, Slot, QThread
 from pyqtgraph import LinearRegionItem
 from datetime import datetime
 
-from database_reading_writing import DataRetriever, local_tz
-from core import global_vars
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever, local_tz
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -60,7 +60,7 @@ class UptakeCorrectionUi(QMainWindow):
             config (ConfigReader): Application configuration.
             time_range_to_read (List[datetime, datetime]): Time window to load.
         """
-        from recording_business_v2 import StaticPlotWindow
+        from recorder_app.gui.recording_gui.recording_business_v2 import StaticPlotWindow
 
         self.top_plot = StaticPlotWindow(
             meta_data=meta_data,
@@ -591,7 +591,7 @@ class UptakeCorrectionBackend(QObject):
             config (ConfigReader): Application configuration.
         """
         super().__init__()
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
 
         self.logger = logging.getLogger(__name__)
         self.tp_table = TableConfig().TPDataTable
@@ -662,7 +662,7 @@ class UptakeCorrectionBackend(QObject):
         """
         Perform the Vant Hoff uptake calculation using the min/max rows.
         """
-        from eq_p_calculation import VantHoffCalcEq
+        from recorder_app.infrastructure.utils.eq_p_calculation import VantHoffCalcEq
 
         if self.row_min.empty or self.row_max.empty:
             self.logger.info("No data for uptake calculation provided")
@@ -691,7 +691,7 @@ class UptakeCorrectionBackend(QObject):
             self.logger.error("No cycle to update provided")
             return
 
-        from database_reading_writing import DataBaseManipulator
+        from recorder_app.config_connection_reading_management.database_reading_writing import DataBaseManipulator
         tp_series, cycle_series = self._create_series_to_update()
         dbm = DataBaseManipulator(db_conn_params=self.db_conn_params)
 
@@ -772,7 +772,7 @@ class UptakeCorrectionBackend(QObject):
         update_df_etc = pd.Series({self.etc_table.is_isotherm_flag: self.is_isotherm,
                                    self.etc_table.cycle_number_flag: self.is_cycle})
 
-        from database_reading_writing import DataBaseManipulator
+        from recorder_app.config_connection_reading_management.database_reading_writing import DataBaseManipulator
         dbm = DataBaseManipulator(db_conn_params=self.db_conn_params)
 
         dbm.update_data(
@@ -807,7 +807,7 @@ class UptakeCorrectionBackend(QObject):
         update_df_tp = pd.Series({self.tp_table.reservoir_volume: self.reservoir_volume})
 
 
-        from database_reading_writing import DataBaseManipulator
+        from recorder_app.config_connection_reading_management.database_reading_writing import (DataBaseManipulator)
         dbm = DataBaseManipulator(db_conn_params=self.db_conn_params)
 
         dbm.update_data(
@@ -932,8 +932,8 @@ def main():
 
     Opens the window for sample 'WAE-WA-028' over a fixed time range.
     """
-    from config_reader import config
-    from metadata_handler import MetaData
+    from recorder_app.infrastructure.core.config_reader import config
+    from recorder_app.infrastructure.handler.metadata_handler import MetaData
 
     app = QApplication([])
     meta_data = MetaData(sample_id="WAE-WA-040", db_conn_params=config.db_conn_params)

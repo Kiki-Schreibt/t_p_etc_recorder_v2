@@ -4,13 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit, differential_evolution, brute
 
-from hydride_handler import MetalHydrideDatabase
+from recorder_app.infrastructure.handler.hydride_handler import MetalHydrideDatabase
+
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.infrastructure.core.table_config import TableConfig
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
-from database_reading_writing import DataRetriever
-from table_config import TableConfig
 
 standard_constraints_dict = {
             "min_TotalCharTime": 0.33,
@@ -408,7 +409,7 @@ def main(mode='curve_fit', data_loader=None):
     # oder einfach verschweigen dass ich das je versucht habe.
     #file_path = r"C:\Daten\Kiki\WAE-WA-028-MgFe3wt\Results\Results-WAE-WA-028-044\WAE-WA-028-044-AllData.txt"
     # Load data
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     if not data_loader:
         data_loader = DataLoader(sample_id="WAE-WA-040", cycle_number=0.5, temperature=200, db_conn_params=config.db_conn_params)

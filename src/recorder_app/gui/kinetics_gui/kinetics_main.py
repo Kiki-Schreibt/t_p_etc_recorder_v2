@@ -1,3 +1,5 @@
+##kinetics_main.py
+
 from __future__ import annotations
 
 import sys
@@ -12,9 +14,9 @@ from PySide6.QtWidgets import (
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — needed for 3D projection
 
-from config_reader import config
-from connections import DatabaseConnection
-from kinetics_ui import KineticsView, DataAccess, KineticsWorker, Series
+from recorder_app.infrastructure.core.config_reader import config
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.gui.kinetics_gui.kinetics_ui import KineticsView, DataAccess, KineticsWorker, Series
 
 
 # -----------------------------
@@ -335,7 +337,7 @@ class KineticsController(QObject):
     def _on_correction_requested(self):
         if not self.selected_cycle:
             return
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
 
         dates = self.dal.fetch_measurements(sample_id=self.view.sample_edit.text(),
                                             cycles=self.selected_cycle,
@@ -349,9 +351,9 @@ class KineticsController(QObject):
         self._open_correction_gui(time_range)
 
     def _open_correction_gui(self, time_range):
-        from h2_uptake_correction_gui import UptakeCorrectionWindow
-        from metadata_handler import MetaData
-        from config_reader import config
+        from recorder_app.gui.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
+        from recorder_app.infrastructure.handler.metadata_handler import MetaData
+        from recorder_app.infrastructure.core.config_reader import config
         meta_data = MetaData(sample_id=self.view.sample_edit.text(),
                              db_conn_params=config.db_conn_params)
 
@@ -373,6 +375,7 @@ class KineticsController(QObject):
     def closeEvent(self, event):
         self._stop_all()
         self.view.closeEvent(event)
+
 
 def main() -> None:
     # Services

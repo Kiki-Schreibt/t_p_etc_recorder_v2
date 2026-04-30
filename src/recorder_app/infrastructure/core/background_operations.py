@@ -6,8 +6,8 @@ from dateutil.relativedelta import relativedelta
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
 from PySide6.QtCore    import QTimer
 
-from table_config import TableConfig
-from connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
 
 
 tp_table = TableConfig().TPDataTable
@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
         self._last_run_month = current_month
 
 if __name__ == "__main__":
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     app = QApplication(sys.argv)
     win = MainWindow(db_conn_params=config.db_conn_params)

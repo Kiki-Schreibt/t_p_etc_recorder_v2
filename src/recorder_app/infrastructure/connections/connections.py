@@ -7,7 +7,7 @@ from pymodbus.exceptions import ConnectionException
 import psycopg2
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -347,7 +347,7 @@ def test_hot_disk_connection(config):
 # Run the test function
 
 if __name__ == "__main__":
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     # Load the configuration
     i=0
     while i<=200:

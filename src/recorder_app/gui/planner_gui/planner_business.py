@@ -6,9 +6,9 @@ import pyqtgraph as pg
 from PySide6.QtCore import Signal, Qt, QTimer
 
 
-import global_vars
-from eq_p_calculation import VantHoffCalcEq
-from hydride_handler import MetalHydrideDatabase
+import recorder_app.infrastructure.core.global_vars
+from recorder_app.infrastructure.utils.eq_p_calculation import VantHoffCalcEq
+from recorder_app.infrastructure.handler.hydride_handler import MetalHydrideDatabase
 
 
 class VantHoffPlot(pg.PlotWidget):
@@ -219,7 +219,7 @@ def main():
 
     # Create an instance of VantHoffCalcEq
     # Create an instance of VantHoffPlot and plot the data
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     vant_hoff_plot = VantHoffPlot(db_conn_params=config.db_conn_params)
     vant_hoff_plot.plot_vant_hoff()
     vant_hoff_plot.show()

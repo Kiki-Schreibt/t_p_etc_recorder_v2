@@ -1,15 +1,18 @@
 import numpy as np
-
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
-from data_loader import DataLoader
-from material_properties import MaterialProperties
-from models import KaganerModel, ZehnerBauerSchluenderModel  # Use appropriate model here
-from model_fitter import ModelFitter
-from plotter import Plotter
-from config_reader import config
-from scipy.optimize import curve_fit
+from recorder_app.gui.data_fitter.data_loader import DataLoader
+from recorder_app.gui.data_fitter.material_properties import MaterialProperties
+from recorder_app.gui.data_fitter.models import KaganerModel, ZehnerBauerSchluenderModel  # Use appropriate model here
+from recorder_app.gui.data_fitter.model_fitter import ModelFitter
+from recorder_app.gui.data_fitter.plotter import Plotter
+from recorder_app.infrastructure.core.config_reader import config
 
+try:
+    import recorder_app.infrastructure.core.logger as logging
+except ImportError:
+    import logging
 
 class ZBSFitter:
     """

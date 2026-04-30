@@ -1,8 +1,14 @@
 #material_properties.py
 import numpy as np
-import logging
 
-from hydride_handler import MetalHydrideDatabase
+
+from recorder_app.infrastructure.handler.hydride_handler import MetalHydrideDatabase
+from recorder_app.infrastructure.core.config_reader import config
+
+try:
+    import recorder_app.infrastructure.core.logger as logging
+except ImportError:
+    import logging
 
 class MaterialProperties:
     """
@@ -13,7 +19,7 @@ class MaterialProperties:
         if not material:
             return  # No material specified; nothing to do.
         self.logger = logging.getLogger(__name__)
-        self.hydride_worker = MetalHydrideDatabase(db_conn_params=config_reader.config.db_conn_params)
+        self.hydride_worker = MetalHydrideDatabase(db_conn_params=config.db_conn_params)
         self.material = material  # e.g., "MgH2"
         self.particle_diameter = particle_diameter
 

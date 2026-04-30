@@ -2,15 +2,15 @@ import pandas as pd
 import os
 import numpy as np
 
-import global_vars
+import recorder_app.infrastructure.core.global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
-from table_config import TableConfig
-from database_reading_writing import DataRetriever
-from standard_paths import standard_export_path
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.infrastructure.utils.standard_paths import standard_export_path
 
 
 class QuickExport:
@@ -75,7 +75,7 @@ class QuickExport:
                           self.etc_table.test_info)
         export_filter_string = ""
         if not constraints_etc:
-            from global_vars import STANDARD_CONSTRAINTS
+            from recorder_app.infrastructure.core.global_vars import STANDARD_CONSTRAINTS
             constraints_etc = STANDARD_CONSTRAINTS
 
         export_filter_struct, export_filter_string = self._get_constraints_from_export_filter(export_filter)
@@ -265,8 +265,8 @@ if __name__ == '__main__':
    # sample_ids = ['WAE-WA-028', 'WAE-WA-030', 'WAE-WA-040']
     sample_ids = ['WAE-WJ-001']
 
-    from metadata_handler import MetaData
-    from config_reader import config
+    from recorder_app.infrastructure.handler.metadata_handler import MetaData
+    from recorder_app.infrastructure.core.config_reader import config
     standard_constraints = global_vars.STANDARD_CONSTRAINTS
 
     standard_constraints['max_TotalCharTime'] =  1.2

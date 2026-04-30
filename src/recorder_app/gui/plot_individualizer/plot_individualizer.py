@@ -10,10 +10,10 @@ from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton,
                                QLabel, QComboBox, QHBoxLayout, QLineEdit,
                                QMessageBox)
 
-from table_config import TableConfig
-from database_reading_writing import DataRetriever
-from recording_business_v2 import StaticPlotWindow
-from global_vars import style, STANDARD_CONSTRAINTS, local_tz
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.gui.recording_gui.recording_business_v2 import StaticPlotWindow
+from recorder_app.infrastructure.core.global_vars import style, STANDARD_CONSTRAINTS, local_tz
 
 tp_table = TableConfig().TPDataTable
 etc_table = TableConfig().ETCDataTable
@@ -426,8 +426,8 @@ class DataLoadWorker(QObject):
 
 if __name__ == '__main__':
     import sys
-    from config_reader import config
-    from metadata_handler import MetaData
+    from recorder_app.infrastructure.core.config_reader import config
+    from recorder_app.infrastructure.handler.metadata_handler import MetaData
     meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-028")
     app = QApplication(sys.argv)
     win = PlotIndividualizerMainWindow(config=config)

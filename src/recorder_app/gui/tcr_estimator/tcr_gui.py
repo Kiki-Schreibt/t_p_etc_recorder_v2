@@ -39,8 +39,8 @@ TCRCalculator = None
 
 # Try to import your implementation
 try:
-    from tcr_calculator import TCRCalculator as _TCRCalculator, DataLoaderTCR as _DataLoaderTCR
-    from table_config import TableConfig as _TableConfig
+    from recorder_app.gui.tcr_estimator.tcr_calculator import TCRCalculator as _TCRCalculator, DataLoaderTCR as _DataLoaderTCR
+    from recorder_app.infrastructure.core.table_config import TableConfig as _TableConfig
     TCRCalculator = _TCRCalculator
     DataLoaderTCR = _DataLoaderTCR
     TableConfig = _TableConfig
@@ -367,7 +367,7 @@ class TCRWindow(QMainWindow):
             return
         # Import your config lazily so GUI still opens if project isn't present
         try:
-            from config_reader import config
+            from recorder_app.infrastructure.core.config_reader import config
         except Exception as e:
             QMessageBox.critical(self, "Config error", f"Could not import project config:\n{e}")
             return

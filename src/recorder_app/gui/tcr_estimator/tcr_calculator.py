@@ -12,10 +12,10 @@ try:
 except Exception:
     _HAS_SCIPY = False
 
-from database_reading_writing import DataRetriever
-from table_config import TableConfig
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.infrastructure.core.table_config import TableConfig
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 """tcr_calculator.py
@@ -304,7 +304,7 @@ __all__ = ["TCRCalculator"]
 
 
 if __name__ == '__main__':
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     time_range = ["2025-10-09", '2025-10-20']
     table = TableConfig().ETCDataTable

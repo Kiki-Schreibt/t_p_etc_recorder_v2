@@ -6,7 +6,59 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/query_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/query_builder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/export_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/export_methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/config_creation/config_creator_ui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/config_creation/config_creator_ui_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_gui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_gui_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_ui_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_ui_business.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/main_fitter_backend.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/main_fitter_backend.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/material_properties.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/material_properties.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/database_maintenance/database_maintainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/database_maintenance/database_maintainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/etc_measurement_starter/start_etc_measurement_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/etc_measurement_starter/start_etc_measurement_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_business.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/hydride_handler_gui/hydride_handler_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/hydride_handler_gui/hydride_handler_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_worker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/meta_data_gui/meta_data_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/meta_data_gui/meta_data_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/planner_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/planner_business.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/test_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/test_planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/plot_individualizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/plot_individualizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/post_processor_t_p_etc/post_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/post_processor_t_p_etc/post_processor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/plot_window_reader_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/plot_window_reader_basic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_business_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_main_v3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_main_v3.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/side_operations/h2_uptake_correction_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/side_operations/h2_uptake_correction_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/simulation/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/simulation/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/simulation/dicon_simulator_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/simulation/simulator_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/simulation/simulator_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_calculator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/connections.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/background_operations.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/background_operations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/config_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/config_reader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/global_vars.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/global_vars.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/table_partitioner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/table_partitioner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/csv_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/excel_data_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/excel_data_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_log_file_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_log_file_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_json_db_importer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_json_db_importer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/metadata_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/metadata_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/modbus_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/utils/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/utils/eq_p_calculation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/table_creator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,122 +99,123 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Doctest load_ui_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Doctests in database_reading_writing (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Doctests in database_reading_writing (2).executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Doctests in database_reading_writing.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for tests.TestRecordingMain.test_start_modbus_server.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for unittest_plotting.TestPlotMainWindow.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in unittest_plotting.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Circle.executor&quot;: &quot;Run&quot;,
-    &quot;Python.PlotWidget.executor&quot;: &quot;Run&quot;,
-    &quot;Python.PlotWindows.executor&quot;: &quot;Run&quot;,
-    &quot;Python.adsfasdf.executor&quot;: &quot;Run&quot;,
-    &quot;Python.asdf.executor&quot;: &quot;Run&quot;,
-    &quot;Python.asdfasdf.executor&quot;: &quot;Run&quot;,
-    &quot;Python.background_operations.executor&quot;: &quot;Run&quot;,
-    &quot;Python.backup_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.code_length.executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_creator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_creator_ui_main (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_creator_ui_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.config_reader.executor&quot;: &quot;Run&quot;,
-    &quot;Python.connections.executor&quot;: &quot;Run&quot;,
-    &quot;Python.connections_and_logger.executor&quot;: &quot;Run&quot;,
-    &quot;Python.csv_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.data_fitter_gui_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.data_fitter_ui_business.executor&quot;: &quot;Run&quot;,
-    &quot;Python.data_loader.executor&quot;: &quot;Run&quot;,
-    &quot;Python.database_cleaner.executor&quot;: &quot;Run&quot;,
-    &quot;Python.database_maintainer.executor&quot;: &quot;Run&quot;,
-    &quot;Python.database_reading_writing.executor&quot;: &quot;Run&quot;,
-    &quot;Python.database_reading_writing_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.dicon_simulater.executor&quot;: &quot;Run&quot;,
-    &quot;Python.dicon_simulator_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.eq_p_calculation.executor&quot;: &quot;Run&quot;,
-    &quot;Python.excel_data_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.export_methods.executor&quot;: &quot;Run&quot;,
-    &quot;Python.exporter_business.executor&quot;: &quot;Run&quot;,
-    &quot;Python.exporter_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.gen_api.executor&quot;: &quot;Run&quot;,
-    &quot;Python.h2_uptake_correction_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hot_disk_controller.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hot_disk_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hydride_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hydride_handler_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hydride_json_db_importer.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hydride_worker.executor&quot;: &quot;Run&quot;,
-    &quot;Python.kinetics_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.kinetics_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.kinetics_ui (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.kinetics_ui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.kinetics_worker.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main_fitter_backend.executor&quot;: &quot;Run&quot;,
-    &quot;Python.manual_csv_xlsx_inserter.executor&quot;: &quot;Run&quot;,
-    &quot;Python.material_properties.executor&quot;: &quot;Run&quot;,
-    &quot;Python.meta_data_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.meta_data_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.metadata_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.modbus_handler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.optimization.executor&quot;: &quot;Run&quot;,
-    &quot;Python.path_utils.executor&quot;: &quot;Run&quot;,
-    &quot;Python.planner_business.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_individualizer.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_window_reader_basic (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_window_reader_basic.executor&quot;: &quot;Run&quot;,
-    &quot;Python.plot_windows (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.post_processor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.project_plot_graphviz.executor&quot;: &quot;Run&quot;,
-    &quot;Python.qt_plots.executor&quot;: &quot;Run&quot;,
-    &quot;Python.query_builder.executor&quot;: &quot;Run&quot;,
-    &quot;Python.query_builder_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_business_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_business_v3.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_main_v2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.recording_main_v3.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sequenzer.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sequenzer_temp (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.sequenzer_temp.executor&quot;: &quot;Run&quot;,
-    &quot;Python.server.executor&quot;: &quot;Run&quot;,
-    &quot;Python.simulatioor_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.simulator_gui (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.simulator_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.smaller_stuff.executor&quot;: &quot;Run&quot;,
-    &quot;Python.standard_paths.executor&quot;: &quot;Run&quot;,
-    &quot;Python.start_etc_measurement_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.suggestionsgpt.executor&quot;: &quot;Run&quot;,
-    &quot;Python.suquenzer_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.t_p_simulator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.table_config.executor&quot;: &quot;Run&quot;,
-    &quot;Python.table_creator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.table_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.table_partitioner.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tcr_calculator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tcr_gui.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_planner.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_scheduler.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tests.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tp_program_simulator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.unittest_plotting.executor&quot;: &quot;Run&quot;,
-    &quot;Python.visualize_color_maps.executor&quot;: &quot;Run&quot;,
-    &quot;Python.write_sql_results_to_txt.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Daten/Kiki/ProgrammingStuff/t_p_etc_recorder_v2/src/GUI/tcr_estimator&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Doctest load_ui_file.executor": "Run",
+    "Python tests.Doctests in database_reading_writing (1).executor": "Run",
+    "Python tests.Doctests in database_reading_writing (2).executor": "Run",
+    "Python tests.Doctests in database_reading_writing.executor": "Run",
+    "Python tests.Python tests for tests.TestRecordingMain.test_start_modbus_server.executor": "Run",
+    "Python tests.Python tests for unittest_plotting.TestPlotMainWindow.executor": "Run",
+    "Python tests.Python tests in unittest_plotting.py.executor": "Run",
+    "Python.Circle.executor": "Run",
+    "Python.PlotWidget.executor": "Run",
+    "Python.PlotWindows.executor": "Run",
+    "Python.adsfasdf.executor": "Run",
+    "Python.asdf.executor": "Run",
+    "Python.asdfasdf.executor": "Run",
+    "Python.background_operations.executor": "Run",
+    "Python.backup_gui.executor": "Run",
+    "Python.code_length.executor": "Run",
+    "Python.config_creator.executor": "Run",
+    "Python.config_creator_ui_main (1).executor": "Run",
+    "Python.config_creator_ui_main.executor": "Run",
+    "Python.config_reader.executor": "Run",
+    "Python.connections.executor": "Run",
+    "Python.connections_and_logger.executor": "Run",
+    "Python.csv_handler.executor": "Run",
+    "Python.data_fitter_gui_main.executor": "Run",
+    "Python.data_fitter_ui_business.executor": "Run",
+    "Python.data_loader.executor": "Run",
+    "Python.database_cleaner.executor": "Run",
+    "Python.database_maintainer.executor": "Run",
+    "Python.database_reading_writing.executor": "Run",
+    "Python.database_reading_writing_v2.executor": "Run",
+    "Python.dicon_simulater.executor": "Run",
+    "Python.dicon_simulator_v2.executor": "Run",
+    "Python.eq_p_calculation.executor": "Run",
+    "Python.excel_data_handler.executor": "Run",
+    "Python.export_methods.executor": "Run",
+    "Python.exporter_business.executor": "Run",
+    "Python.exporter_main.executor": "Run",
+    "Python.gen_api.executor": "Run",
+    "Python.h2_uptake_correction_gui.executor": "Run",
+    "Python.hot_disk_controller.executor": "Run",
+    "Python.hot_disk_handler.executor": "Run",
+    "Python.hydride_handler.executor": "Run",
+    "Python.hydride_handler_main.executor": "Run",
+    "Python.hydride_json_db_importer.executor": "Run",
+    "Python.hydride_worker.executor": "Run",
+    "Python.kinetics_gui.executor": "Run",
+    "Python.kinetics_main.executor": "Run",
+    "Python.kinetics_ui (1).executor": "Run",
+    "Python.kinetics_ui.executor": "Run",
+    "Python.kinetics_worker.executor": "Run",
+    "Python.main (1).executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.main_fitter_backend.executor": "Run",
+    "Python.manual_csv_xlsx_inserter.executor": "Run",
+    "Python.material_properties.executor": "Run",
+    "Python.meta_data_gui.executor": "Run",
+    "Python.meta_data_handler.executor": "Run",
+    "Python.metadata_handler.executor": "Run",
+    "Python.modbus_handler.executor": "Run",
+    "Python.optimization.executor": "Run",
+    "Python.path_utils.executor": "Run",
+    "Python.planner_business.executor": "Run",
+    "Python.plot_individualizer.executor": "Run",
+    "Python.plot_window_reader_basic (1).executor": "Run",
+    "Python.plot_window_reader_basic.executor": "Run",
+    "Python.plot_windows (1).executor": "Run",
+    "Python.post_processor.executor": "Run",
+    "Python.project_plot_graphviz.executor": "Run",
+    "Python.qt_plots.executor": "Run",
+    "Python.query_builder.executor": "Run",
+    "Python.query_builder_v2.executor": "Run",
+    "Python.recording_business_v2.executor": "Run",
+    "Python.recording_business_v3.executor": "Run",
+    "Python.recording_main.executor": "Run",
+    "Python.recording_main_v2.executor": "Run",
+    "Python.recording_main_v3.executor": "Run",
+    "Python.sequenzer.executor": "Run",
+    "Python.sequenzer_temp (1).executor": "Run",
+    "Python.sequenzer_temp.executor": "Run",
+    "Python.server.executor": "Run",
+    "Python.simulatioor_gui.executor": "Run",
+    "Python.simulator_gui (1).executor": "Run",
+    "Python.simulator_gui.executor": "Run",
+    "Python.smaller_stuff.executor": "Run",
+    "Python.standard_paths.executor": "Run",
+    "Python.start_etc_measurement_gui.executor": "Run",
+    "Python.suggestionsgpt.executor": "Run",
+    "Python.suquenzer_gui.executor": "Run",
+    "Python.t_p_simulator.executor": "Run",
+    "Python.table_config.executor": "Run",
+    "Python.table_creator.executor": "Run",
+    "Python.table_data.executor": "Run",
+    "Python.table_partitioner.executor": "Run",
+    "Python.tcr_calculator.executor": "Run",
+    "Python.tcr_gui.executor": "Run",
+    "Python.test_planner.executor": "Run",
+    "Python.test_scheduler.executor": "Run",
+    "Python.tests.executor": "Run",
+    "Python.tp_program_simulator.executor": "Run",
+    "Python.unittest_plotting.executor": "Run",
+    "Python.visualize_color_maps.executor": "Run",
+    "Python.write_sql_results_to_txt.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Daten/Kiki/ProgrammingStuff/t_p_etc_recorder_v2/src/GUI/tcr_estimator",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;Markdown&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "Markdown"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\tcr_estimator" />
@@ -172,14 +225,14 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app\" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\assets\pics\dicon_simulator" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\assets\pics\test_planner" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\user_manual\getting_started" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.main (1)">
     <configuration name="config_creator_ui_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -246,6 +299,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="t_p_etc_recorder_v2" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/recorder_app" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/recorder_app/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
@@ -268,35 +343,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="standard_paths" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="t_p_etc_recorder_v2" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/recorder_app/infrastructure/utils" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/recorder_app/infrastructure/utils/standard_paths.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main (1)" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.config_creator_ui_main" />
         <item itemvalue="Python.exporter_main" />
         <item itemvalue="Python.config_reader" />
-        <item itemvalue="Python.standard_paths" />
       </list>
     </recent_temporary>
   </component>
@@ -451,6 +504,11 @@
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/recorder_app/gui/planner_gui/planner_business.py</url>
           <option name="timeStamp" value="735" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="737" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

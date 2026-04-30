@@ -3,12 +3,12 @@ import json
 import sys
 import os
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from standard_paths import standard_config_file_path as config_file_path
-from standard_paths import standard_log_dir
+from recorder_app.infrastructure.utils.standard_paths import standard_config_file_path as config_file_path
+from recorder_app.infrastructure.utils.standard_paths import standard_log_dir
 
 current_dir = os.path.dirname(__file__)
 

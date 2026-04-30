@@ -1,7 +1,7 @@
 from recorder_app.infrastructure.core.table_config import TableConfig
-from recorder_app.infrastructure.connections import DatabaseConnection
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 t_p_table = TableConfig().TPDataTable
@@ -406,7 +406,7 @@ def test_create_table_from_class():
 
 
 if __name__ == "__main__":
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     create_database(config.db_conn_params)
     creator = TableCreator(db_conn_params=config.db_conn_params)
     #creator.__delete_table__(table_name="thermal_conductivity_xy_data")

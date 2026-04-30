@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
-from hydride_handler import MetalHydrideDatabase
-from core import global_vars
+
+
+from recorder_app.infrastructure.handler.hydride_handler import MetalHydrideDatabase
+from recorder_app.infrastructure.core import global_vars
 
 from pandas.api.types import (
     is_integer_dtype, is_float_dtype, is_string_dtype
@@ -10,7 +12,7 @@ from typing import Optional, Sequence, Tuple, Union
 from zoneinfo import ZoneInfo
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -319,7 +321,7 @@ class KineticCalcEquations:
             absorption_sign: +1 for uptake = m(t0)-m(t) (absorption),
                              -1 for uptake = m(t)-m(t0) (desorption).
         """
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
         self.V_cell_m3 = float(V_cell_mL) * 1e-6
         self.V_res_m3 = float(V_res_L) * 1e-3
         self.m_sample_kg = float(m_sample_g) * 1e-3
@@ -655,8 +657,8 @@ def test_calc_h2_uptake(meta_data, db_conn_params):
 
 
 if __name__ == "__main__":
-    from metadata_handler import MetaData
-    from config_reader import config
+    from recorder_app.infrastructure.handler.metadata_handler import MetaData
+    from recorder_app.infrastructure.core.config_reader import config
     meta_data = MetaData(sample_id="WAE-WA-040", db_conn_params=config.db_conn_params)
     test_calc_eq(meta_data, db_conn_params=config.db_conn_params)
     test_calc_h2_uptake(meta_data,db_conn_params=config.db_conn_params)

@@ -1,10 +1,10 @@
 import json
 
-from connections import DatabaseConnection
-from table_config import TableConfig
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -135,8 +135,8 @@ class HydrideJsonImporter:
 
 
 
-from config_reader import config
-from standard_paths import standard_hydride_data_base_path
+from recorder_app.infrastructure.core.config_reader import config
+from recorder_app.infrastructure.utils.standard_paths import standard_hydride_data_base_path
 
 importer = HydrideJsonImporter(
     db_conn_params=config.db_conn_params,

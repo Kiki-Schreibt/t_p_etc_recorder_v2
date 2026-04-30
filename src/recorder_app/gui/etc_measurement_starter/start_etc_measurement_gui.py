@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout,
 from PySide6.QtCore import Signal
 
 # Import your HotDiskController and other necessary classes/modules
-from hot_disk_handler import HotDiskController  # Assuming this is the correct import path
+from recorder_app.infrastructure.handler.hot_disk_handler import HotDiskController  # Assuming this is the correct import path
 
 
 class StartETCMeasurementGUI(QWidget):
@@ -139,9 +139,9 @@ class StartETCMeasurementGUI(QWidget):
 
 def main():
     # Assuming you have a way to get the `hd_conn_params`
-    from config_reader import config
-    from global_vars import standard_etc_folder_path
-    from metadata_handler import MetaData
+    from recorder_app.infrastructure.core.config_reader import config
+    from recorder_app.infrastructure.core.global_vars import standard_etc_folder_path
+    from recorder_app.infrastructure.handler.metadata_handler import MetaData
     meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id="WAE-WA-060")
 
     # Standard folder path for the export

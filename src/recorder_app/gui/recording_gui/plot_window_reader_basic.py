@@ -7,11 +7,11 @@ import pyqtgraph as pg
 from PySide6.QtCore import (QDateTime, QThread, QTimer, Signal, Slot, Qt)
 from PySide6.QtWidgets import QApplication
 
-from connections import DatabaseConnection
-from table_config import TableConfig
-from core import global_vars
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.core import global_vars
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -90,7 +90,7 @@ class ReadData(QThread):
     def __init__(self, meta_data, db_conn_params):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        from database_reading_writing import DataRetriever
+        from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
         self.db_conn_params = db_conn_params
         self.db_retriever = DataRetriever(db_conn_params=self.db_conn_params)
         self._init_standard_params()
@@ -238,7 +238,7 @@ class ReadData(QThread):
             if not df.empty:
                 df = df.sort_values(by=table.time, ascending=True)
             if not df[table.sample_id].iloc[-1] == self.meta_data.sample_id:
-                from metadata_handler import MetaData
+                from recorder_app.infrastructure.handler.metadata_handler import MetaData
                 self.meta_data = MetaData(sample_id=df[table.sample_id].iloc[-1], db_conn_params=self.db_conn_params)
                 self.meta_data_sig.emit(self.meta_data)
                 self.logger.info("Sample ID changed to %s", self.meta_data.sample_id)

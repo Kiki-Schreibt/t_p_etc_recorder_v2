@@ -3,9 +3,9 @@ from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 from PySide6.QtWidgets import QMainWindow
 
-from planner_business import VantHoffPlot
-from standard_paths import planner_ui_file_path
-from core import global_vars
+from recorder_app.gui.planner_gui.planner_business import VantHoffPlot
+from recorder_app.infrastructure.utils.standard_paths import planner_ui_file_path
+from recorder_app.infrastructure.core import global_vars
 
 STYLE_SHEET = global_vars.style
 
@@ -138,7 +138,7 @@ def main():
     # Create the Qt Application
     app = QApplication([])
     # Create and show the main application window
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     main_window = TestPlannerMain(db_conn_params=config.db_conn_params)
     main_window.show()
     # Run the event loop

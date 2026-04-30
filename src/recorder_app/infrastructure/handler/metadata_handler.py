@@ -10,13 +10,13 @@ from datetime import timedelta
 
 import pandas as pd
 
-from connections import DatabaseConnection
-from query_builder import QueryBuilder
-from table_config import TableConfig
-from core import global_vars
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.config_connection_reading_management.query_builder import QueryBuilder
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 meta_table = TableConfig().MetaDataTable
@@ -315,7 +315,7 @@ class MetaData:
 
     def _get_enthalpy_entropy_wt_theoretical(self):
         """Retrieve thermodynamic properties for the sample material."""
-        from hydride_handler import MetalHydrideDatabase
+        from recorder_app.infrastructure.handler.hydride_handler import MetalHydrideDatabase
         if self.enthalpy is not None and self.entropy is not None and self.theoretical_uptake is not None:
             return self.enthalpy, self.entropy, self.theoretical_uptake
 
@@ -394,7 +394,7 @@ class MetaData:
 
     def fetch_last_state_and_cycle(self):
         """Fetch the last recorded de/hydration state and cycle number."""
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
         table = TableConfig().TPDataTable
         table_name = table.table_name
         sample_id_column = table.sample_id
@@ -433,7 +433,7 @@ class MetaData:
 
 
 def test_meta_data_handler(sample_id):
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     meta_data_instance = MetaData(sample_id=sample_id,
                                   db_conn_params=config.db_conn_params)
     meta_data_instance.print()

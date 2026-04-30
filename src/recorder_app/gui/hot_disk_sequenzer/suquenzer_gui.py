@@ -22,11 +22,11 @@ import pyqtgraph as pg
 
 # Local project imports (assumed available in your project structure)
 from recorder_app.tp_program_simulator import TemperatureControllerHotDiskSequenzer
-from hot_disk_handler import HotDiskSequenzerBackend
-from core import global_vars
+from recorder_app.infrastructure.handler.hot_disk_handler import HotDiskSequenzerBackend
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -356,7 +356,7 @@ class ScheduleGeneratorBase(QWidget):
 
     @staticmethod
     def safe_schedule(schedule: pd.DataFrame):
-        from standard_paths import standard_schedule_files_path
+        from recorder_app.infrastructure.utils.standard_paths import standard_schedule_files_path
         import os
         os.makedirs(standard_schedule_files_path, exist_ok=True)
         current_day = datetime.datetime.now()
@@ -423,7 +423,7 @@ class SequenzerMainWindow(ScheduleGeneratorBase):
         Open a file dialog to select a previously saved schedule CSV
         and start continuing the schedule from that file.
         """
-        from standard_paths import standard_schedule_files_path
+        from recorder_app.infrastructure.utils.standard_paths import standard_schedule_files_path
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         file_path, _ = QFileDialog.getOpenFileName(
@@ -836,7 +836,7 @@ class DateAxisItem(pg.AxisItem):
 # Main execution
 # =============================================================================
 if __name__ == '__main__':
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     app = QApplication([])
 
     window = SequenzerMainWindow(config=config)

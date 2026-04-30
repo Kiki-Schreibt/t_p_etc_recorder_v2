@@ -20,13 +20,13 @@ import warnings
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QMessageBox
 from PySide6.QtGui import QDoubleValidator
 
-from hot_disk_handler import HotDiskController
-from metadata_handler import MetaData
-from recording_business_v2 import DataRecorder
-from standard_paths import recording_ui_file_path
-from core import global_vars
+from recorder_app.infrastructure.handler.hot_disk_handler import HotDiskController
+from recorder_app.infrastructure.handler.metadata_handler import MetaData
+from recorder_app.gui.recording_gui.recording_business_v2 import DataRecorder
+from recorder_app.infrastructure.utils.standard_paths import recording_ui_file_path
+from recorder_app.infrastructure.core import global_vars
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -177,7 +177,7 @@ class PlotManager:
         Initialize continuous plots for temperature and pressure.
         """
         try:
-            from recording_business_v2 import ContinuousPlotWindow
+            from recorder_app.gui.recording_gui.recording_business_v2 import ContinuousPlotWindow
             self.clear_plots()
             self.top_plot = ContinuousPlotWindow(y_axis="temperature", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
             self.bottom_plot = ContinuousPlotWindow(y_axis="pressure", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
@@ -197,7 +197,7 @@ class PlotManager:
         Initialize static plots for temperature and pressure.
         """
         try:
-            from recording_business_v2 import StaticPlotWindow
+            from recorder_app.gui.recording_gui.recording_business_v2 import StaticPlotWindow
             self.clear_plots()
             self.top_plot = StaticPlotWindow(y_axis="temperature", meta_data=self.meta_data, db_conn_params=self.db_conn_params)
             self.bottom_plot = StaticPlotWindow(y_axis="pressure", meta_data=self.meta_data, db_conn_params=self.db_conn_params, passive_window=True)
@@ -227,7 +227,7 @@ class PlotManager:
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
 
-            from recording_business_v2 import XYPlot
+            from recorder_app.gui.recording_gui.recording_business_v2 import XYPlot
             self.right_plot = XYPlot(db_conn_params=self.db_conn_params)
             self._ensure_layout(self.ui.xy_plot_window)
             self.ui.xy_plot_window.layout().addWidget(self.right_plot)
@@ -249,7 +249,7 @@ class PlotManager:
         Initialize the uptake plot for hydrogen uptake data.
         """
         try:
-            from recording_business_v2 import UptakePlot
+            from recorder_app.gui.recording_gui.recording_business_v2 import UptakePlot
             if self.right_plot:
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
@@ -273,7 +273,7 @@ class PlotManager:
                 self.right_plot.deleteLater()
                 self.right_plot = None
 
-            from recording_business_v2 import ReadPlotTpDependent
+            from recorder_app.gui.recording_gui.recording_business_v2 import ReadPlotTpDependent
             self.right_plot = ReadPlotTpDependent.PlotTpDependent(db_conn_params=self.db_conn_params,
                                                                   constraints=constraints)
             self.right_plot.load_data(time_range=time_range,
@@ -300,7 +300,7 @@ class PlotManager:
             if self.right_plot:
                 self.right_plot.setParent(None)
                 self.right_plot.deleteLater()
-            from recording_business_v2 import CyclePlotWindow
+            from recorder_app.gui.recording_gui.recording_business_v2 import CyclePlotWindow
             self.right_plot = CyclePlotWindow(db_conn_params=self.db_conn_params, meta_data=self.meta_data, constraints=constraints)
             self.right_plot.load_data(time_range=time_range)
             self._ensure_layout(self.ui.xy_plot_window)
@@ -625,7 +625,7 @@ class MainWindow(QMainWindow):
             self.logger = logging.getLogger(__name__)
 
 #            QTimer for memory logging. Can be deleted
-            from memory_logger import log_memory
+            from recorder_app.infrastructure.utils.memory_logger import log_memory
             from PySide6.QtCore import QTimer
             self.memory_timer = QTimer()
             self.memory_timer.setInterval(10*1e3*60)  # 1 second in milliseconds
@@ -1146,7 +1146,7 @@ def main():
     Entry point for the application.
     """
     try:
-        from config_reader import config
+        from recorder_app.infrastructure.core.config_reader import config
         app = QApplication([])
         main_window = MainWindow(config=config)
         main_window.show()

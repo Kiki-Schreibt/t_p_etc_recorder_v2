@@ -8,21 +8,21 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile
 
-import global_vars
-from config_creator_ui_main import ConfigWindow
-from standard_paths import standard_config_file_path
-from recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
-from simulator_gui import ModbusServerControlGUI
-from test_planner import TestPlannerMain
-from h2_uptake_correction_gui import UptakeCorrectionWindow
-from suquenzer_gui import SequenzerMainWindow
-from start_etc_measurement_gui import StartETCMeasurementGUI
-from plot_individualizer import PlotIndividualizerMainWindow
-from hydride_handler_main import HydrideHandlerMainWindow
-from meta_data_gui import MetaDataGUI
+import recorder_app.infrastructure.core.global_vars
+from recorder_app.gui.config_creation.config_creator_ui_main import ConfigWindow
+from recorder_app.infrastructure.utils.standard_paths import standard_config_file_path
+from recorder_app.gui.recording_gui.recording_main_v3 import MainWindow as RecordingMainWindow, local_tz
+from recorder_app.gui.simulation.simulator_gui import ModbusServerControlGUI
+from recorder_app.gui.planner_gui.test_planner import TestPlannerMain
+from recorder_app.gui.side_operations.h2_uptake_correction_gui import UptakeCorrectionWindow
+from recorder_app.gui.hot_disk_sequenzer.suquenzer_gui import SequenzerMainWindow
+from recorder_app.gui.etc_measurement_starter.start_etc_measurement_gui import StartETCMeasurementGUI
+from recorder_app.gui.plot_individualizer.plot_individualizer import PlotIndividualizerMainWindow
+from recorder_app.gui.hydride_handler_gui.hydride_handler_main import HydrideHandlerMainWindow
+from recorder_app.gui.meta_data_gui.meta_data_gui import MetaDataGUI
 
 try:
-    import logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -120,7 +120,7 @@ class MainProgram(RecordingMainWindow):
         """
         Perform a quick export using the current constraints, in a background thread.
         """
-        from recorder_app import QuickExport
+        from recorder_app.export_methods import QuickExport
         exporter = QuickExport(meta_data=self.meta_data, db_conn_params=self.config.db_conn_params)
         constraints = self.controller.constraints
         export_thread = threading.Thread(target=exporter.export_all, args=(constraints,), daemon=True)
@@ -185,7 +185,7 @@ class MainProgram(RecordingMainWindow):
             self._connect_set_state_signals()
 
     def _open_database_maintainer(self):
-        from database_maintainer import MaintenanceWindow
+        from recorder_app.gui.database_maintenance.database_maintainer import MaintenanceWindow
         self.db_maintainer = MaintenanceWindow(db_conn_params=self.db_conn_params)
         self.db_maintainer.show()
         self.db_maintainer.started.connect(self.controller.stop_t_p_recording)
@@ -269,7 +269,7 @@ def launch_main_program(app):
     """
 
     try:
-        from config_reader import config
+        from recorder_app.infrastructure.core.config_reader import config
 
         create_database_and_tables_if_not_exists(config)
         populate_hydride_database(config)
@@ -281,15 +281,15 @@ def launch_main_program(app):
 
 
 def create_database_and_tables_if_not_exists(config):
-    from recorder_app import create_database, TableCreator
+    from recorder_app.table_creator import create_database, TableCreator
     create_database(db_conn_params=config.db_conn_params)
     creator = TableCreator(db_conn_params=config.db_conn_params)
     creator.create_all_tables()
 
 
 def populate_hydride_database(config):
-    from hydride_json_db_importer import HydrideJsonImporter
-    from standard_paths import standard_hydride_data_base_path
+    from recorder_app.infrastructure.handler.hydride_json_db_importer import HydrideJsonImporter
+    from recorder_app.infrastructure.utils.standard_paths import standard_hydride_data_base_path
 
     importer = HydrideJsonImporter(
         db_conn_params=config.db_conn_params,

@@ -2,7 +2,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 
-from standard_paths import exporter_ui_file_path
+from recorder_app.infrastructure.core.standard_paths import exporter_ui_file_path
 
 
 class ExporterWindow(QMainWindow):

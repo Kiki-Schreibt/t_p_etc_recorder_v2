@@ -14,16 +14,16 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.ticker import FuncFormatter
 
-from dicon_simulator_v2 import MBServer  # Import your MBServer class
+from recorder_app.gui.simulation.dicon_simulator_v2 import MBServer  # Import your MBServer class
 from recorder_app.tp_program_simulator import TemperatureControllerDiconSimulator
-from core import global_vars
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from memory_logger import log_memory
+from recorder_app.infrastructure.utils.memory_logger import log_memory
 
 logger = logging.getLogger(__name__)
 STYLE_SHEET = global_vars.style

@@ -11,14 +11,11 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal
 
-from standard_paths import standard_config_file_path
-import core.global_vars as global_vars
+from recorder_app.infrastructure.utils.standard_paths import standard_config_file_path
+from recorder_app.infrastructure.core import global_vars
 
 STYLE_SHEET = global_vars.style
 
-import core.global_vars as global_vars
-
-STYLE_SHEET = global_vars.style
 
 
 class ConfigWindow(QWidget):
@@ -337,7 +334,7 @@ def main():
     sys.exit(app.exec())
 
 def test_db_and_table_creation():
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     db_conn_params = config.db_conn_params
     db_conn_params["DB_DATABASE"] = "BaseTestBase"

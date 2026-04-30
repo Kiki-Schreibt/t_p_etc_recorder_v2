@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QThread, Signal, QTimer
 
-from connections import DatabaseConnection
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
 
 
 class MaintenanceThread(QThread):
@@ -115,7 +115,7 @@ class MaintenanceWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     app = QApplication(sys.argv)
 

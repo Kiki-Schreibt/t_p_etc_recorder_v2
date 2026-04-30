@@ -22,16 +22,16 @@ import pyqtgraph as pg
 
 from PySide6.QtCore import QThread, Signal, QObject
 
-from database_reading_writing import DataRetriever
-from hot_disk_log_file_handler import LogFileTracker
-from modbus_handler import ModbusProcessor
-from table_config import TableConfig
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.infrastructure.handler.hot_disk_log_file_handler import LogFileTracker
+from recorder_app.infrastructure.handler.modbus_handler import ModbusProcessor
+from recorder_app.infrastructure.core.table_config import TableConfig
 # Import plot window base classes (assumed to be unchanged)
-from plot_window_reader_basic import (
+from recorder_app.gui.recording_gui.plot_window_reader_basic import (
     PlotBaseWindow, ReadStatic, ReadContinuous, AxisLabel
 )
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -1032,8 +1032,8 @@ def test_read_plot_uptake():
     Test function for UptakePlot.
     """
     try:
-        from config_reader import config
-        from metadata_handler import MetaData
+        from recorder_app.infrastructure.core.config_reader import config
+        from recorder_app.infrastructure.handler.metadata_handler import MetaData
         meta_data = MetaData(sample_id='WAE-WA-040', db_conn_params=config.db_conn_params)
         uptake_win = UptakePlot()
         uptake_win.load_data(meta_data=meta_data)
@@ -1096,7 +1096,7 @@ def test_xy_read_plot():
     Test function for XY plot.
     """
     try:
-        from plot_window_reader_basic import PlotStaticWindow
+        from recorder_app.gui.recording_gui.plot_window_reader_basic import PlotStaticWindow
         time_plot = PlotStaticWindow(y_axis="Temperature")
         time_plot.reader.is_test = True
         xy_plot = XYPlot()
@@ -1111,8 +1111,8 @@ if __name__ == '__main__':
         from PySide6.QtWidgets import QApplication
         app = QApplication([])
 
-        from config_reader import config
-        from metadata_handler import MetaData
+        from recorder_app.infrastructure.core.config_reader import config
+        from recorder_app.infrastructure.handler.metadata_handler import MetaData
 
         db_conn_params = config.db_conn_params
         meta_data = MetaData(sample_id='WAE-WA-028', db_conn_params=db_conn_params)

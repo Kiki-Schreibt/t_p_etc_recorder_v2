@@ -1,9 +1,14 @@
 #data_loader.py
 import pandas as pd
 import numpy as np
-import logging
-from database_reading_writing import DataRetriever
-from table_config import TableConfig
+
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.infrastructure.core.table_config import TableConfig
+try:
+    import recorder_app.infrastructure.core.logger as logging
+except ImportError:
+    import logging
+
 
 # Define standard constraints as a constant
 STANDARD_CONSTRAINTS = {

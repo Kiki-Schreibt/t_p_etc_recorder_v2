@@ -8,18 +8,18 @@ from typing import Optional, List
 import pandas as pd
 from psycopg2 import IntegrityError
 
-from connections import DatabaseConnection
-from eq_p_calculation import VantHoffCalcEq as EqCalculator
-from metadata_handler import MetaData
-from modbus_handler import ModbusDBWriter, CycleCounter
-from excel_data_handler import  write_ETC_folder
-from database_reading_writing import DataBaseManipulator
-from database_reading_writing import DataRetriever
-from table_config import TableConfig
-from core import global_vars
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.utils.eq_p_calculation import VantHoffCalcEq as EqCalculator
+from recorder_app.infrastructure.handler.metadata_handler import MetaData
+from recorder_app.infrastructure.handler.modbus_handler import ModbusDBWriter, CycleCounter
+from recorder_app.infrastructure.handler.excel_data_handler import  write_ETC_folder
+from recorder_app.config_connection_reading_management.database_reading_writing import DataBaseManipulator
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -200,7 +200,7 @@ class CSVProcessor:
         csv_counter.count(sample_id=sample_id, init_state=init_state)
 
     def _create_partition_sample_id(self):
-        from table_partitioner import SamplePartitioner
+        from recorder_app.infrastructure.core.table_partitioner import SamplePartitioner
         partitioner = SamplePartitioner(db_conn_params=self.db_conn_params)
         partitioner.create_partition_for_sample_all_tables(sample_id=self.meta_data.sample_id)
 
@@ -887,7 +887,7 @@ def check_nan_values(df, fun_str=""):
 
 def _import_one_example():
     logger = logging.getLogger(__name__)
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     sample_id = "WAE-WA-028"
     file_path = r'C:\Daten\Kiki\WAE-WA-028-MgFe3wt\WAE-WA-028-TundP-Verläufe\WAE-WA-028-Mg3wtFe_2021_ 9_16_12_05_Uhr_WAE-WA-028-014.csv'
@@ -989,7 +989,7 @@ def read_and_plot_tp(sample_id=None, inserter_wizard=None, data_points_max=10000
         plt.gcf().autofmt_xdate()
         plt.gca().autoscale()
         plt.show()
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
     data_retriever.limit_datapoints = data_points_max
     table_name = TableConfig().TPDataTable.table_name
@@ -1018,7 +1018,7 @@ def import_all(compress_data=False):
     if not sample_ids:
         return
     logger = logging.getLogger(__name__)
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     for sample_id in sample_ids:
         dir_tp, dir_etc, vol_res = get_folders_for_id(sample_id=sample_id)
         csv_processor = CSVProcessor(sample_id=sample_id, config=config, compress_data=compress_data)

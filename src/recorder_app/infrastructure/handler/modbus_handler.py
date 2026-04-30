@@ -11,16 +11,16 @@ from pymodbus.exceptions import ModbusException
 from pymodbus.pdu import ExceptionResponse
 from psycopg2 import IntegrityError
 
-from connections import DatabaseConnection, ModbusConnection
-from eq_p_calculation import VantHoffCalcEq as EqCalculator
-from query_builder import QueryBuilder
-from metadata_handler import MetaData
-from table_config import TableConfig
-from database_reading_writing import DataRetriever, DataBaseManipulator
-from core import global_vars
+from recorder_app.infrastructure.connections.connections import DatabaseConnection, ModbusConnection
+from recorder_app.infrastructure.utils.eq_p_calculation import VantHoffCalcEq as EqCalculator
+from recorder_app.config_connection_reading_management.query_builder import QueryBuilder
+from recorder_app.infrastructure.handler.metadata_handler import MetaData
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever, DataBaseManipulator
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -98,7 +98,7 @@ class ModbusProcessor:
         Starts data reading, processing and writing in a continuous loop.
         """
 
-        from table_partitioner import SamplePartitioner
+        from recorder_app.infrastructure.core.table_partitioner import SamplePartitioner
         if not self.meta_data.sample_id:
             self.logger.error("No Sample ID entered")
             return
@@ -1095,7 +1095,7 @@ class ModbusDBWriter:
             self.meta_data.write()
 
 
-from eq_p_calculation import KineticCalcEquations
+from recorder_app.infrastructure.utils.eq_p_calculation import KineticCalcEquations
 
 
 class KineticCalculator:
@@ -1272,7 +1272,7 @@ def convert_value(value):
 
 
 def test_mb_reading_writing(sample_id):
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
    # config.mb_conn_params["MB_PORT"] = "503"
    # config.mb_conn_params["MB_HOST"] = "localhost"
     meta = MetaData(sample_id=sample_id, db_conn_params=config.db_conn_params)

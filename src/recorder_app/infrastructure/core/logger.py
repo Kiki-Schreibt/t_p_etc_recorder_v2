@@ -5,8 +5,8 @@ import logging
 import atexit
 from datetime import datetime
 
-from standard_paths import standard_log_dir
-from global_vars import log_file_name
+from recorder_app.infrastructure.utils.standard_paths import standard_log_dir
+from recorder_app.infrastructure.core.global_vars import log_file_name
 
 """
 Custom logger module that mimics the standard logging interface.

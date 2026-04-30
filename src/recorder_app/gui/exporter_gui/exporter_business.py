@@ -1,9 +1,9 @@
 import sys
 
-from recording_business_v2 import StaticPlotWindow
+from recorder_app.gui.recording_gui.recording_business_v2 import StaticPlotWindow
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -35,8 +35,8 @@ class ExporterBackend:
 def main():
     try:
         from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
-        from config_reader import config
-        from metadata_handler import MetaData
+        from recorder_app.infrastructure.core.config_reader import config
+        from recorder_app.infrastructure.handler.metadata_handler import MetaData
 
         app = QApplication(sys.argv)
         widget = QWidget()

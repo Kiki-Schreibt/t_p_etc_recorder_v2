@@ -1,11 +1,13 @@
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from connections import DatabaseConnection
+
+
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
 from recorder_app.table_creator import TableCreator, PARTITIONING_KEYS
 
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -358,7 +360,7 @@ class SamplePartitioner:
             conn.conn.commit()
 
     def create_partition_for_sample_all_tables(self, sample_id: str):
-        from table_config import TableConfig
+        from recorder_app.infrastructure.core.table_config import TableConfig
         table_classes = [
                             TableConfig().CycleDataTable,
                             TableConfig().ETCDataTable,
@@ -378,8 +380,8 @@ def partition_by_sample_id(config, table_class, schema: str = 'public'):
 
 # Example usage:
 if __name__ == '__main__':
-    from config_reader import config
-    from table_config import TableConfig
+    from recorder_app.infrastructure.core.config_reader import config
+    from recorder_app.infrastructure.core.table_config import TableConfig
    # table_classes = [
        # TableConfig().CycleDataTable,
        # TableConfig().ETCDataTable,

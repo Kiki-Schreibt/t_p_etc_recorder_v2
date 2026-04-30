@@ -8,10 +8,10 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox, QSpinBox
 )
 
-from config_reader import config
-from connections import DatabaseConnection
-from table_config import TableConfig
-from metadata_handler import MetaData
+from recorder_app.infrastructure.core.config_reader import config
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.handler.metadata_handler import MetaData
 
 
 # --------------------------------------------------

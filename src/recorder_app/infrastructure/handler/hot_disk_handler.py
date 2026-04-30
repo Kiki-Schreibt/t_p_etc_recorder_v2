@@ -6,11 +6,11 @@ from datetime import datetime
 import time
 import re
 
-from connections import HotDiskConnection
-from core import global_vars
+from recorder_app.infrastructure.connections.connections import HotDiskConnection
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -312,7 +312,7 @@ def test_hd_controller():
 
 if __name__ == '__main__':
 
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     hd_conn_params = config.hd_conn_params
     hd_controller = HotDiskController(hd_conn_params=hd_conn_params, response_delay=None)
     file_name = 'WAE-WA-060-000-08'

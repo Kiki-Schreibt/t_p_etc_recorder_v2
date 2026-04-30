@@ -5,8 +5,8 @@ from zoneinfo import ZoneInfo
 import logging
 import re
 
-from connections import DatabaseConnection
-from table_config import TableConfig
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.core.table_config import TableConfig
 
 
 local_tz = ZoneInfo("Europe/Berlin")
@@ -398,7 +398,7 @@ class TPQueryBuilder(BaseQueryBuilder):
         return query_part, values
 
     def _get_times_by_meta_data(self, sample_id):
-        from metadata_handler import MetaData
+        from recorder_app.infrastructure.handler.metadata_handler import MetaData
 
         meta_data = MetaData(sample_id=sample_id, db_conn_params=self.db_conn_params)
         if not meta_data.start_time or not meta_data.end_time:
@@ -631,7 +631,7 @@ class QueryBuilder:
 
 # --- Test function for quick verification ---
 def test_query_builder():
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     qb = QueryBuilder(db_conn_params=config.db_conn_params)
     sample_id = "WAE-WA-040"
     start_time = datetime(2023, 1, 1, 23, 21, 22)

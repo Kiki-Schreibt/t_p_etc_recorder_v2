@@ -5,16 +5,16 @@ from typing import Optional, Tuple, Union, List
 
 import pandas as pd
 
-import global_vars
-from connections import DatabaseConnection
+import recorder_app.infrastructure.core.global_vars
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from query_builder import QueryBuilder
-from table_config import TableConfig
-from global_vars import data_point_reading_limit
+from recorder_app.config_connection_reading_management.query_builder import QueryBuilder
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.infrastructure.core.global_vars import data_point_reading_limit
 
 local_tz = ZoneInfo("Europe/Berlin")
 LIMIT_DATA_POINTS = data_point_reading_limit
@@ -827,7 +827,7 @@ def _to_native(val):
 
 
 def test_data_retriever() -> None:
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
 
     data_retriever = DataRetriever(db_conn_params=config.db_conn_params)
     sample_id = 'WAE-WA-030'
@@ -841,8 +841,8 @@ def test_data_retriever() -> None:
 
 
 if __name__ == '__main__':
-    from config_reader import config
-    from metadata_handler import MetaData
+    from recorder_app.infrastructure.core.config_reader import config
+    from recorder_app.infrastructure.handler.metadata_handler import MetaData
     import time
     sample_id = 'WAE-WA-060'
     meta_data = MetaData(db_conn_params=config.db_conn_params, sample_id=sample_id)

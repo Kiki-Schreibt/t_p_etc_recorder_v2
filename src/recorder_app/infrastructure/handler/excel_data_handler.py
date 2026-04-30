@@ -13,14 +13,14 @@ import math
 import pandas as pd
 from psycopg2 import IntegrityError
 
-from connections import DatabaseConnection
-from metadata_handler import MetaData
-from table_config import TableConfig
-from database_reading_writing import DataRetriever
-from core import global_vars
+from recorder_app.infrastructure.connections.connections import DatabaseConnection
+from recorder_app.infrastructure.handler.metadata_handler import MetaData
+from recorder_app.infrastructure.core.table_config import TableConfig
+from recorder_app.config_connection_reading_management.database_reading_writing import DataRetriever
+from recorder_app.infrastructure.core import global_vars
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
@@ -353,7 +353,7 @@ class ExcelDataProcessor:
 
 
 def test_excel_data_processor(etc_dir: str, sample_id: str) -> None:
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     etc_processor = ExcelDataProcessor(sample_id=sample_id, file_path=etc_dir, db_conn_params=config.db_conn_params)
     etc_processor.execute()
 
@@ -397,7 +397,7 @@ def write_ETC_folder(dir_etc_folder: str, sample_id: str, logger_inst, config) -
 
 
 def _import_nickel_rene():
-    from config_reader import config
+    from recorder_app.infrastructure.core.config_reader import config
     logger = logging.getLogger(__name__)
     sample_id = 'ALR-AB-017'
     dir_etc = r"C:\Daten\Rene\ALR-AB-017\All"

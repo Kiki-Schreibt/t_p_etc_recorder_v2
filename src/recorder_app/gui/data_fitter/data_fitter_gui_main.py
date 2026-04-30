@@ -7,8 +7,8 @@ from PySide6.QtWidgets import (
 )
 import pyqtgraph as pg
 
-from data_fitter_ui_business import DataLoader
-from data_fitter_ui_business import main as fitting_main
+from recorder_app.gui.data_fitter.data_fitter_ui_business import DataLoader
+from recorder_app.gui.data_fitter.data_fitter_ui_business import main as fitting_main
 
 
 class DataFitterGuiWindow(QMainWindow):
@@ -77,7 +77,7 @@ class DataFitterMain(DataFitterGuiWindow):
             sample_id = self.sample_id_input.text()
             cycle_number = float(self.cycle_number_input.text())
             temperature = float(self.temperature_input.text())
-            from config_reader import config
+            from recorder_app.infrastructure.core.config_reader import config
             self.data_loader = DataLoader(
                 sample_id=sample_id,
                 cycle_number=cycle_number,

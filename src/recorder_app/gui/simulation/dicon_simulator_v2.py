@@ -20,15 +20,17 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from pyModbusTCP.server import ModbusServer
 from PySide6.QtCore import Signal, QObject
-from table_config import TableConfig
+
+
+from recorder_app.infrastructure.core.table_config import TableConfig
 from recorder_app.tp_program_simulator import TemperatureControllerDiconSimulator
 
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
-from memory_logger import log_memory
+from recorder_app.infrastructure.utils.memory_logger import log_memory
 
 local_tz = ZoneInfo("Europe/Berlin")
 

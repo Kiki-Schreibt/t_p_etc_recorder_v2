@@ -14,11 +14,11 @@ from PySide6.QtCore import Qt, QAbstractTableModel
 
 # ---- Import backend ----------------------------------------------------------
 try:
-    from hydride_handler import (
+    from recorder_app.infrastructure.handler.hydride_handler import (
         MetalHydrideDatabase, PeriodicTableOfElements, parse_chemical_formula
     )
 except ImportError:
-    from hydride_handler import MetalHydrideDatabase, PeriodicTableOfElements, parse_chemical_formula
+    from recorder_app.infrastructure.handler.hydride_handler import MetalHydrideDatabase, PeriodicTableOfElements, parse_chemical_formula
 
 
 # ---- Utility Functions -------------------------------------------------------

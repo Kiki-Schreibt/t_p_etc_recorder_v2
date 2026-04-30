@@ -8,10 +8,10 @@ import os
 
 from PySide6.QtCore import Signal, QObject
 
-from excel_data_handler import ExcelDataProcessor
-from standard_paths import standard_hot_disk_file_path
+from recorder_app.infrastructure.handler.excel_data_handler import ExcelDataProcessor
+from recorder_app.infrastructure.utils.standard_paths import standard_hot_disk_file_path
 try:
-    import core.logger as logging
+    import recorder_app.infrastructure.core.logger as logging
 except ImportError:
     import logging
 
