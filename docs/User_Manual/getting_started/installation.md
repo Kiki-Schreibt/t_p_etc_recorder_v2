@@ -62,7 +62,7 @@ pip install -r requirements.txt
 Launch the GUI from the `Scripts` entry point:
 
 ``` bash
-python Scripts/main.py
+python src/main.py
 ```
 
 This opens the main recording window with access to planner,

@@ -3,7 +3,7 @@ site_name: Main Window Usage
 ## The Main Window
 This window opens when you run:
 ``` bash 
-python Scripts/main.py
+python src/main.py
 ```
 
 ![main_overview.PNG](../assets/pics/main_window/main_overview.PNG)

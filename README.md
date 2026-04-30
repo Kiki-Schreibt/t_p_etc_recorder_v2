@@ -19,8 +19,10 @@ If you have any questions, feel free to contact me at Christian.Wagner.420@gmail
 , and I will do my best to help.
 
 A more detailed user manual and a sample database with example data will be added in the future. At the moment, I am focusing on other priorities. A basic manual is available under Manual.md
-The manual can be found on gh-pages [t_p_etc_recorder](https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/)
 
+
+The manual can now be found on gh-pages [t_p_etc_recorder](https://Kiki-Schreibt.github.io/t_p_etc_recorder_v2/)
+I will update it over time.
 Enjoy!
 
 ## Overview
@@ -41,12 +43,13 @@ The repository bundles several companion utilities:
 ## Project Structure
 ```
 .
-├── Scripts/main.py           # Primary GUI entry point
+├── 
 ├── src/
-│    └──│  
-│       ├── GUI/                  # PySide6 widgets and windows (recording, planning, simulation, etc.)
-│       ├── infrastructure/       # Hardware handlers, utilities, logging, and data abstractions
-│       └── ...
+     ├──  main.py                      #entry point
+│    └──recorder_appp│  
+│            ├── GUI/                  # PySide6 widgets and windows (recording, planning, simulation, etc.)
+│            ├── infrastructure/       # Hardware handlers, utilities, logging, and data abstractions
+│            └── ...
 ├── config/                   # Deployment-specific configuration files
 ├── tests/                    # 
 ├── requirements.txt          # Python dependencies
@@ -92,7 +95,7 @@ Additional assets such as schedule templates, log files, and exported data are c
 ## Running the Application
 Launch the GUI from the `Scripts` entry point:
 ```bash
-python Scripts/main.py
+python src/main.py
 ```
 This opens the main recording window with access to planner, configuration editor, quick export, DICON simulator, schedule creator, uptake correction, ETC measurement starter, and plot individualizer modules. Several tools spawn in separate windows so you can operate planners and recorders simultaneously.
 

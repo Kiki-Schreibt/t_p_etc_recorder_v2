@@ -6,59 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/database_reading_writing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/query_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/config_connection_reading_management/query_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/export_methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/export_methods.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/config_creation/config_creator_ui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/config_creation/config_creator_ui_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_gui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_gui_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_ui_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_fitter_ui_business.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/data_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/main_fitter_backend.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/main_fitter_backend.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/material_properties.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/data_fitter/material_properties.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/database_maintenance/database_maintainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/database_maintenance/database_maintainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/etc_measurement_starter/start_etc_measurement_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/etc_measurement_starter/start_etc_measurement_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_business.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/exporter_gui/exporter_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/hot_disk_sequenzer/suquenzer_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/hot_disk_sequenzer/suquenzer_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/hydride_handler_gui/hydride_handler_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/hydride_handler_gui/hydride_handler_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_ui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/kinetics_gui/kinetics_worker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/meta_data_gui/meta_data_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/meta_data_gui/meta_data_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/planner_business.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/planner_business.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/test_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/planner_gui/test_planner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/plot_individualizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/plot_individualizer/plot_individualizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/post_processor_t_p_etc/post_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/post_processor_t_p_etc/post_processor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/plot_window_reader_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/plot_window_reader_basic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_business_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_business_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_main_v3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/recording_gui/recording_main_v3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/side_operations/h2_uptake_correction_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/side_operations/h2_uptake_correction_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/simulation/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/simulation/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/simulation/dicon_simulator_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/simulation/dicon_simulator_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/simulation/simulator_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/simulation/simulator_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_calculator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/gui/tcr_estimator/tcr_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/connections.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/connections/connections.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/background_operations.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/background_operations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/config_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/config_reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/global_vars.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/global_vars.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/logger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/table_partitioner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/core/table_partitioner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/csv_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/csv_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/excel_data_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/excel_data_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_log_file_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hot_disk_log_file_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_json_db_importer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/hydride_json_db_importer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/metadata_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/metadata_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/modbus_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/handler/modbus_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/utils/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/utils/eq_p_calculation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recorder_app/table_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/table_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/user_manual/getting_started/installation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/user_manual/getting_started/installation.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/user_manual/main_window.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/user_manual/main_window.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -225,11 +176,11 @@
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\GUI\planner_gui\ui" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\Scripts" />
+      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app\" />
       <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\assets\pics\dicon_simulator" />
-      <recent name="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\docs\assets\pics\test_planner" />
     </key>
   </component>
   <component name="RunManager" selected="Python.main (1)">
@@ -299,7 +250,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="t_p_etc_recorder_v2" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -308,11 +259,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/recorder_app" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/recorder_app/main.py" />
+      <option name="SCRIPT_NAME" value="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -330,11 +281,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Scripts" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/recorder_app" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\recorder_app\main.py" />
+      <option name="SCRIPT_NAME" value="C:\Daten\Kiki\ProgrammingStuff\t_p_etc_recorder_v2\src\main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
