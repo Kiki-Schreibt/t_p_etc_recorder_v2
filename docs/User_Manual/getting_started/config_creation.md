@@ -26,7 +26,7 @@ opens:
     - Note: For the Jumo DICON touch, data is stored in the selected register and the following register.
 
     - Conversion happens like:
-      (See Code Block at bottom of the page)
+      (See Code Block of ModbusReader at bottom of the page. Look at def _read_raw_registers and def _select_interesting )
 
 3. **Logging Settings**
     - Define a folder and file nam to store the application logs. The file name will be extended by date and time
@@ -49,21 +49,5 @@ opens:
     - To start a test continue with 
       [Start New Test](../../user_manual/getting_started/create_new_test.md)
 
-
-
-
-
-``` {#conversion .python}
-def _unpack_to_df(self, regs):
-    values = []
-    for i in range(0, len(regs), 2):
-        raw = struct.pack('>HH', regs[i+1], regs[i])
-        values.append(struct.unpack('>f', raw)[0])
-    cols = [
-        self.table.pressure,
-        self.table.temperature_sample,
-        self.table.setpoint_sample,
-        self.table.temperature_heater,
-        self.table.setpoint_heater
-           ]
-```
+      
+::: recorder_app.infrastructure.handler.modbus_handler.ModbusReader

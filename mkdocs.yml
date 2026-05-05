@@ -14,8 +14,7 @@ plugins:
               show_source: true
               show_root_heading: true
               show_submodules: false
-            paths:
-              - src
+            paths: [src]
   - gen-files:
       scripts:
         - docs/gen_api_v2.py
