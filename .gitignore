@@ -1,3 +1,7 @@
 old_snippets/
 test_data/
 site/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
