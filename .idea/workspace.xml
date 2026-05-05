@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267d731c-00f3-4994-92ef-b7d436f09219" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/getting_started/config_creation.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/User_Manual/main_window.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/User_Manual/main_window.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mkdocs.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mkdocs.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/recorder_app/infrastructure/utils/eq_p_calculation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recorder_app/infrastructure/utils/eq_p_calculation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -447,7 +444,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/recorder_app/infrastructure/utils/eq_p_calculation.py</url>
-          <line>168</line>
+          <line>461</line>
           <option name="timeStamp" value="734" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

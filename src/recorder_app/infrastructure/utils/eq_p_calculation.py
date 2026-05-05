@@ -25,10 +25,83 @@ V_pipes = global_vars.V_pipes     # [m³] Pipe volume
 
 class VantHoffCalcEq:
     """
-    Class to calculate hydrogen equilibrium pressure and uptake values using the Van't Hoff equation.
+    Thermodynamic calculator for hydrogen equilibrium pressure and uptake
+    based on the Van't Hoff relation and ideal gas mass balance.
 
-    This version accepts scalars, NumPy arrays, or pandas Series as inputs.
+    This class provides a complete toolkit for evaluating hydrogen storage
+    systems, including:
+
+    - Equilibrium pressure calculation via the Van't Hoff equation
+    - Hydrogen uptake (wt.%) computation from pressure–temperature data
+    - Inverse reconstruction of pressures from known uptake values
+    - Full and simplified ideal gas mass-balance models
+
+    The implementation supports scalar, NumPy array, and pandas Series inputs,
+    enabling both single-point evaluation and vectorized dataset processing.
+
+    Core Thermodynamic Models
+    -------------------------
+    1. Van't Hoff relation:
+        P_eq ∝ exp( -ΔH / (R * T) + ΔS / R )
+
+    2. Ideal gas hydrogen mass balance:
+        m = (p * (V_res + V_pipes)) / (R_H2 * T_res)
+          + (p * V_cell) / (R_H2 * T_cell)
+
+    3. Inverse pressure reconstruction from mass:
+        p = m * R_H2 / (V/T terms)
+
+    Key Features
+    ------------
+    - Flexible input handling (scalar, vector, Series)
+    - Database-driven thermodynamic parameter retrieval (enthalpy/entropy)
+    - Multiple pressure reconstruction strategies:
+        * direct inversion
+        * full mass-balance solution
+        * simplified reverse model
+    - Optional metadata integration for material-specific properties
+    - Built-in validation against theoretical uptake limits
+
+    Parameters
+    ----------
+    enthalpy : float, optional
+        Reaction enthalpy ΔH in J/mol.
+    entropy : float, optional
+        Reaction entropy ΔS in J/(mol·K).
+    meta_data : object, optional
+        Metadata container expected to provide:
+        - enthalpy, entropy
+        - sample_material
+        - theoretical_uptake (optional constraint)
+    hydride : str, optional
+        Hydride identifier used for database lookup if metadata is incomplete.
+    db_conn_params : dict, optional
+        Database connection parameters used for retrieving thermodynamic data.
+
+    Attributes
+    ----------
+    enthalpy : float
+        Active enthalpy value used in calculations.
+    entropy : float
+        Active entropy value used in calculations.
+    meta_data : object
+        Stored metadata object, if provided.
+    db_conn_params : dict
+        Database connection configuration.
+    logger : logging.Logger
+        Logger instance for runtime diagnostics.
+
+    Notes
+    -----
+    - All temperature inputs are assumed to be in °C unless explicitly stated.
+    - Pressures are handled in bar externally but converted to Pa internally.
+    - Volumes must be provided in consistent units per method documentation.
+    - Ideal gas behavior is assumed throughout; no real gas corrections are applied.
+    - Constants such as `R_H2` and `V_pipes` are assumed to be defined at module level.
+    - The class is designed for research-grade hydrogen storage modeling rather
+      than high-pressure engineering certification.
     """
+
     def __init__(self,
                  enthalpy: float = None,
                  entropy: float = None,
@@ -43,7 +116,45 @@ class VantHoffCalcEq:
         self.enthalpy, self.entropy = self._get_enthalpy_entropy(enthalpy, entropy, hydride)
 
     def _get_enthalpy_entropy(self, enthalpy: float, entropy: float, hydride: str) -> tuple:
-        # Check if meta_data provides the values
+        """
+        Resolve enthalpy and entropy values for a metal hydride system using a prioritized lookup strategy.
+
+        The method determines the appropriate enthalpy (ΔH) and entropy (ΔS) values based on the following order:
+
+        1. If both `enthalpy` and `entropy` are defined in `self.meta_data`, those values are returned.
+        2. If `self.meta_data.sample_material` is defined, values are retrieved from the database
+           using the sample material identifier.
+        3. If a `hydride` name is provided, values are retrieved from the database using that identifier.
+        4. If both `enthalpy` and `entropy` arguments are explicitly provided, those values are returned.
+        5. If none of the above sources are available, default values for MgH2 are used.
+
+        Parameters
+        ----------
+        enthalpy : float
+            User-provided enthalpy value (ΔH) in J/mol. Used as a fallback if no metadata or database values are available.
+        entropy : float
+            User-provided entropy value (ΔS) in J/(mol·K). Used as a fallback if no metadata or database values are available.
+        hydride : str
+            Name of the hydride material used to query the database if metadata is incomplete.
+
+        Returns
+        -------
+        tuple
+            A tuple `(enthalpy, entropy)` where:
+            - enthalpy is in J/mol
+            - entropy is in J/(mol·K)
+
+        Notes
+        -----
+        - Database lookups are performed via `MetalHydrideDatabase.get_enthalpy_entropy`.
+        - Default fallback values correspond to MgH2:
+            enthalpy = 7.4701e+04 J/mol
+            entropy = 134.6944 J/(mol·K)
+        - A log message is emitted when default values are used.
+        """
+
+
+
         if hasattr(self.meta_data, 'enthalpy') and self.meta_data.enthalpy is not None \
            and hasattr(self.meta_data, 'entropy') and self.meta_data.entropy is not None:
             return self.meta_data.enthalpy, self.meta_data.entropy
@@ -59,8 +170,39 @@ class VantHoffCalcEq:
 
     def _compute_vant_hoff(self, temperature_array: np.ndarray, enthalpy: float, entropy: float) -> np.ndarray:
         """
-        Compute the Van't Hoff equation term for an array of temperatures.
-        The temperatures are assumed to be in Celsius.
+        Compute the equilibrium pressure term using the Van't Hoff equation.
+
+        This method evaluates the exponential form of the Van't Hoff relation:
+
+            P_eq ∝ exp( -ΔH / (R * T) + ΔS / R )
+
+        where:
+            - ΔH is the reaction enthalpy (J/mol)
+            - ΔS is the reaction entropy (J/(mol·K))
+            - R is the universal gas constant
+            - T is the absolute temperature (K)
+
+        The input temperature array is assumed to be in degrees Celsius and is internally
+        converted to Kelvin.
+
+        Parameters
+        ----------
+        temperature_array : np.ndarray
+            Array of temperatures in degrees Celsius.
+        enthalpy : float
+            Reaction enthalpy ΔH in J/mol.
+        entropy : float
+            Reaction entropy ΔS in J/(mol·K).
+
+        Returns
+        -------
+        np.ndarray
+            Array of exponential Van't Hoff terms (dimensionless), proportional to equilibrium pressure.
+
+        Notes
+        -----
+        - The returned values are not scaled by a reference pressure unless handled elsewhere.
+        - Numerical stability may be affected for very large |ΔH| or very low temperatures.
         """
         T_kelvin = temperature_array + 273.15
         exponent = -enthalpy / (R_universal * T_kelvin) + entropy / R_universal
@@ -68,11 +210,41 @@ class VantHoffCalcEq:
 
     def calc_eq(self, temperature, enthalpy: float = None, entropy: float = None):
         """
-        Calculate the equilibrium pressure using the Van't Hoff equation at a given temperature.
-        The input temperature can be a scalar, NumPy array, or pandas Series (in °C).
+        Calculate the equilibrium pressure using the Van't Hoff relation.
 
-        Returns:
-            A scalar (if input is scalar) or an array/Series of equilibrium pressures.
+        This method evaluates the equilibrium pressure (or proportional term) as a function
+        of temperature based on the Van't Hoff equation. The computation is delegated to
+        `_compute_vant_hoff`, with internal handling for different input types.
+
+        Parameters
+        ----------
+        temperature : float, np.ndarray, or pandas.Series
+            Temperature input in degrees Celsius. Can be a scalar, NumPy array,
+            or pandas Series.
+        enthalpy : float, optional
+            Reaction enthalpy ΔH in J/mol. If provided יחד with `entropy`, overrides
+            the instance attributes `self.enthalpy` and `self.entropy`.
+        entropy : float, optional
+            Reaction entropy ΔS in J/(mol·K). Must be provided יחד with `enthalpy`
+            to override instance attributes.
+
+        Returns
+        -------
+        float, np.ndarray, or pandas.Series
+            Equilibrium pressure (or proportional Van't Hoff term), with output type
+            matching the input:
+            - scalar float if `temperature` is scalar
+            - np.ndarray if input is array-like
+            - pandas.Series if input is a Series (index preserved)
+
+        Notes
+        -----
+        - Temperatures are internally converted from Celsius to Kelvin.
+        - If both `enthalpy` and `entropy` are provided, they overwrite the instance
+          attributes for subsequent calculations.
+        - The returned value is the exponential Van't Hoff term and may require
+          additional scaling (e.g., reference pressure) depending on the application.
+        - Uses `np.atleast_1d` to normalize input for vectorized computation.
         """
         if enthalpy is not None and entropy is not None:
             self.enthalpy, self.entropy = enthalpy, entropy
@@ -92,8 +264,44 @@ class VantHoffCalcEq:
     def calc_vant_hoff_lin(self, temperature_range: range = range(30, 500, 2),
                             enthalpy: float = None, entropy: float = None) -> np.ndarray:
         """
-        Calculate the Van't Hoff curve over a range of temperatures (°C).
+        Compute the Van't Hoff equilibrium curve over a specified temperature range.
+
+        This method evaluates the exponential Van't Hoff relation across a discrete
+        set of temperatures:
+
+            P_eq ∝ exp( -ΔH / (R * T) + ΔS / R )
+
+        where temperatures are provided in degrees Celsius and internally converted
+        to Kelvin.
+
+        Parameters
+        ----------
+        temperature_range : range, optional
+            Range of temperatures in degrees Celsius. Default is `range(30, 500, 2)`.
+            The range is converted to a NumPy array for vectorized computation.
+        enthalpy : float, optional
+            Reaction enthalpy ΔH in J/mol. If provided יחד with `entropy`, these values
+            override the instance attributes for this calculation.
+        entropy : float, optional
+            Reaction entropy ΔS in J/(mol·K). Must be provided יחד with `enthalpy`
+            to override instance attributes.
+
+        Returns
+        -------
+        np.ndarray
+            Array of Van't Hoff exponential terms (dimensionless), proportional to
+            equilibrium pressure at each temperature in `temperature_range`.
+
+        Notes
+        -----
+        - If `enthalpy` and `entropy` are not provided, `self.enthalpy` and
+          `self.entropy` are used.
+        - The output corresponds to the unscaled exponential term; any reference
+          pressure factor must be applied externally if required.
+        - The temperature range is explicitly materialized into a NumPy array,
+          which may have memory implications for very large ranges.
         """
+
         used_enthalpy, used_entropy = (enthalpy, entropy) if (enthalpy is not None and entropy is not None) \
                                       else (self.enthalpy, self.entropy)
         temperature_array = np.array(list(temperature_range))
@@ -101,10 +309,54 @@ class VantHoffCalcEq:
 
     def _H2_mass_fun(self, p_list, T_list, V_res_list, V_cell, T_res_list):
         """
-        Calculate the mass of hydrogen gas using vectorized operations.
-        Accepts scalar, list, NumPy array, or pandas Series inputs.
-        Temperatures (T_list and T_res_list) are assumed to be in °C.
+        Compute the mass of hydrogen gas in a coupled reservoir–cell system.
+
+        This method evaluates the total hydrogen mass assuming ideal gas behavior
+        in two volumes:
+            1. Reservoir and connected piping volume
+            2. Measurement cell volume
+
+        The total mass is calculated as:
+
+            m = (p * (V_res + V_pipes)) / (R_H2 * T_res)
+              + (p * V_cell) / (R_H2 * T_cell)
+
+        where pressure is converted from bar to Pa and temperatures are converted
+        from Celsius to Kelvin.
+
+        Parameters
+        ----------
+        p_list : float, list, np.ndarray, or pandas.Series
+            Hydrogen pressure(s) in bar.
+        T_list : float, list, np.ndarray, or pandas.Series
+            Cell temperature(s) in degrees Celsius.
+        V_res_list : float, list, np.ndarray, or pandas.Series
+            Reservoir volume(s) in m³.
+        V_cell : float
+            Cell volume in m³.
+        T_res_list : float, list, np.ndarray, or pandas.Series
+            Reservoir temperature(s) in degrees Celsius.
+
+        Returns
+        -------
+        float or np.ndarray
+            Total hydrogen mass in kilograms:
+            - scalar if all inputs resolve to a single value
+            - NumPy array for vectorized inputs
+
+        Notes
+        -----
+        - All inputs are internally converted to at least 1D NumPy arrays using
+          `np.atleast_1d` to enable vectorized computation.
+        - Pressure is assumed to be provided in bar and is converted to Pa via
+          multiplication by 1e5.
+        - `V_pipes` and `R_H2` are assumed to be defined in the enclosing scope
+          or as class/module-level constants.
+        - The calculation assumes ideal gas behavior and does not account for
+          real gas effects (e.g., compressibility factor).
+        - Shape compatibility between inputs must allow NumPy broadcasting.
         """
+
         # Convert all inputs to at least 1D NumPy arrays
         p_arr = np.atleast_1d(p_list)
         T_arr = np.atleast_1d(T_list) + 273.15  # Convert to Kelvin
@@ -117,22 +369,63 @@ class VantHoffCalcEq:
 
     def calc_h2_uptake(self, p_hyd, p_dehyd, T_hyd, T_dehyd, V_res, V_cell, m_sample, T_reservoir: float = 30):
         """
-        Calculate the hydrogen uptake based on hydride and dehydride measurements.
-        Input pressures and temperatures can be scalars, lists, NumPy arrays, or pandas Series.
+        Calculate hydrogen uptake (wt.%) from hydride and dehydride measurements.
 
-        Parameters:
-            p_hyd: Pressure during hydride (bar).
-            p_dehyd: Pressure during dehydride (bar).
-            T_hyd: Temperature during hydride (°C).
-            T_dehyd: Temperature during dehydride (°C).
-            V_res: Reservoir volume (mL).
-            V_cell: Cell volume (µL).
-            m_sample: Sample mass (g).
-            T_reservoir (float, optional): Reservoir temperature (°C).
+        This method determines the hydrogen mass difference between two states
+        (hydrogenation and dehydrogenation) using the ideal gas law, and converts
+        it into gravimetric uptake (weight percent):
 
-        Returns:
-            The weight percentage of hydrogen uptake as a scalar, NumPy array, or pandas Series.
+            m_uptake = |m_dehyd - m_hyd|
+            wt.% = 100 * m_uptake / (m_uptake + m_sample)
+
+        The hydrogen masses are computed via `_H2_mass_fun`, which accounts for
+        both reservoir and cell gas contributions.
+
+        Parameters
+        ----------
+        p_hyd : float, list, np.ndarray, or pandas.Series
+            Pressure during hydrogenation in bar.
+        p_dehyd : float, list, np.ndarray, or pandas.Series
+            Pressure during dehydrogenation in bar.
+        T_hyd : float, list, np.ndarray, or pandas.Series
+            Temperature during hydrogenation in °C.
+        T_dehyd : float, list, np.ndarray, or pandas.Series
+            Temperature during dehydrogenation in °C.
+        V_res : float
+            Reservoir volume in mL.
+        V_cell : float
+            Cell volume in µL.
+        m_sample : float
+            Sample mass in grams.
+        T_reservoir : float, optional
+            Reservoir temperature in °C. Default is 30 °C.
+
+        Returns
+        -------
+        float, np.ndarray, or pandas.Series, or None
+            Hydrogen uptake in weight percent:
+            - scalar float if inputs are scalar
+            - NumPy array for vectorized inputs
+            - pandas.Series if input temperatures are Series (index preserved)
+            - None if required inputs are missing
+
+        Notes
+        -----
+        - Unit conversions applied internally:
+            * Pressure: bar → Pa (×1e5)
+            * Temperature: °C → K (+273.15)
+            * Reservoir volume: mL → m³ (×1e-3)
+            * Cell volume: µL → m³ (×1e-6)
+            * Sample mass: g → kg (×1e-3)
+        - The calculation assumes ideal gas behavior (no compressibility correction).
+        - Absolute difference between hydride and dehydride states is used to ensure
+          non-negative uptake.
+        - If `self.meta_data.theoretical_uptake` is defined, results are filtered:
+            values outside [0, theoretical_uptake + 0.2] are replaced with None.
+        - All inputs are broadcast using NumPy semantics via `_H2_mass_fun`.
+        - A log error is emitted and `None` is returned if any required input is missing.
         """
+
         # Convert m_sample to kg, and volumes to m³
         m_sample = np.round(m_sample * 1e-3, 9)  # g -> kg
         V_cell = V_cell * 1e-6                    # µL -> m³
@@ -169,9 +462,68 @@ class VantHoffCalcEq:
                              T_dehyd, V_res, V_cell,
                              T_reservoir: float = 30):
         """
-        Reverse the calculation to find the pressure change from a given weight percentage.
-        This version has been updated to work with scalar, array, or pandas Series inputs.
+        Compute the pressure change corresponding to a given hydrogen uptake (wt.%).
+
+        This method performs the inverse of the uptake calculation by reconstructing
+        the pressure difference between hydrogenation and dehydrogenation states
+        from a specified gravimetric hydrogen content. The hydrogen mass is first
+        derived from the weight percentage:
+
+            m_H2 = (wt.% / 100) * m_sample / (1 - wt.% / 100)
+
+        The corresponding pressure change is then obtained using an ideal gas-based
+        formulation consistent with `_H2_mass_fun`, accounting for both reservoir
+        and cell volumes.
+
+        Depending on which pressure is provided (`p_hyd` or `p_dehyd`), the method
+        computes the missing counterpart:
+            - If `p_hyd` is given → compute `p_dehyd`
+            - If `p_dehyd` is given → compute `p_hyd`
+
+        Parameters
+        ----------
+        wt_p : float, np.ndarray, or pandas.Series
+            Hydrogen uptake in weight percent (wt.%).
+        m_sample : float
+            Sample mass in grams.
+        p_hyd : float, np.ndarray, or pandas.Series, or None
+            Hydrogenation pressure in bar. If None, it will be computed.
+        p_dehyd : float, np.ndarray, or pandas.Series, or None
+            Dehydrogenation pressure in bar. If None, it will be computed.
+        T_hyd : float, np.ndarray, or pandas.Series
+            Hydrogenation temperature in °C.
+        T_dehyd : float, np.ndarray, or pandas.Series
+            Dehydrogenation temperature in °C.
+        V_res : float
+            Reservoir volume in mL.
+        V_cell : float
+            Cell volume in µL.
+        T_reservoir : float, optional
+            Reservoir temperature in °C. Default is 30 °C.
+
+        Returns
+        -------
+        tuple
+            (p_hyd, p_dehyd), where each element is:
+            - scalar float if inputs resolve to a single value
+            - np.ndarray for vectorized inputs
+            - pandas.Series if input pressures were Series (index preserved)
+
+        Notes
+        -----
+        - Unit conversions applied internally:
+            * Sample mass: g → kg (×1e-3)
+            * Volume: mL → m³ (×1e-3), µL → m³ (×1e-6)
+            * Temperature: °C → K (+273.15)
+            * Pressure: returned in bar
+        - Uses ideal gas assumptions; no real gas corrections are applied.
+        - Requires exactly one of `p_hyd` or `p_dehyd` to be provided; if both
+          are given, no adjustment is performed.
+        - Computation is vectorized using NumPy broadcasting.
+        - If inputs are pandas Series, the output preserves the original index.
+        - Relies on constants `R_H2` and `V_pipes` defined in the enclosing scope.
         """
+
         # Convert sample mass and volumes
         m_sample = m_sample * 1e-3  # g -> kg
         wt_p_fraction = wt_p / 100  # Percentage to fraction
@@ -226,6 +578,72 @@ class VantHoffCalcEq:
                             T_hyd, T_dehyd, V_res,
                             V_cell, T_reservoir=30):
 
+        """
+        Compute hydrogenation/dehydrogenation pressures from a given uptake (wt.%)
+        using a full mass-balance formulation.
+
+        This method reconstructs the missing pressure (`p_hyd` or `p_dehyd`) by
+        explicitly solving the ideal gas mass balance between two thermodynamic
+        states. The formulation accounts for temperature-dependent gas volumes
+        in both the reservoir (including piping) and the measurement cell.
+
+        The gas-phase hydrogen mass is expressed as:
+
+            m_gas = (p * 1e5 * C(T)) / R_H2
+
+        where:
+            C(T) = (V_res + V_pipes) / T_res + V_cell / T_cell
+
+        The hydrogen uptake (wt.%) is converted to absolute hydrogen mass:
+
+            m_H2 = (wt.% / 100) * m_sample / (1 - wt.% / 100)
+
+        The missing pressure is then obtained by enforcing:
+
+            m_gas,dehyd = m_gas,hyd ± m_H2
+
+        depending on the direction of the process.
+
+        Parameters
+        ----------
+        wt_p : float or None
+            Hydrogen uptake in weight percent (wt.%). If None, no mass change is applied.
+        m_sample : float
+            Sample mass in grams.
+        p_hyd : float or None
+            Hydrogenation pressure in bar. If None, it will be computed.
+        p_dehyd : float or None
+            Dehydrogenation pressure in bar. If None, it will be computed.
+        T_hyd : float
+            Hydrogenation temperature in °C.
+        T_dehyd : float
+            Dehydrogenation temperature in °C.
+        V_res : float
+            Reservoir volume in mL.
+        V_cell : float
+            Cell volume in µL.
+        T_reservoir : float, optional
+            Reservoir temperature in °C. Default is 30 °C.
+
+        Returns
+        -------
+        tuple
+            (p_hyd, p_dehyd) in bar.
+
+        Notes
+        -----
+        - Unit conversions applied internally:
+            * Sample mass: g → kg (×1e-3)
+            * Volume: mL → m³ (×1e-3), µL → m³ (×1e-6)
+            * Temperature: °C → K (+273.15)
+            * Pressure: internally converted between bar and Pa
+        - Uses ideal gas assumptions; no compressibility corrections are included.
+        - Requires exactly one of `p_hyd` or `p_dehyd` to be provided.
+        - `V_pipes` and `R_H2` are assumed to be defined in the enclosing scope.
+        - Unlike `calc_delta_p`, this implementation explicitly computes intermediate
+          gas masses, improving transparency and numerical traceability.
+        """
+
         # --- Unit conversions ---
         m_sample = m_sample * 1e-3
         V_res = V_res * 1e-3
@@ -267,12 +685,51 @@ class VantHoffCalcEq:
 
     def _reverse_H2_mass_fun(self, m: float, T_cell: float, V_res: float, V_cell: float, T_res: float) -> float:
         """
-        Reverse the hydrogen mass function to calculate pressure from hydrogen mass.
-        This version assumes scalar values and is used as a fallback.
+        Compute pressure from hydrogen mass using the inverse ideal gas relation.
+
+        This method inverts the hydrogen mass calculation used in `_H2_mass_fun`,
+        solving for pressure given a known hydrogen mass distributed between the
+        reservoir (including piping) and the measurement cell.
+
+        The pressure is calculated as:
+
+            p = m * R_H2 * 1e-5 / [ (V_res + V_pipes) / T_res + V_cell / T_cell ]
+
+        where:
+            - m is the hydrogen mass (kg)
+            - R_H2 is the specific gas constant for hydrogen (J/(kg·K))
+            - T_res and T_cell are absolute temperatures (K)
+            - V_res, V_cell, and V_pipes are volumes in m³
+            - The factor 1e-5 converts pressure from Pa to bar
+
+        Parameters
+        ----------
+        m : float
+            Hydrogen mass in kilograms.
+        T_cell : float
+            Cell temperature in Kelvin.
+        V_res : float
+            Reservoir volume in m³.
+        V_cell : float
+            Cell volume in m³.
+        T_res : float
+            Reservoir temperature in Kelvin.
+
+        Returns
+        -------
+        float
+            Pressure in bar.
+
+        Notes
+        -----
+        - This function assumes scalar inputs and does not support vectorized operations.
+        - Ideal gas behavior is assumed (no compressibility correction).
+        - `V_pipes` and `R_H2` are expected to be defined in the enclosing scope.
+        - Primarily used as a fallback or low-level helper for pressure reconstruction.
         """
+
         p = m * R_H2 * 1e-5 / (((V_res + V_pipes) / T_res) + (V_cell / T_cell))
         return p
-
 
 
 Number = Union[int, float, np.number]
