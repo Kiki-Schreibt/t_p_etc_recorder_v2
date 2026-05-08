@@ -1,8 +1,9 @@
  ## Project Structure
  ```
  .
- ├── Scripts/main.py           # Primary GUI entry point
+           
  ├── src/
+ ├   ├── main.py                  # Primary GUI entry point
  │   ├── GUI/                  # PySide6 widgets and windows (recording, planning, simulation, etc.)
  │   ├── infrastructure/       # Hardware handlers, utilities, logging, and data abstractions
  │   ├── config/               # Default configuration templates
@@ -55,7 +56,7 @@ It combines live data recording, live analysis, plotting, export tooling, planni
 +- **Plot Individualizer** (To plot individual columns from the database tables freely)
 +- **Hydride Handler** (Allows adding/updating/removing metal hydrides to the database. This data is necessary to correctly detect the de-/hydrogenation state of the measured hydride)
 +
-+The main integration point is `Scripts/main.py`, which launches the recording window and exposes these tools through actions (Drop down menu or buttons) in the GUI.
++The main integration point is `src/main.py`, which launches the recording window and exposes these tools through actions (Drop down menu or buttons) in the GUI.
 +
 +---
 +
@@ -98,7 +99,7 @@ Install and set up Postgres before using the application. Necessary database tab
 +   ```
 +4. Start app
 +   ```bash
-+   python Scripts/main.py
++   python src/main.py
 +   ```
 +
 +On first launch (if no config file exists), the **Configuration Input** window opens first.
@@ -210,7 +211,7 @@ Install and set up Postgres before using the application. Necessary database tab
 +
 +## 8. Files and paths you should know
 +
-+- Main launcher: `Scripts/main.py`
++- Main launcher: `src/main.py`
 +- Core code: `src/`
 +- Config templates and runtime configs: `config/` and `src/config/`
 +- Logs: default `Log/`
@@ -294,7 +295,7 @@ Install and set up Postgres before using the application. Necessary database tab
 +
 +## 13. Quick reference cheat sheet
 +
-+- **Start app:** `python Scripts/main.py`
++- **Start app:** `python src/main.py`
 +- **First-run required action:** fill config, test, save
 +- **No hardware available:** use DICON Simulator (Start the simulator before the recording and end it after the recording stop)
 +- **Need fast output dump:** Quick Export
