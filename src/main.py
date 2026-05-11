@@ -100,7 +100,7 @@ class MainProgram(RecordingMainWindow):
         self.ui.actionPlot_Individualizer.triggered.connect(self._open_plot_individualizer)
         self.ui.actionHydride_Handler.triggered.connect(self._open_hydride_handler)
         self.ui.actionMeta_Data.triggered.connect(self._open_meta_data_handler)
-
+        self.ui.actionKinetic_Calculator.triggered.connect(self._open_kinetic_calculator)
 
     def open_test_planner(self):
         """
@@ -193,7 +193,7 @@ class MainProgram(RecordingMainWindow):
     def _open_etc_measurement_performer(self):
         try:
             self.etc_ms = StartETCMeasurementGUI(config=self.config,
-                                                 standard_etc_folder_path=global_vars.standard_etc_folder_path,
+                                                 standard_etc_folder_path=recorder_app.infrastructure.core.global_vars.standard_etc_folder_path,
                                                  meta_data=self.meta_data)
             self.etc_ms.show()
         except Exception as e:
@@ -223,6 +223,22 @@ class MainProgram(RecordingMainWindow):
 
         except Exception as e:
             self.logger.error(f"Error opening meta data GUI {e}")
+
+    def _open_kinetic_calculator(self):
+        try:
+            from recorder_app.gui.kinetics_gui.kinetics_main import DataAccess, KineticsView, KineticsController
+            from recorder_app.infrastructure.core.config_reader import config
+            self.kin_dal = DataAccess(config)
+
+            # View + Controller
+            
+            self.kin_view = KineticsView()
+            self.kin_controller = KineticsController(self.kin_view, self.kin_dal)
+            self.kinetic_calculator = MetaDataGUI()
+            self.kin_view.show()
+
+        except Exception as e:
+            self.logger.error(f"Error opening Kinetic GUI {e}")
 
     def closeEvent(self, event):
         """

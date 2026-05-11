@@ -685,6 +685,7 @@
     <addaction name="actionPlot_Individualizer"/>
     <addaction name="actionHydride_Handler"/>
     <addaction name="actionMeta_Data"/>
+    <addaction name="actionKinetic_Calculator"/>
    </widget>
    <addaction name="menuView"/>
   </widget>
@@ -742,6 +743,11 @@
   <action name="actionMeta_Data">
    <property name="text">
     <string>Meta Data</string>
+   </property>
+  </action>
+  <action name="actionKinetic_Calculator">
+   <property name="text">
+    <string>Kinetic Calculator</string>
    </property>
   </action>
  </widget>
