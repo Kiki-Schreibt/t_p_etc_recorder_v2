@@ -231,7 +231,7 @@ class MainProgram(RecordingMainWindow):
             self.kin_dal = DataAccess(config)
 
             # View + Controller
-            
+
             self.kin_view = KineticsView()
             self.kin_controller = KineticsController(self.kin_view, self.kin_dal)
             self.kinetic_calculator = MetaDataGUI()
