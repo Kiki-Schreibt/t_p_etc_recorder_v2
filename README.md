@@ -15,7 +15,7 @@ Feel free to extend the functionality for your own purposes. However, please do 
 
 If you are a professional programmer, parts of the implementation may appear unpolished. I appreciate your understanding, as this project was developed alongside learning the necessary programming skills.
 
-If you have any questions, feel free to contact me at Christian.Wagner.420@gmail.com
+If you have any questions, feel free to contact me at Christian.Wagner.j@gmail.com
 , and I will do my best to help.
 
 A more detailed user manual and a sample database with example data will be added in the future. At the moment, I am focusing on other priorities. A basic manual is available under Manual.md
@@ -152,6 +152,6 @@ If you want to use this software commercially, you must obtain a separate writte
 For commercial licensing inquiries, contact:
 
 Christian Wagner  
-Christian.Wagner.420@gmail.com
+Christian.Wagner.j@gmail.com
 
 For further information see LICENSE.md, COMMERCIAL-LICENSE.md and NOTICE.md

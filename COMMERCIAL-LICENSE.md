@@ -9,4 +9,4 @@ If you want to use this software commercially, including internal business use, 
 For commercial licensing inquiries, contact:
 
 Christian Wagner  
-Christian.Wagner.420@gmail.com
+Christian.Wagner.j@gmail.com
