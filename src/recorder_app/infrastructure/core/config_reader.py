@@ -115,7 +115,7 @@ class ConfigPrompter:
                 "DB_SERVER": "localhost",
                 "DB_DATABASE": "postgres",
                 "DB_USERNAME": "postgres",
-                "DB_PASSWORD": "Bananensalat1!",
+                "DB_PASSWORD": "pppw",
                 "DB_PORT": 5432,  # Use an integer for the port
                 "MODBUS_HOST": "192.168.178.1",
                 "MODBUS_PORT": 502,
