@@ -48,14 +48,24 @@ class DataLoader:
     def get_isotherm(self, sample_id=None, cycle_number=None, temperature=None, time_window: list=None):
         """
         Retrieve the isotherm data along with the mean temperature and de-hydrogenation state.
+
+        Constructor values are used when the corresponding arguments are omitted.
         """
-        if cycle_number:
+        sample_id = self.sample_id if sample_id is None else sample_id
+        cycle_number = self.cycle_number if cycle_number is None else cycle_number
+        temperature = self.temperature if temperature is None else temperature
+
+        if cycle_number is not None and temperature is not None:
             isotherm = self._read_isotherm_by_cycle_number(sample_id, cycle_number, temperature)
-        elif time_window:
+        elif time_window is not None:
             isotherm = self._read_isotherm_by_time(sample_id, time_window)
         else:
-            self.logger.error("Please provide either cycle_number and temperature or a time window to read isother")
-            raise
+            self.logger.error(
+                "Please provide either cycle_number and temperature or a time window to read isother"
+            )
+            raise ValueError(
+                "Either cycle_number and temperature or time_window must be provided."
+            )
 
         mean_temperature, de_hyd_state = self._process_isotherm(isotherm)
         return isotherm, mean_temperature, de_hyd_state
