@@ -10,9 +10,9 @@ Keeps the recorder's historical Kaganer/ZBS models and adds:
 from __future__ import annotations
 import numpy as np
 
-_NIST_H2_T_K = np.array([200,250,300,350,400,450,500,550,600], dtype=float)
-_NIST_H2_K_MW = np.array(
-    [132.27,160.44,185.63,210.20,233.94,256.84,280.40,304.11,327.99],
+_H2_T_K = np.array([200,250,300,350,400,450,500,550,600,700,800,900,1000], dtype=float)
+_H2_K_MW = np.array(
+    [131.0,157.0,183.0,204.0,226.0,247.0,266.0,285.0,305.0,342.0,378.0,412.0,448.0],
     dtype=float,
 )
 
@@ -45,10 +45,15 @@ class BaseModel:
         return self.mp.kB * self.T / (np.sqrt(2.0) * self.mp.sigma0 * p_pa)
 
     def nist_h2_conductivity(self):
-        """Zero-density normal-H2 conductivity, NIST SRD23 values."""
-        if not 200.0 <= self.T <= 600.0:
-            raise ValueError(f"NIST H2 conductivity table covers 200--600 K; got {self.T:.1f} K.")
-        return float(np.interp(self.T, _NIST_H2_T_K, _NIST_H2_K_MW)) * 1e-3
+        """Temperature-dependent H2 conductivity used as the gas reference value.
+
+        Values cover the recorder range (200--1000 K) and are deliberately
+        treated as a reference correlation rather than a fitted bed property.
+        The pressure dependence is applied separately through Smoluchowski.
+        """
+        if not 200.0 <= self.T <= 1000.0:
+            raise ValueError(f"H2 conductivity table covers 200--1000 K; got {self.T:.1f} K.")
+        return float(np.interp(self.T, _H2_T_K, _H2_K_MW)) * 1e-3
 
     def gas_conductivity(self, p, porosity, particle_diameter, beta=None,
                          lambda_null_gas=None, use_nist=True, conductivity_scale=1.0):
