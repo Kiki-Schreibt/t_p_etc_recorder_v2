@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ScheduleSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <BasicPreMeasurmentDelay>0</BasicPreMeasurmentDelay>
+  <BasicMeasurementInterval>10</BasicMeasurementInterval>
+  <BasicNoOfMeasurements>5</BasicNoOfMeasurements>
+  <StandbyTemp>-1</StandbyTemp>
+  <StandbyVar>-1</StandbyVar>
+  <ControllerStandbyMode>Undefined</ControllerStandbyMode>
+  <BasicPreMeasurmentDelay>0</BasicPreMeasurmentDelay>
+  <ActivityList>
+    <ScheduleActivity type="ScheduledDelay">
+      <waitPeriod>10</waitPeriod>
+    </ScheduleActivity>
+  </ActivityList>
+</ScheduleSettings>

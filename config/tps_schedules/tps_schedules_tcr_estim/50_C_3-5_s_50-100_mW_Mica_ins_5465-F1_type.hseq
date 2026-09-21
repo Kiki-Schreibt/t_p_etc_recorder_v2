@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ScheduleSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <BasicPreMeasurmentDelay>0</BasicPreMeasurmentDelay>
+  <BasicMeasurementInterval>10</BasicMeasurementInterval>
+  <BasicNoOfMeasurements>5</BasicNoOfMeasurements>
+  <StandbyTemp>-1</StandbyTemp>
+  <StandbyVar>-1</StandbyVar>
+  <ControllerStandbyMode>Undefined</ControllerStandbyMode>
+  <BasicPreMeasurmentDelay>0</BasicPreMeasurmentDelay>
+  <ActivityList>
+    <ScheduleActivity type="ScheduledDelay">
+      <waitPeriod>1</waitPeriod>
+    </ScheduleActivity>
+    <ScheduleActivity type="MeasurementTriggerEvent">
+      <NoOfMeasurements>3</NoOfMeasurements>
+      <MeasurementInterval>3</MeasurementInterval>
+      <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+      <ExperimentSettingsBySwitchPort>
+        <ExecutedStep type="ExecutedExperiment">
+          <RowNumber>0</RowNumber>
+          <LastStatus>NotRun</LastStatus>
+          <Data>
+            <RunConfiguration>
+              <MethodType>Standard</MethodType>
+              <SampleIdentity>
+                <Identity>WAE-WA-060-001</Identity>
+                <AvailableProbingDepth>10</AvailableProbingDepth>
+                <Notes>First Hydrogenation 350 C 20 bar</Notes>
+              </SampleIdentity>
+              <InstrumentRunConfigurations type="StandardRunConfigurations">
+                <SampleTemperatureData>
+                  <Sample>50</Sample>
+                  <Source>ManualTemp</Source>
+                  <Manual>50</Manual>
+                  <TCR>0.00487580465814619</TCR>
+                </SampleTemperatureData>
+                <DiskType>Mica</DiskType>
+                <SensorType>DISK</SensorType>
+                <SensorDesign>5465</SensorDesign>
+                <SensorDimension>3.189</SensorDimension>
+                <SensorBatchID>F1</SensorBatchID>
+                <CableOrHolder>GreyCable</CableOrHolder>
+                <HeatingPower>0.05</HeatingPower>
+                <HeatingTime>3</HeatingTime>
+                <NPLC>0.75</NPLC>
+                <DriftEnable>true</DriftEnable>
+                <DriftTime>40</DriftTime>
+                <ScanningVoltage>0.05</ScanningVoltage>
+              </InstrumentRunConfigurations>
+              <ExperimentHardware>
+                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                <PowerLineFrequency>50</PowerLineFrequency>
+                <ReferenceResistance>6.912091</ReferenceResistance>
+              </ExperimentHardware>
+              <OriginalFile>C:\Daten\Kiki\WAE-WA-060-Mg5wtFe\WAE-WA-060-All\WAE-WA-060-001-FirstHyd\WAE-WA-060-001.hotb</OriginalFile>
+              <SoftwareVersion>7.6.28</SoftwareVersion>
+            </RunConfiguration>
+          </Data>
+          <FileName>
+          </FileName>
+        </ExecutedStep>
+      </ExperimentSettingsBySwitchPort>
+    </ScheduleActivity>
+    <ScheduleActivity type="ScheduledCalculation">
+      <CalculationSettingsBySwitchPort>
+        <CalcSettings>
+          <selectionStartIndex>50</selectionStartIndex>
+          <selectionEndIndex>200</selectionEndIndex>
+          <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+          <specificHeatOfSample>1E-06</specificHeatOfSample>
+          <specificHeatOfSampleOtherValue>0</specificHeatOfSampleOtherValue>
+          <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+          <specHeatCapSensorCal>true</specHeatCapSensorCal>
+          <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+          <timeCorrection>true</timeCorrection>
+          <analysisType>Standard</analysisType>
+          <MinIntervalSize>20</MinIntervalSize>
+          <FullIntervalSize>60</FullIntervalSize>
+          <SwitchPort>-1</SwitchPort>
+        </CalcSettings>
+      </CalculationSettingsBySwitchPort>
+    </ScheduleActivity>
+    <ScheduleActivity type="ScheduledDelay">
+      <waitPeriod>3</waitPeriod>
+    </ScheduleActivity>
+    <ScheduleActivity type="MeasurementTriggerEvent">
+      <NoOfMeasurements>3</NoOfMeasurements>
+      <MeasurementInterval>3</MeasurementInterval>
+      <DoWaitWhenSwitchingSensor>false</DoWaitWhenSwitchingSensor>
+      <ExperimentSettingsBySwitchPort>
+        <ExecutedStep type="ExecutedExperiment">
+          <RowNumber>0</RowNumber>
+          <LastStatus>NotRun</LastStatus>
+          <Data>
+            <RunConfiguration>
+              <MethodType>Standard</MethodType>
+              <SampleIdentity>
+                <Identity>WAE-WA-060-001</Identity>
+                <AvailableProbingDepth>10</AvailableProbingDepth>
+                <Notes>First Hydrogenation 350 C 20 bar</Notes>
+              </SampleIdentity>
+              <InstrumentRunConfigurations type="StandardRunConfigurations">
+                <SampleTemperatureData>
+                  <Sample>50</Sample>
+                  <Source>ManualTemp</Source>
+                  <Manual>50</Manual>
+                  <TCR>0.00258622027633343</TCR>
+                </SampleTemperatureData>
+                <DiskType>Mica</DiskType>
+                <SensorType>DISK</SensorType>
+                <SensorDesign>5465</SensorDesign>
+                <SensorDimension>3.189</SensorDimension>
+                <SensorBatchID>F1</SensorBatchID>
+                <CableOrHolder>GreyCable</CableOrHolder>
+                <HeatingPower>0.1</HeatingPower>
+                <HeatingTime>3</HeatingTime>
+                <NPLC>0.75</NPLC>
+                <DriftEnable>true</DriftEnable>
+                <DriftTime>40</DriftTime>
+                <ScanningVoltage>0.05</ScanningVoltage>
+              </InstrumentRunConfigurations>
+              <ExperimentHardware>
+                <HotDiskAnalyzerModel>TPS2500S</HotDiskAnalyzerModel>
+                <PowerLineFrequency>50</PowerLineFrequency>
+                <ReferenceResistance>6.912091</ReferenceResistance>
+              </ExperimentHardware>
+              <OriginalFile>C:\Daten\Kiki\WAE-WA-060-Mg5wtFe\WAE-WA-060-All\WAE-WA-060-001-FirstHyd\WAE-WA-060-001.hotb</OriginalFile>
+              <SoftwareVersion>7.6.28</SoftwareVersion>
+            </RunConfiguration>
+          </Data>
+          <FileName>
+          </FileName>
+        </ExecutedStep>
+      </ExperimentSettingsBySwitchPort>
+    </ScheduleActivity>
+    <ScheduleActivity type="ScheduledCalculation">
+      <CalculationSettingsBySwitchPort>
+        <CalcSettings>
+          <selectionStartIndex>50</selectionStartIndex>
+          <selectionEndIndex>200</selectionEndIndex>
+          <specHeatCapOfSensor>0.0111866931</specHeatCapOfSensor>
+          <specificHeatOfSample>1E-06</specificHeatOfSample>
+          <specificHeatOfSampleOtherValue>0</specificHeatOfSampleOtherValue>
+          <specificHeatOfSampleKnown>false</specificHeatOfSampleKnown>
+          <specHeatCapSensorCal>true</specHeatCapSensorCal>
+          <UseDefaultSpecHeatCapSensor>true</UseDefaultSpecHeatCapSensor>
+          <timeCorrection>true</timeCorrection>
+          <analysisType>Standard</analysisType>
+          <MinIntervalSize>20</MinIntervalSize>
+          <FullIntervalSize>60</FullIntervalSize>
+          <SwitchPort>-1</SwitchPort>
+        </CalcSettings>
+      </CalculationSettingsBySwitchPort>
+    </ScheduleActivity>
+  </ActivityList>
+</ScheduleSettings>

@@ -1,0 +1,9 @@
+old_snippets/
+test_data/
+site/
+__pycache__/
+*.py[cod]
+.idea/ 
+"mkdocs.yml" 
+.venv/
+config/config_logging_modbus_database.json

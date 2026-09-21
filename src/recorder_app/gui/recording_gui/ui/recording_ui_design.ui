@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1573</width>
+    <height>938</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLineEdit" name="MaxCharTimeEditField">
+    <property name="geometry">
+     <rect>
+      <x>1430</x>
+      <y>181</y>
+      <width>51</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>160</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Temp. Increase</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>-20</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Meta data</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="MinCharTimeEditField">
+    <property name="geometry">
+     <rect>
+      <x>1380</x>
+      <y>180</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>1390</x>
+      <y>140</y>
+      <width>31</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Min</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="MinTempIncEditField">
+    <property name="geometry">
+     <rect>
+      <x>1380</x>
+      <y>160</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="MaxTempIncEditField">
+    <property name="geometry">
+     <rect>
+      <x>1430</x>
+      <y>160</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>1260</x>
+      <y>180</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Total to Char. Time</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>1440</x>
+      <y>140</y>
+      <width>31</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Max</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="T_p_dependent_drop_down">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>171</y>
+      <width>201</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Temperature Dependent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Pressure Dependent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Cycle Dependent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Isotherms</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Uptake</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="XyDataSelectDropDown">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>170</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Transient</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Residual</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Calculated</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Drift</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QWidget" name="ExpMetaPlotLeft" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>200</y>
+      <width>871</width>
+      <height>291</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QWidget" name="ExpMetaPlotLeftLower" native="true">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>500</y>
+      <width>871</width>
+      <height>321</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QWidget" name="xy_plot_window" native="true">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>220</y>
+      <width>611</width>
+      <height>531</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>311</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <widget class="QPushButton" name="start_stop_static_plot_button">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>10</y>
+       <width>131</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start Static Plot</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="start_stop_log_file_tracker_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start Log File Tracker</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="start_stop_tp_recording_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start Tp Recording</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>1190</x>
+      <y>10</y>
+      <width>261</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="update_meta_data_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>241</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Update Metadata</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="start_etc_measurement_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>241</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start ETC Measurement</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>90</y>
+      <width>311</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QLabel" name="label_22">
+         <property name="text">
+          <string>Current State </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_21">
+         <property name="text">
+          <string>Current Cycle [#] </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_24">
+         <property name="text">
+          <string>Capacity last cycle [wt-%] </string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QLineEdit" name="current_de_hyd_state_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="current_cycle_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="current_uptake_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>331</x>
+      <y>11</y>
+      <width>291</width>
+      <height>181</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Sample ID</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Sample Mass [g]</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>Material</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>Cell Volume [ml]</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>Reservoir Volume [l]</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLineEdit" name="sample_id_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sample_mass_edit_field"/>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="material_composition_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="cell_volume_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="reservoir_volume_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>10</y>
+      <width>231</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>First Hyd</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Test Start</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Test End</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Cell Type</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QLineEdit" name="first_hyd_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="test_start_edit_field"/>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="test_end_edit_field"/>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="cell_type_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>10</y>
+      <width>291</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Max Pressure Cycling</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Min Temperature Cycling</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_23">
+         <property name="text">
+          <string>Cycle Duration</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QLineEdit" name="max_pressure_cycling_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="min_temperature_cycling_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="cycle_duration_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>820</y>
+      <width>871</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QCheckBox" name="h2_uptake_check_box">
+         <property name="text">
+          <string>Is Uptake</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="isotherm_check_box">
+         <property name="text">
+          <string>Is Isotherm</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cycle_test_check_box">
+         <property name="text">
+          <string>Cycle Test</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>Additional Test Info</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="additional_test_info_edit_field">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>2</width>
+      <height>2</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_9"/>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>2</width>
+      <height>2</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_10"/>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1573</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionTest_Planner"/>
+    <addaction name="actionConfig_Settings"/>
+    <addaction name="actionQuick_Export"/>
+    <addaction name="actionDicon_Simulator"/>
+    <addaction name="actionSchedule_Creator"/>
+    <addaction name="actionUptake_Correction"/>
+    <addaction name="actionDatabase_Maintenance"/>
+    <addaction name="actionETC_Measurement_Starter"/>
+    <addaction name="actionPlot_Individualizer"/>
+    <addaction name="actionHydride_Handler"/>
+    <addaction name="actionMeta_Data"/>
+    <addaction name="actionKinetic_Calculator"/>
+   </widget>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionTest_Planner">
+   <property name="text">
+    <string>Test Planner</string>
+   </property>
+  </action>
+  <action name="actionConfig_Settings">
+   <property name="text">
+    <string>Config Settings</string>
+   </property>
+  </action>
+  <action name="actionQuick_Export">
+   <property name="text">
+    <string>Quick Export</string>
+   </property>
+  </action>
+  <action name="actionDicon_Simulator">
+   <property name="text">
+    <string>Dicon Simulator</string>
+   </property>
+  </action>
+  <action name="actionSchedule_Creator">
+   <property name="text">
+    <string>Schedule Creator</string>
+   </property>
+  </action>
+  <action name="actionUptake_Correction">
+   <property name="text">
+    <string>Uptake Correction</string>
+   </property>
+  </action>
+  <action name="actionDatabase_Maintenance">
+   <property name="text">
+    <string>Database Maintenance</string>
+   </property>
+  </action>
+  <action name="actionETC_Measurement_Starter">
+   <property name="text">
+    <string>ETC Measurement Starter</string>
+   </property>
+  </action>
+  <action name="actionPlot_Individualizer">
+   <property name="text">
+    <string>Plot Individualizer</string>
+   </property>
+  </action>
+  <action name="actionHydride_Handler">
+   <property name="text">
+    <string>Hydride Handler</string>
+   </property>
+  </action>
+  <action name="actionMeta_Data">
+   <property name="text">
+    <string>Meta Data</string>
+   </property>
+  </action>
+  <action name="actionKinetic_Calculator">
+   <property name="text">
+    <string>Kinetic Calculator</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
