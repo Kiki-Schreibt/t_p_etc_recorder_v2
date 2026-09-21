@@ -7,8 +7,8 @@ from PySide6.QtWidgets import (
 )
 import pyqtgraph as pg
 
-from recorder_app.gui.data_fitter.data_fitter_ui_business import DataLoader
-from recorder_app.gui.data_fitter.data_fitter_ui_business import main as fitting_main
+from recorder_app.gui.data_fitter.data_loader import DataLoader
+from recorder_app.gui.data_fitter.main_fitter_backend import main as fitting_main
 
 
 class DataFitterGuiWindow(QMainWindow):
