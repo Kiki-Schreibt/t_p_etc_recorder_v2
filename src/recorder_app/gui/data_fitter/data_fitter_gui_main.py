@@ -117,7 +117,7 @@ class DataFitterMain(DataFitterGuiWindow):
             # Proceed with fitting
             # Optionally, you can keep the GUI open or close it
             # self.close()  # Close the GUI if desired
-            fitting_main(self.data_loader)
+            fitting_main(data_loader=self.data_loader, mode='robust_least_squares')
         else:
             QMessageBox.warning(self, "No Data", "Please load data first.")
 
